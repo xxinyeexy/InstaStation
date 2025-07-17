@@ -40,7 +40,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             <Head title="Login" />
 
             <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4">
-                <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-md">
+                <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">
                     <div className="mb-6 text-center">
                         <div className="mb-2 flex justify-center">
                             <div className="rounded-full bg-blue-100 p-3"> 
