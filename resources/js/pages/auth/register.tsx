@@ -1,7 +1,7 @@
 import TextLink from '@/components/text-link';
+import axios from 'axios'; // Add axios for API requests
 import { Building, IdCard, LoaderCircle, Lock, Mail, User } from 'lucide-react';
 import { useState } from 'react';
-import axios from 'axios'; // Add axios for API requests
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -21,29 +21,26 @@ export default function Register() {
         e.preventDefault();
         setProcessing(true);
         try {
-            let endpoint = '';
-            let payload: any = {};
-            if (formData.userType === 'Student') {
-                endpoint = '/api/register/student';
-                payload = {
-                    name: formData.name,
-                    email: formData.email,
-                    password: formData.password,
-                    password_confirmation: formData.password_confirmation,
-                    matric: formData.matric,
-                };
+            // Always use the same endpoint
+            const endpoint = '/register';
+            // Map userType to type expected by backend
+            const type = formData.userType === 'Student' ? 'student' : 'staff';
+            // Build payload with type
+            const payload: any = {
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                password_confirmation: formData.password_confirmation,
+                type,
+            };
+            if (type === 'student') {
+                payload.matric = formData.matric;
             } else {
-                endpoint = '/api/register/staff';
-                payload = {
-                    name: formData.name,
-                    email: formData.email,
-                    password: formData.password,
-                    password_confirmation: formData.password_confirmation,
-                    department: formData.department,
-                };
+                payload.department = formData.department;
             }
             await axios.post(endpoint, payload);
-            alert('Account created successfully!');
+            // Redirect to sign in page after successful registration
+            window.location.href = '/login';
         } catch (error: any) {
             setErrors(error.response?.data?.errors || {});
         } finally {
