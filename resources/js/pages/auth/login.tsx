@@ -1,10 +1,11 @@
 // resources/js/Pages/Auth/Login.tsx
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
 import { LoaderCircle, Lock, Mail, User } from 'lucide-react';
+import { FormEventHandler, useEffect, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
+import Alert from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -28,8 +29,33 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         role: '',
     });
 
+    const [warning, setWarning] = useState<{ msg: string; key: number } | null>(null);
+    const [warningKey, setWarningKey] = useState(0);
+    const [errorKey, setErrorKey] = useState(0);
+
+    useEffect(() => {
+        if (Object.keys(errors).length > 0) {
+            setErrorKey((k) => k + 1);
+        }
+    }, [errors]);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
+        let newKey = warningKey + 1;
+        setWarningKey(newKey);
+        if (!data.email) {
+            setWarning({ msg: 'Please fill out the email field.', key: newKey });
+            return;
+        }
+        if (!data.password) {
+            setWarning({ msg: 'Please fill out the password field.', key: newKey });
+            return;
+        }
+        if (!data.role) {
+            setWarning({ msg: 'Please select a role.', key: newKey });
+            return;
+        }
+        setWarning(null);
         post(route('login'), {
             onFinish: () => reset('password'),
         });
@@ -39,11 +65,22 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         <>
             <Head title="Login" />
 
+            {/* Floating toast for warning */}
+            {warning && <Alert key={warning.key} type="warning" message={warning.msg} />}
+            {/* Floating toast for each error */}
+            {Object.values(errors)
+                .flat()
+                .map((msg, i) => (
+                    <Alert key={`${errorKey}-${i}`} type="error" message={msg as string} />
+                ))}
+            {/* Floating toast for status */}
+            {status && <Alert type="success" message={status} />}
+
             <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4">
                 <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">
                     <div className="mb-6 text-center">
                         <div className="mb-2 flex justify-center">
-                            <div className="rounded-full bg-blue-100 p-3"> 
+                            <div className="rounded-full bg-blue-100 p-3">
                                 <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                     <path d="M3 7l9-4 9 4-9 4-9-4z" />
                                     <path d="M3 17l9 4 9-4" />
@@ -55,10 +92,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         <p className="text-sm text-gray-500">Instant Parcel Tracking Dashboard</p>
                     </div>
 
-                    <form onSubmit={submit} className="space-y-4">
+                    <form onSubmit={submit} className="space-y-4" noValidate>
                         {/* Email */}
                         <div className="relative">
-                            <Label htmlFor="email" className="sr-only">Email</Label>
+                            <Label htmlFor="email" className="sr-only">
+                                Email
+                            </Label>
                             <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                             <Input
                                 id="email"
@@ -70,12 +109,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 value={data.email}
                                 onChange={(e) => setData('email', e.target.value)}
                             />
-                            <InputError message={errors.email} />
                         </div>
 
                         {/* Password */}
                         <div className="relative">
-                            <Label htmlFor="password" className="sr-only">Password</Label>
+                            <Label htmlFor="password" className="sr-only">
+                                Password
+                            </Label>
                             <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                             <Input
                                 id="password"
@@ -92,7 +132,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
                         {/* Role */}
                         <div className="relative">
-                            <Label htmlFor="role" className="sr-only">Role</Label>
+                            <Label htmlFor="role" className="sr-only">
+                                Role
+                            </Label>
                             <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                             <select
                                 id="role"
@@ -101,7 +143,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 onChange={(e) => setData('role', e.target.value)}
                                 className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pr-8 pl-10 text-sm focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
                             >
-                                <option value="" disabled>Select Role</option>
+                                <option value="" disabled>
+                                    Select Role
+                                </option>
                                 <option value="student">Student</option>
                                 <option value="staff">Staff</option>
                             </select>
@@ -150,11 +194,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     </div>
 
                     {/* Status Message */}
-                    {status && (
-                        <div className="mt-2 text-center text-sm font-medium text-green-600">
-                            {status}
-                        </div>
-                    )}
+                    {status && <div className="mt-2 text-center text-sm font-medium text-green-600">{status}</div>}
                 </div>
             </div>
         </>
