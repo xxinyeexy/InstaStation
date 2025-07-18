@@ -32,6 +32,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     const [warning, setWarning] = useState<{ msg: string; key: number } | null>(null);
     const [warningKey, setWarningKey] = useState(0);
     const [errorKey, setErrorKey] = useState(0);
+    const [success, setSuccess] = useState('');
 
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
@@ -43,6 +44,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         e.preventDefault();
         let newKey = warningKey + 1;
         setWarningKey(newKey);
+        setSuccess('');
         if (!data.email) {
             setWarning({ msg: 'Please fill out the email field.', key: newKey });
             return;
@@ -58,6 +60,12 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         setWarning(null);
         post(route('login'), {
             onFinish: () => reset('password'),
+            onSuccess: () => {
+                setSuccess('Login successful! Redirecting...');
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1500);
+            },
         });
     };
 
@@ -73,8 +81,9 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 .map((msg, i) => (
                     <Alert key={`${errorKey}-${i}`} type="error" message={msg as string} />
                 ))}
-            {/* Floating toast for status */}
-            {status && <Alert type="success" message={status} />}
+            {/* Floating toast for success */}
+            {success && <Alert type="success" message={success} />}
+            {status && !success && <Alert type="success" message={status} />}
 
             <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4">
                 <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">

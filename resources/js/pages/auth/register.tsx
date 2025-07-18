@@ -78,8 +78,10 @@ export default function Register() {
                 payload.department = formData.department;
             }
             await axios.post(endpoint, payload);
-            // Redirect to sign in page after successful registration
-            window.location.href = '/login';
+            setSuccess('You may proceed to login now.');
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 1500);
         } catch (error: any) {
             setErrors(error.response?.data?.errors || {});
         } finally {
@@ -182,7 +184,7 @@ export default function Register() {
                                         value={formData.email}
                                         onChange={(e) => handleInputChange('email', e.target.value)}
                                         disabled={processing}
-                                        placeholder="email@example.com"
+                                        placeholder="xxxx@gmail.com"
                                         className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 focus:border-[#f0bfd7] focus:ring-2 focus:ring-[#fdceef] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                     />
                                 </div>
