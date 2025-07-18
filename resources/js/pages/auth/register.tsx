@@ -1,6 +1,7 @@
 import TextLink from '@/components/text-link';
 import { Building, IdCard, LoaderCircle, Lock, Mail, User } from 'lucide-react';
 import { useState } from 'react';
+import axios from 'axios'; // Add axios for API requests
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -10,19 +11,44 @@ export default function Register() {
         password_confirmation: '',
         userType: 'Student',
         department: '',
+        matric: '', // Add matric to state
     });
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState({});
     const [signInProcessing, setSignInProcessing] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setProcessing(true);
-        // Simulate form submission
-        setTimeout(() => {
+        try {
+            let endpoint = '';
+            let payload: any = {};
+            if (formData.userType === 'Student') {
+                endpoint = '/api/register/student';
+                payload = {
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password,
+                    password_confirmation: formData.password_confirmation,
+                    matric: formData.matric,
+                };
+            } else {
+                endpoint = '/api/register/staff';
+                payload = {
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password,
+                    password_confirmation: formData.password_confirmation,
+                    department: formData.department,
+                };
+            }
+            await axios.post(endpoint, payload);
+            alert('Account created successfully!');
+        } catch (error: any) {
+            setErrors(error.response?.data?.errors || {});
+        } finally {
             setProcessing(false);
-            console.log('Form submitted:', formData);
-        }, 2000);
+        }
     };
 
     const handleInputChange = (field: string, value: string) => {
@@ -127,6 +153,8 @@ export default function Register() {
                                         id="matric"
                                         type="text"
                                         required
+                                        value={formData.matric}
+                                        onChange={(e) => handleInputChange('matric', e.target.value)}
                                         disabled={processing}
                                         placeholder="CB12345"
                                         className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 focus:border-[#f0bfd7] focus:ring-2 focus:ring-[#fdceef] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
