@@ -19,6 +19,8 @@ export default function Register() {
     const [signInProcessing, setSignInProcessing] = useState(false);
     const [success, setSuccess] = useState('');
     const [errorKey, setErrorKey] = useState(0);
+    const [warning, setWarning] = useState<{ msg: string; key: number } | null>(null);
+    const [warningKey, setWarningKey] = useState(0);
 
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
@@ -28,6 +30,34 @@ export default function Register() {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        let newKey = warningKey + 1;
+        setWarningKey(newKey);
+        // Manual validation for required fields
+        if (!formData.name) {
+            setWarning({ msg: 'Please fill out the full name field.', key: newKey });
+            return;
+        }
+        if (!formData.email) {
+            setWarning({ msg: 'Please fill out the email address field.', key: newKey });
+            return;
+        }
+        if (formData.userType === 'Student' && !formData.matric) {
+            setWarning({ msg: 'Please fill out the matric ID field.', key: newKey });
+            return;
+        }
+        if (formData.userType === 'Staff' && !formData.department) {
+            setWarning({ msg: 'Please select a department.', key: newKey });
+            return;
+        }
+        if (!formData.password) {
+            setWarning({ msg: 'Please fill out the password field.', key: newKey });
+            return;
+        }
+        if (!formData.password_confirmation) {
+            setWarning({ msg: 'Please fill out the confirm password field.', key: newKey });
+            return;
+        }
+        setWarning(null);
         setProcessing(true);
         try {
             // Always use the same endpoint
@@ -66,6 +96,8 @@ export default function Register() {
 
     return (
         <>
+            {/* Floating toast for warning */}
+            {warning && <Alert key={warning.key} type="warning" message={warning.msg} />}
             {/* Floating toast for each error */}
             {Object.values(errors)
                 .flat()
@@ -115,7 +147,7 @@ export default function Register() {
                             </div>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                             {/* Full Name */}
                             <div>
                                 <label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-700">
