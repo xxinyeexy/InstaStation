@@ -234,7 +234,9 @@ export default function Register() {
                                             <option value="" disabled>
                                                 Select Department
                                             </option>
-
+                                            <option value="IT">Information Technology</option>
+                                            <option value="HR">Human Resources</option>
+                                            <option value="Finance">Finance</option>
                                             <option value="General">Operations - General</option>
                                             <option value="Admin">Operations - Admin</option>
                                         </select>
