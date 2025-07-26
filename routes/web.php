@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Auth\RegisteredUserController;
-
+use App\Http\Controllers\StaffController;
+use App\Http\Controllers\ParcelController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -19,6 +20,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });
+
+Route::get('/staff/parcel', [StaffController::class, 'staff'])
+    ->name('staff.parcel');
+
+    Route::get('/staff/add-parcel', [ParcelController::class, 'create'])->name('parcel.create');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php'; 

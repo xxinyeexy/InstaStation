@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Parcel;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ParcelController extends Controller
 {
@@ -20,7 +21,8 @@ class ParcelController extends Controller
      */
     public function create()
     {
-        //
+            return Inertia::render('staff/add-parcel');
+
     }
 
     /**

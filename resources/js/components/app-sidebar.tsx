@@ -6,38 +6,83 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, PackageOpen, WalletCards, ContactRound, MessageCircleQuestion, LayoutGrid } from 'lucide-react';
 import AppLogo from './app-logo';
+import { usePage } from '@inertiajs/react';
 
+type AuthUser = {
+    type?: string;
+    // add other user properties if needed
+};
 
+type AuthProps = {
+    user?: AuthUser;
+};
+
+export function AppSidebar() {
+const { auth } = usePage<{ auth?: AuthProps }>().props;
+const userRole = auth?.user?.type || 'student'; // Default to 'student' if no user is authenticated
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
+        title: 'Home',
+        href: '/student/dashboard',
         icon: LayoutGrid,
     },
     {
-        title: 'Parcel',
-        href: '/dashboard',
+        title: 'My Parcel',
+        href: '/student/parcel',
         icon: PackageOpen,
     },
     {
         title: 'Payment',
-        href: '/dashboard',
+        href: '/student/payment',
         icon: WalletCards,
     },
     {
-        title: 'Users',
-        href: '/dashboard',
+        title: 'History',
+        href: '/student/history',
         icon: ContactRound,
     },
     {
         title: 'FAQs',
-        href: '/dashboard',
+        href: '/student/faqs',
         icon: MessageCircleQuestion,
     },
    
 ];
 
+const staffNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/staff/dashboard',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Parcel',
+        href: '/staff/parcel',
+        icon: PackageOpen,
+    },
+    {
+        title: 'Payment',
+        href: '/staff/payment',
+        icon: WalletCards,
+    },
+    {
+        title: 'Users',
+        href: '/staff/users',
+        icon: ContactRound,
+    },
+    {
+        title: 'FAQs',
+        href: '/staff/faqs',
+        icon: MessageCircleQuestion,
+    },
+   
+];
+
+let roleBasedNavItems =[...mainNavItems];
+if (userRole === 'staff') {
+    roleBasedNavItems = [...staffNavItems];
+}
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
@@ -51,7 +96,7 @@ const footerNavItems: NavItem[] = [
     },
 ];
 
-export function AppSidebar() {
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -67,7 +112,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={roleBasedNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

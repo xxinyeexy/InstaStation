@@ -4,12 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Staff;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class StaffController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    public function staff(): Response
+    {
+        return Inertia::render('staff/parcel');
+    }
     public function index()
     {
         //
