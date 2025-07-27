@@ -1,215 +1,367 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeft, Search, QrCode, Camera, X } from 'lucide-react';
+import { Html5Qrcode } from 'html5-qrcode';
+import { ArrowLeft, Camera, QrCode, Search, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const ParcelRegistrationForm = () => {
-  const [formData, setFormData] = useState({
-    trackingNumber: '',
-    sender: '',
-    size: '',
-    location: 'Shelf A-15',
-    studentName: '',
-    matricId: ''
-  });
-
-  const [isScanning, setIsScanning] = useState(false);
-
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleQRScan = () => {
-    setIsScanning(true);
-    // Simulate QR code scan
-    setTimeout(() => {
-      setFormData(prev => ({
-        ...prev,
-        trackingNumber: 'TRK' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-        sender: 'Express Delivery Co.',
-        size: 'Medium'
-      }));
-      setIsScanning(false);
-    }, 2000);
-  };
-
-  const handleSearch = () => {
-    // Simulate student search
-    if (formData.studentName.toLowerCase().includes('john')) {
-      setFormData(prev => ({ ...prev, matricId: 'A20CE1234' }));
-    }
-  };
-
-  const handleRegister = () => {
-    console.log('Registering parcel:', formData);
-    alert('Parcel registered successfully!');
-  };
-
-  const handleCancel = () => {
-    setFormData({
-      trackingNumber: '',
-      sender: '',
-      size: '',
-      location: 'Shelf A-15',
-      studentName: '',
-      matricId: ''
+    const [formData, setFormData] = useState({
+        trackingNumber: '',
+        sender: '',
+        size: '',
+        location: 'Shelf A-15',
+        studentName: '',
+        matricId: '',
     });
-  };
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <style>{`
+    const [isScanning, setIsScanning] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [highlightTracking, setHighlightTracking] = useState(false);
+
+    const handleInputChange = (field: keyof typeof formData, value: string) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleQRScan = () => {
+        setIsScanning(true);
+        // Simulate QR code scan
+        setTimeout(() => {
+            setFormData((prev) => ({
+                ...prev,
+                trackingNumber: 'TRK' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+                sender: 'Express Delivery Co.',
+                size: 'Medium',
+            }));
+            setIsScanning(false);
+        }, 2000);
+    };
+
+    const handleSearch = () => {
+        // Simulate student search
+        if (formData.studentName.toLowerCase().includes('john')) {
+            setFormData((prev) => ({ ...prev, matricId: 'A20CE1234' }));
+        }
+    };
+
+    const handleRegister = () => {
+        console.log('Registering parcel:', formData);
+        alert('Parcel registered successfully!');
+    };
+
+    const handleCancel = () => {
+        setFormData({
+            trackingNumber: '',
+            sender: '',
+            size: '',
+            location: 'Shelf A-15',
+            studentName: '',
+            matricId: '',
+        });
+    };
+
+    const html5QrCodeRef = useRef<any>(null);
+
+    useEffect(() => {
+        if (isScanning) {
+            const qrRegionId = 'qr-reader';
+            html5QrCodeRef.current = new Html5Qrcode(qrRegionId);
+            html5QrCodeRef.current
+                .start(
+                    { facingMode: 'environment' },
+                    { fps: 10, qrbox: { width: 300, height: 300 } },
+                    (decodedText: string) => {
+                        console.log('QR Code detected:', decodedText);
+                        setFormData((prev) => ({
+                            ...prev,
+                            trackingNumber: decodedText,
+                        }));
+                        setShowToast(true);
+                        setHighlightTracking(true);
+                        setTimeout(() => setShowToast(false), 2500);
+                        setTimeout(() => setHighlightTracking(false), 1500);
+                        setIsScanning(false);
+                        if (html5QrCodeRef.current) {
+                            try {
+                                html5QrCodeRef.current
+                                    .stop()
+                                    .then(() => {
+                                        html5QrCodeRef.current?.clear();
+                                    })
+                                    .catch(() => {
+                                        // Ignore errors if already stopped
+                                    });
+                            } catch (e) {
+                                // Ignore synchronous errors
+                            }
+                        }
+                    },
+                    (errorMessage: string) => {
+                        // Optionally handle scan errors
+                    },
+                )
+                .catch((err: any) => {
+                    alert('Unable to start the camera: ' + err);
+                    setIsScanning(false);
+                });
+        }
+        return () => {
+            if (html5QrCodeRef.current) {
+                try {
+                    html5QrCodeRef.current
+                        .stop()
+                        .then(() => {
+                            html5QrCodeRef.current?.clear();
+                        })
+                        .catch(() => {
+                            // Ignore errors if already stopped
+                        });
+                } catch (e) {
+                    // Ignore synchronous errors
+                }
+            }
+        };
+        // eslint-disable-next-line
+    }, [isScanning]);
+
+    return (
+        <div className="min-h-screen bg-gray-50 p-4">
+            <style>{`
         @keyframes scan {
           0% { transform: translateY(-100px); }
           100% { transform: translateY(100px); }
         }
       `}</style>
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm border">
-        {/* Header */}
-        <div className="flex items-center gap-3 p-6 border-b">
-          <button className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Back</span>
-          </button>
-        </div>
-
-        {/* Title */}
-        <div className="px-6 py-4">
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">📦 Register New Parcel</h1>
-          <p className="text-sm text-gray-600">Scan the parcel's QR code to auto-fill the details</p>
-        </div>
-
-        {/* QR Scanner Area */}
-        <div className="px-6 mb-6">
-          <div 
-            className={`relative w-full h-48 border-2 border-dashed rounded-lg flex items-center justify-center cursor-pointer transition-all ${
-              isScanning ? 'border-pink-400 bg-pink-50' : 'border-pink-300 bg-pink-50'
-            }`}
-            onClick={handleQRScan}
-          >
-            {isScanning ? (
-              <div className="text-center">
-                <div className="animate-pulse">
-                  <QrCode className="w-12 h-12 text-pink-500 mx-auto mb-2" />
-                  <p className="text-pink-600 font-medium">Scanning...</p>
+            <div className="mx-auto max-w-2xl rounded-lg border bg-white shadow-sm">
+                {/* Header */}
+                <div className="flex items-center gap-3 border-b p-6">
+                    <button className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-800">
+                        <ArrowLeft className="h-4 w-4" />
+                        <span className="text-sm">Back</span>
+                    </button>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center">
-                <QrCode className="w-12 h-12 text-pink-400 mx-auto mb-2" />
-                <p className="text-pink-600 font-medium">Tap to scan QR code</p>
-                <p className="text-sm text-pink-500">or manually enter details below</p>
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Parcel Information */}
-        <div className="px-6 mb-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Parcel Information</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tracking Number</label>
-              <input
-                type="text"
-                placeholder="Enter tracking number"
-                value={formData.trackingNumber}
-                onChange={(e) => handleInputChange('trackingNumber', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Size</label>
-              <select
-                value={formData.size}
-                onChange={(e) => handleInputChange('size', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-              >
-                <option value="">Select size</option>
-                <option value="Small">Small</option>
-                <option value="Medium">Medium</option>
-                <option value="Large">Large</option>
-                <option value="Extra Large">Extra Large</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Sender</label>
-              <input
-                type="text"
-                placeholder="Sender name"
-                value={formData.sender}
-                onChange={(e) => handleInputChange('sender', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-              <input
-                type="text"
-                value={formData.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-              />
-            </div>
-          </div>
-        </div>
+                {/* Title */}
+                <div className="px-6 py-4">
+                    <h1 className="mb-2 text-xl font-semibold text-gray-900">📦 Register New Parcel</h1>
+                    <p className="text-sm text-gray-600">Scan the parcel's QR code to auto-fill the details</p>
+                </div>
 
-        {/* Student Information */}
-        <div className="px-6 mb-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Student Information</h2>
-          <p className="text-sm text-gray-600 mb-3">Search for the recipient in the student database</p>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Student Name *</label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Enter recipient full name"
-                value={formData.studentName}
-                onChange={(e) => handleInputChange('studentName', e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-              />
-              <button
-                onClick={handleSearch}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors flex items-center gap-2"
-              >
-                <Search className="w-4 h-4" />
-                Search
-              </button>
+                {/* QR Scanner Area */}
+                <div className="mb-6 px-6">
+                    {/* Toast Notification */}
+                    {showToast && (
+                        <div className="animate-fade-in fixed top-6 left-1/2 z-50 -translate-x-1/2 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
+                            Tracking number filled from QR code!
+                        </div>
+                    )}
+                    {/* Pink Modern QR Scanner Section */}
+                    <div className="flex justify-center">
+                        <div className="relative aspect-square w-full max-w-lg overflow-hidden rounded-3xl border-4 border-pink-500 bg-pink-50">
+                            {/* Grid Overlay */}
+                            <div
+                                className="pointer-events-none absolute inset-0 z-0"
+                                style={{
+                                    backgroundImage:
+                                        'linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)',
+                                    backgroundSize: '32px 32px',
+                                }}
+                            />
+                            {/* Cancel Button */}
+                            {isScanning && (
+                                <button
+                                    className="absolute top-4 right-4 z-20 rounded-full bg-white/20 p-2 text-pink-500 transition-colors hover:bg-white/40"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsScanning(false);
+                                    }}
+                                >
+                                    <X className="h-6 w-6" />
+                                </button>
+                            )}
+                            {/* Scanner Content */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                {/* Corner Brackets */}
+                                <div className="pointer-events-none absolute inset-0 z-10">
+                                    <div className="absolute top-6 left-6 h-10 w-10 rounded-tl-xl border-t-4 border-l-4 border-pink-300"></div>
+                                    <div className="absolute top-6 right-6 h-10 w-10 rounded-tr-xl border-t-4 border-r-4 border-pink-300"></div>
+                                    <div className="absolute bottom-6 left-6 h-10 w-10 rounded-bl-xl border-b-4 border-l-4 border-pink-300"></div>
+                                    <div className="absolute right-6 bottom-6 h-10 w-10 rounded-br-xl border-r-4 border-b-4 border-pink-300"></div>
+                                </div>
+                                {/* Animated Scan Line */}
+                                {isScanning && (
+                                    <div
+                                        className="animate-horizontal-scan absolute right-10 left-10 z-20 h-1 rounded-full bg-gradient-to-r from-transparent via-pink-300 to-transparent"
+                                        style={{ top: 80 }}
+                                    />
+                                )}
+                                {/* (Central icon and pulse removed) */}
+                                {/* Camera Preview */}
+                                {isScanning && <div id="qr-reader" className="absolute inset-0 z-10 h-full w-full overflow-hidden rounded-3xl" />}
+                                {/* Indeterminate Progress Bar */}
+                                {isScanning && (
+                                    <div className="absolute right-0 bottom-0 left-0 z-30 px-8 pb-8">
+                                        <div className="h-3 overflow-hidden rounded-full bg-pink-200/40">
+                                            <div className="animate-indeterminate-bar h-full bg-pink-400" style={{ width: '40%' }}></div>
+                                        </div>
+                                        <div className="mt-2 text-center text-lg font-semibold tracking-wide text-pink-500">Scanning...</div>
+                                        <style>{`
+                                            @keyframes indeterminate-bar {
+                                                0% { margin-left: 0%; width: 40%; }
+                                                50% { margin-left: 60%; width: 40%; }
+                                                100% { margin-left: 0%; width: 40%; }
+                                            }
+                                            .animate-indeterminate-bar {
+                                                animation: indeterminate-bar 1.5s infinite cubic-bezier(0.4,0,0.2,1);
+                                            }
+                                        `}</style>
+                                    </div>
+                                )}
+                                {/* Tap to Scan State */}
+                                {!isScanning && (
+                                    <div className="flex h-full flex-col items-center justify-center">
+                                        <div className="mb-8">
+                                            <div className="rounded-full bg-pink-100 p-8">
+                                                <QrCode className="h-20 w-20 text-pink-500" />
+                                            </div>
+                                        </div>
+                                        <h3 className="mb-2 text-3xl font-extrabold text-pink-600">Tap to Scan QR Code</h3>
+                                        <p className="mb-4 text-lg text-pink-400">Point camera at parcel QR code for instant recognition</p>
+                                        <div className="flex items-center gap-2 text-base font-medium text-pink-400">
+                                            <Camera className="h-5 w-5" />
+                                            <span>AI-Powered Detection</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            {/* Animations */}
+                            <style>{`
+                        @keyframes horizontal-scan {
+                          0% { top: 80px; }
+                          100% { top: 340px; }
+                        }
+                        .animate-horizontal-scan {
+                          animation: horizontal-scan 2s linear infinite alternate;
+                        }
+                      `}</style>
+                            {/* Click to start scanning */}
+                            {!isScanning && (
+                                <button
+                                    className="absolute inset-0 z-30 h-full w-full cursor-pointer"
+                                    onClick={() => setIsScanning(true)}
+                                    aria-label="Start scanning"
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Parcel Information */}
+                <div className="mb-6 px-6">
+                    <h2 className="mb-4 text-lg font-medium text-gray-900">Parcel Information</h2>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Tracking Number</label>
+                            <input
+                                type="text"
+                                placeholder="Enter tracking number"
+                                value={formData.trackingNumber}
+                                onChange={(e) => handleInputChange('trackingNumber', e.target.value)}
+                                className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none ${highlightTracking ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
+                                readOnly={isScanning}
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Size</label>
+                            <select
+                                value={formData.size}
+                                onChange={(e) => handleInputChange('size', e.target.value)}
+                                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                            >
+                                <option value="">Select size</option>
+                                <option value="Small">Small</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Large">Large</option>
+                                <option value="Extra Large">Extra Large</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Sender</label>
+                            <input
+                                type="text"
+                                placeholder="Sender name"
+                                value={formData.sender}
+                                onChange={(e) => handleInputChange('sender', e.target.value)}
+                                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Location</label>
+                            <input
+                                type="text"
+                                value={formData.location}
+                                onChange={(e) => handleInputChange('location', e.target.value)}
+                                className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Student Information */}
+                <div className="mb-6 px-6">
+                    <h2 className="mb-4 text-lg font-medium text-gray-900">Student Information</h2>
+                    <p className="mb-3 text-sm text-gray-600">Search for the recipient in the student database</p>
+
+                    <div className="mb-4">
+                        <label className="mb-1 block text-sm font-medium text-gray-700">Student Name *</label>
+                        <div className="flex gap-2">
+                            <input
+                                type="text"
+                                placeholder="Enter recipient full name"
+                                value={formData.studentName}
+                                onChange={(e) => handleInputChange('studentName', e.target.value)}
+                                className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                            />
+                            <button
+                                onClick={handleSearch}
+                                className="flex items-center gap-2 rounded-md bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200"
+                            >
+                                <Search className="h-4 w-4" />
+                                Search
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-gray-700">Matric ID</label>
+                        <input
+                            type="text"
+                            placeholder="ID number"
+                            value={formData.matricId}
+                            onChange={(e) => handleInputChange('matricId', e.target.value)}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                        />
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="rounded-b-lg border-t bg-gray-50 px-6 py-4">
+                    <div className="flex justify-end gap-3">
+                        <button
+                            onClick={handleCancel}
+                            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleRegister}
+                            disabled={!formData.trackingNumber || !formData.studentName}
+                            className="rounded-md bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600"
+                        >
+                            Register Parcel
+                        </button>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Matric ID</label>
-            <input
-              type="text"
-              placeholder="ID number"
-              value={formData.matricId}
-              onChange={(e) => handleInputChange('matricId', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-            />
-          </div>
         </div>
-
-        {/* Action Buttons */}
-        <div className="px-6 py-4 border-t bg-gray-50 rounded-b-lg">
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={handleCancel}
-              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleRegister}
-              disabled={!formData.trackingNumber || !formData.studentName}
-              className="px-4 py-2 bg-pink-500 text-white rounded-md hover:bg-pink-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              Register Parcel
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default ParcelRegistrationForm;
