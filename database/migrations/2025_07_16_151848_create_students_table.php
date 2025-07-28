@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('student_name', 50);
             $table->string('phone_no', 15);
             $table->string('room_no', 12)->nullable();
+            $table->string('matric', 10)->unique();
             $table->string('email', 255)->unique();
             $table->string('password', 255);
             $table->string('profile_pic', 500)->nullable();

@@ -24,7 +24,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/staff/parcel', [StaffController::class, 'staff'])
     ->name('staff.parcel');
 
-    Route::get('/staff/add-parcel', [ParcelController::class, 'create'])->name('parcel.create');
+Route::get('/staff/add-parcel', [ParcelController::class, 'create'])->name('parcel.create');
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php'; 
+Route::get('/api/students/search', [ParcelController::class, 'searchStudents'])->name('students.search');
+
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

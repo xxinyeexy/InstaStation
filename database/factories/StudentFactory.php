@@ -19,10 +19,14 @@ class StudentFactory extends Factory
     public function definition(): array
     {
         return [
-            'student_name' => $this->faker->name(),
+            'student_name' => $this->faker->firstName() . ' ' . $this->faker->lastName(),
             'phone_no' => $this->faker->numerify('01#########'),
-            'room_no' => $this->faker->optional()->randomElement(['A101', 'B202', 'C303']),
-            'email' => $this->faker->unique()->safeEmail(),
+            'room_no' => $this->faker->randomElement(range('A', 'I')) .
+                $this->faker->numberBetween(1, 3) . '-' .
+                $this->faker->numberBetween(1, 8) .
+                str_pad($this->faker->numberBetween(1, 4), 2, '0', STR_PAD_LEFT),
+            'matric' => $this->faker->randomElement(['TG', 'TP', 'CB', 'CD', 'TL']) . rand(20, 25) .  str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT),
+            'email' => strtolower($this->faker->firstName . '.' . $this->faker->lastName) . '@gmail.com',
             'password' => Hash::make('password'), // Always hash passwords
             'profile_pic' => null,
             'status' => $this->faker->randomElement(['Active', 'Inactive']),

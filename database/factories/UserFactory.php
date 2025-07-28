@@ -24,11 +24,14 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'name' => fake()->firstName() . ' ' . fake()->lastName(),
+            'email' => strtolower(fake()->firstName() . '.' . fake()->lastName()) . '@gmail.com',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'type' => 'student',
+            'matric' => fake()->randomElement(['TG', 'TP', 'CB', 'CD', 'TL']) . rand(20, 25) .  str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT),
+            'department' => null,
         ];
     }
 
@@ -37,8 +40,21 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+       public function staff(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'name' => fake()->firstName() . ' ' . fake()->lastName(),
+            'email' => strtolower(fake()->firstName() . '.' . fake()->lastName()) . '@gmail.com',
+            'email_verified_at' => now(),
+            'password' => static::$password ??= Hash::make('password'),
+            'remember_token' => Str::random(10),
+            'type' => 'staff',
+            'matric' => null,
+            'department' => fake()->randomElement(['Information Technology', 'Human Resources', 'Finance', 'Operations - General','Operations - Admin']),
         ]);
     }
 }

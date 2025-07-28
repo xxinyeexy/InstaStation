@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Parcel;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class ParcelController extends Controller
@@ -21,8 +24,7 @@ class ParcelController extends Controller
      */
     public function create()
     {
-            return Inertia::render('staff/add-parcel');
-
+        return Inertia::render('staff/add-parcel');
     }
 
     /**
@@ -63,5 +65,40 @@ class ParcelController extends Controller
     public function destroy(Parcel $parcel)
     {
         //
+    }
+
+    /**
+     * Search for students by name
+     */
+    public function searchStudents(Request $request)
+    {
+        $query = $request->get('query');
+
+        Log::info('Student search query: ' . $query);
+
+        if (empty($query)) {
+            return response()->json([]);
+        }
+
+        // Search in students table and join with users table to get matric ID
+        $students = Student::select('students.student_id', 'students.student_name', 'students.email', 'users.matric as matric_id')
+            ->leftJoin('users', 'students.email', '=', 'users.email')
+            ->where('students.student_name', 'LIKE', "%{$query}%")
+            ->where('students.status', 'Active')
+            ->limit(10)
+            ->get()
+            ->map(function ($student) {
+                return [
+                    'student_id' => $student->student_id,
+                    'student_name' => $student->student_name,
+                    'matric_id' => $student->matric_id,
+                    'email' => $student->email
+                ];
+            });
+
+        Log::info('Student search results: ' . $students->count() . ' found');
+        Log::info('Results: ' . $students->toJson());
+
+        return response()->json($students);
     }
 }
