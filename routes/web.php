@@ -27,6 +27,7 @@ Route::get('/staff/parcel', [StaffController::class, 'staff'])
 Route::get('/staff/add-parcel', [ParcelController::class, 'create'])->name('parcel.create');
 
 Route::get('/api/students/search', [ParcelController::class, 'searchStudents'])->name('students.search');
-
+Route::post('/parcels', [ParcelController::class, 'store']);
+Route::get('/students/search', [ParcelController::class, 'searchStudents']);
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

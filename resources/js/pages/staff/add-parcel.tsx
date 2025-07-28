@@ -8,10 +8,12 @@ const ParcelRegistrationForm = () => {
         trackingNumber: '',
         sender: '',
         size: '',
-        location: 'Shelf A-15',
+        location: '',
         studentName: '',
         matricId: '',
     });
+
+    const [showRegisterToast, setShowRegisterToast] = useState(false);
 
     const [isScanning, setIsScanning] = useState(false);
     const [showToast, setShowToast] = useState(false);
@@ -32,33 +34,33 @@ const ParcelRegistrationForm = () => {
     const searchContainerRef = useRef<HTMLDivElement>(null);
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleInputChange = (field: keyof typeof formData, value: string) => {
-    if (field === 'studentName' && isSelectingStudent) {
-        return; // 🔒 prevent overwrite after user selects a result
-    }
-
-    setFormData((prev) => ({ ...prev, [field]: value }));
-
-    if (field === 'studentName') {
-        // Cancel previous timeout
-        if (searchTimeoutRef.current) {
-            clearTimeout(searchTimeoutRef.current);
+    const handleInputChange = (field: keyof typeof formData, value: string) => {
+        if (field === 'studentName' && isSelectingStudent) {
+            return; // 🔒 prevent overwrite after user selects a result
         }
 
-        // Show search box immediately on any input
-        setShowSearchResults(true);
+        setFormData((prev) => ({ ...prev, [field]: value }));
 
-        if (value.length >= 1) {
-            searchTimeoutRef.current = setTimeout(() => {
-                handleSearch(value);
-            }, 300);
-        } else {
-            setSearchResults([]);
-            setShowSearchResults(false);
-            setSearchError('');
+        if (field === 'studentName') {
+            // Cancel previous timeout
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+
+            // Show search box immediately on any input
+            setShowSearchResults(true);
+
+            if (value.length >= 1) {
+                searchTimeoutRef.current = setTimeout(() => {
+                    handleSearch(value);
+                }, 300);
+            } else {
+                setSearchResults([]);
+                setShowSearchResults(false);
+                setSearchError('');
+            }
         }
-    }
-};
+    };
 
     const handleQRScan = () => {
         setIsScanning(true);
@@ -102,36 +104,55 @@ const ParcelRegistrationForm = () => {
         }
     };
 
-   const handleStudentSelect = (student: any) => {
-    setIsSelectingStudent(true);
+    const handleStudentSelect = (student: any) => {
+        setIsSelectingStudent(true);
 
-    setFormData((prev) => ({
-        ...prev,
-        studentName: student.student_name,
-        matricId: student.matric_id || '',
-    }));
+        setFormData((prev) => ({
+            ...prev,
+            studentName: student.student_name,
+            matricId: student.matric_id || '',
+        }));
 
-    setShowSearchResults(false);
-    setSearchResults([]);
-    setHighlightMatric(true);
+        setShowSearchResults(false);
+        setSearchResults([]);
+        setHighlightMatric(true);
 
-    setTimeout(() => setHighlightMatric(false), 1500);
+        setTimeout(() => setHighlightMatric(false), 1500);
 
-    // Reset flag after a tiny delay (helps with debounce conflict)
-    setTimeout(() => setIsSelectingStudent(false), 200);
+        // Reset flag after a tiny delay (helps with debounce conflict)
+        setTimeout(() => setIsSelectingStudent(false), 200);
+    };
+
+   const handleRegister = async () => {
+    try {
+        const response = await fetch('/api/parcels/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to register parcel');
+        }
+
+        setShowRegisterToast(true);
+        setTimeout(() => setShowRegisterToast(false), 3000);
+        handleCancel(); // Clear form
+    } catch (err) {
+  if (err instanceof Error) {
+    alert('🚨 Registration failed: ' + err.message);
+  } else {
+    alert('🚨 An unexpected error occurred.');
+  }    }
 };
 
-    const handleRegister = () => {
-        console.log('Registering parcel:', formData);
-        alert('Parcel registered successfully!');
-    };
 
     const handleCancel = () => {
         setFormData({
             trackingNumber: '',
             sender: '',
             size: '',
-            location: 'Shelf A-15',
+            location: '',
             studentName: '',
             matricId: '',
         });
@@ -226,6 +247,11 @@ const ParcelRegistrationForm = () => {
 
     return (
         <AppLayout>
+                {showRegisterToast && (
+                                <div className="animate-fade-in fixed top-20 left-1/2 z-50 -translate-x-1/2 rounded bg-green-600 px-4 py-2 text-white shadow-lg">
+                                    🎉 Parcel registered successfully!
+                                </div>
+                            )}
             <div className="min-h-screen bg-gray-50 p-4">
                 <style>{`
         @keyframes scan {
@@ -437,34 +463,34 @@ const ParcelRegistrationForm = () => {
                                 </button>
                             </div>
 
-                     {showSearchResults && (
-                            <div className="mt-2 max-h-48 overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg">
-                                {searchResults.length > 0 ? (
-                                    <ul className="divide-y divide-gray-200">
-                                        {searchResults.map((student) => (
-                                            <li
-                                                key={student.student_id}
-                                                className="flex cursor-pointer items-center justify-between px-4 py-3 transition-colors hover:bg-pink-50"
-                                                onMouseDown={(e) => {
-                                                    e.preventDefault();
-                                                    handleStudentSelect(student);
-                                                }}
-                                            >
-                                                <div className="flex flex-col">
-                                                    <span className="font-medium text-gray-900">{student.student_name}</span>
-                                                    <span className="text-sm text-gray-500">{student.email}</span>
-                                                </div>
-                                                <span className="text-sm font-medium text-pink-600">{student.matric_id || 'No Matric ID'}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <div className="px-4 py-3 text-center text-gray-500">
-                                        {isSearching ? 'Searching...' : searchError || 'No students found'}
-                                    </div>
-                                )}
-                            </div>
-                        )}
+                            {showSearchResults && (
+                                <div className="mt-2 max-h-48 overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg">
+                                    {searchResults.length > 0 ? (
+                                        <ul className="divide-y divide-gray-200">
+                                            {searchResults.map((student) => (
+                                                <li
+                                                    key={student.student_id}
+                                                    className="flex cursor-pointer items-center justify-between px-4 py-3 transition-colors hover:bg-pink-50"
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        handleStudentSelect(student);
+                                                    }}
+                                                >
+                                                    <div className="flex flex-col">
+                                                        <span className="font-medium text-gray-900">{student.student_name}</span>
+                                                        <span className="text-sm text-gray-500">{student.email}</span>
+                                                    </div>
+                                                    <span className="text-sm font-medium text-pink-600">{student.matric_id || 'No Matric ID'}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <div className="px-4 py-3 text-center text-gray-500">
+                                            {isSearching ? 'Searching...' : searchError || 'No students found'}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <div>
@@ -488,6 +514,7 @@ const ParcelRegistrationForm = () => {
                             >
                                 Cancel
                             </button>
+                        
                             <button
                                 onClick={handleRegister}
                                 disabled={!formData.trackingNumber || !formData.studentName}

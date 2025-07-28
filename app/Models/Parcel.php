@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Parcel extends Model
 {
+    protected $fillable = [
+    'tracking_number',
+    'sender',
+    'size',
+    'location',
+    'student_name',
+    'matric_id',
+];
     use HasFactory;
     public function student()
     {
