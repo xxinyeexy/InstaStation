@@ -30,6 +30,10 @@ class User extends Authenticatable
 {
     return $this->hasOne(Staff::class, 'user_id');
 }
+public function parcels()
+    {
+        return $this->hasMany(Parcel::class, 'student_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

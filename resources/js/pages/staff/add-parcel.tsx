@@ -1,7 +1,9 @@
 import AppLayout from '@/layouts/app-layout';
+import Alert from '@/components/ui/alert';
 import { Html5Qrcode } from 'html5-qrcode';
-import { ArrowLeft, Camera, QrCode, Search, X } from 'lucide-react';
+import {  XCircle, CircleCheck, AlertTriangle ,ArrowLeft, Camera, QrCode, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 const ParcelRegistrationForm = () => {
     const [formData, setFormData] = useState({
@@ -13,11 +15,44 @@ const ParcelRegistrationForm = () => {
         matricId: '',
     });
 
-    const [showRegisterToast, setShowRegisterToast] = useState(false);
+    
+ const Toast = ({ type, message }: { type: 'success' | 'error' | 'warning'; message: string }) => {
+    const iconMap = {
+        success: <CircleCheck className="h-5 w-5 text-green-600" />,
+        error: <XCircle className="h-5 w-5 text-red-600" />,
+        warning: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
+    };
+
+    const bgMap = {
+        success: 'bg-green-100 border-green-300 text-green-800',
+        error: 'bg-red-100 border-red-300 text-red-800',
+        warning: 'bg-yellow-100 border-yellow-300 text-yellow-800',
+    };
+
+    return (
+        <div
+            className={`fixed top-6 left-1/2 z-50 flex w-fit -translate-x-1/2 items-center gap-2 rounded-md border px-4 py-2 shadow-md animate-fade-in ${bgMap[type]}`}
+        >
+            {iconMap[type]}
+            <span className="text-sm font-medium">{message}</span>
+        </div>
+    );
+};
+  const [errorToast, setErrorToast] = useState<{ show: boolean; message: string }>({
+    show: false,
+    message: '',
+});
+const showErrorToast = (message: string) => {
+    setErrorToast({ show: true, message });
+    setTimeout(() => setErrorToast({ show: false, message: '' }), 3000);
+};
+    const [showRegisterToast, setShowRegisterToast] = useState(false);  
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [isScanning, setIsScanning] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [highlightTracking, setHighlightTracking] = useState(false);
+    
     type Student = {
         student_id: string;
         student_name: string;
@@ -123,29 +158,125 @@ const ParcelRegistrationForm = () => {
         setTimeout(() => setIsSelectingStudent(false), 200);
     };
 
-   const handleRegister = async () => {
-    try {
-        const response = await fetch('/api/parcels/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
-        });
-
-        if (!response.ok) {
-            throw new Error('Failed to register parcel');
+    const handleRegister = async () => {
+        // Prevent double submission
+        if (isSubmitting) return;
+        
+        // Basic validation
+        if (!formData.trackingNumber.trim()) {
+            alert('❌ Please enter a tracking number');
+            return;
+        }
+        
+        if (!formData.sender.trim()) {
+            alert('❌ Please enter sender information');
+            return;
+        }
+        
+        if (!formData.matricId.trim()) {
+            alert('❌ Please select a student or enter matric ID');
+            return;
         }
 
-        setShowRegisterToast(true);
-        setTimeout(() => setShowRegisterToast(false), 3000);
-        handleCancel(); // Clear form
-    } catch (err) {
-  if (err instanceof Error) {
-    alert('🚨 Registration failed: ' + err.message);
-  } else {
-    alert('🚨 An unexpected error occurred.');
-  }    }
-};
+        setIsSubmitting(true);
 
+        try {
+            // Get CSRF token
+            const getCsrfToken = () => {
+                // First try to get from meta tag
+                const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                if (metaToken) return metaToken;
+                
+                // If no meta tag, try to get from cookies (Laravel's default XSRF-TOKEN)
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === 'XSRF-TOKEN') {
+                        return decodeURIComponent(value);
+                    }
+                }
+                return null;
+            };
+
+            const csrfToken = getCsrfToken();
+            
+            if (!csrfToken) {
+                throw new Error('CSRF token not found. Please refresh the page and try again.');
+            }
+
+            // Transform the data to match Laravel controller expectations
+            const requestData = {
+                tracking_no: formData.trackingNumber.trim(),
+                size: formData.size || null,
+                sender: formData.sender.trim(),
+                location: formData.location.trim() || null,
+                student_id: formData.matricId.trim(),
+                qr_code: null
+            };
+
+            console.log('Sending request with data:', requestData);
+
+            const response = await fetch('/parcels', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(requestData),
+            });
+
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                
+                try {
+                    const errorData = await response.json();
+                    console.log('Error response:', errorData);
+                    
+                    if (errorData.message) {
+                        errorMessage = errorData.message;
+                    } else if (errorData.errors) {
+                        // Handle validation errors
+                        const validationErrors = Object.entries(errorData.errors)
+                            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+                            .join('\n');
+                        errorMessage = `Validation errors:\n${validationErrors}`;
+                    }
+                } catch (parseError) {
+                    console.log('Could not parse error response as JSON');
+                    const errorText = await response.text();
+                    console.log('Error response text:', errorText);
+                    errorMessage += `\n\nResponse: ${errorText}`;
+                }
+                
+                throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+            console.log('Success response:', result);
+            
+            // Show success message
+            setShowRegisterToast(true);
+            setTimeout(() => setShowRegisterToast(false), 3000);
+            
+            // Clear form
+            handleCancel();
+            
+        } catch (err) {
+            console.error('Registration error:', err);
+            if (err instanceof Error) {
+                alert('🚨 Registration failed: ' + err.message);
+            } else {
+                alert('🚨 An unexpected error occurred.');
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const handleCancel = () => {
         setFormData({
@@ -156,6 +287,8 @@ const ParcelRegistrationForm = () => {
             studentName: '',
             matricId: '',
         });
+        setShowSearchResults(false);
+        setSearchResults([]);
     };
 
     const html5QrCodeRef = useRef<any>(null);
@@ -247,18 +380,18 @@ const ParcelRegistrationForm = () => {
 
     return (
         <AppLayout>
-                {showRegisterToast && (
-                                <div className="animate-fade-in fixed top-20 left-1/2 z-50 -translate-x-1/2 rounded bg-green-600 px-4 py-2 text-white shadow-lg">
-                                    🎉 Parcel registered successfully!
-                                </div>
-                            )}
+            
+           {showRegisterToast && <Toast type="success" message=" Parcel registered successfully!" />}
+           {errorToast.show && <Toast type="error" message={errorToast.message} />}
+
+
             <div className="min-h-screen bg-gray-50 p-4">
                 <style>{`
-        @keyframes scan {
-          0% { transform: translateY(-100px); }
-          100% { transform: translateY(100px); }
-        }
-      `}</style>
+                    @keyframes scan {
+                        0% { transform: translateY(-100px); }
+                        100% { transform: translateY(100px); }
+                    }
+                `}</style>
                 <div className="mx-auto max-w-2xl rounded-lg border bg-white shadow-sm">
                     {/* Header */}
                     <div className="flex items-center gap-3 border-b p-6">
@@ -277,11 +410,8 @@ const ParcelRegistrationForm = () => {
                     {/* QR Scanner Area */}
                     <div className="mb-6 px-6">
                         {/* Toast Notification */}
-                        {showToast && (
-                            <div className="animate-fade-in fixed top-6 left-1/2 z-50 -translate-x-1/2 rounded bg-green-500 px-4 py-2 text-white shadow-lg">
-                                Tracking number filled from QR code!
-                            </div>
-                        )}
+                     {showToast && <Toast type="success" message="Tracking number filled from QR code!" />}
+
                         {/* Pink Modern QR Scanner Section */}
                         <div className="flex justify-center">
                             <div className="relative aspect-square w-full max-w-lg overflow-hidden rounded-3xl border-4 border-pink-500 bg-pink-50">
@@ -322,7 +452,6 @@ const ParcelRegistrationForm = () => {
                                             style={{ top: 80 }}
                                         />
                                     )}
-                                    {/* (Central icon and pulse removed) */}
                                     {/* Camera Preview */}
                                     {isScanning && <div id="qr-reader" className="absolute inset-0 z-10 h-full w-full overflow-hidden rounded-3xl" />}
                                     {/* Indeterminate Progress Bar */}
@@ -333,15 +462,15 @@ const ParcelRegistrationForm = () => {
                                             </div>
                                             <div className="mt-2 text-center text-lg font-semibold tracking-wide text-pink-500">Scanning...</div>
                                             <style>{`
-                                            @keyframes indeterminate-bar {
-                                                0% { margin-left: 0%; width: 40%; }
-                                                50% { margin-left: 60%; width: 40%; }
-                                                100% { margin-left: 0%; width: 40%; }
-                                            }
-                                            .animate-indeterminate-bar {
-                                                animation: indeterminate-bar 1.5s infinite cubic-bezier(0.4,0,0.2,1);
-                                            }
-                                        `}</style>
+                                                @keyframes indeterminate-bar {
+                                                    0% { margin-left: 0%; width: 40%; }
+                                                    50% { margin-left: 60%; width: 40%; }
+                                                    100% { margin-left: 0%; width: 40%; }
+                                                }
+                                                .animate-indeterminate-bar {
+                                                    animation: indeterminate-bar 1.5s infinite cubic-bezier(0.4,0,0.2,1);
+                                                }
+                                            `}</style>
                                         </div>
                                     )}
                                     {/* Tap to Scan State */}
@@ -363,14 +492,14 @@ const ParcelRegistrationForm = () => {
                                 </div>
                                 {/* Animations */}
                                 <style>{`
-                        @keyframes horizontal-scan {
-                          0% { top: 80px; }
-                          100% { top: 340px; }
-                        }
-                        .animate-horizontal-scan {
-                          animation: horizontal-scan 2s linear infinite alternate;
-                        }
-                      `}</style>
+                                    @keyframes horizontal-scan {
+                                        0% { top: 80px; }
+                                        100% { top: 340px; }
+                                    }
+                                    .animate-horizontal-scan {
+                                        animation: horizontal-scan 2s linear infinite alternate;
+                                    }
+                                `}</style>
                                 {/* Click to start scanning */}
                                 {!isScanning && (
                                     <button
@@ -388,7 +517,7 @@ const ParcelRegistrationForm = () => {
                         <h2 className="mb-4 text-lg font-medium text-gray-900">Parcel Information</h2>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">Tracking Number</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700">Tracking Number *</label>
                                 <input
                                     type="text"
                                     placeholder="Enter tracking number"
@@ -396,6 +525,7 @@ const ParcelRegistrationForm = () => {
                                     onChange={(e) => handleInputChange('trackingNumber', e.target.value)}
                                     className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none ${highlightTracking ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
                                     readOnly={isScanning}
+                                    required
                                 />
                             </div>
                             <div>
@@ -413,19 +543,21 @@ const ParcelRegistrationForm = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">Sender</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700">Sender *</label>
                                 <input
                                     type="text"
                                     placeholder="Sender name"
                                     value={formData.sender}
                                     onChange={(e) => handleInputChange('sender', e.target.value)}
                                     className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                                    required
                                 />
                             </div>
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-gray-700">Location</label>
                                 <input
                                     type="text"
+                                    placeholder="Storage location"
                                     value={formData.location}
                                     onChange={(e) => handleInputChange('location', e.target.value)}
                                     className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
@@ -448,6 +580,7 @@ const ParcelRegistrationForm = () => {
                                     value={formData.studentName}
                                     onChange={(e) => handleInputChange('studentName', e.target.value)}
                                     className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                                    required
                                 />
                                 <button
                                     onClick={() => handleSearch(formData.studentName)}
@@ -494,13 +627,14 @@ const ParcelRegistrationForm = () => {
                         </div>
 
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700">Matric ID</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Matric ID *</label>
                             <input
                                 type="text"
                                 placeholder="ID number"
                                 value={formData.matricId}
                                 onChange={(e) => handleInputChange('matricId', e.target.value)}
                                 className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none ${highlightMatric ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
+                                required
                             />
                         </div>
                     </div>
@@ -511,16 +645,20 @@ const ParcelRegistrationForm = () => {
                             <button
                                 onClick={handleCancel}
                                 className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                                disabled={isSubmitting}
                             >
                                 Cancel
                             </button>
                         
                             <button
                                 onClick={handleRegister}
-                                disabled={!formData.trackingNumber || !formData.studentName}
-                                className="rounded-md bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600"
+                                disabled={!formData.trackingNumber || !formData.sender || !formData.matricId || isSubmitting}
+                                className="rounded-md bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600 flex items-center gap-2"
                             >
-                                Register Parcel
+                                {isSubmitting && (
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                )}
+                                {isSubmitting ? 'Registering...' : 'Register Parcel'}
                             </button>
                         </div>
                     </div>

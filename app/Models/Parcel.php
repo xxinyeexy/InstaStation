@@ -8,28 +8,43 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Parcel extends Model
 {
+     use HasFactory;
     protected $fillable = [
-    'tracking_number',
-    'sender',
-    'size',
-    'location',
-    'student_name',
-    'matric_id',
-];
-    use HasFactory;
-    public function student()
+        'tracking_no',
+        'size',
+        'sender',
+        'location',
+        'student_id',
+        'parcel_status',
+        'days',
+        'qr_code',
+        'schedule',
+        'created_by',
+        'last_edited_by',
+    ];
+
+    protected $casts = [
+        'schedule' => 'datetime',
+    ];
+
+    // Relationships
+    public function studentUser()
     {
-        return $this->belongsTo(Student::class, 'student_id');
+        return $this->belongsTo(User::class, 'student_id');
     }
+
+
+   
+    
 
     public function createdBy()
     {
-        return $this->belongsTo(Staff::class, 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function lastEditedBy()
     {
-        return $this->belongsTo(Staff::class, 'last_edited_by');
+        return $this->belongsTo(User::class, 'last_edited_by');
     }
 
     public function payment()

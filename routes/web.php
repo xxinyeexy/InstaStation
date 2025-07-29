@@ -21,13 +21,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
-Route::get('/staff/parcel', [StaffController::class, 'staff'])
-    ->name('staff.parcel');
+// Staff and Parcel routes - all under auth middleware
+Route::middleware('auth')->group(function () {
+    
+    // Staff routes
+    Route::get('/staff/parcel', [StaffController::class, 'staff'])
+        ->name('staff.parcel');
+    
+    // Parcel routes
+    Route::resource('parcels', ParcelController::class);
+    Route::get('/staff/add-parcel', [ParcelController::class, 'create'])
+        ->name('parcel.create');
+    
+    // API routes for AJAX calls
+    Route::get('/api/students/search', [ParcelController::class, 'searchStudents'])
+        ->name('students.search');
+});
 
-Route::get('/staff/add-parcel', [ParcelController::class, 'create'])->name('parcel.create');
-
-Route::get('/api/students/search', [ParcelController::class, 'searchStudents'])->name('students.search');
-Route::post('/parcels', [ParcelController::class, 'store']);
-Route::get('/students/search', [ParcelController::class, 'searchStudents']);
 require __DIR__ . '/settings.php';
 require __DIR__ . '/auth.php';

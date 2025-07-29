@@ -7,7 +7,6 @@ use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Models\Staff;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -34,37 +33,99 @@ class ParcelController extends Controller
      */
     public function store(Request $request)
     {
-            $user = Auth::user(); 
-        if (!$user || !$user->staff) {
-        Log::error('Staff record not found for user ID: ' . ($user->id ?? 'N/A'));
-        return redirect()->back()->withErrors(['auth' => 'Staff account not linked. Please contact admin.']);
-    }
+        $user = Auth::user(); 
+        if (!$user || $user->type !== 'staff') {
+            Log::error('User is not staff', ['user_id' => ($user->id ?? 'N/A'), 'user_type' => ($user->type ?? 'N/A')]);
+            return response()->json(['message' => 'Access denied. Staff account required.'], 403);
+        }
 
+        try {
+            // Log the incoming request for debugging
+            Log::info('Parcel registration request received', [
+                'user_id' => $user->id,
+                'request_data' => $request->all()
+            ]);
 
-        $request->validate([
-            'tracking_no' => 'required|unique:parcels,tracking_no|max:50',
-            'size' => 'nullable|string',
-            'sender' => 'required|string|max:50',
-            'location' => 'nullable|string|max:100',
-            'student_id' => 'required|exists:students,student_id',
-            'qr_code' => 'nullable|unique:parcels,qr_code|max:255',
-        ]);
+            $validatedData = $request->validate([
+                'tracking_no' => 'required|unique:parcels,tracking_no|max:50',
+                'size' => 'nullable|string',
+                'sender' => 'required|string|max:50',
+                'location' => 'nullable|string|max:100',
+                'student_id' => 'required|string',
+                'qr_code' => 'nullable|string|max:255',
+            ]);
 
-        Parcel::create([
-            'tracking_no' => $request->tracking_no,
-            'size' => $request->size,
-            'sender' => $request->sender,
-            'location' => $request->location,
-            'student_id' => $request->student_id,
-            'parcel_status' => 'Pending Payment',
-            'days' => null,
-            'qr_code' => $request->qr_code,
-            'schedule' => now(),
-            'created_by' => Auth::user()->staff_id,
-            'last_edited_by' => Auth::user()->staff_id,
-        ]);
+            Log::info('Validation passed', ['validated_data' => $validatedData]);
 
-        return redirect()->back()->with('success', 'Parcel registered successfully.');
+            // Find the student user by matric ID or user ID
+            $student_user = User::where('matric', $request->student_id)
+                                ->orWhere('id', $request->student_id)
+                                ->where('type', 'student')
+                                ->first();
+            
+            if (!$student_user) {
+                Log::error('Student not found in users table', ['student_id' => $request->student_id]);
+                return response()->json(['message' => 'Student not found with ID: ' . $request->student_id], 404);
+            }
+
+            Log::info('Student user found', [
+                'student_user_id' => $student_user->id,
+                'student_matric' => $student_user->matric,
+                'student_name' => $student_user->name
+            ]);
+
+            Log::info('Staff user authenticated', [
+                'staff_user_id' => $user->id,
+                'staff_name' => $user->name
+            ]);
+
+            // Create the parcel - both student_id and staff IDs reference the users table
+            $parcel = Parcel::create([
+                'tracking_no' => $validatedData['tracking_no'],
+                'size' => $validatedData['size'],
+                'sender' => $validatedData['sender'],
+                'location' => $validatedData['location'],
+                'student_id' => $student_user->id, // Reference to users table
+                'parcel_status' => 'Pending Payment',
+                'days' => null,
+                'qr_code' => $validatedData['qr_code'],
+                'schedule' => now(),
+                'created_by' => $user->id, // Reference to users table (staff)
+                'last_edited_by' => $user->id, // Reference to users table (staff)
+            ]);
+
+            Log::info('Parcel created successfully', [
+                'parcel_id' => $parcel->id,
+                'tracking_no' => $parcel->tracking_no,
+                'student_id' => $parcel->student_id,
+                'created_by' => $parcel->created_by
+            ]);
+
+            return response()->json([
+                'message' => 'Parcel registered successfully.',
+                'parcel' => $parcel,
+                'student' => [
+                    'name' => $student_user->name,
+                    'matric' => $student_user->matric,
+                    'email' => $student_user->email
+                ]
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed', ['errors' => $e->errors()]);
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Parcel registration error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
+            ]);
+            return response()->json([
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -112,10 +173,14 @@ class ParcelController extends Controller
             return response()->json([]);
         }
 
-        // Search in students table and join with users table to get matric ID
+        // Search in users table for students
         $students = User::select('id as student_id', 'name as student_name', 'email', 'matric as matric_id')
             ->where('type', 'student')
-            ->where('name', 'LIKE', "%{$query}%")
+            ->where(function($q) use ($query) {
+                $q->where('name', 'LIKE', "%{$query}%")
+                  ->orWhere('matric', 'LIKE', "%{$query}%")
+                  ->orWhere('email', 'LIKE', "%{$query}%");
+            })
             ->limit(10)
             ->get()
             ->map(function ($student) {
@@ -128,7 +193,6 @@ class ParcelController extends Controller
             });
 
         Log::info('Student search results: ' . $students->count() . ' found');
-        Log::info('Results: ' . $students->toJson());
 
         return response()->json($students);
     }
