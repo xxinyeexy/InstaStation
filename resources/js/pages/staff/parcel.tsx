@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Edit, Eye, Trash2, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -10,7 +11,121 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+// Sample parcel data
+const sampleParcels = [
+    {
+        id: 'P001',
+        recipient: 'John Doe',
+        sender: 'Jane Smith',
+        status: 'Pending Payments',
+        statusColor: 'orange',
+    },
+    {
+        id: 'P002',
+        recipient: 'Jane Doe',
+        sender: 'Jane Smith',
+        status: 'Ready for Collection',
+        statusColor: 'emerald',
+    },
+    {
+        id: 'P003',
+        recipient: 'Alice Johnson',
+        sender: 'Jane Smith',
+        status: 'Unclaimed',
+        statusColor: 'gray',
+    },
+    {
+        id: 'P004',
+        recipient: 'Bob Wilson',
+        sender: 'Jane Smith',
+        status: 'Collected',
+        statusColor: 'blue',
+    },
+    {
+        id: 'P005',
+        recipient: 'Carol Brown',
+        sender: 'Jane Smith',
+        status: 'Pending Payments',
+        statusColor: 'orange',
+    },
+];
+
+type TabType = 'All Parcels' | 'Pending Payments' | 'Ready for Collection' | 'Collected' | 'Unclaimed';
+
 export default function Dashboard() {
+    const [activeTab, setActiveTab] = useState<TabType>('All Parcels');
+    const [searchTerm, setSearchTerm] = useState('');
+
+    // Filter parcels based on active tab and search term
+    const filteredParcels = sampleParcels.filter((parcel) => {
+        const matchesTab = activeTab === 'All Parcels' || parcel.status === activeTab;
+        const matchesSearch =
+            searchTerm === '' ||
+            parcel.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.sender.toLowerCase().includes(searchTerm.toLowerCase());
+
+        return matchesTab && matchesSearch;
+    });
+
+    // Get counts for each tab
+    const getCounts = () => {
+        return {
+            'All Parcels': sampleParcels.length,
+            'Pending Payments': sampleParcels.filter((p) => p.status === 'Pending Payments').length,
+            'Ready for Collection': sampleParcels.filter((p) => p.status === 'Ready for Collection').length,
+            Collected: sampleParcels.filter((p) => p.status === 'Collected').length,
+            Unclaimed: sampleParcels.filter((p) => p.status === 'Unclaimed').length,
+        };
+    };
+
+    const counts = getCounts();
+
+    const getStatusStyles = (status: string) => {
+        switch (status) {
+            case 'Pending Payments':
+                return 'border-orange-200 bg-orange-100 text-orange-700';
+            case 'Ready for Collection':
+                return 'border-emerald-200 bg-emerald-100 text-emerald-700';
+            case 'Collected':
+                return 'border-blue-200 bg-blue-100 text-blue-700';
+            case 'Unclaimed':
+                return 'border-gray-200 bg-gray-100 text-gray-600';
+            default:
+                return 'border-gray-200 bg-gray-100 text-gray-600';
+        }
+    };
+
+    const getTabStyles = (tab: TabType) => {
+        const isActive = activeTab === tab;
+
+        // Active and hover colors should match for each tab
+        switch (tab) {
+            case 'All Parcels':
+                return isActive
+                    ? 'bg-blue-50 text-blue-600 border-blue-200'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200';
+            case 'Pending Payments':
+                return isActive
+                    ? 'bg-orange-50 text-orange-600 border-orange-200'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200';
+            case 'Ready for Collection':
+                return isActive
+                    ? 'bg-[#EDE9FE] text-[#5B21B6] border-purple-200'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-[#EDE9FE] hover:text-[#5B21B6] hover:border-purple-200';
+            case 'Collected':
+                return isActive
+                    ? 'bg-[#DCFCE7] text-[#166534] border-green-200'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-[#DCFCE7] hover:text-[#166534] hover:border-green-200';
+            case 'Unclaimed':
+                return isActive
+                    ? 'bg-[#C5C5CF] text-black border-gray-300'
+                    : 'bg-white text-gray-600 border-gray-200 hover:bg-[#C5C5CF] hover:text-black hover:border-gray-300';
+            default:
+                return 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-700';
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
@@ -118,6 +233,8 @@ export default function Dashboard() {
                                     <input
                                         type="text"
                                         placeholder="Search parcels..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
                                         className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                                     />
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -133,129 +250,64 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* Filter Tabs */}
+                            {/* Filter Tabs - Updated to match the image */}
                             <div className="flex gap-2 border-b border-gray-100 p-6">
-                                <button className="rounded-lg bg-blue-100 px-4 py-2 text-sm font-medium text-blue-700">All Parcels 1</button>
-                                <button className="rounded-lg border border-orange-200 bg-orange-50 px-4 py-2 text-sm text-orange-600 hover:bg-orange-100">
-                                    Pending Payments 1
-                                </button>
-                                <button className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-100">
-                                    Ready for Collection 0
-                                </button>
-                                <button className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">
-                                    Collected 0
-                                </button>
-                                <button className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">
-                                    Unclaimed 0
-                                </button>
+                                {(['All Parcels', 'Pending Payments', 'Ready for Collection', 'Collected', 'Unclaimed'] as TabType[]).map((tab) => (
+                                    <button
+                                        key={tab}
+                                        onClick={() => setActiveTab(tab)}
+                                        className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${getTabStyles(tab)}`}
+                                    >
+                                        {tab} <span className="ml-1 rounded-full bg-white/50 px-2 py-0.5 text-xs">{counts[tab]}</span>
+                                    </button>
+                                ))}
                             </div>
 
                             {/* Table Content */}
                             <div className="space-y-4 p-6">
-                                {/* Package P001 */}
-                                <div className="rounded-xl border border-gray-200 p-5 transition-shadow hover:shadow-md">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                                                <span className="text-lg font-semibold text-blue-600">P</span>
-                                            </div>
-                                            <div>
-                                                <p className="text-lg font-semibold text-gray-900">Package - P001</p>
-                                                <p className="mt-1 text-sm text-gray-500">Recipient: John Doe</p>
-                                                <p className="text-sm text-gray-400">The parcel - Jane Smith</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="rounded-full border border-orange-200 bg-orange-100 px-4 py-2 text-sm font-medium text-orange-700">
-                                                Pending Payments
-                                            </span>
-                                            <div className="flex items-center gap-2">
-                                                <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                                                    <Eye className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                                                    <Edit className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600">
-                                                    Mark as Collected
-                                                </button>
-                                            </div>
-                                        </div>
+                                {filteredParcels.length === 0 ? (
+                                    <div className="py-8 text-center text-gray-500">
+                                        {searchTerm ? `No parcels found matching "${searchTerm}"` : `No parcels in ${activeTab.toLowerCase()}`}
                                     </div>
-                                </div>
-
-                                {/* Package P002 */}
-                                <div className="rounded-xl border border-gray-200 p-5 transition-shadow hover:shadow-md">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                                                <span className="text-lg font-semibold text-blue-600">P</span>
-                                            </div>
-                                            <div>
-                                                <p className="text-lg font-semibold text-gray-900">Package - P002</p>
-                                                <p className="mt-1 text-sm text-gray-500">Recipient: Jane Doe</p>
-                                                <p className="text-sm text-gray-400">The parcel - Jane Smith</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="rounded-full border border-emerald-200 bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700">
-                                                Ready for Collection
-                                            </span>
-                                            <div className="flex items-center gap-2">
-                                                <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                                                    <Eye className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                                                    <Edit className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600">
-                                                    Mark as Collected
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Package P003 */}
-                                <div className="rounded-xl border border-gray-200 p-5 transition-shadow hover:shadow-md">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                                                <span className="text-lg font-semibold text-blue-600">P</span>
-                                            </div>
-                                            <div>
-                                                <p className="text-lg font-semibold text-gray-900">Package - P003</p>
-                                                <p className="mt-1 text-sm text-gray-500">Recipient: Alice Johnson</p>
-                                                <p className="text-sm text-gray-400">The parcel - Jane Smith</p>
+                                ) : (
+                                    filteredParcels.map((parcel) => (
+                                        <div key={parcel.id} className="rounded-xl border border-gray-200 p-5 transition-shadow hover:shadow-md">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                                                        <span className="text-lg font-semibold text-blue-600">P</span>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-lg font-semibold text-gray-900">Package - {parcel.id}</p>
+                                                        <p className="mt-1 text-sm text-gray-500">Recipient: {parcel.recipient}</p>
+                                                        <p className="text-sm text-gray-400">The parcel - {parcel.sender}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <span
+                                                        className={`rounded-full border px-4 py-2 text-sm font-medium ${getStatusStyles(parcel.status)}`}
+                                                    >
+                                                        {parcel.status}
+                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                                                            <Eye className="h-4 w-4" />
+                                                        </button>
+                                                        <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                                                            <Edit className="h-4 w-4" />
+                                                        </button>
+                                                        <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
+                                                        <button className="rounded-lg bg-[var(--mintgreen)] px-5 py-2 text-sm font-medium text-[var(--applegreen)] shadow-sm hover:bg-emerald-100">
+                                                            Mark as Collected
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="rounded-full border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-medium text-gray-600">
-                                                Unclaimed
-                                            </span>
-                                            <div className="flex items-center gap-2">
-                                                <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                                                    <Eye className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                                                    <Edit className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </button>
-                                                <button className="rounded-lg bg-emerald-500 px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-600">
-                                                    Mark as Collected
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
