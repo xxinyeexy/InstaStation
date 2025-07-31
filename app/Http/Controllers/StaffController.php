@@ -12,9 +12,9 @@ class StaffController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function staff(): Response
+    public function staff()
     {
-        return Inertia::render('staff/parcel');
+
     }
     public function index()
     {

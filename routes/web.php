@@ -25,7 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware('auth')->group(function () {
     
     // Staff routes
-    Route::get('/staff/parcel', [StaffController::class, 'staff'])
+    Route::get('/staff/parcel', [ParcelController::class, 'index'])
         ->name('staff.parcel');
     
     // Parcel routes

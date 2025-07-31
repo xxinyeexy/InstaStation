@@ -16,23 +16,24 @@ class ParcelController extends Controller
      */
     public function index()
     {
-        $parcels = Parcel::with(['student', 'creator', 'editor'])
+           $parcels = Parcel::with(['studentUser', 'createdBy', 'lastEditedBy'])  // Updated relationship names
         ->orderBy('created_at', 'desc')
         ->get();
-    
-    // Optional: Calculate stats
+
+    // Calculate stats
     $stats = [
         'newlyArrived' => $parcels->where('created_at', '>=', today())->count(),
         'pendingPayments' => $parcels->where('parcel_status', 'Pending Payment')->count(),
-        'readyForCollection' => $parcels->where('parcel_status', 'Ready To Collect')->count(),
+        'readyForCollection' => $parcels->where('parcel_status', 'Ready For Collection')->count(),
         'todayCollection' => $parcels->where('parcel_status', 'Collected')->where('updated_at', '>=', today())->count(),
-        'totalRevenue' => 0, // Calculate based on your business logic
+        'totalRevenue' => $parcels->where('parcel_status', 'Collected')->count(), // RM1 per collected parcel
         'paymentVerified' => $parcels->where('parcel_status', 'Approved')->count(),
     ];
-    
-    return Inertia::render('Dashboard', [
-         'parcels' => $parcels->toArray(),
+
+    return Inertia::render('staff/parcel', [  // Make sure this matches your component path
+        'parcels' => $parcels->toArray(),
         'stats' => $stats
+
     ]);
     }
 

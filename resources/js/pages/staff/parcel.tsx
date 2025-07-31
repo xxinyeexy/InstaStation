@@ -11,86 +11,149 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Sample parcel data
-const sampleParcels = [
-    {
-        id: 'P001',
-        recipient: 'John Doe',
-        sender: 'Jane Smith',
-        status: 'Pending Payments',
-        statusColor: 'orange',
-    },
-    {
-        id: 'P002',
-        recipient: 'Jane Doe',
-        sender: 'Jane Smith',
-        status: 'Ready for Collection',
-        statusColor: 'emerald',
-    },
-    {
-        id: 'P003',
-        recipient: 'Alice Johnson',
-        sender: 'Jane Smith',
-        status: 'Unclaimed',
-        statusColor: 'gray',
-    },
-    {
-        id: 'P004',
-        recipient: 'Bob Wilson',
-        sender: 'Jane Smith',
-        status: 'Collected',
-        statusColor: 'blue',
-    },
-    {
-        id: 'P005',
-        recipient: 'Carol Brown',
-        sender: 'Jane Smith',
-        status: 'Pending Payments',
-        statusColor: 'orange',
-    },
-];
+// Define the Parcel interface based on your database structure
+interface Parcel {
+    parcel_id: number;
+    student_id: number;
+    tracking_no: string;
+    parcel_status: string;
+    days: number;
+    sender: string;
+    size: string;
+    location: string;
+    qr_code: string;
+    schedule: string;
+    created_by: number;
+    last_edited_by: number;
+    report_at: string;
+    created_at: string;
+    updated_at: string;
+}
 
-type TabType = 'All Parcels' | 'Pending Payments' | 'Ready for Collection' | 'Collected' | 'Unclaimed';
+// Props interface for the component
+interface DashboardProps {
+    parcels?: Parcel[];
+}
 
-export default function Dashboard() {
+type TabType = 'All Parcels' | 'Pending Payment' | 'Ready for Collection' | 'Collected' | 'Unclaimed';
+
+export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<TabType>('All Parcels');
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Debug: Log parcels data
+    console.log('Parcels received:', parcels);
+    console.log('Parcels length:', parcels.length);
+    if (parcels.length > 0) {
+        console.log('First parcel:', parcels[0]);
+        console.log('All statuses:', parcels.map(p => p.parcel_status));
+    }
+
     // Filter parcels based on active tab and search term
-    const filteredParcels = sampleParcels.filter((parcel) => {
-        const matchesTab = activeTab === 'All Parcels' || parcel.status === activeTab;
+    const filteredParcels = parcels.filter((parcel) => {
+    // Normalize status for easier comparison
+    const status = parcel.parcel_status?.toLowerCase();
+
+    // Skip all 'Approved' parcels entirely
+    if (status === 'approved') return false;
+
+    // Tabs filtering
+    const matchesTab =
+        activeTab === 'All Parcels'
+            ? ['pending payment', 'ready for collection', 'ready to collect', 'collected', 'unclaimed'].includes(status)
+            : activeTab === 'Pending Payment'
+                ? ['pending payment'].includes(status)
+                : activeTab === 'Ready for Collection'
+                    ? ['ready for collection'].includes(status)
+                    : activeTab === 'Collected'
+                        ? status === 'collected'
+                        : activeTab === 'Unclaimed'
+                            ? status === 'unclaimed'
+                            : true;
+
+            
         const matchesSearch =
             searchTerm === '' ||
-            parcel.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            parcel.recipient.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            parcel.sender.toLowerCase().includes(searchTerm.toLowerCase());
+            parcel.tracking_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.sender?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.student_id?.toString().includes(searchTerm);
 
         return matchesTab && matchesSearch;
     });
 
-    // Get counts for each tab
+    // Get exact counts for each tab from actual database data
     const getCounts = () => {
         return {
-            'All Parcels': sampleParcels.length,
-            'Pending Payments': sampleParcels.filter((p) => p.status === 'Pending Payments').length,
-            'Ready for Collection': sampleParcels.filter((p) => p.status === 'Ready for Collection').length,
-            Collected: sampleParcels.filter((p) => p.status === 'Collected').length,
-            Unclaimed: sampleParcels.filter((p) => p.status === 'Unclaimed').length,
+            'All Parcels': parcels.length,
+            'Pending Payment': parcels.filter((p) => p.parcel_status === 'Pending Payment').length,
+            'Ready for Collection': parcels.filter((p) => p.parcel_status === 'Ready For Collection').length,
+            'Collected': parcels.filter((p) => p.parcel_status === 'Collected').length,
+            'Unclaimed': parcels.filter((p) => p.parcel_status === 'Unclaimed').length,
         };
     };
 
     const counts = getCounts();
 
+    // Calculate actual stats from parcel data
+    const getActualStats = () => {
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+        
+        const todayParcels = parcels.filter(p => {
+            if (!p.created_at) return false;
+            const createdDate = new Date(p.created_at).toISOString().split('T')[0];
+            return createdDate === todayStr;
+        });
+        
+        const pendingPayments = parcels.filter(p => p.parcel_status === 'Pending Payment' );
+        const readyToCollect = parcels.filter(p => p.parcel_status === 'Ready For Collection' );
+        
+        const todayCollected = parcels.filter(p => {
+            if (p.parcel_status !== 'Collected') return false;
+            if (!p.updated_at) return false;
+            const updatedDate = new Date(p.updated_at).toISOString().split('T')[0];
+            return updatedDate === todayStr;
+        });
+        
+        const approved = parcels.filter(p => p.parcel_status === 'Approved');
+
+        // Calculate revenue based on collected parcels (RM1 per parcel)
+        const collectedParcels = parcels.filter(p => p.parcel_status === 'Collected');
+        const totalRevenue = collectedParcels.length * 1;
+
+        return {
+            newlyArrived: todayParcels.length,
+            pendingPayments: pendingPayments.length,
+            readyForCollection: readyToCollect.length,
+            todayCollection: todayCollected.length,
+            totalRevenue: totalRevenue,
+            paymentVerified: approved.length
+        };
+    };
+
+    const stats = getActualStats();
+
+    // Calculate percentage changes (mock calculation for demo purposes)
+    const getPercentageChange = (current: number, mockPrevious?: number) => {
+        if (current === 0) return 0;
+        const previous = mockPrevious || Math.max(1, current - Math.floor(Math.random() * 3) - 1);
+        const change = ((current - previous) / Math.max(previous, 1)) * 100;
+        return Math.round(Math.max(change, 0)); // Ensure positive for demo
+    };
+
     const getStatusStyles = (status: string) => {
         switch (status) {
-            case 'Pending Payments':
+            case 'Pending Payment':
                 return 'border-orange-200 bg-orange-100 text-orange-700';
-            case 'Ready for Collection':
-                return 'border-emerald-200 bg-emerald-100 text-emerald-700';
+            case 'Ready For Collection':
+                return 'bg-[#EDE9FE] text-[#5B21B6] border-purple-200';
             case 'Collected':
-                return 'border-blue-200 bg-blue-100 text-blue-700';
+                return 'border-emerald-200 bg-emerald-100 text-emerald-700';
             case 'Unclaimed':
-                return 'border-gray-200 bg-gray-100 text-gray-600';
+                return 'bg-[#C5C5CF] text-black border-gray-300';
+            case 'Approved':
+                return 'border-green-200 bg-green-100 text-green-700';
             default:
                 return 'border-gray-200 bg-gray-100 text-gray-600';
         }
@@ -105,7 +168,7 @@ export default function Dashboard() {
                 return isActive
                     ? 'bg-blue-50 text-blue-600 border-blue-200'
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200';
-            case 'Pending Payments':
+            case 'Pending Payment':
                 return isActive
                     ? 'bg-orange-50 text-orange-600 border-orange-200'
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200';
@@ -126,22 +189,32 @@ export default function Dashboard() {
         }
     };
 
+    // Format date for display
+    const formatDate = (dateString: string) => {
+        if (!dateString) return 'N/A';
+        try {
+            return new Date(dateString).toLocaleDateString('en-MY');
+        } catch {
+            return 'N/A';
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
 
             {/* Background color matching the image */}
             <div className="min-h-screen bg-gray-50 p-6">
-                {/* Top Stats Grid */}
+                {/* Top Stats Grid - Using actual database data */}
                 <div className="mb-6 grid grid-cols-3 gap-6">
                     {/* Newly Arrived */}
                     <div className="rounded-xl border border-gray-100 bg-pink-100 p-6 shadow-sm">
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Newly Arrived</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">65</p>
+                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.newlyArrived}</p>
                                 <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+12%</span>
+                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.newlyArrived)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
                                 </div>
                             </div>
@@ -152,10 +225,10 @@ export default function Dashboard() {
                     <div className="rounded-xl border border-gray-100 bg-blue-100 p-6 shadow-sm">
                         <div className="flex items-start justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-500">Pending Payments</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">71</p>
+                                <p className="text-sm font-medium text-gray-500">Pending Payment</p>
+                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.pendingPayments}</p>
                                 <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+8%</span>
+                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.pendingPayments)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
                                 </div>
                             </div>
@@ -167,9 +240,9 @@ export default function Dashboard() {
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Ready for Collection</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">15</p>
+                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.readyForCollection}</p>
                                 <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+5%</span>
+                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.readyForCollection)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
                                 </div>
                             </div>
@@ -177,16 +250,16 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Second Row Stats */}
+                {/* Second Row Stats - Using actual database data */}
                 <div className="mb-6 grid grid-cols-3 gap-6">
                     {/* Total Collection */}
                     <div className="rounded-xl border border-gray-100 bg-blue-50 p-6 shadow-sm">
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Today Collection</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">18</p>
+                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.todayCollection}</p>
                                 <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+23%</span>
+                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.todayCollection)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
                                 </div>
                             </div>
@@ -198,9 +271,9 @@ export default function Dashboard() {
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Total Revenue</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">$25</p>
+                                <p className="mt-2 text-4xl font-bold text-gray-800">RM{stats.totalRevenue}</p>
                                 <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+15%</span>
+                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.totalRevenue)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
                                 </div>
                             </div>
@@ -212,9 +285,9 @@ export default function Dashboard() {
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Payment Verified</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">65</p>
+                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.paymentVerified}</p>
                                 <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+18%</span>
+                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.paymentVerified)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
                                 </div>
                             </div>
@@ -252,7 +325,7 @@ export default function Dashboard() {
 
                             {/* Filter Tabs - Updated to match the image */}
                             <div className="flex gap-2 border-b border-gray-100 p-6">
-                                {(['All Parcels', 'Pending Payments', 'Ready for Collection', 'Collected', 'Unclaimed'] as TabType[]).map((tab) => (
+                                {(['All Parcels', 'Pending Payment', 'Ready for Collection', 'Collected', 'Unclaimed'] as TabType[]).map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
@@ -271,23 +344,28 @@ export default function Dashboard() {
                                     </div>
                                 ) : (
                                     filteredParcels.map((parcel) => (
-                                        <div key={parcel.id} className="rounded-xl border border-gray-200 p-5 transition-shadow hover:shadow-md">
+                                        <div key={parcel.parcel_id} className="rounded-xl border border-gray-200 p-5 transition-shadow hover:shadow-md">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-4">
                                                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
                                                         <span className="text-lg font-semibold text-blue-600">P</span>
                                                     </div>
                                                     <div>
-                                                        <p className="text-lg font-semibold text-gray-900">Package - {parcel.id}</p>
-                                                        <p className="mt-1 text-sm text-gray-500">Recipient: {parcel.recipient}</p>
-                                                        <p className="text-sm text-gray-400">The parcel - {parcel.sender}</p>
+                                                        <p className="text-lg font-semibold text-gray-900">Package - {parcel.tracking_no || 'N/A'}</p>
+                                                        <p className="mt-1 text-sm text-gray-500">Student ID: {parcel.student_id || 'N/A'}</p>
+                                                        <p className="text-sm text-gray-400">
+                                                            From: {parcel.sender || 'N/A'} | Size: {parcel.size || 'N/A'} | Location: {parcel.location || 'N/A'}
+                                                        </p>
+                                                        <p className="text-xs text-gray-400">
+                                                            Days: {parcel.days || 0} | Created: {formatDate(parcel.created_at)}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-4">
                                                     <span
-                                                        className={`rounded-full border px-4 py-2 text-sm font-medium ${getStatusStyles(parcel.status)}`}
+                                                        className={`rounded-full border px-4 py-2 text-sm font-medium ${getStatusStyles(parcel.parcel_status)}`}
                                                     >
-                                                        {parcel.status}
+                                                        {parcel.parcel_status}
                                                     </span>
                                                     <div className="flex items-center gap-2">
                                                         <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
@@ -299,9 +377,11 @@ export default function Dashboard() {
                                                         <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
                                                             <Trash2 className="h-4 w-4" />
                                                         </button>
-                                                        <button className="rounded-lg bg-[var(--mintgreen)] px-5 py-2 text-sm font-medium text-[var(--applegreen)] shadow-sm hover:bg-emerald-100">
-                                                            Mark as Collected
-                                                        </button>
+                                                        {parcel.parcel_status !== 'Collected' && (
+                                                            <button className="rounded-lg bg-[var(--mintgreen)] px-5 py-2 text-sm font-medium text-[var(--applegreen)] shadow-sm hover:bg-emerald-100">
+                                                                Mark as Collected
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
