@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Parcel;
-use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +16,24 @@ class ParcelController extends Controller
      */
     public function index()
     {
-        //
+        $parcels = Parcel::with(['student', 'creator', 'editor'])
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+    // Optional: Calculate stats
+    $stats = [
+        'newlyArrived' => $parcels->where('created_at', '>=', today())->count(),
+        'pendingPayments' => $parcels->where('parcel_status', 'Pending Payment')->count(),
+        'readyForCollection' => $parcels->where('parcel_status', 'Ready To Collect')->count(),
+        'todayCollection' => $parcels->where('parcel_status', 'Collected')->where('updated_at', '>=', today())->count(),
+        'totalRevenue' => 0, // Calculate based on your business logic
+        'paymentVerified' => $parcels->where('parcel_status', 'Approved')->count(),
+    ];
+    
+    return Inertia::render('Dashboard', [
+         'parcels' => $parcels->toArray(),
+        'stats' => $stats
+    ]);
     }
 
     /**

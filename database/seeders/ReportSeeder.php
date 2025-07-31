@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Report;
 use App\Models\Parcel;
-use App\Models\Student;
+use App\Models\User;
 
 class ReportSeeder extends Seeder
 {
@@ -15,7 +15,7 @@ class ReportSeeder extends Seeder
      */
     public function run(): void
     {
-        $students = Student::all();
+         $students = User::where('type', 'student')->get();
         $parcels = Parcel::all();
 
         if ($students->count() === 0 || $parcels->count() === 0) {
@@ -24,7 +24,7 @@ class ReportSeeder extends Seeder
         }
 
         Report::factory()->count(10)->make()->each(function ($report) use ($students, $parcels) {
-            $report->student_id = $students->random()->student_id;
+            $report->student_id = $students->random()->id;
             $report->parcel_id = $parcels->random()->parcel_id;
             $report->save();
         });

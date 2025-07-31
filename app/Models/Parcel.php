@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Parcel extends Model
 {
+     protected $table = 'parcels';
+    protected $primaryKey = 'parcel_id';
      use HasFactory;
     protected $fillable = [
         'tracking_no',
@@ -24,6 +26,9 @@ class Parcel extends Model
     ];
 
     protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'report_at' => 'datetime',
         'schedule' => 'datetime',
     ];
 

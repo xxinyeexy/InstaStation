@@ -27,30 +27,29 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $this->call([
-            StudentSeeder::class,
-            StaffSeeder::class,
+            UserSeeder::class,
             FaqSeeder::class,
             ParcelSeeder::class,
             PaymentSeeder::class,
             ReportSeeder::class,
         ]);
 
-        // Create users for each student to enable matric search
-        $students = Student::all();
-        foreach ($students as $student) {
-            // Check if user already exists for this student
-            $existingUser = User::where('email', $student->email)->first();
-            if (!$existingUser) {
-                User::factory()->create([
-                    'name' => $student->student_name,
-                    'email' => $student->email,
-                    'type' => 'student',
-                    'matric' => $student->matric,
-                    'password' => $student->password,
+        // // Create users for each student to enable matric search
+        // $students = User::all();
+        // foreach ($students as $student) {
+        //     // Check if user already exists for this student
+        //     $existingUser = User::where('email', $student->email)->first();
+        //     if (!$existingUser) {
+        //         User::factory()->create([
+        //             'name' => $student->student_name,
+        //             'email' => $student->email,
+        //             'type' => 'student',
+        //             'matric' => $student->matric,
+        //             'password' => $student->password,
 
-                ]);
-            }
-        }
+        //         ]);
+        //     }
+        // }
 
         // Create test user only if it doesn't exist
         $testUser = User::where('email', 'test@gmail.com')->first();

@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Payment;
 use App\Models\Parcel;
-use App\Models\Staff;
+use App\Models\User;
 
 class PaymentSeeder extends Seeder
 {
@@ -15,9 +15,9 @@ class PaymentSeeder extends Seeder
      */
     public function run(): void
     {
-         
+
         $parcels = Parcel::all();
-        $staff = Staff::all();
+        $staff = User::where('type', 'staff')->get();
 
         if ($parcels->count() === 0 || $staff->count() === 0) {
             $this->command->warn('⚠️ Skipping PaymentSeeder: No parcels or staff available.');
@@ -26,9 +26,8 @@ class PaymentSeeder extends Seeder
 
         Payment::factory()->count(10)->make()->each(function ($payment) use ($parcels, $staff) {
             $payment->parcel_id = $parcels->random()->parcel_id;
-            $payment->verified_by = $staff->random()->staff_id;
+            $payment->verified_by = $staff->random()->id;
             $payment->save();
         });
-    
     }
 }

@@ -19,7 +19,7 @@ class FaqFactory extends Factory
     public function definition(): array
     {
         return [
-            'faq_question' => Str::limit($this->faker->sentence(8), 100),
+            'faq_question' => Str::limit($this->faker->sentence(8), 100, ''),
             'faq_answer' => $this->faker->paragraph(1),
             'category' => $this->faker->randomElement(['General', 'Delivery', 'Payment']),
             'faq_status' => $this->faker->randomElement(['Active', 'Inactive']),

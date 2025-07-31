@@ -24,14 +24,21 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->firstName() . ' ' . fake()->lastName(),
+            'name'=> $this->faker->firstName() . ' ' . $this->faker->lastName(),
             'email' => strtolower(fake()->firstName() . '.' . fake()->lastName()) . '@gmail.com',
             'email_verified_at' => now(),
+            'type' => 'student',
+            'matric' => fake()->randomElement(['TG', 'TP', 'CB', 'CD', 'TL']) . rand(20, 25) . str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT),
+            'room_no' => $this->faker->randomElement(range('A', 'I')) .
+                $this->faker->numberBetween(1, 3) . '-' .
+                $this->faker->numberBetween(1, 8) .
+                str_pad($this->faker->numberBetween(1, 4), 2, '0', STR_PAD_LEFT),
+            'phone_no' => $this->faker->numerify('01#########'),
+            'profile_pic' => null,
+            'status' => $this->faker->randomElement(['Active', 'Inactive']),
+            'department' => null,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'type' => 'student',
-            'matric' => fake()->randomElement(['TG', 'TP', 'CB', 'CD', 'TL']) . rand(20, 25) .  str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT),
-            'department' => null,
         ];
     }
 
@@ -44,17 +51,31 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
-       public function staff(): static
+
+    /**
+     * Define a staff state for the factory.
+     */
+    public function staff(): static
     {
         return $this->state(fn(array $attributes) => [
-            'name' => fake()->firstName() . ' ' . fake()->lastName(),
+            'name' => $this->faker->firstName() . ' ' . $this->faker->lastName(),
             'email' => strtolower(fake()->firstName() . '.' . fake()->lastName()) . '@gmail.com',
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
             'type' => 'staff',
             'matric' => null,
-            'department' => fake()->randomElement(['Information Technology', 'Human Resources', 'Finance', 'Operations - General','Operations - Admin']),
+            'room_no' => null,
+            'phone_no' => $this->faker->numerify('01#########'),
+            'profile_pic' => null,
+            'status' => $this->faker->randomElement(['Active', 'Inactive']),
+            'department' => fake()->randomElement([
+                'Information Technology',
+                'Human Resources',
+                'Finance',
+                'Operations - General',
+                'Operations - Admin'
+            ]),
+            'password' => static::$password ??= Hash::make('password'),
+            'remember_token' => Str::random(10),
         ]);
     }
 }
