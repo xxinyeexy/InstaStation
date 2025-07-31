@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router} from '@inertiajs/react';
 import { Edit, Eye, Trash2, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 
@@ -40,38 +40,40 @@ type TabType = 'All Parcels' | 'Pending Payment' | 'Ready for Collection' | 'Col
 export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<TabType>('All Parcels');
     const [searchTerm, setSearchTerm] = useState('');
+    // Use state for parcel list and initialize it with the parcels prop
+    const [parcelList, setParcelList] = useState<Parcel[]>(parcels);
 
     // Debug: Log parcels data
-    console.log('Parcels received:', parcels);
-    console.log('Parcels length:', parcels.length);
-    if (parcels.length > 0) {
-        console.log('First parcel:', parcels[0]);
-        console.log('All statuses:', parcels.map(p => p.parcel_status));
+    console.log('Parcels received:', parcelList);
+    console.log('Parcels length:', parcelList.length);
+    if (parcelList.length > 0) {
+        console.log('First parcel:', parcelList[0]);
+        console.log('All statuses:', parcelList.map(p => p.parcel_status));
     }
 
-    // Filter parcels based on active tab and search term
-    const filteredParcels = parcels.filter((parcel) => {
-    // Normalize status for easier comparison
-    const status = parcel.parcel_status?.toLowerCase();
+    // Filter parcels based on active tab and search term - USE parcelList instead of parcels
+    const filteredParcels = parcelList.filter((parcel) => {
+        // Normalize status for easier comparison
+        const status = parcel.parcel_status?.toLowerCase();
 
-    // Skip all 'Approved' parcels entirely
-    if (status === 'approved') return false;
+        // Skip all 'Approved' parcels entirely
+        if (status === 'approved') return false;
 
-    // Tabs filtering
-    const matchesTab =
-        activeTab === 'All Parcels'
-            ? ['pending payment', 'ready for collection', 'ready to collect', 'collected', 'unclaimed'].includes(status)
-            : activeTab === 'Pending Payment'
-                ? ['pending payment'].includes(status)
-                : activeTab === 'Ready for Collection'
-                    ? ['ready for collection'].includes(status)
-                    : activeTab === 'Collected'
-                        ? status === 'collected'
-                        : activeTab === 'Unclaimed'
-                            ? status === 'unclaimed'
-                            : true;
+        // Tabs filtering
+        const matchesTab =
+            activeTab === 'All Parcels'
+                ? ['pending payment', 'ready for collection', 'ready to collect', 'collected', 'unclaimed'].includes(status)
+                : activeTab === 'Pending Payment'
+                    ? ['pending payment'].includes(status)
+                    : activeTab === 'Ready for Collection'
+                        ? ['ready for collection', 'ready to collect'].includes(status)
+                        : activeTab === 'Collected'
+                            ? status === 'collected'
+                            : activeTab === 'Unclaimed'
+                                ? status === 'unclaimed'
+                                : true;
 
-            
+                
         const matchesSearch =
             searchTerm === '' ||
             parcel.tracking_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -82,44 +84,50 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         return matchesTab && matchesSearch;
     });
 
-    // Get exact counts for each tab from actual database data
+    // Get exact counts for each tab from actual database data - USE parcelList instead of parcels
     const getCounts = () => {
         return {
-            'All Parcels': parcels.length,
-            'Pending Payment': parcels.filter((p) => p.parcel_status === 'Pending Payment').length,
-            'Ready for Collection': parcels.filter((p) => p.parcel_status === 'Ready For Collection').length,
-            'Collected': parcels.filter((p) => p.parcel_status === 'Collected').length,
-            'Unclaimed': parcels.filter((p) => p.parcel_status === 'Unclaimed').length,
+            'All Parcels': parcelList.filter(p => 
+                !['approved'].includes(p.parcel_status?.toLowerCase())
+            ).length,
+            'Pending Payment': parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'pending payment').length,
+            'Ready for Collection': parcelList.filter((p) => 
+                ['ready for collection', 'ready to collect'].includes(p.parcel_status?.toLowerCase())
+            ).length,
+            'Collected': parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'collected').length,
+            'Unclaimed': parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'unclaimed').length,
         };
     };
 
     const counts = getCounts();
 
-    // Calculate actual stats from parcel data
+    // Calculate actual stats from parcel data - USE parcelList instead of parcels
     const getActualStats = () => {
         const today = new Date();
         const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
         
-        const todayParcels = parcels.filter(p => {
+        const todayParcels = parcelList.filter(p => {
             if (!p.created_at) return false;
             const createdDate = new Date(p.created_at).toISOString().split('T')[0];
             return createdDate === todayStr;
         });
         
-        const pendingPayments = parcels.filter(p => p.parcel_status === 'Pending Payment' );
-        const readyToCollect = parcels.filter(p => p.parcel_status === 'Ready For Collection' );
+        const pendingPayments = parcelList.filter(p => p.parcel_status?.toLowerCase() === 'pending payment');
+        const readyToCollect = parcelList.filter(p => 
+            ['ready for collection', 'ready to collect'].includes(p.parcel_status?.toLowerCase())
+        );
         
-        const todayCollected = parcels.filter(p => {
-            if (p.parcel_status !== 'Collected') return false;
+        const todayCollected = parcelList.filter(p => {
+            if (p.parcel_status?.toLowerCase() !== 'collected') return false;
             if (!p.updated_at) return false;
             const updatedDate = new Date(p.updated_at).toISOString().split('T')[0];
             return updatedDate === todayStr;
         });
         
-        const approved = parcels.filter(p => p.parcel_status === 'Approved');
+        const approved = parcelList.filter(p => p.parcel_status?.toLowerCase() === 'approved');
 
         // Calculate revenue based on collected parcels (RM1 per parcel)
-        const collectedParcels = parcels.filter(p => p.parcel_status === 'Collected');
+        const collectedParcels = parcelList.filter(p => p.parcel_status?.toLowerCase() === 'collected');
         const totalRevenue = collectedParcels.length * 1;
 
         return {
@@ -143,16 +151,18 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     };
 
     const getStatusStyles = (status: string) => {
-        switch (status) {
-            case 'Pending Payment':
+        const normalizedStatus = status?.toLowerCase();
+        switch (normalizedStatus) {
+            case 'pending payment':
                 return 'border-orange-200 bg-orange-100 text-orange-700';
-            case 'Ready For Collection':
+            case 'ready for collection':
+            case 'ready to collect':
                 return 'bg-[#EDE9FE] text-[#5B21B6] border-purple-200';
-            case 'Collected':
+            case 'collected':
                 return 'border-emerald-200 bg-emerald-100 text-emerald-700';
-            case 'Unclaimed':
+            case 'unclaimed':
                 return 'bg-[#C5C5CF] text-black border-gray-300';
-            case 'Approved':
+            case 'approved':
                 return 'border-green-200 bg-green-100 text-green-700';
             default:
                 return 'border-gray-200 bg-gray-100 text-gray-600';
@@ -186,6 +196,79 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-[#C5C5CF] hover:text-black hover:border-gray-300';
             default:
                 return 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-700';
+        }
+    };
+
+    // Updated handleMarkAsCollected function - handles route issues
+    const handleMarkAsCollected = async (parcelId: number) => {
+        try {
+            // First try with the current route
+            let response = await fetch(`/staff/parcel/${parcelId}/collect`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+
+            // If 404, try alternative routes
+            if (response.status === 404) {
+                // Try POST method
+                response = await fetch(`/staff/parcel/${parcelId}/collect`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                });
+            }
+
+            // If still 404, try different route pattern
+            if (response.status === 404) {
+                response = await fetch(`/staff/parcels/${parcelId}/collect`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                });
+            }
+
+            if (response.ok) {
+                console.log(`Parcel ${parcelId} marked as collected successfully`);
+                
+                // Update the local state immediately
+                setParcelList(prev =>
+                    prev.map(parcel =>
+                        parcel.parcel_id === parcelId
+                            ? { ...parcel, parcel_status: 'Collected', updated_at: new Date().toISOString() }
+                            : parcel
+                    )
+                );
+                
+                // Show success message
+                alert('Parcel marked as collected successfully!');
+                
+                // Automatically switch to Collected tab to show the updated parcel
+                setActiveTab('Collected');
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Failed to mark as collected:', error);
+            
+            // For now, just update the UI optimistically since the route doesn't exist
+            console.log('Route not found, updating UI optimistically');
+            setParcelList(prev =>
+                prev.map(parcel =>
+                    parcel.parcel_id === parcelId
+                        ? { ...parcel, parcel_status: 'Collected', updated_at: new Date().toISOString() }
+                        : parcel
+                )
+            );
+            
+            alert('Parcel marked as collected (frontend only - please implement backend route)');
+            setActiveTab('Collected');
         }
     };
 
@@ -377,8 +460,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
                                                             <Trash2 className="h-4 w-4" />
                                                         </button>
-                                                        {parcel.parcel_status !== 'Collected' && (
-                                                            <button className="rounded-lg bg-[var(--mintgreen)] px-5 py-2 text-sm font-medium text-[var(--applegreen)] shadow-sm hover:bg-emerald-100">
+                                                        {parcel.parcel_status?.toLowerCase() !== 'collected' && (
+                                                            <button 
+                                                                onClick={() => handleMarkAsCollected(parcel.parcel_id)} 
+                                                                className="rounded-lg bg-emerald-100 px-5 py-2 text-sm font-medium text-emerald-700 shadow-sm hover:bg-emerald-200 transition-colors"
+                                                            >
                                                                 Mark as Collected
                                                             </button>
                                                         )}

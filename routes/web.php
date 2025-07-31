@@ -27,12 +27,14 @@ Route::middleware('auth')->group(function () {
     // Staff routes
     Route::get('/staff/parcel', [ParcelController::class, 'index'])
         ->name('staff.parcel');
+Route::patch('/staff/parcel/{id}/collect', [ParcelController::class, 'markAsCollected'])->name('staff.parcel.collect');
+
     
     // Parcel routes
     Route::resource('parcels', ParcelController::class);
     Route::get('/staff/add-parcel', [ParcelController::class, 'create'])
         ->name('parcel.create');
-    
+
     // API routes for AJAX calls
     Route::get('/api/students/search', [ParcelController::class, 'searchStudents'])
         ->name('students.search');

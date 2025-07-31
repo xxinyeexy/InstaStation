@@ -144,7 +144,31 @@ class ParcelController extends Controller
             ], 500);
         }
     }
-
+// In your controller
+ public function markAsCollected($id)
+    {
+       
+    try {
+        $parcel = \App\Models\Parcel::findOrFail($id);
+        
+        $parcel->update([
+            'parcel_status' => 'Collected',
+            'updated_at' => now()
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Parcel marked as collected successfully',
+            'parcel' => $parcel
+        ]);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to mark parcel as collected'
+        ], 500);
+    }
+    }
     /**
      * Display the specified resource.
      */
