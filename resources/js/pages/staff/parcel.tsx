@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router} from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Edit, Eye, Trash2, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 
@@ -10,6 +10,8 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/staff/parcel',
     },
 ];
+
+
 
 // Define the Parcel interface based on your database structure
 interface Parcel {
@@ -35,7 +37,7 @@ interface DashboardProps {
     parcels?: Parcel[];
 }
 
-type TabType = 'All Parcels' | 'Pending Payment' | 'Ready for Collection' | 'Collected' | 'Unclaimed';
+type TabType = 'All Parcels' | 'Pending Payment' | 'Ready For Collection' | 'Collected' | 'Unclaimed';
 
 export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<TabType>('All Parcels');
@@ -48,7 +50,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     console.log('Parcels length:', parcelList.length);
     if (parcelList.length > 0) {
         console.log('First parcel:', parcelList[0]);
-        console.log('All statuses:', parcelList.map(p => p.parcel_status));
+        console.log(
+            'All statuses:',
+            parcelList.map((p) => p.parcel_status),
+        );
     }
 
     // Filter parcels based on active tab and search term - USE parcelList instead of parcels
@@ -62,18 +67,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         // Tabs filtering
         const matchesTab =
             activeTab === 'All Parcels'
-                ? ['pending payment', 'ready for collection', 'ready to collect', 'collected', 'unclaimed'].includes(status)
+                ? ['pending payment', 'ready for collection', 'collected', 'unclaimed'].includes(status)
                 : activeTab === 'Pending Payment'
-                    ? ['pending payment'].includes(status)
-                    : activeTab === 'Ready for Collection'
-                        ? ['ready for collection', 'ready to collect'].includes(status)
-                        : activeTab === 'Collected'
-                            ? status === 'collected'
-                            : activeTab === 'Unclaimed'
-                                ? status === 'unclaimed'
-                                : true;
+                  ? ['pending payment'].includes(status)
+                  : activeTab === 'Ready For Collection'
+                    ? ['ready for collection', 'ready to collect'].includes(status)
+                    : activeTab === 'Collected'
+                      ? status === 'collected'
+                      : activeTab === 'Unclaimed'
+                        ? status === 'unclaimed'
+                        : true;
 
-                
         const matchesSearch =
             searchTerm === '' ||
             parcel.tracking_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,15 +91,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Get exact counts for each tab from actual database data - USE parcelList instead of parcels
     const getCounts = () => {
         return {
-            'All Parcels': parcelList.filter(p => 
-                !['approved'].includes(p.parcel_status?.toLowerCase())
-            ).length,
+            'All Parcels': parcelList.filter((p) => !['approved'].includes(p.parcel_status?.toLowerCase())).length,
             'Pending Payment': parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'pending payment').length,
-            'Ready for Collection': parcelList.filter((p) => 
-                ['ready for collection', 'ready to collect'].includes(p.parcel_status?.toLowerCase())
-            ).length,
-            'Collected': parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'collected').length,
-            'Unclaimed': parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'unclaimed').length,
+            'Ready For Collection': parcelList.filter((p) => ['ready for collection'].includes(p.parcel_status?.toLowerCase()))
+                .length,
+            Collected: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'collected').length,
+            Unclaimed: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'unclaimed').length,
         };
     };
 
@@ -105,29 +106,27 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const getActualStats = () => {
         const today = new Date();
         const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
-        
-        const todayParcels = parcelList.filter(p => {
+
+        const todayParcels = parcelList.filter((p) => {
             if (!p.created_at) return false;
             const createdDate = new Date(p.created_at).toISOString().split('T')[0];
             return createdDate === todayStr;
         });
-        
-        const pendingPayments = parcelList.filter(p => p.parcel_status?.toLowerCase() === 'pending payment');
-        const readyToCollect = parcelList.filter(p => 
-            ['ready for collection', 'ready to collect'].includes(p.parcel_status?.toLowerCase())
-        );
-        
-        const todayCollected = parcelList.filter(p => {
+
+        const pendingPayments = parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'pending payment');
+        const readyToCollect = parcelList.filter((p) => ['ready for collection'].includes(p.parcel_status?.toLowerCase()));
+
+        const todayCollected = parcelList.filter((p) => {
             if (p.parcel_status?.toLowerCase() !== 'collected') return false;
             if (!p.updated_at) return false;
             const updatedDate = new Date(p.updated_at).toISOString().split('T')[0];
             return updatedDate === todayStr;
         });
-        
-        const approved = parcelList.filter(p => p.parcel_status?.toLowerCase() === 'approved');
+
+        const approved = parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'approved');
 
         // Calculate revenue based on collected parcels (RM1 per parcel)
-        const collectedParcels = parcelList.filter(p => p.parcel_status?.toLowerCase() === 'collected');
+        const collectedParcels = parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'collected');
         const totalRevenue = collectedParcels.length * 1;
 
         return {
@@ -136,7 +135,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             readyForCollection: readyToCollect.length,
             todayCollection: todayCollected.length,
             totalRevenue: totalRevenue,
-            paymentVerified: approved.length
+            paymentVerified: approved.length,
         };
     };
 
@@ -154,9 +153,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         const normalizedStatus = status?.toLowerCase();
         switch (normalizedStatus) {
             case 'pending payment':
-                return 'border-orange-200 bg-orange-100 text-orange-700';
+                return 'border-orange-200 bg-orange-100 text-orange-600';
             case 'ready for collection':
-            case 'ready to collect':
                 return 'bg-[#EDE9FE] text-[#5B21B6] border-purple-200';
             case 'collected':
                 return 'border-emerald-200 bg-emerald-100 text-emerald-700';
@@ -182,7 +180,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 return isActive
                     ? 'bg-orange-50 text-orange-600 border-orange-200'
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200';
-            case 'Ready for Collection':
+            case 'Ready For Collection':
                 return isActive
                     ? 'bg-[#EDE9FE] text-[#5B21B6] border-purple-200'
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-[#EDE9FE] hover:text-[#5B21B6] hover:border-purple-200';
@@ -196,6 +194,32 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     : 'bg-white text-gray-600 border-gray-200 hover:bg-[#C5C5CF] hover:text-black hover:border-gray-300';
             default:
                 return 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-700';
+        }
+    };
+
+    // NEW: Function to get badge styles for each tab
+    const getBadgeStyles = (tab: TabType) => {
+        const isActive = activeTab === tab;
+
+        if (isActive) {
+            // Active badge styles (semi-transparent white)
+            return 'bg-white/50';
+        } else {
+            // Inactive badge styles should match the active tab colors
+            switch (tab) {
+                case 'All Parcels':
+                    return 'bg-blue-100 text-blue-600';
+                case 'Pending Payment':
+                    return 'bg-orange-100 text-orange-600';
+                case 'Ready For Collection':
+                    return 'bg-purple-100 text-purple-600';
+                case 'Collected':
+                    return 'bg-green-100 text-green-600';
+                case 'Unclaimed':
+                    return 'bg-gray-100 text-grey-600';
+                default:
+                    return 'bg-gray-100 text-white';
+            }
         }
     };
 
@@ -236,19 +260,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
             if (response.ok) {
                 console.log(`Parcel ${parcelId} marked as collected successfully`);
-                
+
                 // Update the local state immediately
-                setParcelList(prev =>
-                    prev.map(parcel =>
-                        parcel.parcel_id === parcelId
-                            ? { ...parcel, parcel_status: 'Collected', updated_at: new Date().toISOString() }
-                            : parcel
-                    )
+                setParcelList((prev) =>
+                    prev.map((parcel) =>
+                        parcel.parcel_id === parcelId ? { ...parcel, parcel_status: 'Collected', updated_at: new Date().toISOString() } : parcel,
+                    ),
                 );
-                
+
                 // Show success message
                 alert('Parcel marked as collected successfully!');
-                
+
                 // Automatically switch to Collected tab to show the updated parcel
                 setActiveTab('Collected');
             } else {
@@ -256,18 +278,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             }
         } catch (error) {
             console.error('Failed to mark as collected:', error);
-            
+
             // For now, just update the UI optimistically since the route doesn't exist
             console.log('Route not found, updating UI optimistically');
-            setParcelList(prev =>
-                prev.map(parcel =>
-                    parcel.parcel_id === parcelId
-                        ? { ...parcel, parcel_status: 'Collected', updated_at: new Date().toISOString() }
-                        : parcel
-                )
+            setParcelList((prev) =>
+                prev.map((parcel) =>
+                    parcel.parcel_id === parcelId ? { ...parcel, parcel_status: 'Collected', updated_at: new Date().toISOString() } : parcel,
+                ),
             );
-            
-            alert('Parcel marked as collected (frontend only - please implement backend route)');
+
             setActiveTab('Collected');
         }
     };
@@ -281,6 +300,33 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             return 'N/A';
         }
     };
+
+    const handleDeleteParcel = async (parcelId: number) => {
+    const confirmDelete = confirm('Are you sure you want to delete this parcel? This action cannot be undone.');
+    if (!confirmDelete) return;
+
+    try {
+        const response = await fetch(`/staff/parcel/${parcelId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Remove parcel from local state
+        setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== parcelId));
+
+        alert('Parcel deleted successfully!');
+    } catch (error) {
+        console.error('Failed to delete parcel:', error);
+        alert('Failed to delete parcel. Please try again.');
+    }
+};
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -322,7 +368,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     <div className="rounded-xl border border-gray-100 bg-purple-100 p-6 shadow-sm">
                         <div className="flex items-start justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-500">Ready for Collection</p>
+                                <p className="text-sm font-medium text-gray-500">Ready For Collection</p>
                                 <p className="mt-2 text-4xl font-bold text-gray-800">{stats.readyForCollection}</p>
                                 <div className="mt-3 flex items-center">
                                     <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.readyForCollection)}%</span>
@@ -406,15 +452,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 </div>
                             </div>
 
-                            {/* Filter Tabs - Updated to match the image */}
+                            {/* Filter Tabs - Updated with colored badges */}
                             <div className="flex gap-2 border-b border-gray-100 p-6">
-                                {(['All Parcels', 'Pending Payment', 'Ready for Collection', 'Collected', 'Unclaimed'] as TabType[]).map((tab) => (
+                                {(['All Parcels', 'Pending Payment', 'Ready For Collection', 'Collected', 'Unclaimed'] as TabType[]).map((tab) => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
                                         className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${getTabStyles(tab)}`}
                                     >
-                                        {tab} <span className="ml-1 rounded-full bg-white/50 px-2 py-0.5 text-xs">{counts[tab]}</span>
+                                        {tab} <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${getBadgeStyles(tab)}`}>{counts[tab]}</span>
                                     </button>
                                 ))}
                             </div>
@@ -427,7 +473,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     </div>
                                 ) : (
                                     filteredParcels.map((parcel) => (
-                                        <div key={parcel.parcel_id} className="rounded-xl border border-gray-200 p-5 transition-shadow hover:shadow-md">
+                                        <div
+                                            key={parcel.parcel_id}
+                                            className="rounded-xl border border-gray-200 p-5 transition-shadow hover:shadow-md"
+                                        >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-4">
                                                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
@@ -437,7 +486,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <p className="text-lg font-semibold text-gray-900">Package - {parcel.tracking_no || 'N/A'}</p>
                                                         <p className="mt-1 text-sm text-gray-500">Student ID: {parcel.student_id || 'N/A'}</p>
                                                         <p className="text-sm text-gray-400">
-                                                            From: {parcel.sender || 'N/A'} | Size: {parcel.size || 'N/A'} | Location: {parcel.location || 'N/A'}
+                                                            From: {parcel.sender || 'N/A'} | Size: {parcel.size || 'N/A'} | Location:{' '}
+                                                            {parcel.location || 'N/A'}
                                                         </p>
                                                         <p className="text-xs text-gray-400">
                                                             Days: {parcel.days || 0} | Created: {formatDate(parcel.created_at)}
@@ -457,13 +507,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
                                                             <Edit className="h-4 w-4" />
                                                         </button>
-                                                        <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
+                                                        <button  onClick={() => handleDeleteParcel(parcel.parcel_id)} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
                                                             <Trash2 className="h-4 w-4" />
                                                         </button>
                                                         {parcel.parcel_status?.toLowerCase() !== 'collected' && (
-                                                            <button 
-                                                                onClick={() => handleMarkAsCollected(parcel.parcel_id)} 
-                                                                className="rounded-lg bg-emerald-100 px-5 py-2 text-sm font-medium text-emerald-700 shadow-sm hover:bg-emerald-200 transition-colors"
+                                                            <button
+                                                                onClick={() => handleMarkAsCollected(parcel.parcel_id)}
+                                                                className="rounded-lg bg-emerald-100 px-5 py-2 text-sm font-medium text-emerald-700 shadow-sm transition-colors hover:bg-emerald-200"
                                                             >
                                                                 Mark as Collected
                                                             </button>

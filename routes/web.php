@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/staff/parcel', [ParcelController::class, 'index'])
         ->name('staff.parcel');
 Route::patch('/staff/parcel/{id}/collect', [ParcelController::class, 'markAsCollected'])->name('staff.parcel.collect');
+Route::delete('/staff/parcel/{id}', [ParcelController::class, 'destroy']);
 
     
     // Parcel routes
