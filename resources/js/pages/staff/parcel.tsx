@@ -2,7 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Edit, Eye, Trash2, TrendingUp } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -10,8 +10,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/staff/parcel',
     },
 ];
-
-
 
 // Define the Parcel interface based on your database structure
 interface Parcel {
@@ -44,6 +42,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [searchTerm, setSearchTerm] = useState('');
     // Use state for parcel list and initialize it with the parcels prop
     const [parcelList, setParcelList] = useState<Parcel[]>(parcels);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedParcelId, setSelectedParcelId] = useState<number | null>(null);
+    const [selectedTrackingNo, setSelectedTrackingNo] = useState<string | null>(null);
 
     // Debug: Log parcels data
     console.log('Parcels received:', parcelList);
@@ -89,7 +90,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     });
 
     // Get exact counts for each tab from actual database data - USE parcelList instead of parcels
-    const getCounts = () => {
+    const getCounts = useCallback(() => {
         return {
             'All Parcels': parcelList.filter((p) => !['approved'].includes(p.parcel_status?.toLowerCase())).length,
             'Pending Payment': parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'pending payment').length,
@@ -98,12 +99,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             Collected: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'collected').length,
             Unclaimed: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'unclaimed').length,
         };
-    };
+    }, [parcelList]);
 
     const counts = getCounts();
 
     // Calculate actual stats from parcel data - USE parcelList instead of parcels
-    const getActualStats = () => {
+    const getActualStats = useCallback(() => {
         const today = new Date();
         const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
 
@@ -137,7 +138,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             totalRevenue: totalRevenue,
             paymentVerified: approved.length,
         };
-    };
+    }, [parcelList]);
 
     const stats = getActualStats();
 
@@ -197,7 +198,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
-    // NEW: Function to get badge styles for each tab
+    // Function to get badge styles for each tab
     const getBadgeStyles = (tab: TabType) => {
         const isActive = activeTab === tab;
 
@@ -216,7 +217,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 case 'Collected':
                     return 'bg-green-100 text-green-600';
                 case 'Unclaimed':
-                    return 'bg-gray-100 text-grey-600';
+                    return 'bg-gray-100 text-gray-600';
                 default:
                     return 'bg-gray-100 text-white';
             }
@@ -301,36 +302,81 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
-    const handleDeleteParcel = async (parcelId: number) => {
-    const confirmDelete = confirm('Are you sure you want to delete this parcel? This action cannot be undone.');
-    if (!confirmDelete) return;
+    // Handle delete parcel with modal
+    const handleDeleteClick = (parcelId: number, trackingNo: string) => {
+        setSelectedParcelId(parcelId);
+        setSelectedTrackingNo(trackingNo);
+        setShowDeleteModal(true);
+    };
 
-    try {
-        const response = await fetch(`/staff/parcel/${parcelId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            },
-        });
+    const handleDeleteConfirm = async () => {
+        if (!selectedParcelId) return;
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+            const response = await fetch(`/staff/parcel/${selectedParcelId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Remove parcel from local state
+            setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== selectedParcelId));
+            setShowDeleteModal(false);
+            setSelectedParcelId(null);
+            setSelectedTrackingNo(null);
+            alert('Parcel deleted successfully!');
+        } catch (error) {
+            console.error('Failed to delete parcel:', error);
+            alert('Failed to delete parcel. Please try again.');
         }
+    };
 
-        // Remove parcel from local state
-        setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== parcelId));
-
-        alert('Parcel deleted successfully!');
-    } catch (error) {
-        console.error('Failed to delete parcel:', error);
-        alert('Failed to delete parcel. Please try again.');
-    }
-};
+    const handleDeleteCancel = () => {
+        setShowDeleteModal(false);
+        setSelectedParcelId(null);
+        setSelectedTrackingNo(null);
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
+            
+            {/* Delete Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="rounded-xl bg-white p-6 shadow-xl w-full max-w-md text-center">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-2">Delete Parcel</h2>
+                        <p className="text-sm text-gray-600">
+                            Are you sure you want to delete parcel{' '}
+                            <span className="font-medium text-blue-600">{selectedTrackingNo}</span>?
+                        </p>
+                        <p className="mt-1 text-xs text-gray-500">
+                            This action cannot be undone and will permanently remove all parcel data and history.
+                        </p>
+
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                onClick={handleDeleteCancel}
+                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirm}
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                            >
+                                Delete Parcel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Background color matching the image */}
             <div className="min-h-screen bg-gray-50 p-6">
@@ -507,7 +553,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
                                                             <Edit className="h-4 w-4" />
                                                         </button>
-                                                        <button  onClick={() => handleDeleteParcel(parcel.parcel_id)} className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600">
+                                                        <button 
+                                                            onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
+                                                            className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                                                        >
                                                             <Trash2 className="h-4 w-4" />
                                                         </button>
                                                         {parcel.parcel_status?.toLowerCase() !== 'collected' && (
