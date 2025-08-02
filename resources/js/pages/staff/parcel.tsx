@@ -1,8 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Edit, Eye, Trash2, TrendingUp } from 'lucide-react';
-import { useState, useCallback } from 'react';
+import { Edit, Eye, Trash2, TrendingUp, CheckCircle, XCircle, X } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,6 +37,14 @@ interface DashboardProps {
 
 type TabType = 'All Parcels' | 'Pending Payment' | 'Ready For Collection' | 'Collected' | 'Unclaimed';
 
+// Notification interface
+interface Notification {
+    id: string;
+    type: 'success' | 'error';
+    title: string;
+    message: string;
+}
+
 export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [activeTab, setActiveTab] = useState<TabType>('All Parcels');
     const [searchTerm, setSearchTerm] = useState('');
@@ -45,6 +53,27 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedParcelId, setSelectedParcelId] = useState<number | null>(null);
     const [selectedTrackingNo, setSelectedTrackingNo] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+    
+    // Notification state
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+
+    // Add notification function
+    const addNotification = (type: 'success' | 'error', title: string, message: string) => {
+        const id = Date.now().toString();
+        const newNotification: Notification = { id, type, title, message };
+        setNotifications(prev => [...prev, newNotification]);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            removeNotification(id);
+        }, 5000);
+    };
+
+    // Remove notification function
+    const removeNotification = (id: string) => {
+        setNotifications(prev => prev.filter(notification => notification.id !== id));
+    };
 
     // Debug: Log parcels data
     console.log('Parcels received:', parcelList);
@@ -269,8 +298,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     ),
                 );
 
-                // Show success message
-                alert('Parcel marked as collected successfully!');
+                // Show success notification
+                addNotification('success', 'Success!', 'Parcel marked as collected successfully!');
 
                 // Automatically switch to Collected tab to show the updated parcel
                 setActiveTab('Collected');
@@ -312,6 +341,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const handleDeleteConfirm = async () => {
         if (!selectedParcelId) return;
 
+        setIsDeleting(true);
+
         try {
             const response = await fetch(`/staff/parcel/${selectedParcelId}`, {
                 method: 'DELETE',
@@ -330,10 +361,16 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             setShowDeleteModal(false);
             setSelectedParcelId(null);
             setSelectedTrackingNo(null);
-            alert('Parcel deleted successfully!');
+            
+            // Show success notification
+            addNotification('success', 'Parcel Deleted', `Parcel ${selectedTrackingNo} has been successfully deleted.`);
         } catch (error) {
             console.error('Failed to delete parcel:', error);
-            alert('Failed to delete parcel. Please try again.');
+            
+            // Show error notification
+            addNotification('error', 'Delete Failed', `Failed to delete parcel ${selectedTrackingNo}. Please try again.`);
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -347,31 +384,81 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             
+            {/* Notification Container */}
+            <div className="fixed bottom-4 right-4 z-50 space-y-3">
+                {notifications.map((notification) => (
+                    <div
+                        key={notification.id}
+                        className={`
+                            min-w-80 max-w-96 rounded-lg border p-4 shadow-lg backdrop-blur-sm
+                            transition-all duration-300 ease-in-out
+                            ${notification.type === 'success' 
+                                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800' 
+                                : 'border-red-200 bg-red-50/95 text-red-800'
+                            }
+                        `}
+                    >
+                        <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 mt-0.5">
+                                {notification.type === 'success' ? (
+                                    <CheckCircle className="h-5 w-5 text-emerald-600" />
+                                ) : (
+                                    <XCircle className="h-5 w-5 text-red-600" />
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-sm font-semibold">{notification.title}</h4>
+                                <p className="mt-1 text-sm opacity-90">{notification.message}</p>
+                            </div>
+                            <button
+                                onClick={() => removeNotification(notification.id)}
+                                className="flex-shrink-0 rounded-full p-1 hover:bg-black/10 transition-colors"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            
             {/* Delete Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                     <div className="rounded-xl bg-white p-6 shadow-xl w-full max-w-md text-center">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-2">Delete Parcel</h2>
-                        <p className="text-sm text-gray-600">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                            <Trash2 className="h-6 w-6 text-red-600" />
+                        </div>
+                        
+                        <h2 className="text-lg font-semibold text-gray-900 mb-2">Delete Parcel</h2>
+                        <p className="text-sm text-gray-600 mb-1">
                             Are you sure you want to delete parcel{' '}
-                            <span className="font-medium text-blue-600">{selectedTrackingNo}</span>?
+                            <span className="font-medium text-red-600">{selectedTrackingNo}</span>?
                         </p>
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="text-left text-xs text-gray-500 mb-6 px-7 ">
                             This action cannot be undone and will permanently remove all parcel data and history.
                         </p>
 
-                        <div className="mt-6 flex justify-end gap-3">
+                        <div className="flex justify-center gap-3">
                             <button
                                 onClick={handleDeleteCancel}
-                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                                disabled={isDeleting}
+                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleDeleteConfirm}
-                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                                disabled={isDeleting}
+                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
-                                Delete Parcel
+                                {isDeleting ? (
+                                    <>
+                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    'Delete Parcel'
+                                )}
                             </button>
                         </div>
                     </div>
@@ -529,7 +616,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <span className="text-lg font-semibold text-blue-600">P</span>
                                                     </div>
                                                     <div>
-                                                        <p className="text-lg font-semibold text-gray-900">Package - {parcel.tracking_no || 'N/A'}</p>
+                                                         <p className="text-lg font-semibold text-gray-900">Package - {parcel.tracking_no || 'N/A'}</p>
                                                         <p className="mt-1 text-sm text-gray-500">Student ID: {parcel.student_id || 'N/A'}</p>
                                                         <p className="text-sm text-gray-400">
                                                             From: {parcel.sender || 'N/A'} | Size: {parcel.size || 'N/A'} | Location:{' '}
