@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { BellRing, CheckCircle, Edit, Eye, Trash2, TrendingUp, X, XCircle } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -65,6 +65,9 @@ interface Notification {
 }
 
 export default function Dashboard({ parcels = [] }: DashboardProps) {
+    const { auth } = usePage<SharedData>().props;
+    const currentUser = auth.user;
+
     const [activeTab, setActiveTab] = useState<TabType>('All Parcels');
     const [searchTerm, setSearchTerm] = useState('');
     // Use state for parcel list and initialize it with the parcels prop
@@ -314,7 +317,18 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 // Update the local state immediately
                 setParcelList((prev) =>
                     prev.map((parcel) =>
-                        parcel.parcel_id === parcelId ? { ...parcel, parcel_status: 'Collected', updated_at: new Date().toISOString() } : parcel,
+                        parcel.parcel_id === parcelId
+                            ? {
+                                  ...parcel,
+                                  parcel_status: 'Collected',
+                                  updated_at: new Date().toISOString(),
+                                  last_edited_by: {
+                                      id: currentUser.id,
+                                      name: currentUser.name,
+                                      email: currentUser.email,
+                                  },
+                              }
+                            : parcel,
                     ),
                 );
 
@@ -333,7 +347,18 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             console.log('Route not found, updating UI optimistically');
             setParcelList((prev) =>
                 prev.map((parcel) =>
-                    parcel.parcel_id === parcelId ? { ...parcel, parcel_status: 'Collected', updated_at: new Date().toISOString() } : parcel,
+                    parcel.parcel_id === parcelId
+                        ? {
+                              ...parcel,
+                              parcel_status: 'Collected',
+                              updated_at: new Date().toISOString(),
+                              last_edited_by: {
+                                  id: currentUser.id,
+                                  name: currentUser.name,
+                                  email: currentUser.email,
+                              },
+                          }
+                        : parcel,
                 ),
             );
 
