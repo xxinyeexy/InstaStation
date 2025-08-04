@@ -276,11 +276,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
-    // Updated handleMarkAsCollected function - handles route issues
+    // Updated handleMarkAsCollected function - uses backend response
     const handleMarkAsCollected = async (parcelId: number) => {
         try {
-            // First try with the current route
-            let response = await fetch(`/staff/parcel/${parcelId}/collect`, {
+            const response = await fetch(`/staff/parcel/${parcelId}/collect`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -288,45 +287,19 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 },
             });
 
-            // If 404, try alternative routes
-            if (response.status === 404) {
-                // Try POST method
-                response = await fetch(`/staff/parcel/${parcelId}/collect`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    },
-                });
-            }
-
-            // If still 404, try different route pattern
-            if (response.status === 404) {
-                response = await fetch(`/staff/parcels/${parcelId}/collect`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                    },
-                });
-            }
-
             if (response.ok) {
+                const result = await response.json();
                 console.log(`Parcel ${parcelId} marked as collected successfully`);
 
-                // Update the local state immediately
+                // Update the local state with the actual data from the server
                 setParcelList((prev) =>
                     prev.map((parcel) =>
                         parcel.parcel_id === parcelId
                             ? {
                                   ...parcel,
                                   parcel_status: 'Collected',
-                                  updated_at: new Date().toISOString(),
-                                  last_edited_by: {
-                                      id: currentUser.id,
-                                      name: currentUser.name,
-                                      email: currentUser.email,
-                                  },
+                                  updated_at: result.parcel.updated_at,
+                                  last_edited_by: result.parcel.last_edited_by,
                               }
                             : parcel,
                     ),
@@ -343,26 +316,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         } catch (error) {
             console.error('Failed to mark as collected:', error);
 
-            // For now, just update the UI optimistically since the route doesn't exist
-            console.log('Route not found, updating UI optimistically');
-            setParcelList((prev) =>
-                prev.map((parcel) =>
-                    parcel.parcel_id === parcelId
-                        ? {
-                              ...parcel,
-                              parcel_status: 'Collected',
-                              updated_at: new Date().toISOString(),
-                              last_edited_by: {
-                                  id: currentUser.id,
-                                  name: currentUser.name,
-                                  email: currentUser.email,
-                              },
-                          }
-                        : parcel,
-                ),
-            );
-
-            setActiveTab('Collected');
+            // Show error notification
+            addNotification('error', 'Error!', 'Failed to mark parcel as collected. Please try again.');
         }
     };
 
@@ -966,26 +921,26 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 </div>
 
                                                 {/* Right side - Actions */}
-                                                <div className="flex items-center gap-2">
-                                                    <button className="rounded-xl p-3 text-gray-400 transition-all hover:scale-110 hover:bg-blue-50 hover:text-blue-600">
+                                                <div className="flex items-center gap-3">
+                                                    <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
                                                         <BellRing className="h-5 w-5" />
                                                     </button>
-                                                    <button className="rounded-xl p-3 text-gray-400 transition-all hover:scale-110 hover:bg-blue-50 hover:text-blue-600">
+                                                    <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
                                                         <Eye className="h-5 w-5" />
                                                     </button>
-                                                    <button className="rounded-xl p-3 text-gray-400 transition-all hover:scale-110 hover:bg-blue-50 hover:text-blue-600">
+                                                    <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
                                                         <Edit className="h-5 w-5" />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
-                                                        className="rounded-xl p-3 text-gray-400 transition-all hover:scale-110 hover:bg-red-50 hover:text-red-600"
+                                                        className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
                                                     >
                                                         <Trash2 className="h-5 w-5" />
                                                     </button>
                                                     {parcel.parcel_status?.toLowerCase() !== 'collected' && (
                                                         <button
                                                             onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                            className="rounded-lg bg-emerald-100 px-5 py-2 text-sm font-medium text-emerald-700 shadow-sm transition-colors hover:bg-emerald-200"
+                                                            className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
                                                         >
                                                             Mark as Collected
                                                         </button>

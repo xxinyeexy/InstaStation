@@ -146,19 +146,20 @@ class ParcelController extends Controller
     // In your controller
     public function markAsCollected($id)
     {
-
         try {
             $parcel = \App\Models\Parcel::findOrFail($id);
+            $currentUser = Auth::user();
 
             $parcel->update([
                 'parcel_status' => 'Collected',
+                'last_edited_by' => $currentUser->id,
                 'updated_at' => now()
             ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Parcel marked as collected successfully',
-                'parcel' => $parcel
+                'parcel' => $parcel->load(['createdBy', 'lastEditedBy'])
             ]);
         } catch (\Exception $e) {
             return response()->json([
