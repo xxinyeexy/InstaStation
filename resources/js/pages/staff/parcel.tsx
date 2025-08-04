@@ -23,8 +23,20 @@ interface Parcel {
     location: string;
     qr_code: string;
     schedule: string;
-    created_by: number;
-    last_edited_by: number;
+    created_by:
+        | number
+        | {
+              id: number;
+              name: string;
+              email: string;
+          };
+    last_edited_by:
+        | number
+        | {
+              id: number;
+              name: string;
+              email: string;
+          };
     report_at: string;
     created_at: string;
     updated_at: string;
@@ -33,16 +45,6 @@ interface Parcel {
         id: number;
         name: string;
         matric: string;
-        email: string;
-    };
-    created_by_user?: {
-        id: number;
-        name: string;
-        email: string;
-    };
-    last_edited_by_user?: {
-        id: number;
-        name: string;
         email: string;
     };
 }
@@ -383,14 +385,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             default:
                 return 'bg-gradient-to-r from-gray-400 to-gray-500';
         }
-    };
-
-    // Get days indicator color
-    const getDaysIndicatorColor = (days: number) => {
-        if (days >= 0) return 'bg-emerald-500';
-        if (days >= -7) return 'bg-yellow-500';
-        if (days >= -14) return 'bg-orange-500';
-        return 'bg-red-500';
     };
 
     // Handle delete parcel with modal
@@ -786,12 +780,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                 <path d="m7.5 4.27 9 5.15" />
                                                             </svg>{' '}
                                                         </div>
-                                                        {/* Days indicator */}
-                                                        <div
-                                                            className={`absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white ${getDaysIndicatorColor(parcel.days)}`}
-                                                        >
-                                                            {Math.abs(parcel.days || 0)}
-                                                        </div>
                                                     </div>
 
                                                     {/* Parcel details */}
@@ -830,9 +818,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                     {parcel.student_user?.name || `${parcel.student_id || 'N/A'}`}
                                                                 </p>
                                                                 <p className="text-xs text-gray-500">
-                                                                    {parcel.student_user?.matric
-                                                                        ? ` ${parcel.student_user.matric}`
-                                                                        : 'No Matric ID'}
+                                                                    {parcel.student_user?.matric ? ` ${parcel.student_user.matric}` : 'No Matric ID'}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -898,8 +884,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                 <span>
                                                                     Created by:{' '}
                                                                     <span className="font-medium text-gray-700">
-                                                                        {parcel.created_by_user?.name || `Staff ID: ${parcel.created_by}`} 
-                                                                      
+                                                                        {typeof parcel.created_by === 'object' && parcel.created_by?.name
+                                                                            ? parcel.created_by.name
+                                                                            : `Staff ID: ${parcel.created_by}`}
                                                                     </span>
                                                                 </span>
                                                             </div>
@@ -915,7 +902,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                 <span>
                                                                     Last edited by:{' '}
                                                                     <span className="font-medium text-gray-700">
-                                                                        {parcel.last_edited_by_user?.name || `Staff ID: ${parcel.last_edited_by}`}
+                                                                        {typeof parcel.last_edited_by === 'object' && parcel.last_edited_by?.name
+                                                                            ? parcel.last_edited_by.name
+                                                                            : `Staff ID: ${parcel.last_edited_by}`}
                                                                     </span>
                                                                 </span>
                                                             </div>
@@ -971,9 +960,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     {parcel.parcel_status?.toLowerCase() !== 'collected' && (
                                                         <button
                                                             onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                            className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-medium text-white shadow-lg transition-all hover:scale-105 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl"
+                                                            className="rounded-lg bg-emerald-100 px-5 py-2 text-sm font-medium text-emerald-700 shadow-sm transition-colors hover:bg-emerald-200"
                                                         >
-                                                            Mark Collected
+                                                            Mark as Collected
                                                         </button>
                                                     )}
                                                 </div>
