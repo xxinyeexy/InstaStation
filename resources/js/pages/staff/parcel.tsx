@@ -1,8 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { Edit, Eye, Trash2, TrendingUp, CheckCircle, XCircle, X } from 'lucide-react';
-import { useState, useCallback, useEffect } from 'react';
+import { BellRing, CheckCircle, Edit, Eye, Trash2, TrendingUp, X, XCircle } from 'lucide-react';
+import { useCallback, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -28,6 +28,23 @@ interface Parcel {
     report_at: string;
     created_at: string;
     updated_at: string;
+    // Add relationship data
+    student_user?: {
+        id: number;
+        name: string;
+        matric: string;
+        email: string;
+    };
+    created_by_user?: {
+        id: number;
+        name: string;
+        email: string;
+    };
+    last_edited_by_user?: {
+        id: number;
+        name: string;
+        email: string;
+    };
 }
 
 // Props interface for the component
@@ -54,7 +71,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [selectedParcelId, setSelectedParcelId] = useState<number | null>(null);
     const [selectedTrackingNo, setSelectedTrackingNo] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    
+
     // Notification state
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -62,8 +79,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const addNotification = (type: 'success' | 'error', title: string, message: string) => {
         const id = Date.now().toString();
         const newNotification: Notification = { id, type, title, message };
-        setNotifications(prev => [...prev, newNotification]);
-        
+        setNotifications((prev) => [...prev, newNotification]);
+
         // Auto remove after 5 seconds
         setTimeout(() => {
             removeNotification(id);
@@ -72,7 +89,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // Remove notification function
     const removeNotification = (id: string) => {
-        setNotifications(prev => prev.filter(notification => notification.id !== id));
+        setNotifications((prev) => prev.filter((notification) => notification.id !== id));
     };
 
     // Debug: Log parcels data
@@ -113,7 +130,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             parcel.tracking_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.sender?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            parcel.student_id?.toString().includes(searchTerm);
+            parcel.student_id?.toString().includes(searchTerm) ||
+            parcel.student_user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.student_user?.matric?.toLowerCase().includes(searchTerm.toLowerCase());
 
         return matchesTab && matchesSearch;
     });
@@ -123,8 +142,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         return {
             'All Parcels': parcelList.filter((p) => !['approved'].includes(p.parcel_status?.toLowerCase())).length,
             'Pending Payment': parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'pending payment').length,
-            'Ready For Collection': parcelList.filter((p) => ['ready for collection'].includes(p.parcel_status?.toLowerCase()))
-                .length,
+            'Ready For Collection': parcelList.filter((p) => ['ready for collection'].includes(p.parcel_status?.toLowerCase())).length,
             Collected: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'collected').length,
             Unclaimed: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'unclaimed').length,
         };
@@ -331,6 +349,50 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
+    // Format date and time for display
+    const formatDateTime = (dateString: string) => {
+        if (!dateString) return 'N/A';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-MY', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+        } catch {
+            return 'N/A';
+        }
+    };
+
+    // Get status bar color for the top indicator
+    const getStatusBarColor = (status: string) => {
+        const normalizedStatus = status?.toLowerCase();
+        switch (normalizedStatus) {
+            case 'pending payment':
+                return 'bg-gradient-to-r from-orange-400 to-orange-500';
+            case 'ready for collection':
+                return 'bg-gradient-to-r from-purple-400 to-purple-500';
+            case 'collected':
+                return 'bg-gradient-to-r from-emerald-400 to-emerald-500';
+            case 'unclaimed':
+                return 'bg-gradient-to-r from-gray-400 to-gray-500';
+            case 'approved':
+                return 'bg-gradient-to-r from-green-400 to-green-500';
+            default:
+                return 'bg-gradient-to-r from-gray-400 to-gray-500';
+        }
+    };
+
+    // Get days indicator color
+    const getDaysIndicatorColor = (days: number) => {
+        if (days >= 0) return 'bg-emerald-500';
+        if (days >= -7) return 'bg-yellow-500';
+        if (days >= -14) return 'bg-orange-500';
+        return 'bg-red-500';
+    };
+
     // Handle delete parcel with modal
     const handleDeleteClick = (parcelId: number, trackingNo: string) => {
         setSelectedParcelId(parcelId);
@@ -361,12 +423,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             setShowDeleteModal(false);
             setSelectedParcelId(null);
             setSelectedTrackingNo(null);
-            
+
             // Show success notification
             addNotification('success', 'Parcel Deleted', `Parcel ${selectedTrackingNo} has been successfully deleted.`);
         } catch (error) {
             console.error('Failed to delete parcel:', error);
-            
+
             // Show error notification
             addNotification('error', 'Delete Failed', `Failed to delete parcel ${selectedTrackingNo}. Please try again.`);
         } finally {
@@ -383,23 +445,20 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            
+
             {/* Notification Container */}
-            <div className="fixed bottom-4 right-4 z-50 space-y-3">
+            <div className="fixed right-4 bottom-4 z-50 space-y-3">
                 {notifications.map((notification) => (
                     <div
                         key={notification.id}
-                        className={`
-                            min-w-80 max-w-96 rounded-lg border p-4 shadow-lg backdrop-blur-sm
-                            transition-all duration-300 ease-in-out
-                            ${notification.type === 'success' 
-                                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800' 
+                        className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${
+                            notification.type === 'success'
+                                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
                                 : 'border-red-200 bg-red-50/95 text-red-800'
-                            }
-                        `}
+                        } `}
                     >
                         <div className="flex items-start gap-3">
-                            <div className="flex-shrink-0 mt-0.5">
+                            <div className="mt-0.5 flex-shrink-0">
                                 {notification.type === 'success' ? (
                                     <CheckCircle className="h-5 w-5 text-emerald-600" />
                                 ) : (
@@ -412,7 +471,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             </div>
                             <button
                                 onClick={() => removeNotification(notification.id)}
-                                className="flex-shrink-0 rounded-full p-1 hover:bg-black/10 transition-colors"
+                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
                             >
                                 <X className="h-4 w-4" />
                             </button>
@@ -420,21 +479,20 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
                 ))}
             </div>
-            
+
             {/* Delete Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="rounded-xl bg-white p-6 shadow-xl w-full max-w-md text-center">
+                    <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl">
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                             <Trash2 className="h-6 w-6 text-red-600" />
                         </div>
-                        
-                        <h2 className="text-lg font-semibold text-gray-900 mb-2">Delete Parcel</h2>
-                        <p className="text-sm text-gray-600 mb-1">
-                            Are you sure you want to delete parcel{' '}
-                            <span className="font-medium text-red-600">{selectedTrackingNo}</span>?
+
+                        <h2 className="mb-2 text-lg font-semibold text-gray-900">Delete Parcel</h2>
+                        <p className="mb-1 text-sm text-gray-600">
+                            Are you sure you want to delete parcel <span className="font-medium text-red-600">{selectedTrackingNo}</span>?
                         </p>
-                        <p className="text-left text-xs text-gray-500 mb-6 px-7 ">
+                        <p className="mb-6 px-7 text-left text-xs text-gray-500">
                             This action cannot be undone and will permanently remove all parcel data and history.
                         </p>
 
@@ -442,14 +500,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             <button
                                 onClick={handleDeleteCancel}
                                 disabled={isDeleting}
-                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleDeleteConfirm}
                                 disabled={isDeleting}
-                                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 {isDeleting ? (
                                     <>
@@ -470,11 +528,24 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 {/* Top Stats Grid - Using actual database data */}
                 <div className="mb-6 grid grid-cols-3 gap-6">
                     {/* Newly Arrived */}
-                    <div className="rounded-xl border border-gray-100 bg-pink-100 p-6 shadow-sm">
-                        <div className="flex items-start justify-between">
+                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-pink-50 to-pink-200 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-pink-300 opacity-20"></div>
+                        <div className="relative flex items-start justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-500">Newly Arrived</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.newlyArrived}</p>
+                                <div className="mb-2 flex items-center gap-2">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500">
+                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-700">Newly Arrived</p>
+                                </div>
+                                <p className="text-4xl font-bold text-gray-900">{stats.newlyArrived}</p>
                                 <div className="mt-3 flex items-center">
                                     <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.newlyArrived)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
@@ -484,11 +555,24 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Pending Payments */}
-                    <div className="rounded-xl border border-gray-100 bg-blue-100 p-6 shadow-sm">
-                        <div className="flex items-start justify-between">
+                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-orange-50 to-orange-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-orange-200 opacity-20"></div>
+                        <div className="relative flex items-start justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-500">Pending Payment</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.pendingPayments}</p>
+                                <div className="mb-2 flex items-center gap-2">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
+                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-700">Pending Payment</p>
+                                </div>
+                                <p className="text-4xl font-bold text-gray-900">{stats.pendingPayments}</p>
                                 <div className="mt-3 flex items-center">
                                     <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.pendingPayments)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
@@ -498,11 +582,24 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Ready for Collection */}
-                    <div className="rounded-xl border border-gray-100 bg-purple-100 p-6 shadow-sm">
-                        <div className="flex items-start justify-between">
+                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-purple-200 opacity-20"></div>
+                        <div className="relative flex items-start justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-500">Ready For Collection</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.readyForCollection}</p>
+                                <div className="mb-2 flex items-center gap-2">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600">
+                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-700">Ready For Collection</p>
+                                </div>
+                                <p className="text-4xl font-bold text-gray-900">{stats.readyForCollection}</p>
                                 <div className="mt-3 flex items-center">
                                     <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.readyForCollection)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
@@ -515,11 +612,24 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 {/* Second Row Stats - Using actual database data */}
                 <div className="mb-6 grid grid-cols-3 gap-6">
                     {/* Total Collection */}
-                    <div className="rounded-xl border border-gray-100 bg-blue-50 p-6 shadow-sm">
-                        <div className="flex items-start justify-between">
+                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-green-200 opacity-20"></div>
+                        <div className="relative flex items-start justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-500">Today Collection</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.todayCollection}</p>
+                                <div className="mb-2 flex items-center gap-2">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-400">
+                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-700">Today Collection</p>
+                                </div>
+                                <p className="text-4xl font-bold text-gray-900">{stats.todayCollection}</p>
                                 <div className="mt-3 flex items-center">
                                     <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.todayCollection)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
@@ -529,11 +639,24 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Total Revenue */}
-                    <div className="rounded-xl border border-gray-100 bg-yellow-100 p-6 shadow-sm">
-                        <div className="flex items-start justify-between">
+                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-yellow-200 opacity-20"></div>
+                        <div className="relative flex items-start justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-500">Total Revenue</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">RM{stats.totalRevenue}</p>
+                                <div className="mb-2 flex items-center gap-2">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-400">
+                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-700">Total Revenue</p>
+                                </div>
+                                <p className="text-4xl font-bold text-gray-900">RM{stats.totalRevenue}</p>
                                 <div className="mt-3 flex items-center">
                                     <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.totalRevenue)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
@@ -543,11 +666,24 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Payment Verified */}
-                    <div className="rounded-xl border border-gray-100 bg-indigo-100 p-6 shadow-sm">
-                        <div className="flex items-start justify-between">
+                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-indigo-200 opacity-20"></div>
+                        <div className="relative flex items-start justify-between">
                             <div>
-                                <p className="text-sm font-medium text-gray-500">Payment Verified</p>
-                                <p className="mt-2 text-4xl font-bold text-gray-800">{stats.paymentVerified}</p>
+                                <div className="mb-2 flex items-center gap-2">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
+                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <p className="text-sm font-semibold text-gray-700">Payment Verified</p>
+                                </div>
+                                <p className="text-4xl font-bold text-gray-900">{stats.paymentVerified}</p>
                                 <div className="mt-3 flex items-center">
                                     <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.paymentVerified)}%</span>
                                     <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
@@ -599,62 +735,247 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             </div>
 
                             {/* Table Content */}
-                            <div className="space-y-4 p-6">
+                            <div className="space-y-6 p-6">
                                 {filteredParcels.length === 0 ? (
-                                    <div className="py-8 text-center text-gray-500">
-                                        {searchTerm ? `No parcels found matching "${searchTerm}"` : `No parcels in ${activeTab.toLowerCase()}`}
+                                    <div className="py-12 text-center">
+                                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                                            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <h3 className="mb-2 text-lg font-medium text-gray-900">
+                                            {searchTerm ? `No parcels found matching "${searchTerm}"` : `No parcels in ${activeTab.toLowerCase()}`}
+                                        </h3>
+                                        <p className="text-gray-500">Try adjusting your search or filters</p>
                                     </div>
                                 ) : (
                                     filteredParcels.map((parcel) => (
                                         <div
                                             key={parcel.parcel_id}
-                                            className="rounded-xl border border-gray-200 p-5 transition-shadow hover:shadow-md"
+                                            className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-xl"
                                         >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                                                        <span className="text-lg font-semibold text-blue-600">P</span>
+                                            {/* Status indicator bar */}
+
+                                            <div className="flex items-start justify-between">
+                                                {/* Left side - Parcel info */}
+                                                <div className="flex flex-1 items-start gap-6">
+                                                    {/* Parcel icon */}
+                                                    <div className="relative">
+                                                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-50 to-pink-300 shadow-lg">
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                className="h-6 w-6 text-pink-500"
+                                                                width="24"
+                                                                height="24"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                stroke-width="2"
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                // class="lucide lucide-package-icon lucide-package"
+                                                            >
+                                                                <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+                                                                <path d="M12 22V12" />
+                                                                <polyline points="3.29 7 12 12 20.71 7" />
+                                                                <path d="m7.5 4.27 9 5.15" />
+                                                            </svg>{' '}
+                                                        </div>
+                                                        {/* Days indicator */}
+                                                        <div
+                                                            className={`absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold text-white ${getDaysIndicatorColor(parcel.days)}`}
+                                                        >
+                                                            {Math.abs(parcel.days || 0)}
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                         <p className="text-lg font-semibold text-gray-900">Package - {parcel.tracking_no || 'N/A'}</p>
-                                                        <p className="mt-1 text-sm text-gray-500">Student ID: {parcel.student_id || 'N/A'}</p>
-                                                        <p className="text-sm text-gray-400">
-                                                            From: {parcel.sender || 'N/A'} | Size: {parcel.size || 'N/A'} | Location:{' '}
-                                                            {parcel.location || 'N/A'}
-                                                        </p>
-                                                        <p className="text-xs text-gray-400">
-                                                            Days: {parcel.days || 0} | Created: {formatDate(parcel.created_at)}
-                                                        </p>
+
+                                                    {/* Parcel details */}
+                                                    <div className="flex-1 space-y-3">
+                                                        {/* Header row */}
+                                                        <div className="flex items-center gap-4">
+                                                            <h3 className="text-xl font-bold text-gray-900">
+                                                                Parcel - {parcel.tracking_no || 'N/A'}
+                                                            </h3>
+                                                            <span
+                                                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
+                                                            >
+                                                                {parcel.parcel_status}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Student info */}
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                                                                <svg
+                                                                    className="h-6 w-6 text-green-600"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                                    />
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-900">
+                                                                    {parcel.student_user?.name || `${parcel.student_id || 'N/A'}`}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500">
+                                                                    {parcel.student_user?.matric
+                                                                        ? ` ${parcel.student_user.matric}`
+                                                                        : 'No Matric ID'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Parcel details grid */}
+                                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                                            <div className="flex items-center gap-2">
+                                                                <svg
+                                                                    className="h-4 w-4 text-gray-400"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                                    />
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                                                    />
+                                                                </svg>
+                                                                <span className="text-gray-600">
+                                                                    <span className="font-medium">Location:</span> {parcel.location || 'N/A'}
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2">
+                                                                <svg
+                                                                    className="h-4 w-4 text-gray-400"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                    />
+                                                                </svg>
+                                                                <span className="text-gray-600">
+                                                                    <span className="font-medium">Days:</span> {parcel.days || 0} days
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Staff info */}
+                                                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                                                            <div className="flex items-center gap-1">
+                                                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                    />
+                                                                </svg>
+                                                                <span>
+                                                                    Created by:{' '}
+                                                                    <span className="font-medium text-gray-700">
+                                                                        {parcel.created_by_user?.name || `Staff ID: ${parcel.created_by}`} 
+                                                                      
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex items-center gap-1">
+                                                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                                    />
+                                                                </svg>
+                                                                <span>
+                                                                    Last edited by:{' '}
+                                                                    <span className="font-medium text-gray-700">
+                                                                        {parcel.last_edited_by_user?.name || `Staff ID: ${parcel.last_edited_by}`}
+                                                                    </span>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Timestamps */}
+                                                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                                                            <div className="flex items-center gap-1">
+                                                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                                    />
+                                                                </svg>
+                                                                <span>Added: {formatDateTime(parcel.created_at)}</span>
+                                                            </div>
+                                                            {parcel.updated_at !== parcel.created_at && (
+                                                                <div className="flex items-center gap-1">
+                                                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                                        />
+                                                                    </svg>
+                                                                    <span>Updated: {formatDateTime(parcel.updated_at)}</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-4">
-                                                    <span
-                                                        className={`rounded-full border px-4 py-2 text-sm font-medium ${getStatusStyles(parcel.parcel_status)}`}
+
+                                                {/* Right side - Actions */}
+                                                <div className="flex items-center gap-2">
+                                                    <button className="rounded-xl p-3 text-gray-400 transition-all hover:scale-110 hover:bg-blue-50 hover:text-blue-600">
+                                                        <BellRing className="h-5 w-5" />
+                                                    </button>
+                                                    <button className="rounded-xl p-3 text-gray-400 transition-all hover:scale-110 hover:bg-blue-50 hover:text-blue-600">
+                                                        <Eye className="h-5 w-5" />
+                                                    </button>
+                                                    <button className="rounded-xl p-3 text-gray-400 transition-all hover:scale-110 hover:bg-blue-50 hover:text-blue-600">
+                                                        <Edit className="h-5 w-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
+                                                        className="rounded-xl p-3 text-gray-400 transition-all hover:scale-110 hover:bg-red-50 hover:text-red-600"
                                                     >
-                                                        {parcel.parcel_status}
-                                                    </span>
-                                                    <div className="flex items-center gap-2">
-                                                        <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                                                            <Eye className="h-4 w-4" />
-                                                        </button>
-                                                        <button className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                                                            <Edit className="h-4 w-4" />
-                                                        </button>
-                                                        <button 
-                                                            onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
-                                                            className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                                                        <Trash2 className="h-5 w-5" />
+                                                    </button>
+                                                    {parcel.parcel_status?.toLowerCase() !== 'collected' && (
+                                                        <button
+                                                            onClick={() => handleMarkAsCollected(parcel.parcel_id)}
+                                                            className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-3 text-sm font-medium text-white shadow-lg transition-all hover:scale-105 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-xl"
                                                         >
-                                                            <Trash2 className="h-4 w-4" />
+                                                            Mark Collected
                                                         </button>
-                                                        {parcel.parcel_status?.toLowerCase() !== 'collected' && (
-                                                            <button
-                                                                onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                                className="rounded-lg bg-emerald-100 px-5 py-2 text-sm font-medium text-emerald-700 shadow-sm transition-colors hover:bg-emerald-200"
-                                                            >
-                                                                Mark as Collected
-                                                            </button>
-                                                        )}
-                                                    </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -667,61 +988,105 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     {/* Right Sidebar - 1 column */}
                     <div className="col-span-1 space-y-6">
                         {/* Quick Actions */}
-                        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                            <h3 className="mb-5 text-lg font-semibold text-gray-900">Quick Actions</h3>
-                            <div className="space-y-3">
+                        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
+                            <div className="mb-6 flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,_#f2a6a6,_#f4d88e,_#a4d4ae,_#80c7d9,_#a39ddb)]">
+                                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900">Quick Actions</h3>
+                            </div>
+                            <div className="space-y-4">
                                 <Link
                                     href="/staff/add-parcel"
-                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-blue-200 hover:bg-blue-50"
+                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-blue-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:shadow-md"
                                 >
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 transition-colors group-hover:bg-blue-600">
-                                        <span className="font-medium text-white">+</span>
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-pink-500 transition-all group-hover:scale-110">
+                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
                                     </div>
-                                    <span className="text-sm font-medium text-gray-700">Register New Parcel</span>
+                                    <div>
+                                        <span className="text-sm font-semibold text-gray-900">Register New Parcel</span>
+                                        <p className="text-xs text-gray-500">Add a new parcel to the system</p>
+                                    </div>
                                     <span className="ml-auto text-gray-400 transition-colors group-hover:text-blue-500">→</span>
                                 </Link>
-                                <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-emerald-200 hover:bg-emerald-50">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 transition-colors group-hover:bg-emerald-600">
-                                        <span className="font-medium text-white">📄</span>
+                                <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-emerald-200 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:shadow-md">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 transition-all group-hover:scale-110">
+                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            />
+                                        </svg>
                                     </div>
-                                    <span className="text-sm font-medium text-gray-700">Generate Reports</span>
+                                    <div>
+                                        <span className="text-sm font-semibold text-gray-900">Generate Reports</span>
+                                        <p className="text-xs text-gray-500">Create detailed parcel reports</p>
+                                    </div>
                                     <span className="ml-auto text-gray-400 transition-colors group-hover:text-emerald-500">→</span>
                                 </button>
-                                <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-orange-200 hover:bg-orange-50">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 transition-colors group-hover:bg-orange-600">
-                                        <span className="font-medium text-white">📱</span>
+                                <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-orange-200 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:shadow-md">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 transition-all group-hover:scale-110">
+                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zm12 0h2a1 1 0 001-1V6a1 1 0 00-1-1h-2a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
+                                            />
+                                        </svg>
                                     </div>
-                                    <span className="text-sm font-medium text-gray-700">Scan QR Code</span>
+                                    <div>
+                                        <span className="text-sm font-semibold text-gray-900">Scan QR Code</span>
+                                        <p className="text-xs text-gray-500">Quick parcel identification</p>
+                                    </div>
                                     <span className="ml-auto text-gray-400 transition-colors group-hover:text-orange-500">→</span>
                                 </button>
                             </div>
                         </div>
 
                         {/* Recent Notifications */}
-                        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-                            <div className="mb-5 flex items-center justify-between">
-                                <h3 className="text-lg font-semibold text-gray-900">Recent Notifications</h3>
-                                <button className="text-sm font-medium text-blue-600 hover:text-blue-800">View All</button>
+                        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
+                            <div className="mb-6 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,_#e7a6b2,_#f1bca1,_#d7c8a7,_#b4d6c3,_#c8b5e6)]">
+                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M15 17h5l-5 5v-5zM4.19 4.19A2 2 0 006 3h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">Recent Notifications</h3>
+                                </div>
+                                <button className="text-sm font-semibold text-blue-600 transition-colors hover:text-blue-800">View All</button>
                             </div>
                             <div className="space-y-4">
-                                <div className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-gray-50">
-                                    <div className="mt-2 h-3 w-3 flex-shrink-0 rounded-full bg-emerald-500"></div>
+                                <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100">
+                                    <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-emerald-500"></div>
                                     <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">New Parcel Arrived</p>
+                                        <p className="text-sm font-semibold text-gray-900">New Parcel Arrived</p>
                                         <p className="mt-1 text-xs text-gray-500">5 minutes ago</p>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-gray-50">
-                                    <div className="mt-2 h-3 w-3 flex-shrink-0 rounded-full bg-blue-500"></div>
+                                <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100">
+                                    <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-blue-500"></div>
                                     <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">Parcel Ready for Pickup</p>
+                                        <p className="text-sm font-semibold text-gray-900">Parcel Ready for Pickup</p>
                                         <p className="mt-1 text-xs text-gray-500">1 hour ago</p>
                                     </div>
                                 </div>
-                                <div className="flex items-start gap-3 rounded-lg p-3 transition-colors hover:bg-gray-50">
-                                    <div className="mt-2 h-3 w-3 flex-shrink-0 rounded-full bg-orange-500"></div>
+                                <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100">
+                                    <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-orange-500"></div>
                                     <div className="flex-1">
-                                        <p className="text-sm font-medium text-gray-900">Delivery Enquired</p>
+                                        <p className="text-sm font-semibold text-gray-900">Delivery Enquired</p>
                                         <p className="mt-1 text-xs text-gray-500">2 hours ago</p>
                                     </div>
                                 </div>
