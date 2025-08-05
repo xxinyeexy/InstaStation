@@ -459,7 +459,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                     <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl">
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                            <Trash2 className="h-6 w-6 text-red-600" />
+                            <pink-2002 className="h-6 w-6 text-red-600" />
                         </div>
 
                         <h2 className="mb-2 text-lg font-semibold text-gray-900">Delete Parcel</h2>
@@ -680,7 +680,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         placeholder="Search parcels..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                                        className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 focus:ring-3 focus:ring-pink-400"
                                     />
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -701,6 +701,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
+                                        style={{ boxShadow: '0px 3px 4px rgba(0, 0, 0, 0.25)' }}
                                         className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${getTabStyles(tab)}`}
                                     >
                                         {tab} <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${getBadgeStyles(tab)}`}>{counts[tab]}</span>
@@ -763,191 +764,138 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     </div>
 
                                                     {/* Parcel details */}
-                                                    <div className="flex-1 space-y-3">
-                                                        {/* Header row */}
-                                                        <div className="flex items-center gap-4">
-                                                            <h3 className="text-xl font-bold text-gray-900">
-                                                                Parcel - {parcel.tracking_no || 'N/A'}
-                                                            </h3>
-                                                            <span
-                                                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
-                                                            >
-                                                                {parcel.parcel_status}
-                                                            </span>
-                                                        </div>
+                                                   <div className="flex-1 space-y-2">
+                                            {/* Header row */}
+                                            <div className="flex items-center gap-4">
+                                                <h3 className="text-xl font-bold text-gray-900">
+                                                    Parcel - {parcel.tracking_no || 'N/A'}
+                                                </h3>
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
+                                                >
+                                                    {parcel.parcel_status}
+                                                </span>
+                                            </div>
 
-                                                        {/* Student info */}
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                                                                <svg
-                                                                    className="h-6 w-6 text-green-600"
-                                                                    fill="none"
-                                                                    stroke="currentColor"
-                                                                    viewBox="0 0 24 24"
-                                                                >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                                    />
-                                                                </svg>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-medium text-gray-900">
-                                                                    {parcel.student_user?.name || `${parcel.student_id || 'N/A'}`}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500">
-                                                                    {parcel.student_user?.matric ? ` ${parcel.student_user.matric}` : 'No Matric ID'}
-                                                                </p>
-                                                            </div>
-                                                        </div>
+                                            {/* Student info */}
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                                                    <svg
+                                                        className="h-6 w-6 text-green-600"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium text-gray-900">
+                                                        {parcel.student_user?.name || `${parcel.student_id || 'N/A'}`}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {parcel.student_user?.matric ? ` ${parcel.student_user.matric}` : 'No Matric ID'}
+                                                    </p>
+                                                </div>
+                                            </div>
 
-                                                        {/* Parcel details grid */}
-                                                        <div className="grid grid-cols-2 gap-4 text-sm">
-                                                            <div className="flex items-center gap-2">
-                                                                <svg
-                                                                    className="h-4 w-4 text-gray-400"
-                                                                    fill="none"
-                                                                    stroke="currentColor"
-                                                                    viewBox="0 0 24 24"
-                                                                >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                                                    />
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                                                    />
-                                                                </svg>
-                                                                <span className="text-gray-600">
-                                                                    <span className="font-medium">Location:</span> {parcel.location || 'N/A'}
-                                                                </span>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-2">
-                                                                <svg
-                                                                    className="h-4 w-4 text-gray-400"
-                                                                    fill="none"
-                                                                    stroke="currentColor"
-                                                                    viewBox="0 0 24 24"
-                                                                >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                                    />
-                                                                </svg>
-                                                                <span className="text-gray-600">
-                                                                    <span className="font-medium">Days:</span> {parcel.days || 0} days
-                                                                </span>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Staff info */}
-                                                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                                                            <div className="flex items-center gap-1">
-                                                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                                    />
-                                                                </svg>
-                                                                <span>
-                                                                    Created by:{' '}
-                                                                    <span className="font-medium text-gray-700">
-                                                                        {typeof parcel.created_by === 'object' && parcel.created_by?.name
-                                                                            ? parcel.created_by.name
-                                                                            : `Staff ID: ${parcel.created_by}`}
-                                                                    </span>
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center gap-1">
-                                                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                                    />
-                                                                </svg>
-                                                                <span>
-                                                                    Last edited by:{' '}
-                                                                    <span className="font-medium text-gray-700">
-                                                                        {typeof parcel.last_edited_by === 'object' && parcel.last_edited_by?.name
-                                                                            ? parcel.last_edited_by.name
-                                                                            : `Staff ID: ${parcel.last_edited_by}`}
-                                                                    </span>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Timestamps */}
-                                                        <div className="flex items-center gap-4 text-xs text-gray-400">
-                                                            <div className="flex items-center gap-1">
-                                                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                                    />
-                                                                </svg>
-                                                                <span>Added: {formatDateTime(parcel.created_at)}</span>
-                                                            </div>
-                                                            {parcel.updated_at !== parcel.created_at && (
-                                                                <div className="flex items-center gap-1">
-                                                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                                                                        />
-                                                                    </svg>
-                                                                    <span>Updated: {formatDateTime(parcel.updated_at)}</span>
-                                                                </div>
-                                                            )}
-                                                        </div>
+                                            {/* Compact Two-Line Layout */}
+                                            <div className="space-y-5">
+                                                {/* First line - Location and Days */}
+                                                <div className="flex items-center gap-6 text-sm text-gray-600">
+                                                    <div className="flex items-center gap-1">
+                                                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        </svg>
+                                                        <span><span className="font-medium">Location:</span> {parcel.location || 'N/A'}</span>
+                                                    </div>
+                                                    
+                                                    <div className="flex items-center gap-1">
+                                                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        <span><span className="font-medium">Days:</span> {parcel.days || 0} days</span>
                                                     </div>
                                                 </div>
 
-                                                {/* Right side - Actions */}
-                                                <div className="flex items-center gap-3">
-                                                    <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
-                                                        <BellRing className="h-5 w-5" />
-                                                    </button>
-                                                    <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
-                                                        <Eye className="h-5 w-5" />
-                                                    </button>
-                                                    <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
-                                                        <Edit className="h-5 w-5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
-                                                        className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
-                                                    >
-                                                        <Trash2 className="h-5 w-5" />
-                                                    </button>
-                                                    {parcel.parcel_status?.toLowerCase() !== 'collected' && (
-                                                        <button
-                                                            onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                            className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
-                                                        >
-                                                            Mark as Collected
-                                                        </button>
+                                                {/* Second line - All staff and timestamp info in one line */}
+                                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                    <div className="flex items-center gap-1">
+                                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                        </svg>
+                                                        <span>Created by: <span className="font-medium text-gray-700">
+                                                            {typeof parcel.created_by === 'object' && parcel.created_by?.name
+                                                                ? parcel.created_by.name
+                                                                : `Staff ID: ${parcel.created_by}`}
+                                                        </span></span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1">
+                                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                        <span>Last edited by: <span className="font-medium text-gray-700">
+                                                            {typeof parcel.last_edited_by === 'object' && parcel.last_edited_by?.name
+                                                                ? parcel.last_edited_by.name
+                                                                : `Staff ID: ${parcel.last_edited_by}`}
+                                                        </span></span>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1">
+                                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        <span>Added: {formatDateTime(parcel.created_at)}</span>
+                                                    </div>
+
+                                                    {parcel.updated_at !== parcel.created_at && (
+                                                        <div className="flex items-center gap-1">
+                                                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                            </svg>
+                                                            <span>Updated: {formatDateTime(parcel.updated_at)}</span>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* Right side - Actions */}
+                                    <div className="flex items-center gap-3">
+                                        <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg">
+                                            <BellRing className="h-5 w-5" />
+                                        </button>
+                                        <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
+                                            <Eye className="h-5 w-5" />
+                                        </button>
+                                        <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
+                                            <Edit className="h-5 w-5" />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
+                                            className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
+                                        >
+                                            <Trash2 className="h-5 w-5" />
+                                        </button>
+                                        {parcel.parcel_status?.toLowerCase() !== 'collected' && (
+                                            <button
+                                                onClick={() => handleMarkAsCollected(parcel.parcel_id)}
+                                                className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
+                                            >
+                                                Mark as Collected
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
                                     ))
                                 )}
                             </div>

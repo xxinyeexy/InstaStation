@@ -523,7 +523,7 @@ const showErrorToast = (message: string) => {
                                     placeholder="Enter tracking number"
                                     value={formData.trackingNumber}
                                     onChange={(e) => handleInputChange('trackingNumber', e.target.value)}
-                                    className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none ${highlightTracking ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
+                                    className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightTracking ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
                                     readOnly={isScanning}
                                     required
                                 />
@@ -533,7 +533,7 @@ const showErrorToast = (message: string) => {
                                 <select
                                     value={formData.size}
                                     onChange={(e) => handleInputChange('size', e.target.value)}
-                                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
                                 >
                                     <option value="">Select size</option>
                                     <option value="Small">Small</option>
@@ -549,7 +549,7 @@ const showErrorToast = (message: string) => {
                                     placeholder="Sender name"
                                     value={formData.sender}
                                     onChange={(e) => handleInputChange('sender', e.target.value)}
-                                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
                                     required
                                 />
                             </div>
@@ -560,7 +560,7 @@ const showErrorToast = (message: string) => {
                                     placeholder="Storage location"
                                     value={formData.location}
                                     onChange={(e) => handleInputChange('location', e.target.value)}
-                                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
                                 />
                             </div>
                         </div>
@@ -579,7 +579,7 @@ const showErrorToast = (message: string) => {
                                     placeholder="Enter recipient full name"
                                     value={formData.studentName}
                                     onChange={(e) => handleInputChange('studentName', e.target.value)}
-                                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none"
+                                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
                                     required
                                 />
                                 <button
@@ -588,7 +588,7 @@ const showErrorToast = (message: string) => {
                                     disabled={isSearching}
                                 >
                                     {isSearching ? (
-                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-pink-500"></div>
+                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-pink-200"></div>
                                     ) : (
                                         <Search className="h-4 w-4" />
                                     )}
@@ -633,7 +633,7 @@ const showErrorToast = (message: string) => {
                                 placeholder="ID number"
                                 value={formData.matricId}
                                 onChange={(e) => handleInputChange('matricId', e.target.value)}
-                                className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-500 focus:ring-2 focus:ring-pink-500 focus:outline-none ${highlightMatric ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
+                                className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightMatric ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
                                 required
                             />
                         </div>
