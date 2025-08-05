@@ -459,7 +459,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                     <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl">
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                            <pink-2002 className="h-6 w-6 text-red-600" />
+                            <Trash2 className="h-6 w-6 text-red-600" />
                         </div>
 
                         <h2 className="mb-2 text-lg font-semibold text-gray-900">Delete Parcel</h2>
@@ -520,10 +520,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Newly Arrived</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.newlyArrived}</p>
-                                <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.newlyArrived)}%</span>
-                                    <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
-                                </div>
+                            
                             </div>
                         </div>
                     </div>
@@ -547,10 +544,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Pending Payment</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.pendingPayments}</p>
-                                <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.pendingPayments)}%</span>
-                                    <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -574,10 +568,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Ready For Collection</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.readyForCollection}</p>
-                                <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.readyForCollection)}%</span>
-                                    <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
-                                </div>
+                              
                             </div>
                         </div>
                     </div>
@@ -604,10 +595,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Today Collection</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.todayCollection}</p>
-                                <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.todayCollection)}%</span>
-                                    <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
-                                </div>
+                              
                             </div>
                         </div>
                     </div>
@@ -631,10 +619,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Total Revenue</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">RM{stats.totalRevenue}</p>
-                                <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.totalRevenue)}%</span>
-                                    <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
-                                </div>
+                              
                             </div>
                         </div>
                     </div>
@@ -658,10 +643,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Payment Verified</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.paymentVerified}</p>
-                                <div className="mt-3 flex items-center">
-                                    <span className="text-sm font-medium text-emerald-600">+{getPercentageChange(stats.paymentVerified)}%</span>
-                                    <TrendingUp className="ml-1 h-4 w-4 text-emerald-600" />
-                                </div>
+                            
                             </div>
                         </div>
                     </div>
@@ -876,7 +858,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
                                             <Eye className="h-5 w-5" />
                                         </button>
-                                        <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
+                                        <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg">
                                             <Edit className="h-5 w-5" />
                                         </button>
                                         <button
