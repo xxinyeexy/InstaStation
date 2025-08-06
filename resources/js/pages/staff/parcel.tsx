@@ -49,6 +49,15 @@ interface Parcel {
     };
 }
 
+// Extended interface for detailed parcel view
+interface ParcelDetails extends Parcel {
+    weight?: string;
+    dimensions?: string;
+    description?: string;
+    sender_address?: string;
+    fee?: number;
+}
+
 // Props interface for the component
 interface DashboardProps {
     parcels?: Parcel[];
@@ -77,6 +86,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [selectedTrackingNo, setSelectedTrackingNo] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Parcel details modal states
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [parcelDetails, setParcelDetails] = useState<ParcelDetails | null>(null);
+    const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+
     // Notification state
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -95,6 +109,41 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Remove notification function
     const removeNotification = (id: string) => {
         setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+    };
+
+    // Fetch parcel details function
+    const handleViewParcel = async (parcelId: number) => {
+        setIsLoadingDetails(true);
+        setShowDetailsModal(true);
+
+        try {
+            const response = await fetch(`/staff/parcel/${parcelId}/details`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            setParcelDetails(result.parcel);
+        } catch (error) {
+            console.error('Failed to fetch parcel details:', error);
+            addNotification('error', 'Error!', 'Failed to fetch parcel details. Please try again.');
+            setShowDetailsModal(false);
+        } finally {
+            setIsLoadingDetails(false);
+        }
+    };
+
+    // Close details modal
+    const handleCloseDetailsModal = () => {
+        setShowDetailsModal(false);
+        setParcelDetails(null);
     };
 
     // Debug: Log parcels data
@@ -454,6 +503,161 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 ))}
             </div>
 
+            {/* Parcel Details Modal */}
+            {showDetailsModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                            <h2 className="text-2xl font-bold text-gray-900">Parcel Details</h2>
+                            <button
+                                onClick={handleCloseDetailsModal}
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-6">
+                            {isLoadingDetails ? (
+                                <div className="flex flex-col items-center justify-center py-12">
+                                    <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+                                    <p className="mt-4 text-gray-600">Loading parcel details...</p>
+                                </div>
+                            ) : parcelDetails ? (
+                                <div className="space-y-6">
+                                    {/* Top Section */}
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900">Tracking Information</h3>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
+                                                    <p className="text-lg font-bold text-gray-900">{parcelDetails.tracking_no}</p>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Status</label>
+                                                    <span
+                                                        className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${getStatusStyles(parcelDetails.parcel_status)}`}
+                                                    >
+                                                        {parcelDetails.parcel_status}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900">Recipient Information</h3>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Student ID</label>
+                                                    <p className="text-gray-900">{parcelDetails.student_user?.matric || parcelDetails.student_id}</p>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Name</label>
+                                                    <p className="text-gray-900">{parcelDetails.student_user?.name || 'N/A'}</p>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Email</label>
+                                                    <p className="text-gray-900">{parcelDetails.student_user?.email || 'N/A'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Sender Information */}
+                                    <div>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Sender Information</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Sender</label>
+                                                <p className="text-gray-900">{parcelDetails.sender || 'N/A'}</p>
+                                            </div>
+                                           
+                                        </div>
+                                    </div>
+
+                                    {/* Parcel Information */}
+                                    <div>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Parcel Information</h3>
+                                        <div className="grid grid-cols-3 gap-4">
+                                          
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Dimensions</label>
+                                                <p className="text-gray-900">{parcelDetails.dimensions || parcelDetails.size || 'N/A'}</p>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Fee</label>
+                                                <p className="text-gray-900">RM{parcelDetails.fee || '1.00'}</p>
+                                            </div>
+                                        </div>
+                                
+                                    </div>
+
+                                    {/* Additional Information */}
+                                    <div>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Additional Information</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Location</label>
+                                                <p className="text-gray-900">{parcelDetails.location || 'N/A'}</p>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Days in Storage</label>
+                                                <p className="text-gray-900">{parcelDetails.days || 0} days</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Timestamps */}
+                                    <div className="border-t border-gray-200 pt-4">
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Timestamps</h3>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Created At</label>
+                                                <p className="text-gray-900">{formatDateTime(parcelDetails.created_at)}</p>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Last Updated</label>
+                                                <p className="text-gray-900">{formatDateTime(parcelDetails.updated_at)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="py-12 text-center">
+                                    <p className="text-gray-500">Failed to load parcel details.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        {parcelDetails && !isLoadingDetails && (
+                            <div className="flex justify-end gap-3 border-t border-gray-200 p-6">
+                                <button
+                                    onClick={handleCloseDetailsModal}
+                                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                                >
+                                    Close
+                                </button>
+                                {parcelDetails.parcel_status?.toLowerCase() !== 'collected' && (
+                                    <button
+                                        onClick={() => {
+                                            handleMarkAsCollected(parcelDetails.parcel_id);
+                                            handleCloseDetailsModal();
+                                        }}
+                                        className="rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 px-4 py-2 text-sm font-medium text-white hover:from-emerald-600 hover:to-green-700"
+                                    >
+                                        Mark as Collected
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Delete Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -716,8 +920,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             key={parcel.parcel_id}
                                             className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-xl"
                                         >
-                                            {/* Status indicator bar */}
-
                                             <div className="flex items-start justify-between">
                                                 {/* Left side - Parcel info */}
                                                 <div className="flex flex-1 items-start gap-6">
@@ -732,16 +934,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                 viewBox="0 0 24 24"
                                                                 fill="none"
                                                                 stroke="currentColor"
-                                                                stroke-width="2"
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                // class="lucide lucide-package-icon lucide-package"
+                                                                strokeWidth="2"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
                                                             >
                                                                 <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
                                                                 <path d="M12 22V12" />
                                                                 <polyline points="3.29 7 12 12 20.71 7" />
                                                                 <path d="m7.5 4.27 9 5.15" />
-                                                            </svg>{' '}
+                                                            </svg>
                                                         </div>
                                                     </div>
 
@@ -855,7 +1056,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg">
                                             <BellRing className="h-5 w-5" />
                                         </button>
-                                        <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg">
+                                        <button 
+                                            onClick={() => handleViewParcel(parcel.parcel_id)}
+                                            className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg"
+                                        >
                                             <Eye className="h-5 w-5" />
                                         </button>
                                         <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg">

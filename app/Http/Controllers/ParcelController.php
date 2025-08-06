@@ -177,6 +177,54 @@ class ParcelController extends Controller
     }
 
     /**
+     * Get detailed parcel information for the view modal
+     */
+    public function getParcelDetails($id)
+    {
+        try {
+            $parcel = Parcel::with(['studentUser', 'createdBy', 'lastEditedBy'])->findOrFail($id);
+
+            $parcelDetails = [
+                'parcel_id' => $parcel->parcel_id,
+                'tracking_no' => $parcel->tracking_no,
+                'parcel_status' => $parcel->parcel_status,
+                'sender' => $parcel->sender,
+                'size' => $parcel->size,
+                'location' => $parcel->location,
+                'days' => $parcel->days,
+                'qr_code' => $parcel->qr_code,
+                'schedule' => $parcel->schedule,
+                'created_at' => $parcel->created_at,
+                'updated_at' => $parcel->updated_at,
+                'student_id' => $parcel->student_id,
+                'created_by' => $parcel->created_by,
+                'last_edited_by' => $parcel->last_edited_by,
+                'student_user' => $parcel->studentUser ? [
+                    'id' => $parcel->studentUser->id,
+                    'name' => $parcel->studentUser->name,
+                    'matric' => $parcel->studentUser->matric,
+                    'email' => $parcel->studentUser->email,
+                ] : null,
+                'weight' => 'N/A',
+                'dimensions' => $parcel->size ?? 'N/A',
+                'description' => 'N/A',
+                'sender_address' => 'N/A',
+                'fee' => 1.00,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'parcel' => $parcelDetails
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch parcel details: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Parcel $parcel)
