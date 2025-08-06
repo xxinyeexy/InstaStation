@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BellRing, CheckCircle, Edit, Eye, Trash2, TrendingUp, X, XCircle } from 'lucide-react';
+import { BellRing, CheckCircle, Edit, Eye, Trash2, X, XCircle } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -73,6 +73,21 @@ interface Notification {
     message: string;
 }
 
+// Extended interface for editing parcel
+interface EditParcelForm {
+    tracking_no: string;
+    parcel_status: string;
+    recipient_name: string;
+    email: string;
+    student_id: string;
+    fee: number;
+    sender_name: string;
+    sender_address: string;
+    weight: string;
+    dimensions: string;
+    description: string;
+}
+
 export default function Dashboard({ parcels = [] }: DashboardProps) {
     const { auth } = usePage<SharedData>().props;
     const currentUser = auth.user;
@@ -89,7 +104,25 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Parcel details modal states
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [parcelDetails, setParcelDetails] = useState<ParcelDetails | null>(null);
-    const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+    // Remove isLoadingDetails
+
+    // Edit parcel modal states
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingParcel, setEditingParcel] = useState<Parcel | null>(null);
+    const [editForm, setEditForm] = useState<EditParcelForm>({
+        tracking_no: '',
+        parcel_status: '',
+        recipient_name: '',
+        email: '',
+        student_id: '',
+        fee: 1.0,
+        sender_name: '',
+        sender_address: '',
+        weight: '',
+        dimensions: '',
+        description: '',
+    });
+    const [isUpdating, setIsUpdating] = useState(false);
 
     // Notification state
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -111,32 +144,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setNotifications((prev) => prev.filter((notification) => notification.id !== id));
     };
 
-    // Fetch parcel details function
-    const handleViewParcel = async (parcelId: number) => {
-        setIsLoadingDetails(true);
-        setShowDetailsModal(true);
-
-        try {
-            const response = await fetch(`/staff/parcel/${parcelId}/details`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-            setParcelDetails(result.parcel);
-        } catch (error) {
-            console.error('Failed to fetch parcel details:', error);
-            addNotification('error', 'Error!', 'Failed to fetch parcel details. Please try again.');
-            setShowDetailsModal(false);
-        } finally {
-            setIsLoadingDetails(false);
+    // Refactored: Use local data for instant modal
+    const handleViewParcel = (parcelId: number) => {
+        const parcel = parcelList.find((p) => p.parcel_id === parcelId);
+        if (parcel) {
+            setParcelDetails(parcel as ParcelDetails);
+            setShowDetailsModal(true);
+        } else {
+            addNotification('error', 'Error!', 'Parcel not found in local data.');
         }
     };
 
@@ -144,6 +159,99 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const handleCloseDetailsModal = () => {
         setShowDetailsModal(false);
         setParcelDetails(null);
+    };
+
+    // Handle edit parcel
+    const handleEditParcel = (parcel: Parcel) => {
+        setEditingParcel(parcel);
+        setEditForm({
+            tracking_no: parcel.tracking_no || '',
+            parcel_status: parcel.parcel_status || '',
+            recipient_name: parcel.student_user?.name || '',
+            email: parcel.student_user?.email || '',
+            student_id: parcel.student_user?.matric || parcel.student_id?.toString() || '',
+            fee: 1.0, // Default fee
+            sender_name: parcel.sender || '',
+            sender_address: 'N/A', // Not in database
+            weight: 'N/A', // Not in database
+            dimensions: parcel.size || '',
+            description: 'N/A', // Not in database
+        });
+        setShowEditModal(true);
+    };
+
+    // Handle form input changes
+    const handleEditFormChange = (field: keyof EditParcelForm, value: string | number) => {
+        setEditForm((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
+    // Handle form submission
+    const handleUpdateParcel = async () => {
+        if (!editingParcel) return;
+
+        setIsUpdating(true);
+        try {
+            const response = await fetch(`/staff/parcel/${editingParcel.parcel_id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({
+                    tracking_no: editForm.tracking_no,
+                    parcel_status: editForm.parcel_status,
+                    sender_name: editForm.sender_name,
+                    sender_address: editForm.sender_address,
+                    dimensions: editForm.dimensions,
+                    weight: editForm.weight,
+                    fee: editForm.fee,
+                    description: editForm.description,
+                    location: editingParcel.location,
+                }),
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+
+                // Update local state
+                setParcelList((prev) =>
+                    prev.map((parcel) => (parcel.parcel_id === editingParcel.parcel_id ? { ...parcel, ...result.parcel } : parcel)),
+                );
+
+                setShowEditModal(false);
+                setEditingParcel(null);
+                addNotification('success', 'Success!', 'Parcel updated successfully!');
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Failed to update parcel:', error);
+            addNotification('error', 'Error!', 'Failed to update parcel. Please try again.');
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    // Close edit modal
+    const handleCloseEditModal = () => {
+        setShowEditModal(false);
+        setEditingParcel(null);
+        setEditForm({
+            tracking_no: '',
+            parcel_status: '',
+            recipient_name: '',
+            email: '',
+            student_id: '',
+            fee: 1.0,
+            sender_name: '',
+            sender_address: '',
+            weight: '',
+            dimensions: '',
+            description: '',
+        });
     };
 
     // Debug: Log parcels data
@@ -509,7 +617,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
                         {/* Modal Header */}
                         <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                             <div>
                             <h2 className="text-2xl font-bold text-gray-900">Parcel Details</h2>
+                           
+                                <p className="text-sm text-gray-600">Complete information about the parcel</p>
+                            </div>
                             <button
                                 onClick={handleCloseDetailsModal}
                                 className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
@@ -520,12 +632,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                         {/* Modal Content */}
                         <div className="p-6">
-                            {isLoadingDetails ? (
-                                <div className="flex flex-col items-center justify-center py-12">
-                                    <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-                                    <p className="mt-4 text-gray-600">Loading parcel details...</p>
-                                </div>
-                            ) : parcelDetails ? (
+                            {parcelDetails ? (
                                 <div className="space-y-6">
                                     {/* Top Section */}
                                     <div className="grid grid-cols-2 gap-6">
@@ -574,15 +681,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 <label className="block text-sm font-medium text-gray-600">Sender</label>
                                                 <p className="text-gray-900">{parcelDetails.sender || 'N/A'}</p>
                                             </div>
-                                           
                                         </div>
                                     </div>
 
                                     {/* Parcel Information */}
                                     <div>
                                         <h3 className="mb-3 text-lg font-semibold text-gray-900">Parcel Information</h3>
-                                        <div className="grid grid-cols-3 gap-4">
-                                          
+                                        <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-600">Dimensions</label>
                                                 <p className="text-gray-900">{parcelDetails.dimensions || parcelDetails.size || 'N/A'}</p>
@@ -592,7 +697,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 <p className="text-gray-900">RM{parcelDetails.fee || '1.00'}</p>
                                             </div>
                                         </div>
-                                
                                     </div>
 
                                     {/* Additional Information */}
@@ -633,7 +737,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Modal Footer */}
-                        {parcelDetails && !isLoadingDetails && (
+                        {parcelDetails && (
                             <div className="flex justify-end gap-3 border-t border-gray-200 p-6">
                                 <button
                                     onClick={handleCloseDetailsModal}
@@ -654,6 +758,197 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 )}
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Parcel Modal */}
+            {showEditModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Edit Parcel</h2>
+                                <p className="text-sm text-gray-600">Update parcel information</p>
+                            </div>
+                            <button
+                                onClick={handleCloseEditModal}
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-6">
+                            {editingParcel ? (
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        handleUpdateParcel();
+                                    }}
+                                    className="space-y-6"
+                                >
+                                    {/* Top Section */}
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900">Tracking Information</h3>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.tracking_no}
+                                                        onChange={(e) => handleEditFormChange('tracking_no', e.target.value)}
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none "
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Status</label>
+                                                    <select
+                                                        value={editForm.parcel_status}
+                                                        onChange={(e) => handleEditFormChange('parcel_status', e.target.value)}
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                    >
+                                                        <option value="Pending Payment">Pending Payment</option>
+                                                        <option value="Ready for Collection">Ready for Collection</option>
+                                                        <option value="Collected">Collected</option>
+                                                        <option value="Unclaimed">Unclaimed</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900">Recipient Information</h3>
+                                            <div className="space-y-3">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Student ID</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.student_id}
+                                                        onChange={(e) => handleEditFormChange('student_id', e.target.value)}
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Name</label>
+                                                    <input
+                                                        type="text"
+                                                        value={editForm.recipient_name}
+                                                        onChange={(e) => handleEditFormChange('recipient_name', e.target.value)}
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-600">Email</label>
+                                                    <input
+                                                        type="email"
+                                                        value={editForm.email}
+                                                        onChange={(e) => handleEditFormChange('email', e.target.value)}
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Sender Information */}
+                                    <div>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Sender Information</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Sender</label>
+                                                <input
+                                                    type="text"
+                                                    value={editForm.sender_name}
+                                                    onChange={(e) => handleEditFormChange('sender_name', e.target.value)}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                />
+                                            </div>
+                                          
+                                        </div>
+                                    </div>
+
+                                    {/* Parcel Information */}
+                                    <div>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Parcel Information</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Dimensions</label>
+                                                <input
+                                                    type="text"
+                                                    value={editForm.dimensions}
+                                                    onChange={(e) => handleEditFormChange('dimensions', e.target.value)}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Fee (RM)</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={editForm.fee}
+                                                    onChange={(e) => handleEditFormChange('fee', parseFloat(e.target.value))}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Additional Information */}
+                                    <div>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Additional Information</h3>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-600">Location</label>
+                                                <input
+                                                    type="text"
+                                                    value={editingParcel.location || ''}
+                                                    onChange={(e) => {
+                                                        // Update the editingParcel directly for location
+                                                        setEditingParcel((prev) => (prev ? { ...prev, location: e.target.value } : null));
+                                                    }}
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                />
+                                            </div>
+                                         
+                                        </div>
+                                    </div>
+
+                                    {/* Modal Footer */}
+                                    <div className="flex justify-end gap-3 border-t border-gray-200 pt-6">
+                                        <button
+                                            type="button"
+                                            onClick={handleCloseEditModal}
+                                            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={isUpdating}
+                                            className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm font-medium text-white hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            {isUpdating ? (
+                                                <>
+                                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                                    Updating...
+                                                </>
+                                            ) : (
+                                                'Update Parcel'
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div className="py-12 text-center">
+                                    <p className="text-gray-500">Failed to load parcel for editing.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
@@ -724,7 +1019,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Newly Arrived</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.newlyArrived}</p>
-                            
                             </div>
                         </div>
                     </div>
@@ -748,7 +1042,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Pending Payment</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.pendingPayments}</p>
-                                
                             </div>
                         </div>
                     </div>
@@ -772,7 +1065,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Ready For Collection</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.readyForCollection}</p>
-                              
                             </div>
                         </div>
                     </div>
@@ -799,7 +1091,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Today Collection</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.todayCollection}</p>
-                              
                             </div>
                         </div>
                     </div>
@@ -823,7 +1114,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Total Revenue</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">RM{stats.totalRevenue}</p>
-                              
                             </div>
                         </div>
                     </div>
@@ -847,7 +1137,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <p className="text-sm font-semibold text-gray-700">Payment Verified</p>
                                 </div>
                                 <p className="text-4xl font-bold text-gray-900">{stats.paymentVerified}</p>
-                            
                             </div>
                         </div>
                     </div>
@@ -866,7 +1155,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         placeholder="Search parcels..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 focus:ring-3 focus:ring-pink-400"
+                                        className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-pink-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                                     />
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -947,141 +1236,204 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     </div>
 
                                                     {/* Parcel details */}
-                                                   <div className="flex-1 space-y-2">
-                                            {/* Header row */}
-                                            <div className="flex items-center gap-4">
-                                                <h3 className="text-xl font-bold text-gray-900">
-                                                    Parcel - {parcel.tracking_no || 'N/A'}
-                                                </h3>
-                                                <span
-                                                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
-                                                >
-                                                    {parcel.parcel_status}
-                                                </span>
-                                            </div>
-
-                                            {/* Student info */}
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                                                    <svg
-                                                        className="h-6 w-6 text-green-600"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                        />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-900">
-                                                        {parcel.student_user?.name || `${parcel.student_id || 'N/A'}`}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {parcel.student_user?.matric ? ` ${parcel.student_user.matric}` : 'No Matric ID'}
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {/* Compact Two-Line Layout */}
-                                            <div className="space-y-5">
-                                                {/* First line - Location and Days */}
-                                                <div className="flex items-center gap-6 text-sm text-gray-600">
-                                                    <div className="flex items-center gap-1">
-                                                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        </svg>
-                                                        <span><span className="font-medium">Location:</span> {parcel.location || 'N/A'}</span>
-                                                    </div>
-                                                    
-                                                    <div className="flex items-center gap-1">
-                                                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        <span><span className="font-medium">Days:</span> {parcel.days || 0} days</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Second line - All staff and timestamp info in one line */}
-                                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                    <div className="flex items-center gap-1">
-                                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                        </svg>
-                                                        <span>Created by: <span className="font-medium text-gray-700">
-                                                            {typeof parcel.created_by === 'object' && parcel.created_by?.name
-                                                                ? parcel.created_by.name
-                                                                : `Staff ID: ${parcel.created_by}`}
-                                                        </span></span>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-1">
-                                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                        </svg>
-                                                        <span>Last edited by: <span className="font-medium text-gray-700">
-                                                            {typeof parcel.last_edited_by === 'object' && parcel.last_edited_by?.name
-                                                                ? parcel.last_edited_by.name
-                                                                : `Staff ID: ${parcel.last_edited_by}`}
-                                                        </span></span>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-1">
-                                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                        <span>Added: {formatDateTime(parcel.created_at)}</span>
-                                                    </div>
-
-                                                    {parcel.updated_at !== parcel.created_at && (
-                                                        <div className="flex items-center gap-1">
-                                                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                            </svg>
-                                                            <span>Updated: {formatDateTime(parcel.updated_at)}</span>
+                                                    <div className="flex-1 space-y-2">
+                                                        {/* Header row */}
+                                                        <div className="flex items-center gap-4">
+                                                            <h3 className="text-xl font-bold text-gray-900">
+                                                                Parcel - {parcel.tracking_no || 'N/A'}
+                                                            </h3>
+                                                            <span
+                                                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
+                                                            >
+                                                                {parcel.parcel_status}
+                                                            </span>
                                                         </div>
+
+                                                        {/* Student info */}
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                                                                <svg
+                                                                    className="h-6 w-6 text-green-600"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                                    />
+                                                                </svg>
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-900">
+                                                                    {parcel.student_user?.name || `${parcel.student_id || 'N/A'}`}
+                                                                </p>
+                                                                <p className="text-xs text-gray-500">
+                                                                    {parcel.student_user?.matric ? ` ${parcel.student_user.matric}` : 'No Matric ID'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Compact Two-Line Layout */}
+                                                        <div className="space-y-5">
+                                                            {/* First line - Location and Days */}
+                                                            <div className="flex items-center gap-6 text-sm text-gray-600">
+                                                                <div className="flex items-center gap-1">
+                                                                    <svg
+                                                                        className="h-4 w-4 text-gray-400"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                                        />
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                                                        />
+                                                                    </svg>
+                                                                    <span>
+                                                                        <span className="font-medium">Location:</span> {parcel.location || 'N/A'}
+                                                                    </span>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-1">
+                                                                    <svg
+                                                                        className="h-4 w-4 text-gray-400"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                        />
+                                                                    </svg>
+                                                                    <span>
+                                                                        <span className="font-medium">Days:</span> {parcel.days || 0} days
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Second line - All staff and timestamp info in one line */}
+                                                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                                <div className="flex items-center gap-1">
+                                                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                                        />
+                                                                    </svg>
+                                                                    <span>
+                                                                        Created by:{' '}
+                                                                        <span className="font-medium text-gray-700">
+                                                                            {typeof parcel.created_by === 'object' && parcel.created_by?.name
+                                                                                ? parcel.created_by.name
+                                                                                : `Staff ID: ${parcel.created_by}`}
+                                                                        </span>
+                                                                    </span>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-1">
+                                                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                                        />
+                                                                    </svg>
+                                                                    <span>
+                                                                        Last edited by:{' '}
+                                                                        <span className="font-medium text-gray-700">
+                                                                            {typeof parcel.last_edited_by === 'object' && parcel.last_edited_by?.name
+                                                                                ? parcel.last_edited_by.name
+                                                                                : `Staff ID: ${parcel.last_edited_by}`}
+                                                                        </span>
+                                                                    </span>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-1">
+                                                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                                        />
+                                                                    </svg>
+                                                                    <span>Added: {formatDateTime(parcel.created_at)}</span>
+                                                                </div>
+
+                                                                {parcel.updated_at !== parcel.created_at && (
+                                                                    <div className="flex items-center gap-1">
+                                                                        <svg
+                                                                            className="h-3 w-3"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth={2}
+                                                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                                            />
+                                                                        </svg>
+                                                                        <span>Updated: {formatDateTime(parcel.updated_at)}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Right side - Actions */}
+                                                <div className="flex items-center gap-3">
+                                                    <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg">
+                                                        <BellRing className="h-5 w-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleViewParcel(parcel.parcel_id)}
+                                                        className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg"
+                                                    >
+                                                        <Eye className="h-5 w-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleEditParcel(parcel)}
+                                                        className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg"
+                                                    >
+                                                        <Edit className="h-5 w-5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
+                                                        className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
+                                                    >
+                                                        <Trash2 className="h-5 w-5" />
+                                                    </button>
+                                                    {parcel.parcel_status?.toLowerCase() !== 'collected' && (
+                                                        <button
+                                                            onClick={() => handleMarkAsCollected(parcel.parcel_id)}
+                                                            className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
+                                                        >
+                                                            Mark as Collected
+                                                        </button>
                                                     )}
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    {/* Right side - Actions */}
-                                    <div className="flex items-center gap-3">
-                                        <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg">
-                                            <BellRing className="h-5 w-5" />
-                                        </button>
-                                        <button 
-                                            onClick={() => handleViewParcel(parcel.parcel_id)}
-                                            className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg"
-                                        >
-                                            <Eye className="h-5 w-5" />
-                                        </button>
-                                        <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg">
-                                            <Edit className="h-5 w-5" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
-                                            className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
-                                        >
-                                            <Trash2 className="h-5 w-5" />
-                                        </button>
-                                        {parcel.parcel_status?.toLowerCase() !== 'collected' && (
-                                            <button
-                                                onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
-                                            >
-                                                Mark as Collected
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
                                     ))
                                 )}
                             </div>

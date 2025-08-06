@@ -235,9 +235,65 @@ class ParcelController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Parcel $parcel)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            $parcel = Parcel::findOrFail($id);
+            $user = Auth::user();
+
+            // Validate the request
+            $validatedData = $request->validate([
+                'tracking_no' => 'sometimes|string|max:50',
+                'parcel_status' => 'sometimes|string|in:Pending Payment,Ready for Collection,Collected,Unclaimed',
+                'sender' => 'sometimes|string|max:50',
+                'size' => 'sometimes|nullable|string',
+                'location' => 'sometimes|nullable|string|max:100',
+                'sender_name' => 'sometimes|string|max:50',
+                'sender_address' => 'sometimes|nullable|string',
+                'weight' => 'sometimes|nullable|string',
+                'dimensions' => 'sometimes|nullable|string',
+                'fee' => 'sometimes|numeric|min:0',
+                'description' => 'sometimes|nullable|string',
+            ]);
+
+            // Map form fields to database fields
+            $updateData = [
+                'last_edited_by' => $user->id,
+                'updated_at' => now(),
+            ];
+
+            // Map validated data to database fields
+            if (isset($validatedData['tracking_no'])) $updateData['tracking_no'] = $validatedData['tracking_no'];
+            if (isset($validatedData['parcel_status'])) $updateData['parcel_status'] = $validatedData['parcel_status'];
+            if (isset($validatedData['sender'])) $updateData['sender'] = $validatedData['sender'];
+            if (isset($validatedData['sender_name'])) $updateData['sender'] = $validatedData['sender_name'];
+            if (isset($validatedData['size'])) $updateData['size'] = $validatedData['size'];
+            if (isset($validatedData['dimensions'])) $updateData['size'] = $validatedData['dimensions'];
+            if (isset($validatedData['location'])) $updateData['location'] = $validatedData['location'];
+
+            // Update the parcel
+            $parcel->update($updateData);
+
+            // Load relationships for response
+            $parcel->load(['studentUser', 'createdBy', 'lastEditedBy']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Parcel updated successfully',
+                'parcel' => $parcel
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update parcel: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
