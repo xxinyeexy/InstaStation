@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+use Inertia\Inertia;
+use Inertia\Response;
 use Illuminate\Http\Request;
 
 class StudentController extends Controller
@@ -10,6 +12,11 @@ class StudentController extends Controller
     /**
      * Display a listing of the resource.
      */
+        public function student(): Response
+    {
+        return Inertia::render('student/parcel');
+    }
+
     public function index()
     {
         //

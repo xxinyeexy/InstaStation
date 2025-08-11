@@ -617,9 +617,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
                         {/* Modal Header */}
                         <div className="flex items-center justify-between border-b border-gray-200 p-6">
-                             <div>
-                            <h2 className="text-2xl font-bold text-gray-900">Parcel Details</h2>
-                           
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Parcel Details</h2>
+
                                 <p className="text-sm text-gray-600">Complete information about the parcel</p>
                             </div>
                             <button
@@ -801,7 +801,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         type="text"
                                                         value={editForm.tracking_no}
                                                         onChange={(e) => handleEditFormChange('tracking_no', e.target.value)}
-                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none "
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
                                                     />
                                                 </div>
                                                 <div>
@@ -867,7 +867,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
                                                 />
                                             </div>
-                                          
                                         </div>
                                     </div>
 
@@ -875,7 +874,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <div>
                                         <h3 className="mb-3 text-lg font-semibold text-gray-900">Parcel Information</h3>
                                         <div className="grid grid-cols-2 gap-4">
-                                            
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-600">Dimensions</label>
                                                 <input
@@ -914,7 +912,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
                                                 />
                                             </div>
-                                         
                                         </div>
                                     </div>
 
@@ -1469,7 +1466,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <span className="ml-auto text-gray-400 transition-colors group-hover:text-blue-500">→</span>
                                 </Link>
                                 <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-emerald-200 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:shadow-md">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 transition-all group-hover:scale-110">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#f5d0c8,#f5f2f9,#d3b9a6,#fbe5cf,#d4dcfa)]">
                                         <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
