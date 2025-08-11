@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { BellRing, CheckCircle, Edit, Eye, Trash2, X, XCircle } from 'lucide-react';
+import { CheckCircle, Trash2, X, XCircle } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -351,6 +351,34 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     const stats = getActualStats();
 
+    // Tile counts for the dashboard header cards
+    const tileCounts = {
+        myParcels: parcelList.length,
+        pendingPayment: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'pending payment').length,
+        approved: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'approved').length,
+        readyForCollection: parcelList.filter((p) => ['ready for collection', 'ready to collect'].includes(p.parcel_status?.toLowerCase())).length,
+        collected: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'collected').length,
+    };
+
+    // Simple search-based filtering for the card grid (no tabs in redesigned UI)
+    const displayParcels = parcelList.filter((parcel) => {
+        if (!searchTerm) return true;
+        const q = searchTerm.toLowerCase();
+        return (
+            parcel.tracking_no?.toLowerCase().includes(q) ||
+            parcel.sender?.toLowerCase().includes(q) ||
+            parcel.location?.toLowerCase().includes(q) ||
+            parcel.student_id?.toString().includes(searchTerm) ||
+            parcel.student_user?.name?.toLowerCase().includes(q) ||
+            parcel.student_user?.matric?.toLowerCase().includes(q)
+        );
+    });
+
+    const handlePayNow = (parcelId: number) => {
+        // Redirect to a payment page (route can be adapted as needed)
+        window.location.href = `/student/payment?parcel=${parcelId}`;
+    };
+
     // Calculate percentage changes (mock calculation for demo purposes)
     const getPercentageChange = (current: number, mockPrevious?: number) => {
         if (current === 0) return 0;
@@ -371,7 +399,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             case 'unclaimed':
                 return 'bg-[#C5C5CF] text-black border-gray-300';
             case 'approved':
-                return 'border-green-200 bg-green-100 text-green-700';
+                return 'border-amber-200 bg-amber-100 text-amber-700';
             default:
                 return 'border-gray-200 bg-gray-100 text-gray-600';
         }
@@ -995,337 +1023,398 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
             {/* Background color matching the image */}
             <div className="min-h-screen bg-gray-50 p-6">
-                {/* Top Stats Grid - Using actual database data */}
-                <div className="mb-6 grid grid-cols-3 gap-6">
-                    {/* Newly Arrived */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-pink-50 to-pink-200 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-pink-300 opacity-20"></div>
-                        <div className="relative flex items-start justify-between">
-                            <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500">
-                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <p className="text-sm font-semibold text-gray-700">Newly Arrived</p>
-                                </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.newlyArrived}</p>
-                            </div>
-                        </div>
+                {/* Header tiles matching screenshot */}
+                <div className="mb-6 grid grid-cols-12 gap-4">
+                    <div className="col-span-2 rounded-xl border border-violet-500 bg-violet-50 p-4">
+                        <div className="text-xs text-gray-600">My Parcels</div>
+                        <div className="mt-1 text-3xl font-bold text-violet-700">{tileCounts.myParcels}</div>
                     </div>
-
-                    {/* Pending Payments */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-orange-50 to-orange-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-orange-200 opacity-20"></div>
-                        <div className="relative flex items-start justify-between">
-                            <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
-                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <p className="text-sm font-semibold text-gray-700">Pending Payment</p>
-                                </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.pendingPayments}</p>
-                            </div>
-                        </div>
+                    <div className="col-span-2 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+                        <div className="text-xs text-gray-600">Pending Payment</div>
+                        <div className="mt-1 text-3xl font-bold text-yellow-700">{tileCounts.pendingPayment}</div>
                     </div>
-
-                    {/* Ready for Collection */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-purple-200 opacity-20"></div>
-                        <div className="relative flex items-start justify-between">
-                            <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600">
-                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <p className="text-sm font-semibold text-gray-700">Ready For Collection</p>
-                                </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.readyForCollection}</p>
-                            </div>
-                        </div>
+                    <div className="col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                        <div className="text-xs text-gray-600">Approved</div>
+                        <div className="mt-1 text-3xl font-bold text-amber-700">{tileCounts.approved}</div>
+                    </div>
+                    <div className="col-span-4 col-start-9 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                        <div className="mb-3 text-sm font-semibold text-gray-700">Quick Actions</div>
+                        <button className="flex w-full items-center justify-between rounded-lg bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100">
+                            <span>Generate Reports</span>
+                            <span>›</span>
+                        </button>
+                    </div>
+                    <div className="col-span-3 rounded-xl border border-green-200 bg-green-50 p-4">
+                        <div className="text-xs text-gray-600">Ready for Collection</div>
+                        <div className="mt-1 text-3xl font-bold text-green-700">{tileCounts.readyForCollection}</div>
+                    </div>
+                    <div className="col-span-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+                        <div className="text-xs text-gray-600">Collected</div>
+                        <div className="mt-1 text-3xl font-bold text-blue-700">{tileCounts.collected}</div>
                     </div>
                 </div>
 
-                {/* Second Row Stats - Using actual database data */}
-                <div className="mb-6 grid grid-cols-3 gap-6">
-                    {/* Total Collection */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-green-200 opacity-20"></div>
-                        <div className="relative flex items-start justify-between">
-                            <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-400">
-                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <p className="text-sm font-semibold text-gray-700">Today Collection</p>
-                                </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.todayCollection}</p>
-                            </div>
-                        </div>
+                {/* Search bar */}
+                <form
+                    className="mb-6 flex items-center gap-3"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                    }}
+                >
+                    <div className="relative flex-1">
+                        <input
+                            type="text"
+                            placeholder="Search by name or parcel ID..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full rounded-md border border-gray-300 py-2 pr-4 pl-10 text-sm text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-green-600 focus:outline-none"
+                        />
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">🔍</div>
                     </div>
+                    <button type="submit" className="rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700">
+                        Search
+                    </button>
+                </form>
 
-                    {/* Total Revenue */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-yellow-200 opacity-20"></div>
-                        <div className="relative flex items-start justify-between">
-                            <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-400">
-                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                                            />
-                                        </svg>
+                {/* Parcel cards grid */}
+                {displayParcels.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center text-gray-500">No parcels found</div>
+                ) : (
+                    <div className="grid grid-cols-3 gap-6">
+                        {displayParcels.map((parcel) => {
+                            const status = parcel.parcel_status?.toLowerCase();
+                            const isApproved = status === 'approved';
+                            const isPendingPayment = status === 'pending payment';
+                            const isReady = status === 'ready for collection' || status === 'ready to collect';
+                            const isCollected = status === 'collected';
+                            return (
+                                <div key={parcel.parcel_id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                                    <div className="mb-3 flex items-start justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600">#</div>
+                                            <div className="text-sm font-semibold text-gray-900"># {parcel.tracking_no || 'N/A'}</div>
+                                        </div>
+                                        <span
+                                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
+                                        >
+                                            {parcel.parcel_status}
+                                        </span>
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-700">Total Revenue</p>
+
+                                    <div className="mb-2 flex items-center gap-2 text-sm text-gray-600">
+                                        <span>Arrived:</span>
+                                        <span className="font-medium text-gray-900">{formatDate(parcel.created_at)}</span>
+                                    </div>
+
+                                    <div className="mb-4 text-sm">
+                                        <span className="mr-2 text-gray-600">Payment:</span>
+                                        {isApproved ? (
+                                            <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+                                                Verified
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
+                                                Pending
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        {isPendingPayment && (
+                                            <button
+                                                onClick={() => handlePayNow(parcel.parcel_id)}
+                                                className="flex-1 rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-600"
+                                            >
+                                                Pay Now
+                                            </button>
+                                        )}
+                                        {isReady && (
+                                            <button
+                                                onClick={() => handleMarkAsCollected(parcel.parcel_id)}
+                                                className="flex-1 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                                            >
+                                                Collect
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => handleViewParcel(parcel.parcel_id)}
+                                            className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                        >
+                                            View Details
+                                        </button>
+                                    </div>
                                 </div>
-                                <p className="text-4xl font-bold text-gray-900">RM{stats.totalRevenue}</p>
-                            </div>
-                        </div>
+                            );
+                        })}
                     </div>
+                )}
 
-                    {/* Payment Verified */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-indigo-200 opacity-20"></div>
-                        <div className="relative flex items-start justify-between">
-                            <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
-                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <p className="text-sm font-semibold text-gray-700">Payment Verified</p>
-                                </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.paymentVerified}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Main Content Area with Sidebar */}
-                <div className="grid grid-cols-4 gap-6">
-                    {/* Main Table Area - 3 columns */}
-                    <div className="col-span-3">
-                        <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
-                            {/* Search Bar */}
-                            <div className="border-b border-gray-100 p-6">
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Search parcels..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-pink-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                                    />
-                                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                        <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                            />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Filter Tabs - Updated with colored badges */}
-                            <div className="flex gap-2 border-b border-gray-100 p-6">
-                                {(['All Parcels', 'Pending Payment', 'Ready For Collection', 'Collected', 'Unclaimed'] as TabType[]).map((tab) => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setActiveTab(tab)}
-                                        style={{ boxShadow: '0px 3px 4px rgba(0, 0, 0, 0.25)' }}
-                                        className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${getTabStyles(tab)}`}
-                                    >
-                                        {tab} <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${getBadgeStyles(tab)}`}>{counts[tab]}</span>
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* Table Content */}
-                            <div className="space-y-6 p-6">
-                                {filteredParcels.length === 0 ? (
-                                    <div className="py-12 text-center">
-                                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-                                            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Keep the previous content below for staff table view (hidden) */}
+                <div className="hidden">
+                    <div className="mb-6 grid grid-cols-3 gap-6">
+                        {/* Newly Arrived */}
+                        <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-pink-50 to-pink-200 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                            <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-pink-300 opacity-20"></div>
+                            <div className="relative flex items-start justify-between">
+                                <div>
+                                    <div className="mb-2 flex items-center gap-2">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500">
+                                            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
                                                     strokeWidth={2}
-                                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                                                 />
                                             </svg>
                                         </div>
-                                        <h3 className="mb-2 text-lg font-medium text-gray-900">
-                                            {searchTerm ? `No parcels found matching "${searchTerm}"` : `No parcels in ${activeTab.toLowerCase()}`}
-                                        </h3>
-                                        <p className="text-gray-500">Try adjusting your search or filters</p>
+                                        <p className="text-sm font-semibold text-gray-700">Newly Arrived</p>
                                     </div>
-                                ) : (
-                                    filteredParcels.map((parcel) => (
-                                        <div
-                                            key={parcel.parcel_id}
-                                            className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-xl"
-                                        >
-                                            <div className="flex items-start justify-between">
-                                                {/* Left side - Parcel info */}
-                                                <div className="flex flex-1 items-start gap-6">
-                                                    {/* Parcel icon */}
-                                                    <div className="relative">
-                                                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-50 to-pink-300 shadow-lg">
-                                                            <svg
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                className="h-6 w-6 text-pink-500"
-                                                                width="24"
-                                                                height="24"
-                                                                viewBox="0 0 24 24"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeWidth="2"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                            >
-                                                                <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
-                                                                <path d="M12 22V12" />
-                                                                <polyline points="3.29 7 12 12 20.71 7" />
-                                                                <path d="m7.5 4.27 9 5.15" />
-                                                            </svg>
-                                                        </div>
-                                                    </div>
+                                    <p className="text-4xl font-bold text-gray-900">{stats.newlyArrived}</p>
+                                </div>
+                            </div>
+                        </div>
 
-                                                    {/* Parcel details */}
-                                                    <div className="flex-1 space-y-2">
-                                                        {/* Header row */}
-                                                        <div className="flex items-center gap-4">
-                                                            <h3 className="text-xl font-bold text-gray-900">
-                                                                Parcel - {parcel.tracking_no || 'N/A'}
-                                                            </h3>
-                                                            <span
-                                                                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
-                                                            >
-                                                                {parcel.parcel_status}
-                                                            </span>
-                                                        </div>
+                        {/* Pending Payments */}
+                        <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-orange-50 to-orange-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                            <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-orange-200 opacity-20"></div>
+                            <div className="relative flex items-start justify-between">
+                                <div>
+                                    <div className="mb-2 flex items-center gap-2">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
+                                            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <p className="text-sm font-semibold text-gray-700">Pending Payment</p>
+                                    </div>
+                                    <p className="text-4xl font-bold text-gray-900">{stats.pendingPayments}</p>
+                                </div>
+                            </div>
+                        </div>
 
-                                                        {/* Student info */}
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                        {/* Ready for Collection */}
+                        <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                            <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-purple-200 opacity-20"></div>
+                            <div className="relative flex items-start justify-between">
+                                <div>
+                                    <div className="mb-2 flex items-center gap-2">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600">
+                                            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <p className="text-sm font-semibold text-gray-700">Ready For Collection</p>
+                                    </div>
+                                    <p className="text-4xl font-bold text-gray-900">{stats.readyForCollection}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Second Row Stats - Using actual database data */}
+                    <div className="mb-6 grid grid-cols-3 gap-6">
+                        {/* Total Collection */}
+                        <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                            <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-green-200 opacity-20"></div>
+                            <div className="relative flex items-start justify-between">
+                                <div>
+                                    <div className="mb-2 flex items-center gap-2">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-400">
+                                            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <p className="text-sm font-semibold text-gray-700">Today Collection</p>
+                                    </div>
+                                    <p className="text-4xl font-bold text-gray-900">{stats.todayCollection}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Total Revenue */}
+                        <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                            <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-yellow-200 opacity-20"></div>
+                            <div className="relative flex items-start justify-between">
+                                <div>
+                                    <div className="mb-2 flex items-center gap-2">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-400">
+                                            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <p className="text-sm font-semibold text-gray-700">Total Revenue</p>
+                                    </div>
+                                    <p className="text-4xl font-bold text-gray-900">RM{stats.totalRevenue}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Payment Verified */}
+                        <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                            <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-indigo-200 opacity-20"></div>
+                            <div className="relative flex items-start justify-between">
+                                <div>
+                                    <div className="mb-2 flex items-center gap-2">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
+                                            <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <p className="text-sm font-semibold text-gray-700">Payment Verified</p>
+                                    </div>
+                                    <p className="text-4xl font-bold text-gray-900">{stats.paymentVerified}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Main Content Area with Sidebar */}
+                    <div className="grid grid-cols-4 gap-6">
+                        {/* Main Table Area - 3 columns */}
+                        <div className="col-span-3">
+                            <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
+                                {/* Search Bar */}
+                                <div className="border-b border-gray-100 p-6">
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Search parcels..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-pink-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                        />
+                                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Filter Tabs - Updated with colored badges */}
+                                <div className="flex gap-2 border-b border-gray-100 p-6">
+                                    {(['All Parcels', 'Pending Payment', 'Ready For Collection', 'Collected', 'Unclaimed'] as TabType[]).map(
+                                        (tab) => (
+                                            <button
+                                                key={tab}
+                                                onClick={() => setActiveTab(tab)}
+                                                style={{ boxShadow: '0px 3px 4px rgba(0, 0, 0, 0.25)' }}
+                                                className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${getTabStyles(tab)}`}
+                                            >
+                                                {tab}{' '}
+                                                <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${getBadgeStyles(tab)}`}>{counts[tab]}</span>
+                                            </button>
+                                        ),
+                                    )}
+                                </div>
+
+                                {/* Table Content */}
+                                <div className="space-y-6 p-6">
+                                    {filteredParcels.length === 0 ? (
+                                        <div className="py-12 text-center">
+                                            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+                                                <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                                    />
+                                                </svg>
+                                            </div>
+                                            <h3 className="mb-2 text-lg font-medium text-gray-900">
+                                                {searchTerm
+                                                    ? `No parcels found matching "${searchTerm}"`
+                                                    : `No parcels in ${activeTab.toLowerCase()}`}
+                                            </h3>
+                                            <p className="text-gray-500">Try adjusting your search or filters</p>
+                                        </div>
+                                    ) : (
+                                        filteredParcels.map((parcel) => (
+                                            <div
+                                                key={parcel.parcel_id}
+                                                className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-xl"
+                                            >
+                                                <div className="flex items-start justify-between">
+                                                    {/* Left side - Parcel info */}
+                                                    <div className="flex flex-1 items-start gap-6">
+                                                        {/* Parcel icon */}
+                                                        <div className="relative">
+                                                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-50 to-pink-300 shadow-lg">
                                                                 <svg
-                                                                    className="h-6 w-6 text-green-600"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    className="h-6 w-6 text-pink-500"
+                                                                    width="24"
+                                                                    height="24"
+                                                                    viewBox="0 0 24 24"
                                                                     fill="none"
                                                                     stroke="currentColor"
-                                                                    viewBox="0 0 24 24"
+                                                                    strokeWidth="2"
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
                                                                 >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                                    />
+                                                                    <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+                                                                    <path d="M12 22V12" />
+                                                                    <polyline points="3.29 7 12 12 20.71 7" />
+                                                                    <path d="m7.5 4.27 9 5.15" />
                                                                 </svg>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-sm font-medium text-gray-900">
-                                                                    {parcel.student_user?.name || `${parcel.student_id || 'N/A'}`}
-                                                                </p>
-                                                                <p className="text-xs text-gray-500">
-                                                                    {parcel.student_user?.matric ? ` ${parcel.student_user.matric}` : 'No Matric ID'}
-                                                                </p>
                                                             </div>
                                                         </div>
 
-                                                        {/* Compact Two-Line Layout */}
-                                                        <div className="space-y-5">
-                                                            {/* First line - Location and Days */}
-                                                            <div className="flex items-center gap-6 text-sm text-gray-600">
-                                                                <div className="flex items-center gap-1">
-                                                                    <svg
-                                                                        className="h-4 w-4 text-gray-400"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        viewBox="0 0 24 24"
-                                                                    >
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                                                        />
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                                                        />
-                                                                    </svg>
-                                                                    <span>
-                                                                        <span className="font-medium">Location:</span> {parcel.location || 'N/A'}
-                                                                    </span>
-                                                                </div>
-
-                                                                <div className="flex items-center gap-1">
-                                                                    <svg
-                                                                        className="h-4 w-4 text-gray-400"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        viewBox="0 0 24 24"
-                                                                    >
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                                        />
-                                                                    </svg>
-                                                                    <span>
-                                                                        <span className="font-medium">Days:</span> {parcel.days || 0} days
-                                                                    </span>
-                                                                </div>
+                                                        {/* Parcel details */}
+                                                        <div className="flex-1 space-y-2">
+                                                            {/* Header row */}
+                                                            <div className="flex items-center gap-4">
+                                                                <h3 className="text-xl font-bold text-gray-900">
+                                                                    Parcel - {parcel.tracking_no || 'N/A'}
+                                                                </h3>
+                                                                <span
+                                                                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
+                                                                >
+                                                                    {parcel.parcel_status}
+                                                                </span>
                                                             </div>
 
-                                                            {/* Second line - All staff and timestamp info in one line */}
-                                                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                                <div className="flex items-center gap-1">
-                                                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            {/* Student info */}
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                                                                    <svg
+                                                                        className="h-6 w-6 text-green-600"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                    >
                                                                         <path
                                                                             strokeLinecap="round"
                                                                             strokeLinejoin="round"
@@ -1333,48 +1422,70 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                                                         />
                                                                     </svg>
-                                                                    <span>
-                                                                        Created by:{' '}
-                                                                        <span className="font-medium text-gray-700">
-                                                                            {typeof parcel.created_by === 'object' && parcel.created_by?.name
-                                                                                ? parcel.created_by.name
-                                                                                : `Staff ID: ${parcel.created_by}`}
+                                                                </div>
+                                                                <div>
+                                                                    <p className="text-sm font-medium text-gray-900">
+                                                                        {parcel.student_user?.name || `${parcel.student_id || 'N/A'}`}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500">
+                                                                        {parcel.student_user?.matric
+                                                                            ? ` ${parcel.student_user.matric}`
+                                                                            : 'No Matric ID'}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            {/* Compact Two-Line Layout */}
+                                                            <div className="space-y-5">
+                                                                {/* First line - Location and Days */}
+                                                                <div className="flex items-center gap-6 text-sm text-gray-600">
+                                                                    <div className="flex items-center gap-1">
+                                                                        <svg
+                                                                            className="h-4 w-4 text-gray-400"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth={2}
+                                                                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                                            />
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth={2}
+                                                                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                                                            />
+                                                                        </svg>
+                                                                        <span>
+                                                                            <span className="font-medium">Location:</span> {parcel.location || 'N/A'}
                                                                         </span>
-                                                                    </span>
-                                                                </div>
+                                                                    </div>
 
-                                                                <div className="flex items-center gap-1">
-                                                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                                        />
-                                                                    </svg>
-                                                                    <span>
-                                                                        Last edited by:{' '}
-                                                                        <span className="font-medium text-gray-700">
-                                                                            {typeof parcel.last_edited_by === 'object' && parcel.last_edited_by?.name
-                                                                                ? parcel.last_edited_by.name
-                                                                                : `Staff ID: ${parcel.last_edited_by}`}
+                                                                    <div className="flex items-center gap-1">
+                                                                        <svg
+                                                                            className="h-4 w-4 text-gray-400"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth={2}
+                                                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                            />
+                                                                        </svg>
+                                                                        <span>
+                                                                            <span className="font-medium">Days:</span> {parcel.days || 0} days
                                                                         </span>
-                                                                    </span>
+                                                                    </div>
                                                                 </div>
 
-                                                                <div className="flex items-center gap-1">
-                                                                    <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                                        />
-                                                                    </svg>
-                                                                    <span>Added: {formatDateTime(parcel.created_at)}</span>
-                                                                </div>
-
-                                                                {parcel.updated_at !== parcel.created_at && (
+                                                                {/* Second line - All staff and timestamp info in one line */}
+                                                                <div className="flex items-center gap-2 text-xs text-gray-500">
                                                                     <div className="flex items-center gap-1">
                                                                         <svg
                                                                             className="h-3 w-3"
@@ -1386,160 +1497,198 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                                 strokeLinecap="round"
                                                                                 strokeLinejoin="round"
                                                                                 strokeWidth={2}
-                                                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                                                             />
                                                                         </svg>
-                                                                        <span>Updated: {formatDateTime(parcel.updated_at)}</span>
+                                                                        <span>
+                                                                            Created by:{' '}
+                                                                            <span className="font-medium text-gray-700">
+                                                                                {typeof parcel.created_by === 'object' && parcel.created_by?.name
+                                                                                    ? parcel.created_by.name
+                                                                                    : `Staff ID: ${parcel.created_by}`}
+                                                                            </span>
+                                                                        </span>
                                                                     </div>
-                                                                )}
+
+                                                                    <div className="flex items-center gap-1">
+                                                                        <svg
+                                                                            className="h-3 w-3"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth={2}
+                                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                                            />
+                                                                        </svg>
+                                                                        <span>
+                                                                            Last edited by:{' '}
+                                                                            <span className="font-medium text-gray-700">
+                                                                                {typeof parcel.last_edited_by === 'object' &&
+                                                                                parcel.last_edited_by?.name
+                                                                                    ? parcel.last_edited_by.name
+                                                                                    : `Staff ID: ${parcel.last_edited_by}`}
+                                                                            </span>
+                                                                        </span>
+                                                                    </div>
+
+                                                                    <div className="flex items-center gap-1">
+                                                                        <svg
+                                                                            className="h-3 w-3"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth={2}
+                                                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                                            />
+                                                                        </svg>
+                                                                        <span>Added: {formatDateTime(parcel.created_at)}</span>
+                                                                    </div>
+
+                                                                    {parcel.updated_at !== parcel.created_at && (
+                                                                        <div className="flex items-center gap-1">
+                                                                            <svg
+                                                                                className="h-3 w-3"
+                                                                                fill="none"
+                                                                                stroke="currentColor"
+                                                                                viewBox="0 0 24 24"
+                                                                            >
+                                                                                <path
+                                                                                    strokeLinecap="round"
+                                                                                    strokeLinejoin="round"
+                                                                                    strokeWidth={2}
+                                                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                                                />
+                                                                            </svg>
+                                                                            <span>Updated: {formatDateTime(parcel.updated_at)}</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                {/* Right side - Actions */}
-                                                <div className="flex items-center gap-3">
-                                                    <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg">
-                                                        <BellRing className="h-5 w-5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleViewParcel(parcel.parcel_id)}
-                                                        className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg"
-                                                    >
-                                                        <Eye className="h-5 w-5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleEditParcel(parcel)}
-                                                        className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg"
-                                                    >
-                                                        <Edit className="h-5 w-5" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
-                                                        className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
-                                                    >
-                                                        <Trash2 className="h-5 w-5" />
-                                                    </button>
-                                                    {parcel.parcel_status?.toLowerCase() !== 'collected' && (
-                                                        <button
-                                                            onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                            className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
-                                                        >
-                                                            Mark as Collected
-                                                        </button>
-                                                    )}
+                                                    {/* Right side - Actions (hidden in redesigned layout) */}
+                                                    <div className="hidden items-center gap-3 md:flex"></div>
                                                 </div>
                                             </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Sidebar - 1 column */}
+                        <div className="col-span-1 space-y-6">
+                            {/* Quick Actions */}
+                            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
+                                <div className="mb-6 flex items-center gap-3">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,_#f2a6a6,_#f4d88e,_#a4d4ae,_#80c7d9,_#a39ddb)]">
+                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-gray-900">Quick Actions</h3>
+                                </div>
+                                <div className="space-y-4">
+                                    <Link
+                                        href="/staff/add-parcel"
+                                        className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-blue-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:shadow-md"
+                                    >
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-pink-500 transition-all group-hover:scale-110">
+                                            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                            </svg>
                                         </div>
-                                    ))
-                                )}
+                                        <div>
+                                            <span className="text-sm font-semibold text-gray-900">Register New Parcel</span>
+                                            <p className="text-xs text-gray-500">Add a new parcel to the system</p>
+                                        </div>
+                                        <span className="ml-auto text-gray-400 transition-colors group-hover:text-blue-500">→</span>
+                                    </Link>
+                                    <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-emerald-200 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:shadow-md">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#f5d0c8,#f5f2f9,#d3b9a6,#fbe5cf,#d4dcfa)]">
+                                            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <span className="text-sm font-semibold text-gray-900">Generate Reports</span>
+                                            <p className="text-xs text-gray-500">Create detailed parcel reports</p>
+                                        </div>
+                                        <span className="ml-auto text-gray-400 transition-colors group-hover:text-emerald-500">→</span>
+                                    </button>
+                                    <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-orange-200 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:shadow-md">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 transition-all group-hover:scale-110">
+                                            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zm12 0h2a1 1 0 001-1V6a1 1 0 00-1-1h-2a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <span className="text-sm font-semibold text-gray-900">Scan QR Code</span>
+                                            <p className="text-xs text-gray-500">Quick parcel identification</p>
+                                        </div>
+                                        <span className="ml-auto text-gray-400 transition-colors group-hover:text-orange-500">→</span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
 
-                    {/* Right Sidebar - 1 column */}
-                    <div className="col-span-1 space-y-6">
-                        {/* Quick Actions */}
-                        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
-                            <div className="mb-6 flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,_#f2a6a6,_#f4d88e,_#a4d4ae,_#80c7d9,_#a39ddb)]">
-                                    <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                    </svg>
+                            {/* Recent Notifications */}
+                            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
+                                <div className="mb-6 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,_#e7a6b2,_#f1bca1,_#d7c8a7,_#b4d6c3,_#c8b5e6)]">
+                                            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M15 17h5l-5 5v-5zM4.19 4.19A2 2 0 006 3h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-gray-900">Recent Notifications</h3>
+                                    </div>
+                                    <button className="text-sm font-semibold text-blue-600 transition-colors hover:text-blue-800">View All</button>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900">Quick Actions</h3>
-                            </div>
-                            <div className="space-y-4">
-                                <Link
-                                    href="/staff/add-parcel"
-                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-blue-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:shadow-md"
-                                >
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-pink-500 transition-all group-hover:scale-110">
-                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                        </svg>
+                                <div className="space-y-4">
+                                    <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100">
+                                        <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-emerald-500"></div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-semibold text-gray-900">New Parcel Arrived</p>
+                                            <p className="mt-1 text-xs text-gray-500">5 minutes ago</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span className="text-sm font-semibold text-gray-900">Register New Parcel</span>
-                                        <p className="text-xs text-gray-500">Add a new parcel to the system</p>
+                                    <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100">
+                                        <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-blue-500"></div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-semibold text-gray-900">Parcel Ready for Pickup</p>
+                                            <p className="mt-1 text-xs text-gray-500">1 hour ago</p>
+                                        </div>
                                     </div>
-                                    <span className="ml-auto text-gray-400 transition-colors group-hover:text-blue-500">→</span>
-                                </Link>
-                                <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-emerald-200 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:shadow-md">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#f5d0c8,#f5f2f9,#d3b9a6,#fbe5cf,#d4dcfa)]">
-                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <span className="text-sm font-semibold text-gray-900">Generate Reports</span>
-                                        <p className="text-xs text-gray-500">Create detailed parcel reports</p>
-                                    </div>
-                                    <span className="ml-auto text-gray-400 transition-colors group-hover:text-emerald-500">→</span>
-                                </button>
-                                <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-orange-200 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:shadow-md">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 transition-all group-hover:scale-110">
-                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zm12 0h2a1 1 0 001-1V6a1 1 0 00-1-1h-2a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <span className="text-sm font-semibold text-gray-900">Scan QR Code</span>
-                                        <p className="text-xs text-gray-500">Quick parcel identification</p>
-                                    </div>
-                                    <span className="ml-auto text-gray-400 transition-colors group-hover:text-orange-500">→</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Recent Notifications */}
-                        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
-                            <div className="mb-6 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,_#e7a6b2,_#f1bca1,_#d7c8a7,_#b4d6c3,_#c8b5e6)]">
-                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M15 17h5l-5 5v-5zM4.19 4.19A2 2 0 006 3h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <h3 className="text-xl font-bold text-gray-900">Recent Notifications</h3>
-                                </div>
-                                <button className="text-sm font-semibold text-blue-600 transition-colors hover:text-blue-800">View All</button>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100">
-                                    <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-emerald-500"></div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">New Parcel Arrived</p>
-                                        <p className="mt-1 text-xs text-gray-500">5 minutes ago</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100">
-                                    <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-blue-500"></div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">Parcel Ready for Pickup</p>
-                                        <p className="mt-1 text-xs text-gray-500">1 hour ago</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100">
-                                    <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-orange-500"></div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">Delivery Enquired</p>
-                                        <p className="mt-1 text-xs text-gray-500">2 hours ago</p>
+                                    <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100">
+                                        <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-orange-500"></div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-semibold text-gray-900">Delivery Enquired</p>
+                                            <p className="mt-1 text-xs text-gray-500">2 hours ago</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
