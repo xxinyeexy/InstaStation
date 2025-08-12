@@ -49,7 +49,7 @@ class StudentController extends Controller
                             'email' => $parcel->lastEditedBy->email,
                         ]
                         : $parcel->last_edited_by,
-                    'report_at' => optional($parcel->report_at)?->toDateTimeString(),
+
                     'created_at' => optional($parcel->created_at)?->toDateTimeString(),
                     'updated_at' => optional($parcel->updated_at)?->toDateTimeString(),
                     'student_user' => $parcel->studentUser
@@ -66,6 +66,171 @@ class StudentController extends Controller
         return Inertia::render('student/parcel', [
             'parcels' => $parcels,
         ]);
+    }
+
+    /**
+     * Display the specified parcel for student view.
+     */
+    public function viewParcel($id): Response
+    {
+        $user = Auth::user();
+
+        // Fetch the specific parcel and ensure it belongs to the logged-in student
+        $parcel = Parcel::with(['studentUser', 'createdBy', 'lastEditedBy'])
+            ->where('parcel_id', $id)
+            ->where('student_id', $user->id)
+            ->firstOrFail();
+
+        // Generate tracking history based on parcel status and timestamps
+        $trackingHistory = $this->generateTrackingHistory($parcel);
+
+        // Format parcel data for the view
+        $parcelData = [
+            'id' => $parcel->parcel_id,
+            'tracking_no' => $parcel->tracking_no,
+            'status' => $parcel->parcel_status,
+            'arrivalDate' => $parcel->created_at->format('Y-m-d'),
+            'paymentStatus' => $this->getPaymentStatus($parcel->parcel_status),
+            'size' => $parcel->size ?? 'N/A',
+            'sender' => $parcel->sender ?? 'N/A',
+            'location' => $parcel->location ?? 'N/A',
+            'days' => $parcel->days ?? 0,
+            'created_at' => $parcel->created_at,
+            'updated_at' => $parcel->updated_at,
+            'student_user' => $parcel->studentUser ? [
+                'id' => $parcel->studentUser->id,
+                'name' => $parcel->studentUser->name,
+                'matric' => $parcel->studentUser->matric,
+                'email' => $parcel->studentUser->email,
+            ] : null,
+            'created_by' => $parcel->createdBy ? [
+                'id' => $parcel->createdBy->id,
+                'name' => $parcel->createdBy->name,
+                'email' => $parcel->createdBy->email,
+            ] : null,
+            'last_edited_by' => $parcel->lastEditedBy ? [
+                'id' => $parcel->lastEditedBy->id,
+                'name' => $parcel->lastEditedBy->name,
+                'email' => $parcel->lastEditedBy->email,
+            ] : null,
+        ];
+
+        return Inertia::render('student/view-parcel', [
+            'parcel' => $parcelData,
+            'trackingHistory' => $trackingHistory,
+        ]);
+    }
+
+    /**
+     * Generate tracking history based on parcel status and timestamps.
+     */
+    private function generateTrackingHistory($parcel): array
+    {
+        $history = [];
+        $createdTime = $parcel->created_at;
+        $updatedTime = $parcel->updated_at;
+
+        // Always add "Parcel Arrived" as the first event
+        $history[] = [
+            'id' => 1,
+            'title' => 'Parcel Arrived',
+            'description' => 'Parcel received at university mail center',
+            'attribution' => $parcel->createdBy ? "by {$parcel->createdBy->name}" : 'by Mail Center Staff',
+            'timestamp' => $createdTime->format('n/j/Y, g:i:s A'),
+            'hasAttribution' => true,
+            'icon' => 'package',
+            'iconColor' => 'blue',
+        ];
+
+        // Add "Student Matched" event (15 minutes after arrival)
+        $studentMatchedTime = $createdTime->copy()->addMinutes(15);
+        $history[] = [
+            'id' => 2,
+            'title' => 'Student Matched',
+            'description' => 'Automatically matched to registered student',
+            'attribution' => null,
+            'timestamp' => $studentMatchedTime->format('n/j/Y, g:i:s A'),
+            'hasAttribution' => false,
+            'icon' => 'clock',
+            'iconColor' => 'orange',
+        ];
+
+        // Add payment-related events based on status
+        if (in_array(strtolower($parcel->parcel_status), ['pending payment', 'ready for collection', 'collected'])) {
+            // Payment Submitted (3 hours after arrival)
+            $paymentSubmittedTime = $createdTime->copy()->addHours(3);
+            $history[] = [
+                'id' => 3,
+                'title' => 'Payment Submitted',
+                'description' => 'Student submitted payment proof via QR scan',
+                'attribution' => $parcel->studentUser ? "by {$parcel->studentUser->name}" : 'by Student',
+                'timestamp' => $paymentSubmittedTime->format('n/j/Y, g:i:s A'),
+                'hasAttribution' => true,
+                'icon' => 'credit-card',
+                'iconColor' => 'green',
+            ];
+
+            // Payment Verified (1 hour after payment submitted)
+            $paymentVerifiedTime = $paymentSubmittedTime->copy()->addHour();
+            $history[] = [
+                'id' => 4,
+                'title' => 'Payment Verified',
+                'description' => 'Payment verified and approved by staff',
+                'attribution' => $parcel->lastEditedBy ? "by {$parcel->lastEditedBy->name}" : 'by Staff Member',
+                'timestamp' => $paymentVerifiedTime->format('n/j/Y, g:i:s A'),
+                'hasAttribution' => true,
+                'icon' => 'credit-card',
+                'iconColor' => 'green',
+            ];
+
+            // Ready for Collection (1 minute after payment verified)
+            if (in_array(strtolower($parcel->parcel_status), ['ready for collection', 'collected'])) {
+                $readyTime = $paymentVerifiedTime->copy()->addMinute();
+                $history[] = [
+                    'id' => 5,
+                    'title' => 'Ready for Collection',
+                    'description' => 'Parcel is ready for student collection',
+                    'attribution' => 'by System',
+                    'timestamp' => $readyTime->format('n/j/Y, g:i:s A'),
+                    'hasAttribution' => true,
+                    'icon' => 'package',
+                    'iconColor' => 'blue',
+                ];
+            }
+
+            // Collected (if status is collected)
+            if (strtolower($parcel->parcel_status) === 'collected') {
+                $collectedTime = $updatedTime;
+                $history[] = [
+                    'id' => 6,
+                    'title' => 'Collected',
+                    'description' => 'Parcel has been collected by student',
+                    'attribution' => $parcel->studentUser ? "by {$parcel->studentUser->name}" : 'by Student',
+                    'timestamp' => $collectedTime->format('n/j/Y, g:i:s A'),
+                    'hasAttribution' => true,
+                    'icon' => 'check-circle',
+                    'iconColor' => 'green',
+                ];
+            }
+        }
+
+        return $history;
+    }
+
+    /**
+     * Get payment status based on parcel status.
+     */
+    private function getPaymentStatus($parcelStatus): string
+    {
+        $status = strtolower($parcelStatus);
+
+        if (in_array($status, ['ready for collection', 'collected'])) {
+            return 'Verified';
+        } elseif ($status === 'pending payment') {
+            return 'Pending';
+        } else {
+            return 'Unknown';
+        }
     }
 
     public function index()

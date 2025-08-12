@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { CheckCircle, Trash2, X, XCircle } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
@@ -144,15 +144,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setNotifications((prev) => prev.filter((notification) => notification.id !== id));
     };
 
-    // Refactored: Use local data for instant modal
+    // Navigate to view-parcel page
     const handleViewParcel = (parcelId: number) => {
-        const parcel = parcelList.find((p) => p.parcel_id === parcelId);
-        if (parcel) {
-            setParcelDetails(parcel as ParcelDetails);
-            setShowDetailsModal(true);
-        } else {
-            addNotification('error', 'Error!', 'Parcel not found in local data.');
-        }
+        router.visit(`/student/parcel/${parcelId}`);
     };
 
     // Close details modal

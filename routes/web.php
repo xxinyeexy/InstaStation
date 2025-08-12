@@ -33,8 +33,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/staff/parcel/{id}/details', [ParcelController::class, 'getParcelDetails'])->name('staff.parcel.details');
     Route::put('/staff/parcel/{id}', [ParcelController::class, 'update'])->name('staff.parcel.update');
 
+    // Student routes
     Route::get('/student/parcel', [StudentController::class, 'student'])
-    ->name('student.parcel');
+        ->name('student.parcel');
+    Route::get('/student/parcel/{id}', [StudentController::class, 'viewParcel'])
+        ->name('student.view-parcel');
 
     // Parcel routes
     Route::resource('parcels', ParcelController::class);
