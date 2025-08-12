@@ -38,6 +38,10 @@ Route::middleware('auth')->group(function () {
         ->name('student.parcel');
     Route::get('/student/parcel/{id}', [StudentController::class, 'viewParcel'])
         ->name('student.view-parcel');
+    Route::get('/student/schedule/{id}', [StudentController::class, 'schedulePickup'])
+        ->name('student.schedule-pickup');
+    Route::post('/student/schedule/{id}', [StudentController::class, 'storeSchedule'])
+        ->name('student.store-schedule');
 
     // Parcel routes
     Route::resource('parcels', ParcelController::class);

@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\Parcel;
-use Inertia\Inertia;
-use Inertia\Response;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class StudentController extends Controller
 {
@@ -156,7 +159,9 @@ class StudentController extends Controller
         ];
 
         // Add payment-related events based on status
-        if (in_array(strtolower($parcel->parcel_status), ['pending payment', 'ready for collection', 'collected'])) {
+        // Only include payment events for approved statuses (ready for collection, collected, approved)
+        // Exclude payment events for pending payment status
+        if (in_array(strtolower($parcel->parcel_status), ['ready for collection', 'collected', 'approved'])) {
             // Payment Submitted (3 hours after arrival)
             $paymentSubmittedTime = $createdTime->copy()->addHours(3);
             $history[] = [
@@ -224,7 +229,7 @@ class StudentController extends Controller
     {
         $status = strtolower($parcelStatus);
 
-        if (in_array($status, ['ready for collection', 'collected'])) {
+        if (in_array($status, ['ready for collection', 'collected', 'approved'])) {
             return 'Verified';
         } elseif ($status === 'pending payment') {
             return 'Pending';
@@ -284,5 +289,86 @@ class StudentController extends Controller
     public function destroy(Student $student)
     {
         //
+    }
+
+    /**
+     * Show schedule pickup page for a specific parcel.
+     */
+    public function schedulePickup($id): Response
+    {
+        $user = Auth::user();
+        $parcel = Parcel::with(['studentUser', 'createdBy', 'lastEditedBy'])
+            ->where('parcel_id', $id)
+            ->where('student_id', $user->id)
+            ->firstOrFail();
+
+        // Generate collection code (simple format: B + random 3 digits)
+        $collectionCode = 'B' . str_pad(rand(100, 999), 3, '0', STR_PAD_LEFT);
+
+        $parcelData = [
+            'id' => $parcel->parcel_id,
+            'tracking_no' => $parcel->tracking_no,
+            'status' => $parcel->parcel_status,
+            'collection_code' => $collectionCode,
+            'sender' => $parcel->sender ?? 'N/A',
+            'payment_status' => $this->getPaymentStatus($parcel->parcel_status),
+            'student_user' => $parcel->studentUser ? [
+                'id' => $parcel->studentUser->id,
+                'name' => $parcel->studentUser->name,
+                'matric' => $parcel->studentUser->matric,
+                'email' => $parcel->studentUser->email,
+            ] : null,
+        ];
+
+        return Inertia::render('student/schedule', [
+            'parcel' => $parcelData,
+        ]);
+    }
+
+    public function storeSchedule(Request $request, $id): JsonResponse
+    {
+        $user = Auth::user();
+
+        // Validate the request
+        $request->validate([
+            'scheduled_datetime' => 'required|date|after:now',
+        ]);
+
+        try {
+            // Find the parcel and ensure it belongs to the authenticated user
+            $parcel = Parcel::where('parcel_id', $id)
+                ->where('student_id', $user->id)
+                ->firstOrFail();
+
+            // Check if parcel is already scheduled
+            if ($parcel->schedule) {
+                return response()->json([
+                    'message' => 'Parcel is already scheduled for pickup'
+                ], 400);
+            }
+
+            // Update the parcel with the scheduled datetime
+            $parcel->update([
+                'schedule' => $request->scheduled_datetime,
+                'last_edited_by' => $user->id,
+            ]);
+
+            return response()->json([
+                'message' => 'Pickup scheduled successfully',
+                'parcel' => [
+                    'id' => $parcel->parcel_id,
+                    'tracking_no' => $parcel->tracking_no,
+                    'scheduled_datetime' => $parcel->schedule,
+                ]
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Parcel not found or access denied'
+            ], 404);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Failed to schedule pickup. Please try again.'
+            ], 500);
+        }
     }
 }

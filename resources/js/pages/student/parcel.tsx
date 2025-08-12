@@ -455,49 +455,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
-    // Updated handleMarkAsCollected function - uses backend response
-    const handleMarkAsCollected = async (parcelId: number) => {
-        try {
-            const response = await fetch(`/staff/parcel/${parcelId}/collect`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-                console.log(`Parcel ${parcelId} marked as collected successfully`);
-
-                // Update the local state with the actual data from the server
-                setParcelList((prev) =>
-                    prev.map((parcel) =>
-                        parcel.parcel_id === parcelId
-                            ? {
-                                  ...parcel,
-                                  parcel_status: 'Collected',
-                                  updated_at: result.parcel.updated_at,
-                                  last_edited_by: result.parcel.last_edited_by,
-                              }
-                            : parcel,
-                    ),
-                );
-
-                // Show success notification
-                addNotification('success', 'Success!', 'Parcel marked as collected successfully!');
-
-                // Automatically switch to Collected tab to show the updated parcel
-                setActiveTab('Collected');
-            } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-        } catch (error) {
-            console.error('Failed to mark as collected:', error);
-
-            // Show error notification
-            addNotification('error', 'Error!', 'Failed to mark parcel as collected. Please try again.');
-        }
+    // Updated handleMarkAsCollected function - navigates to schedule page
+    const handleMarkAsCollected = (parcelId: number) => {
+        // Navigate to schedule page with parcel ID
+        router.visit(`/student/schedule/${parcelId}`);
     };
 
     // Format date for display
@@ -1174,8 +1135,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 <div key={parcel.parcel_id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                                     <div className="mb-3 flex items-start justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path
                                                         strokeLinecap="round"
                                                         strokeLinejoin="round"
@@ -1184,9 +1145,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     />
                                                 </svg>
                                             </div>
-                                            <div className="font-['Consolas'] text-sm font-semibold text-gray-900">
-                                                # {parcel.tracking_no || 'N/A'}
-                                            </div>
+                                            <div className="font-['Consolas'] text-sm font-semibold text-gray-900">{parcel.tracking_no || 'N/A'}</div>
                                         </div>
                                         <span
                                             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}

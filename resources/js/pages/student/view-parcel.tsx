@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { router } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle, CircleAlert, CreditCard, Package, User, AlarmClock } from 'lucide-react';
+import { AlarmClock, ArrowLeft, CheckCircle, CircleAlert, CreditCard, Package, User } from 'lucide-react';
 
 // TypeScript interfaces
 interface ParcelData {

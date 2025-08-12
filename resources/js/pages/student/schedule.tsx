@@ -1,0 +1,465 @@
+import AppLayout from '@/layouts/app-layout';
+import { router } from '@inertiajs/react';
+import { Calendar, CheckCircle, Clock, MapPin, X } from 'lucide-react';
+import { useState } from 'react';
+
+interface ParcelData {
+    id: number;
+    tracking_no: string;
+    status: string;
+    collection_code: string;
+    sender: string;
+    payment_status: string;
+    student_user: {
+        id: number;
+        name: string;
+        matric: string;
+        email: string;
+    } | null;
+}
+
+interface Props {
+    parcel: ParcelData;
+}
+
+const SchedulePickup = ({ parcel }: Props) => {
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleClose = () => {
+        router.visit('/student/parcel');
+    };
+
+    const handleSchedule = async () => {
+        if (!selectedDate || !selectedTimeSlot) {
+            alert('Please select both date and time slot for collection');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            // Get CSRF token
+            const getCsrfToken = () => {
+                const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                if (metaToken) return metaToken;
+                
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === 'XSRF-TOKEN') {
+                        return decodeURIComponent(value);
+                    }
+                }
+                return null;
+            };
+
+            const csrfToken = getCsrfToken();
+            
+            if (!csrfToken) {
+                throw new Error('CSRF token not found. Please refresh the page and try again.');
+            }
+
+            // Convert selected date and time to a proper datetime string
+            const selectedTimeSlotData = timeSlots.find((slot) => slot.id === selectedTimeSlot);
+            if (!selectedTimeSlotData) {
+                throw new Error('Invalid time slot selected');
+            }
+
+            // Parse the time slot to get start time (e.g., "9:00 AM - 10:00 AM" -> "09:00")
+            const timeMatch = selectedTimeSlotData.label.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
+            if (!timeMatch) {
+                throw new Error('Invalid time format');
+            }
+
+            let hour = parseInt(timeMatch[1]);
+            const minute = timeMatch[2];
+            const period = timeMatch[3];
+
+            // Convert to 24-hour format
+            if (period === 'PM' && hour !== 12) {
+                hour += 12;
+            } else if (period === 'AM' && hour === 12) {
+                hour = 0;
+            }
+
+            // Create the scheduled datetime
+            const scheduledDate = new Date(selectedDate);
+            scheduledDate.setHours(hour, parseInt(minute), 0, 0);
+
+            // Prepare the request data
+            const requestData = {
+                parcel_id: parcel.id,
+                scheduled_datetime: scheduledDate.toISOString(),
+            };
+
+            console.log('Scheduling pickup with data:', requestData);
+
+            const response = await fetch(`/student/schedule/${parcel.id}`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(requestData),
+            });
+
+            console.log('Response status:', response.status);
+
+            if (!response.ok) {
+                let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                
+                try {
+                    const errorData = await response.json();
+                    console.log('Error response:', errorData);
+                    
+                    if (errorData.message) {
+                        errorMessage = errorData.message;
+                    } else if (errorData.errors) {
+                        const validationErrors = Object.entries(errorData.errors)
+                            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+                            .join('\n');
+                        errorMessage = `Validation errors:\n${validationErrors}`;
+                    }
+                } catch (parseError) {
+                    console.log('Could not parse error response as JSON');
+                    const errorText = await response.text();
+                    console.log('Error response text:', errorText);
+                    errorMessage += `\n\nResponse: ${errorText}`;
+                }
+                
+                throw new Error(errorMessage);
+            }
+
+            const result = await response.json();
+            console.log('Success response:', result);
+            
+            // Show success message and redirect
+            alert('Collection scheduled successfully!');
+            router.visit('/student/parcel');
+        } catch (error) {
+            console.error('Scheduling error:', error);
+            if (error instanceof Error) {
+                alert('🚨 Scheduling failed: ' + error.message);
+            } else {
+                alert('🚨 An unexpected error occurred.');
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // Generate calendar days
+    const getDaysInMonth = (date: Date) => {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDay = firstDay.getDay();
+
+        const days = [];
+
+        // Add empty days for previous month
+        for (let i = 0; i < startingDay; i++) {
+            days.push(null);
+        }
+
+        // Add days of current month
+        for (let i = 1; i <= daysInMonth; i++) {
+            days.push(new Date(year, month, i));
+        }
+
+        return days;
+    };
+
+    const isWeekend = (date: Date) => {
+        const day = date.getDay();
+        return day === 0 || day === 6; // Sunday or Saturday
+    };
+
+    const isToday = (date: Date) => {
+        const today = new Date();
+        return date.toDateString() === today.toDateString();
+    };
+
+    const isSelected = (date: Date) => {
+        return selectedDate && date.toDateString() === selectedDate.toDateString();
+    };
+
+    const isPastDate = (date: Date) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return date < today;
+    };
+
+    const handleDateClick = (date: Date) => {
+        if (!isWeekend(date) && !isPastDate(date)) {
+            setSelectedDate(date);
+        }
+    };
+
+    const navigateMonth = (direction: 'prev' | 'next') => {
+        const newMonth = new Date(currentMonth);
+        if (direction === 'prev') {
+            newMonth.setMonth(newMonth.getMonth() - 1);
+        } else {
+            newMonth.setMonth(newMonth.getMonth() + 1);
+        }
+        setCurrentMonth(newMonth);
+    };
+
+    const timeSlots = [
+        { id: '9:00-10:00', label: '9:00 AM - 10:00 AM', available: true },
+        { id: '10:00-11:00', label: '10:00 AM - 11:00 AM', available: true },
+        { id: '11:00-12:00', label: '11:00 AM - 12:00 PM', available: false },
+        { id: '14:00-15:00', label: '2:00 PM - 3:00 PM', available: true },
+        { id: '15:00-16:00', label: '3:00 PM - 4:00 PM', available: true },
+        { id: '16:00-17:00', label: '4:00 PM - 5:00 PM', available: true },
+    ];
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+    return (
+        <AppLayout>
+            <div className="fixed inset-0 overflow-y-auto bg-gray-50">
+                    {/* Header */}
+                <div className="border-b bg-white shadow-sm">
+                    <div className="mx-auto max-w-6xl px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-900">Schedule Pickup - {parcel.tracking_no}</h1>
+                                <p className="mt-1 text-gray-600">Choose your preferred date and time for parcel collection</p>
+                            </div>
+                            <button onClick={handleClose} className="rounded-full p-2 transition-colors hover:bg-gray-100">
+                                <X className="h-6 w-6 text-gray-600" />
+                        </button>
+                            </div>
+                        </div>
+                    </div>
+
+                <div className="mx-auto max-w-6xl px-6 py-8">
+                    {/* Parcel Status Section */}
+                    <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-6">
+                        <div className="mb-4 flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <span className="text-lg font-semibold text-green-800">Approved</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                            <div>
+                                <span className="text-sm text-green-700">Tracking ID:</span>
+                                <span className="ml-2 font-medium text-green-900">{parcel.tracking_no}</span>
+                            </div>
+                            <div>
+                                <span className="text-sm text-green-700">Sender:</span>
+                                <span className="ml-2 font-medium text-green-900">{parcel.sender}</span>
+                            </div>
+                            <div>
+                                <span className="text-sm text-green-700">Collection Code:</span>
+                                <span className="ml-2 rounded bg-green-200 px-2 py-1 font-['Consolas'] font-bold text-green-900">
+                                    {parcel.collection_code}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-sm text-green-700">Payment Status:</span>
+                                <span className="ml-2 rounded bg-green-200 px-2 py-1 font-medium text-green-900">{parcel.payment_status}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Collection Location Section */}
+                    <div className="mb-6 rounded-lg border bg-white p-6 shadow-sm">
+                        <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900">
+                            <MapPin className="h-5 w-5 text-blue-600" />
+                            Collection Location
+                        </h2>
+                        <div className="space-y-2">
+                            <h3 className="font-semibold text-gray-900">University Parcel Center</h3>
+                            <p className="text-gray-600">Ground Floor, Student Services Building</p>
+                            <p className="text-gray-600">Operating Hours: Monday - Friday, 9:00 AM - 5:00 PM</p>
+                        </div>
+                    </div>
+
+                    {/* Scheduling Section */}
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        {/* Select Date Card */}
+                        <div className="rounded-lg border bg-white p-6 shadow-sm">
+                            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900">
+                                <Calendar className="h-5 w-5 text-blue-600" />
+                                Select Date
+                            </h2>
+                            <p className="mb-4 text-gray-600">Choose your preferred collection date</p>
+
+                            {/* Calendar Header */}
+                            <div className="mb-4 flex items-center justify-between">
+                                <button onClick={() => navigateMonth('prev')} className="rounded-full p-2 transition-colors hover:bg-gray-100">
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                    {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                                </h3>
+                                <button onClick={() => navigateMonth('next')} className="rounded-full p-2 transition-colors hover:bg-gray-100">
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Calendar Grid */}
+                            <div className="mb-4 grid grid-cols-7 gap-1">
+                                {daysOfWeek.map((day) => (
+                                    <div key={day} className="py-2 text-center text-sm font-medium text-gray-500">
+                                        {day}
+                                                    </div>
+                                ))}
+                                {getDaysInMonth(currentMonth).map((date, index) => (
+                                    <div key={index} className="text-center">
+                                        {date ? (
+                                            <button
+                                                onClick={() => handleDateClick(date)}
+                                                disabled={isWeekend(date) || isPastDate(date)}
+                                                className={`h-10 w-10 rounded-full text-sm font-medium transition-colors ${
+                                                    isSelected(date)
+                                                        ? 'bg-blue-500 text-white'
+                                                        : isToday(date)
+                                                          ? 'bg-blue-100 text-blue-700'
+                                                          : isWeekend(date) || isPastDate(date)
+                                                            ? 'cursor-not-allowed text-gray-300'
+                                                            : 'text-gray-700 hover:bg-gray-100'
+                                                } `}
+                                            >
+                                                {date.getDate()}
+                                            </button>
+                                        ) : (
+                                            <div className="h-10 w-10"></div>
+                                    )}
+                                </div>
+                                ))}
+                            </div>
+
+                            {/* Calendar Notes */}
+                            <div className="space-y-1 text-sm text-gray-600">
+                                <p>• Weekends are not available</p>
+                                <p>• Collection available Monday - Friday only</p>
+                            </div>
+                        </div>
+
+                        {/* Select Time Slot Card */}
+                        <div className="rounded-lg border bg-white p-6 shadow-sm">
+                            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900">
+                                <Clock className="h-5 w-5 text-blue-600" />
+                                Select Time Slot
+                            </h2>
+                            <p className="mb-4 text-gray-600">Choose your preferred collection time</p>
+
+                            {/* Time Slots */}
+                            <div className="mb-6 space-y-3">
+                                {timeSlots.map((slot) => (
+                                    <button
+                                        key={slot.id}
+                                        onClick={() => slot.available && setSelectedTimeSlot(slot.id)}
+                                        disabled={!slot.available}
+                                        className={`flex w-full items-center justify-between rounded-lg border p-3 transition-colors ${
+                                            slot.available
+                                                ? selectedTimeSlot === slot.id
+                                                    ? 'border-blue-500 bg-blue-50'
+                                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                : 'cursor-not-allowed border-gray-200 bg-gray-50'
+                                        } `}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <Clock className="h-4 w-4 text-gray-500" />
+                                            <span className={slot.available ? 'text-gray-900' : 'text-gray-500'}>{slot.label}</span>
+                                        </div>
+                                        {!slot.available && <span className="text-sm font-medium text-red-500">Full</span>}
+                                    </button>
+                                ))}
+                        </div>
+
+                            {/* Note Section */}
+                            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                                <h4 className="mb-1 font-semibold text-yellow-900">Note:</h4>
+                                <p className="text-sm text-yellow-800">
+                                    Please arrive within your selected time slot. Bring your student ID and collection code.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Pickup Summary Section - Only show when both date and time are selected */}
+                    {selectedDate && selectedTimeSlot && (
+                        <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-6">
+                            <h2 className="mb-4 text-xl font-semibold text-blue-900">Pickup Summary</h2>
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div>
+                                    <span className="text-sm text-blue-700">Date:</span>
+                                    <span className="ml-2 font-medium text-blue-900">
+                                        {selectedDate.toLocaleDateString('en-US', {
+                                            weekday: 'long',
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        })}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-blue-700">Time:</span>
+                                    <span className="ml-2 font-medium text-blue-900">
+                                        {timeSlots.find((slot) => slot.id === selectedTimeSlot)?.label}
+                                    </span>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-blue-700">Location:</span>
+                                    <span className="ml-2 font-medium text-blue-900">University Parcel Center</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-blue-700">Collection Code:</span>
+                                    <span className="rounded bg-blue-200 px-3 py-1 font-['Consolas'] font-bold text-blue-900">
+                                        {parcel.collection_code}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Bottom Buttons */}
+                    <div className="mt-8 flex justify-center gap-4">
+                            <button
+                            onClick={handleClose}
+                            className="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                            onClick={handleSchedule}
+                            disabled={!selectedDate || !selectedTimeSlot || isSubmitting}
+                            className="flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                                    Scheduling...
+                                </>
+                            ) : (
+                                'Schedule Pickup'
+                                )}
+                            </button>
+                    </div>
+                </div>
+            </div>
+        </AppLayout>
+    );
+};
+
+
+
+export default SchedulePickup;
