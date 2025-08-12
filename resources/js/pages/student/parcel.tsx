@@ -1086,7 +1086,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <div className="mb-3 flex items-start justify-between">
                                         <div className="flex items-center gap-2">
                                             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600">#</div>
-                                            <div className="text-sm font-semibold text-gray-900"># {parcel.tracking_no || 'N/A'}</div>
+                                            <div className="font-['Consolas'] text-sm font-semibold text-gray-900">
+                                                # {parcel.tracking_no || 'N/A'}
+                                            </div>
                                         </div>
                                         <span
                                             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
@@ -1390,7 +1392,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <div className="flex-1 space-y-2">
                                                             {/* Header row */}
                                                             <div className="flex items-center gap-4">
-                                                                <h3 className="text-xl font-bold text-gray-900">
+                                                                <h3 className="font-['Consolas'] text-xl font-bold text-gray-900">
                                                                     Parcel - {parcel.tracking_no || 'N/A'}
                                                                 </h3>
                                                                 <span
