@@ -385,17 +385,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         const normalizedStatus = status?.toLowerCase();
         switch (normalizedStatus) {
             case 'pending payment':
-                return 'border-orange-200 bg-orange-100 text-orange-600';
+                return 'bg-yellow-100 text-yellow-800 border-yellow-200';
             case 'ready for collection':
-                return 'bg-[#EDE9FE] text-[#5B21B6] border-purple-200';
+                return 'bg-green-100 text-green-800 border-green-200';
             case 'collected':
-                return 'border-emerald-200 bg-emerald-100 text-emerald-700';
+                return 'bg-blue-100 text-blue-800 border-blue-200';
             case 'unclaimed':
-                return 'bg-[#C5C5CF] text-black border-gray-300';
+                return 'bg-gray-100 text-gray-800 border-gray-200';
             case 'approved':
-                return 'border-amber-200 bg-amber-100 text-amber-700';
+                return 'bg-red-100 text-red-800 border-red-200';
             default:
-                return 'border-gray-200 bg-gray-100 text-gray-600';
+                return 'bg-gray-100 text-gray-600 border-gray-200';
         }
     };
 
@@ -1019,32 +1019,121 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             <div className="min-h-screen bg-gray-50 p-6">
                 {/* Header tiles matching screenshot */}
                 <div className="mb-6 grid grid-cols-12 gap-4">
-                    <div className="col-span-2 rounded-xl border border-violet-500 bg-violet-50 p-4">
-                        <div className="text-xs text-gray-600">My Parcels</div>
-                        <div className="mt-1 text-3xl font-bold text-violet-700">{tileCounts.myParcels}</div>
+                    {/* My Parcels - Purple (icon on right) */}
+                    <div className="col-span-2 rounded-xl border border-violet-300 bg-violet-50 p-4">
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <div className="text-xs text-gray-600">My Parcels</div>
+                                <div className="mt-1 text-3xl font-bold text-violet-700">{tileCounts.myParcels}</div>
+                            </div>
+                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-violet-100 text-violet-600">
+                                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Pending Payment - Yellow (icon on right) */}
                     <div className="col-span-2 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
-                        <div className="text-xs text-gray-600">Pending Payment</div>
-                        <div className="mt-1 text-3xl font-bold text-yellow-700">{tileCounts.pendingPayment}</div>
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <div className="text-xs text-gray-600">Pending Payment</div>
+                                <div className="mt-1 text-3xl font-bold text-yellow-700">{tileCounts.pendingPayment}</div>
+                            </div>
+                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
+                                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Approved - Orange (icon on right) */}
                     <div className="col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                        <div className="text-xs text-gray-600">Approved</div>
-                        <div className="mt-1 text-3xl font-bold text-amber-700">{tileCounts.approved}</div>
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <div className="text-xs text-gray-600">Approved</div>
+                                <div className="mt-1 text-3xl font-bold text-amber-700">{tileCounts.approved}</div>
+                            </div>
+                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Quick Actions */}
                     <div className="col-span-4 col-start-9 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
                         <div className="mb-3 text-sm font-semibold text-gray-700">Quick Actions</div>
                         <button className="flex w-full items-center justify-between rounded-lg bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100">
                             <span>Generate Reports</span>
-                            <span>›</span>
                         </button>
                     </div>
+
+                    {/* Ready for Collection - Green (icon on right) */}
                     <div className="col-span-3 rounded-xl border border-green-200 bg-green-50 p-4">
-                        <div className="text-xs text-gray-600">Ready for Collection</div>
-                        <div className="mt-1 text-3xl font-bold text-green-700">{tileCounts.readyForCollection}</div>
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <div className="text-xs text-gray-600">Ready for Collection</div>
+                                <div className="mt-1 text-3xl font-bold text-green-700">{tileCounts.readyForCollection}</div>
+                            </div>
+                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-green-100 text-green-600">
+                                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Collected - Light Blue (icon on right) */}
                     <div className="col-span-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
-                        <div className="text-xs text-gray-600">Collected</div>
-                        <div className="mt-1 text-3xl font-bold text-blue-700">{tileCounts.collected}</div>
+                        <div className="flex items-start justify-between">
+                            <div>
+                                <div className="text-xs text-gray-600">Collected</div>
+                                <div className="mt-1 text-3xl font-bold text-blue-700">{tileCounts.collected}</div>
+                            </div>
+                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    className="lucide lucide-package-open-icon lucide-package-open"
+                                >
+                                    <path d="M12 22v-9" />
+                                    <path d="M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z" />
+                                    <path d="M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13" />
+                                    <path d="M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1085,7 +1174,16 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 <div key={parcel.parcel_id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                                     <div className="mb-3 flex items-start justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600">#</div>
+                                            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                                    />
+                                                </svg>
+                                            </div>
                                             <div className="font-['Consolas'] text-sm font-semibold text-gray-900">
                                                 # {parcel.tracking_no || 'N/A'}
                                             </div>
@@ -1098,8 +1196,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     </div>
 
                                     <div className="mb-2 flex items-center gap-2 text-sm text-gray-600">
-                                        <span>Arrived:</span>
-                                        <span className="font-medium text-gray-900">{formatDate(parcel.created_at)}</span>
+                                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                        </svg>
+                                        <span>Arrived: {formatDate(parcel.created_at)}</span>
                                     </div>
 
                                     <div className="mb-4 text-sm">
@@ -1129,6 +1234,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 onClick={() => handleMarkAsCollected(parcel.parcel_id)}
                                                 className="flex-1 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700"
                                             >
+                                                <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
                                                 Collect
                                             </button>
                                         )}
