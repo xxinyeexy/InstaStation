@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { router } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle, Clock, CreditCard, Package, User, CircleAlert } from 'lucide-react';
+import { ArrowLeft, CheckCircle, CircleAlert, CreditCard, Package, User, AlarmClock } from 'lucide-react';
 
 // TypeScript interfaces
 interface ParcelData {
@@ -199,7 +199,7 @@ const ParcelDetails = ({ parcel, trackingHistory }: Props) => {
                     {/* Right Section - Tracking History */}
                     <div className="space-y-6">
                         <div className="flex items-center gap-2">
-                            <CircleAlert className="h-5 w-5 text-gray-600" />
+                            <AlarmClock className="h-5 w-5 text-gray-600" />
                             <h2 className="text-lg font-semibold text-gray-900">Tracking History - #{parcel.id}</h2>
                         </div>
 
