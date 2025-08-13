@@ -40,6 +40,8 @@ Route::middleware('auth')->group(function () {
         ->name('student.view-parcel');
     Route::get('/student/schedule/{id}', [StudentController::class, 'schedulePickup'])
         ->name('student.schedule-pickup');
+    Route::get('/student/schedule/{id}/availability', [StudentController::class, 'timeSlotAvailability'])
+        ->name('student.schedule-availability');
     Route::post('/student/schedule/{id}', [StudentController::class, 'storeSchedule'])
         ->name('student.store-schedule');
 

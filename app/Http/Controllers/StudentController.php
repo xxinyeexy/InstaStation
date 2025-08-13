@@ -10,11 +10,36 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class StudentController extends Controller
 {
+    /**
+     * Maximum allowed participants per time slot session
+     */
+    private const TIME_SLOT_CAPACITY = 20;
+
+    /**
+     * Time slot definitions: human label mapped to [start, end) 24h range.
+     * Start inclusive, end exclusive.
+     *
+     * @var array<string, array{0: string, 1: string}>
+     */
+    private array $timeSlotRanges = [
+        '9:00 AM - 10:00 AM' => ['09:00:00', '10:00:00'],
+        '10:00 AM - 11:00 AM' => ['10:00:00', '11:00:00'],
+        '11:00 AM - 12:00 PM' => ['11:00:00', '12:00:00'],
+        '2:00 PM - 3:00 PM' => ['14:00:00', '15:00:00'],
+        '3:00 PM - 4:00 PM' => ['15:00:00', '16:00:00'],
+        '4:00 PM - 5:00 PM' => ['16:00:00', '17:00:00'],
+    ];
+
+    private function allowedTimeSlots(): array
+    {
+        return array_keys($this->timeSlotRanges);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -329,6 +354,70 @@ class StudentController extends Controller
         ]);
     }
 
+    /**
+     * Get availability for each time slot for a given date.
+     */
+    public function timeSlotAvailability(Request $request, $id): JsonResponse
+    {
+        $user = Auth::user();
+
+        // ensure parcel belongs to the user (prevents guessing IDs)
+        Parcel::where('parcel_id', $id)
+            ->where('student_id', $user->id)
+            ->firstOrFail();
+
+        $request->validate([
+            'date' => 'required|date', // YYYY-MM-DD
+        ]);
+
+        // Parse as a plain date to avoid timezone shifts
+        $date = Carbon::createFromFormat('Y-m-d', $request->get('date'))->toDateString();
+
+        $slots = [];
+        foreach ($this->allowedTimeSlots() as $label) {
+            [$start, $end] = $this->timeSlotRanges[$label];
+
+            $count = Parcel::whereDate('schedule', $date)
+                ->where(function ($q) use ($label, $start, $end) {
+                    $q->where('time_slot', $label)
+                        ->orWhere(function ($qq) use ($start, $end) {
+                            $qq->whereNull('time_slot')
+                                ->whereTime('schedule', '>=', $start)
+                                ->whereTime('schedule', '<', $end);
+                        });
+                })
+                ->count();
+
+            $slots[] = [
+                'label' => $label,
+                'count' => $count,
+                'full' => $count >= self::TIME_SLOT_CAPACITY,
+            ];
+        }
+
+        // Compute recommended slots (lowest load among not-full)
+        $minCount = null;
+        foreach ($slots as $s) {
+            if ($s['full']) {
+                continue;
+            }
+            if ($minCount === null || $s['count'] < $minCount) {
+                $minCount = $s['count'];
+            }
+        }
+
+        $slots = array_map(function ($s) use ($minCount) {
+            $s['recommended'] = !$s['full'] && $minCount !== null && $s['count'] === $minCount;
+            return $s;
+        }, $slots);
+
+        return response()->json([
+            'date' => $date,
+            'capacity' => self::TIME_SLOT_CAPACITY,
+            'slots' => $slots,
+        ]);
+    }
+
     public function storeSchedule(Request $request, $id): JsonResponse
     {
         $user = Auth::user();
@@ -336,7 +425,7 @@ class StudentController extends Controller
         // Validate the request
         $request->validate([
             'scheduled_datetime' => 'required|date|after:now',
-            'time_slot' => 'required|string|max:50',
+            'time_slot' => 'required|string|in:' . implode(',', $this->allowedTimeSlots()),
         ]);
 
         try {
@@ -360,6 +449,26 @@ class StudentController extends Controller
                 ], 400);
             }
 
+            // Enforce capacity: max N participants per slot per date
+            $desiredDate = Carbon::parse($request->scheduled_datetime)->toDateString();
+            [$start, $end] = $this->timeSlotRanges[$request->time_slot];
+            $existingCount = Parcel::whereDate('schedule', $desiredDate)
+                ->where(function ($q) use ($request, $start, $end) {
+                    $q->where('time_slot', $request->time_slot)
+                        ->orWhere(function ($qq) use ($start, $end) {
+                            $qq->whereNull('time_slot')
+                                ->whereTime('schedule', '>=', $start)
+                                ->whereTime('schedule', '<', $end);
+                        });
+                })
+                ->count();
+
+            if ($existingCount >= self::TIME_SLOT_CAPACITY) {
+                return response()->json([
+                    'message' => 'Selected time slot is full. Please choose another slot.',
+                ], 400);
+            }
+
             // Update the parcel with the scheduled datetime, time slot, and change status to "Ready for Collection"
             $parcel->update([
                 'schedule' => $request->scheduled_datetime,
@@ -380,6 +489,7 @@ class StudentController extends Controller
                     'id' => $parcel->parcel_id,
                     'tracking_no' => $parcel->tracking_no,
                     'scheduled_datetime' => $parcel->schedule,
+                    'time_slot' => $parcel->time_slot,
                 ]
             ]);
         } catch (ModelNotFoundException $e) {

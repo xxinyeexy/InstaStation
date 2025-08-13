@@ -27,6 +27,8 @@ const SchedulePickup = ({ parcel }: Props) => {
     const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [slotAvailability, setSlotAvailability] = useState<Record<string, { count: number; full: boolean; recommended: boolean }>>({});
+    const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
     const handleClose = () => {
         router.visit('/student/parcel');
@@ -156,9 +158,12 @@ const SchedulePickup = ({ parcel }: Props) => {
             const result = await response.json();
             console.log('Success response:', result);
 
-            // Show success message and redirect
+            // Show success message, refresh availability for instant feedback, then redirect
             alert('Collection scheduled successfully!');
-            router.visit('/student/parcel');
+            if (selectedDate) {
+                await fetchAvailability(selectedDate);
+            }
+            setTimeout(() => router.visit('/student/parcel'), 400);
         } catch (error) {
             console.error('Scheduling error:', error);
             if (error instanceof Error) {
@@ -215,9 +220,36 @@ const SchedulePickup = ({ parcel }: Props) => {
         return date < today;
     };
 
+    const fetchAvailability = async (date: Date) => {
+        try {
+            setIsLoadingSlots(true);
+            // Use LOCAL date (not UTC) to avoid off-by-one day issues
+            const yyyy = date.getFullYear();
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const dateStr = `${yyyy}-${mm}-${dd}`;
+            const res = await fetch(`/student/schedule/${parcel.id}/availability?date=${encodeURIComponent(dateStr)}`, {
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin',
+            });
+            if (!res.ok) throw new Error(`Failed to load availability (${res.status})`);
+            const data = await res.json();
+            const map: Record<string, { count: number; full: boolean; recommended: boolean }> = {};
+            for (const s of data.slots) {
+                map[s.label] = { count: s.count, full: s.full, recommended: s.recommended };
+            }
+            setSlotAvailability(map);
+        } catch (e) {
+            console.error('Failed to fetch availability', e);
+        } finally {
+            setIsLoadingSlots(false);
+        }
+    };
+
     const handleDateClick = (date: Date) => {
         if (!isWeekend(date) && !isPastDate(date)) {
             setSelectedDate(date);
+            fetchAvailability(date);
         }
     };
 
@@ -380,26 +412,42 @@ const SchedulePickup = ({ parcel }: Props) => {
 
                             {/* Time Slots */}
                             <div className="mb-6 space-y-3">
-                                {timeSlots.map((slot) => (
-                                    <button
-                                        key={slot.id}
-                                        onClick={() => slot.available && setSelectedTimeSlot(slot.id)}
-                                        disabled={!slot.available}
-                                        className={`flex w-full items-center justify-between rounded-lg border p-3 transition-colors ${
-                                            slot.available
-                                                ? selectedTimeSlot === slot.id
-                                                    ? 'border-blue-500 bg-blue-50'
-                                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                                : 'cursor-not-allowed border-gray-200 bg-gray-50'
-                                        } `}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <Clock className="h-4 w-4 text-gray-500" />
-                                            <span className={slot.available ? 'text-gray-900' : 'text-gray-500'}>{slot.label}</span>
-                                        </div>
-                                        {!slot.available && <span className="text-sm font-medium text-red-500">Full</span>}
-                                    </button>
-                                ))}
+                                {timeSlots.map((slot) => {
+                                    const state = slotAvailability[slot.label];
+                                    const isFull = state?.full === true;
+                                    const isRecommended = state?.recommended === true;
+                                    const isAvailable = !isFull;
+                                    const isSelectedSlot = selectedTimeSlot === slot.id;
+
+                                    return (
+                                        <button
+                                            key={slot.id}
+                                            onClick={() => isAvailable && setSelectedTimeSlot(slot.id)}
+                                            disabled={!isAvailable || isLoadingSlots}
+                                            className={`flex w-full items-center justify-between rounded-lg border p-3 transition-colors ${
+                                                isAvailable
+                                                    ? isSelectedSlot
+                                                        ? 'border-blue-500 bg-blue-50'
+                                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                    : 'cursor-not-allowed border-gray-200 bg-gray-50'
+                                            } `}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <Clock className="h-4 w-4 text-gray-500" />
+                                                <span className={isAvailable ? 'text-gray-900' : 'text-gray-500'}>{slot.label}</span>
+                                                {typeof state?.count === 'number' && (
+                                                    <span className="ml-2 text-xs text-gray-500">{state.count}/20</span>
+                                                )}
+                                                {isRecommended && !isFull && (
+                                                    <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                                                        Recommended
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {isFull && <span className="text-sm font-medium text-red-500">Full</span>}
+                                        </button>
+                                    );
+                                })}
                             </div>
 
                             {/* Note Section */}
