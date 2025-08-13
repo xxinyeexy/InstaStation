@@ -1133,6 +1133,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             const isPendingPayment = status === 'pending payment';
                             const isReady = status === 'ready for collection' || status === 'ready to collect';
                             const isCollected = status === 'collected';
+                            const scheduledDateStr = parcel.schedule
+                                ? new Date(parcel.schedule).toLocaleDateString('en-MY', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                  })
+                                : '';
                             return (
                                 <div key={parcel.parcel_id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
                                     <div className="mb-3 flex items-start justify-between">
@@ -1202,37 +1209,59 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             </button>
                                         )}
                                         {isReady && (
-                                            <>
-                                                <button className="flex-1 rounded-md bg-gray-500 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-600">
-                                                    <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                        />
-                                                    </svg>
-                                                    {parcel.time_slot ? `Scheduled (${parcel.time_slot})` : 'Scheduled'}
+                                            <div className="w-full space-y-2">
+                                                {/* Row 1: QR Code and View Details */}
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <button className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                                        <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
+                                                            />
+                                                        </svg>
+                                                        Show QR Code
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleViewParcel(parcel.parcel_id)}
+                                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                                    >
+                                                        View Details
+                                                    </button>
+                                                </div>
+
+                                                {/* Row 2: Scheduled full-width */}
+                                                <button className="w-full rounded-xl bg-gray-50 px-4 py-3 text-gray-700 shadow-sm transition-colors hover:bg-gray-100">
+                                                    <div className="flex items-center gap-3">
+                                                        <svg className="h-4 w-4 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                            />
+                                                        </svg>
+                                                        <div className="flex flex-col text-left leading-tight">
+                                                            <span className="text-sm font-semibold">Scheduled</span>
+                                                            <span className="text-xs text-gray-700">
+                                                                {scheduledDateStr && parcel.time_slot
+                                                                    ? `${scheduledDateStr} • ${parcel.time_slot}`
+                                                                    : parcel.time_slot || scheduledDateStr || ''}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </button>
-                                                <button className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                                    <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zm12 0h2a1 1 0 001-1V6a1 1 0 00-1-1h-2a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
-                                                        />
-                                                    </svg>
-                                                    Show QR Code
-                                                </button>
-                                            </>
+                                            </div>
                                         )}
-                                        <button
-                                            onClick={() => handleViewParcel(parcel.parcel_id)}
-                                            className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                        >
-                                            View Details
-                                        </button>
+                                        {!isReady && (
+                                            <button
+                                                onClick={() => handleViewParcel(parcel.parcel_id)}
+                                                className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                            >
+                                                View Details
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             );
