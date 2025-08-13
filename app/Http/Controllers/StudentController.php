@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class StudentController extends Controller
 {
@@ -469,10 +470,16 @@ class StudentController extends Controller
                 ], 400);
             }
 
-            // Update the parcel with the scheduled datetime, time slot, and change status to "Ready for Collection"
+            // Generate collection code: alphabet + 3 numbers
+            $alphabet = chr(rand(65, 90)); // Random uppercase letter A-Z
+            $numbers = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
+            $collectionCode = $alphabet . $numbers;
+
+            // Update the parcel with the scheduled datetime, time slot, collection code, and change status to "Ready for Collection"
             $parcel->update([
                 'schedule' => $request->scheduled_datetime,
                 'time_slot' => $request->time_slot,
+                'collection_code' => $collectionCode,
                 'parcel_status' => 'Ready for Collection',
                 'last_edited_by' => $user->id,
             ]);
@@ -500,6 +507,110 @@ class StudentController extends Controller
             return response()->json([
                 'message' => 'Failed to schedule pickup. Please try again.'
             ], 500);
+        }
+    }
+
+    /**
+     * Test QR code generation
+     */
+    public function testQRCode(): JsonResponse
+    {
+        try {
+            Log::info('Testing QR code generation');
+
+            $testData = 'TEST123';
+            $qrCodeImage = QrCode::format('svg')
+                ->size(300)
+                ->margin(10)
+                ->errorCorrection('H')
+                ->generate($testData);
+
+            $qrCodeBase64 = base64_encode($qrCodeImage);
+
+            Log::info('QR code test successful', ['data' => $testData, 'size' => strlen($qrCodeBase64)]);
+
+            return response()->json([
+                'success' => true,
+                'test_data' => $testData,
+                'qr_code_image' => 'data:image/svg+xml;base64,' . $qrCodeBase64,
+            ]);
+        } catch (Exception $e) {
+            Log::error('QR code test failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'QR code test failed: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Generate QR code for a scheduled parcel
+     */
+    public function generateQRCode($id): JsonResponse
+    {
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            Log::info('Generating QR code for parcel', ['parcel_id' => $id, 'user_id' => $user->id]);
+
+            $parcel = Parcel::where('parcel_id', $id)
+                ->where('student_id', $user->id)
+                ->first();
+
+            if (!$parcel) {
+                Log::warning('Parcel not found for QR generation', ['parcel_id' => $id, 'user_id' => $user->id]);
+                return response()->json(['error' => 'Parcel not found'], 404);
+            }
+
+            // Check if parcel is scheduled for pickup
+            if (!$parcel->schedule || !$parcel->time_slot) {
+                Log::warning('Parcel not scheduled for pickup', ['parcel_id' => $id, 'schedule' => $parcel->schedule, 'time_slot' => $parcel->time_slot]);
+                return response()->json(['error' => 'Parcel is not scheduled for pickup'], 400);
+            }
+
+            // Generate collection code if not already exists
+            if (!$parcel->collection_code) {
+                $alphabet = chr(rand(65, 90)); // Random uppercase letter A-Z
+                $numbers = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
+                $collectionCode = $alphabet . $numbers;
+                $parcel->update(['collection_code' => $collectionCode]);
+                Log::info('Generated new collection code', ['parcel_id' => $id, 'collection_code' => $collectionCode]);
+            } else {
+                $collectionCode = $parcel->collection_code;
+                Log::info('Using existing collection code', ['parcel_id' => $id, 'collection_code' => $collectionCode]);
+            }
+
+            // Generate QR code image as base64 - QR code contains only the tracking number
+            Log::info('Generating QR code image', ['parcel_id' => $id, 'tracking_no' => $parcel->tracking_no]);
+
+            $qrCodeImage = QrCode::format('svg')
+                ->size(300)
+                ->margin(10)
+                ->errorCorrection('H')
+                ->generate($parcel->tracking_no);
+
+            $qrCodeBase64 = base64_encode($qrCodeImage);
+
+            Log::info('QR code generated successfully', ['parcel_id' => $id, 'qr_size' => strlen($qrCodeBase64)]);
+
+            return response()->json([
+                'qr_code' => $parcel->tracking_no, // QR code content is the tracking number
+                'collection_code' => $collectionCode,
+                'tracking_no' => $parcel->tracking_no,
+                'schedule' => $parcel->schedule,
+                'time_slot' => $parcel->time_slot,
+                'qr_code_image' => 'data:image/svg+xml;base64,' . $qrCodeBase64,
+            ]);
+        } catch (Exception $e) {
+            Log::error('Error generating QR code', [
+                'parcel_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Failed to generate QR code: ' . $e->getMessage()], 500);
         }
     }
 }

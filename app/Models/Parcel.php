@@ -20,6 +20,7 @@ class Parcel extends Model
         'parcel_status',
         'days',
         'qr_code',
+        'collection_code',
         'schedule',
         'time_slot',
         'created_by',

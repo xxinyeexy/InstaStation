@@ -16,6 +16,8 @@ Route::get('/register', [RegisteredUserController::class, 'create'])
 
 Route::post('/register', [RegisteredUserController::class, 'store']);
 
+
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
@@ -44,6 +46,10 @@ Route::middleware('auth')->group(function () {
         ->name('student.schedule-availability');
     Route::post('/student/schedule/{id}', [StudentController::class, 'storeSchedule'])
         ->name('student.store-schedule');
+    Route::get('/student/parcel/{id}/qr-code', [StudentController::class, 'generateQRCode'])
+        ->name('student.qr-code');
+    Route::get('/student/test-qr-code', [StudentController::class, 'testQRCode'])
+        ->name('student.test-qr-code');
 
     // Parcel routes
     Route::resource('parcels', ParcelController::class);

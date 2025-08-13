@@ -1,3 +1,4 @@
+import QRCodeModal from '@/components/qr-code-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -128,6 +129,16 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Notification state
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
+    // QR Code Modal state
+    const [showQRModal, setShowQRModal] = useState(false);
+    const [qrCodeData, setQrCodeData] = useState<{
+        qr_code: string;
+        collection_code: string;
+        tracking_no: string;
+        qr_code_image: string;
+    } | null>(null);
+    const [loadingQRParcels, setLoadingQRParcels] = useState<Set<number>>(new Set());
+
     // Add notification function
     const addNotification = (type: 'success' | 'error', title: string, message: string) => {
         const id = Date.now().toString();
@@ -148,6 +159,76 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Navigate to view-parcel page
     const handleViewParcel = (parcelId: number) => {
         router.visit(`/student/parcel/${parcelId}`);
+    };
+
+    // Handle QR code generation
+    const handleShowQRCode = async (parcelId: number) => {
+        setLoadingQRParcels((prev) => new Set(prev).add(parcelId));
+        try {
+            console.log('Fetching QR code for parcel:', parcelId);
+
+            const response = await fetch(`/student/parcel/${parcelId}/qr-code`, {
+                method: 'GET',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                credentials: 'same-origin',
+            });
+
+            console.log('QR code response status:', response.status);
+            console.log('QR code response headers:', response.headers);
+
+            if (!response.ok) {
+                let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                try {
+                    const errorData = await response.json();
+                    console.log('Error response data:', errorData);
+                    if (errorData.error) {
+                        errorMessage = errorData.error;
+                    } else if (errorData.message) {
+                        errorMessage = errorData.message;
+                    }
+                } catch (parseError) {
+                    console.log('Could not parse error response as JSON');
+                    const errorText = await response.text();
+                    console.log('Error response text:', errorText);
+                    errorMessage += `\n\nResponse: ${errorText}`;
+                }
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            console.log('QR code response data:', data);
+
+            if (!data.qr_code_image) {
+                throw new Error('QR code image not generated properly');
+            }
+
+            setQrCodeData(data);
+            setShowQRModal(true);
+        } catch (error) {
+            console.error('QR code generation error:', error);
+            if (error instanceof Error) {
+                addNotification('error', 'QR Code Error', error.message);
+            } else {
+                addNotification('error', 'QR Code Error', 'Failed to generate QR code');
+            }
+        } finally {
+            setLoadingQRParcels((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(parcelId);
+                return newSet;
+            });
+        }
+    };
+
+    // Close QR modal
+    const handleCloseQRModal = () => {
+        setShowQRModal(false);
+        setQrCodeData(null);
     };
 
     // Close details modal
@@ -595,6 +676,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
                 ))}
             </div>
+
+            {/* QR Code Modal */}
+            <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} />
 
             {/* Parcel Details Modal */}
             {showDetailsModal && (
@@ -1212,16 +1296,33 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             <div className="w-full space-y-2">
                                                 {/* Row 1: QR Code and View Details */}
                                                 <div className="grid grid-cols-2 gap-2">
-                                                    <button className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                                        <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
-                                                            />
-                                                        </svg>
-                                                        Show QR Code
+                                                    <button
+                                                        onClick={() => handleShowQRCode(parcel.parcel_id)}
+                                                        disabled={loadingQRParcels.has(parcel.parcel_id)}
+                                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                                    >
+                                                        {loadingQRParcels.has(parcel.parcel_id) ? (
+                                                            <div className="flex items-center justify-center">
+                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <svg
+                                                                    className="mr-1 inline h-4 w-4"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
+                                                                    />
+                                                                </svg>
+                                                                Show QR Code
+                                                            </>
+                                                        )}
                                                     </button>
                                                     <button
                                                         onClick={() => handleViewParcel(parcel.parcel_id)}
