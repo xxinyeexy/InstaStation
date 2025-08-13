@@ -7,6 +7,7 @@ use App\Models\Parcel;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -38,6 +39,7 @@ class StudentController extends Controller
                     'location' => $parcel->location,
                     'qr_code' => $parcel->qr_code,
                     'schedule' => optional($parcel->schedule)?->toDateTimeString(),
+                    'time_slot' => $parcel->time_slot,
                     'created_by' => $parcel->createdBy
                         ? [
                             'id' => $parcel->createdBy->id,
@@ -98,6 +100,8 @@ class StudentController extends Controller
             'sender' => $parcel->sender ?? 'N/A',
             'location' => $parcel->location ?? 'N/A',
             'days' => $parcel->days ?? 0,
+            'schedule' => $parcel->schedule ? $parcel->schedule->format('Y-m-d H:i:s') : null,
+            'time_slot' => $parcel->time_slot,
             'created_at' => $parcel->created_at,
             'updated_at' => $parcel->updated_at,
             'student_user' => $parcel->studentUser ? [
@@ -332,9 +336,18 @@ class StudentController extends Controller
         // Validate the request
         $request->validate([
             'scheduled_datetime' => 'required|date|after:now',
+            'time_slot' => 'required|string|max:50',
         ]);
 
         try {
+            // Debug logging
+            Log::info('Scheduling request received', [
+                'parcel_id' => $id,
+                'user_id' => $user->id,
+                'scheduled_datetime' => $request->scheduled_datetime,
+                'request_data' => $request->all()
+            ]);
+
             // Find the parcel and ensure it belongs to the authenticated user
             $parcel = Parcel::where('parcel_id', $id)
                 ->where('student_id', $user->id)
@@ -347,10 +360,18 @@ class StudentController extends Controller
                 ], 400);
             }
 
-            // Update the parcel with the scheduled datetime
+            // Update the parcel with the scheduled datetime, time slot, and change status to "Ready for Collection"
             $parcel->update([
                 'schedule' => $request->scheduled_datetime,
+                'time_slot' => $request->time_slot,
+                'parcel_status' => 'Ready for Collection',
                 'last_edited_by' => $user->id,
+            ]);
+
+            Log::info('Parcel scheduled successfully', [
+                'parcel_id' => $parcel->parcel_id,
+                'schedule' => $parcel->schedule,
+                'status' => $parcel->parcel_status
             ]);
 
             return response()->json([

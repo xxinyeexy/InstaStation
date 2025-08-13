@@ -23,6 +23,7 @@ interface Parcel {
     location: string;
     qr_code: string;
     schedule: string;
+    time_slot?: string;
     created_by:
         | number
         | {
@@ -264,9 +265,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         // Normalize status for easier comparison
         const status = parcel.parcel_status?.toLowerCase();
 
-        // Skip all 'Approved' parcels entirely
-        if (status === 'approved') return false;
-
         // Tabs filtering
         const matchesTab =
             activeTab === 'All Parcels'
@@ -347,7 +345,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // Tile counts for the dashboard header cards
     const tileCounts = {
-        myParcels: parcelList.length,
+        myParcels: parcelList.filter((p) => p.parcel_status?.toLowerCase() !== 'collected').length,
         pendingPayment: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'pending payment').length,
         approved: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'approved').length,
         readyForCollection: parcelList.filter((p) => ['ready for collection', 'ready to collect'].includes(p.parcel_status?.toLowerCase())).length,
@@ -356,6 +354,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // Simple search-based filtering for the card grid (no tabs in redesigned UI)
     const displayParcels = parcelList.filter((parcel) => {
+        // Show all parcels except 'collected' status for students
+        const status = parcel.parcel_status?.toLowerCase();
+        if (status === 'collected') return false;
+
         if (!searchTerm) return true;
         const q = searchTerm.toLowerCase();
         return (
@@ -1199,6 +1201,32 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 Collect
                                             </button>
                                         )}
+                                        {isReady && (
+                                            <>
+                                                <button className="flex-1 rounded-md bg-gray-500 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-600">
+                                                    <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                        />
+                                                    </svg>
+                                                    {parcel.time_slot ? `Scheduled (${parcel.time_slot})` : 'Scheduled'}
+                                                </button>
+                                                <button className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                                    <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zm12 0h2a1 1 0 001-1V6a1 1 0 00-1-1h-2a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
+                                                        />
+                                                    </svg>
+                                                    Show QR Code
+                                                </button>
+                                            </>
+                                        )}
                                         <button
                                             onClick={() => handleViewParcel(parcel.parcel_id)}
                                             className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -1206,34 +1234,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             View Details
                                         </button>
                                     </div>
-
-                                    {/* Additional row for Ready for Collection status */}
-                                    {isReady && (
-                                        <div className="mt-2 flex items-center gap-2">
-                                            <button className="flex-1 rounded-md bg-gray-500 px-3 py-2 text-sm font-semibold text-white hover:bg-gray-600">
-                                                <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                    />
-                                                </svg>
-                                                Scheduled
-                                            </button>
-                                            <button className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                                <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zm12 0h2a1 1 0 001-1V6a1 1 0 00-1-1h-2a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
-                                                    />
-                                                </svg>
-                                                Show QR Code
-                                            </button>
-                                        </div>
-                                    )}
                                 </div>
                             );
                         })}

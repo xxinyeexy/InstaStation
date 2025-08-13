@@ -21,9 +21,9 @@ return new class extends Migration
             $table->enum('type', ['student', 'staff', 'admin']);
             $table->string('matric')->nullable()->unique();
             $table->string('room_no', 12)->nullable();
-            $table->string('phone_no', 15) ->nullable();
+            $table->string('phone_no', 15)->nullable();
             $table->string('profile_pic', 500)->nullable();
-            $table->enum('status', ['Active', 'Inactive'])->default('Active'); ;
+            $table->enum('status', ['Active', 'Inactive'])->default('Active');;
             $table->string('department')->nullable();
             $table->string('password');
             $table->rememberToken();
@@ -68,7 +68,8 @@ return new class extends Migration
             $table->text('size')->nullable();
             $table->string('location', 100)->nullable();
             $table->string('qr_code', 255)->unique()->nullable();
-            $table->timestamp('schedule');
+            $table->timestamp('schedule')->nullable();
+            $table->string('time_slot', 50)->nullable(); // Store the time slot range (e.g., "2:00 PM - 3:00 PM")
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('last_edited_by')->constrained('users', 'id')->onDelete('cascade');
             $table->timestamp('report_at')->useCurrent();

@@ -13,6 +13,8 @@ interface ParcelData {
     sender: string;
     location: string;
     days: number;
+    schedule?: string;
+    time_slot?: string;
     created_at: string;
     updated_at: string;
     student_user?: {
@@ -193,6 +195,30 @@ const ParcelDetails = ({ parcel, trackingHistory }: Props) => {
                                 <label className="mb-1 block text-sm font-medium text-gray-700">Days in Storage</label>
                                 <span className="text-gray-600">{parcel.days} days</span>
                             </div>
+
+                            {/* Show scheduled pickup information if available */}
+                            {parcel.schedule && parcel.time_slot && (
+                                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                                    <h3 className="mb-3 text-sm font-semibold text-blue-900">Scheduled Pickup</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="mb-1 block text-xs font-medium text-blue-700">Date & Time</label>
+                                            <span className="text-sm font-medium text-blue-900">
+                                                {new Date(parcel.schedule).toLocaleDateString('en-US', {
+                                                    weekday: 'long',
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                })}
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-xs font-medium text-blue-700">Time Slot</label>
+                                            <span className="text-sm font-medium text-blue-900">{parcel.time_slot}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 

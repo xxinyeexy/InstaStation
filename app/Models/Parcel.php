@@ -8,9 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Parcel extends Model
 {
-     protected $table = 'parcels';
+    protected $table = 'parcels';
     protected $primaryKey = 'parcel_id';
-     use HasFactory;
+    use HasFactory;
     protected $fillable = [
         'tracking_no',
         'size',
@@ -21,6 +21,7 @@ class Parcel extends Model
         'days',
         'qr_code',
         'schedule',
+        'time_slot',
         'created_by',
         'last_edited_by',
     ];
@@ -39,8 +40,8 @@ class Parcel extends Model
     }
 
 
-   
-    
+
+
 
     public function createdBy()
     {

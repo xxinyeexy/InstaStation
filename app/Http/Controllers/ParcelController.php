@@ -106,7 +106,8 @@ class ParcelController extends Controller
                 'parcel_status' => 'Pending Payment',
                 'days' => null,
                 'qr_code' => $validatedData['qr_code'],
-                'schedule' => now(),
+                'schedule' => null, // Schedule should be null initially
+                'time_slot' => null, // Time slot should be null initially
                 'created_by' => $user->id, // Reference to users table (staff)
                 'last_edited_by' => $user->id, // Reference to users table (staff)
             ]);

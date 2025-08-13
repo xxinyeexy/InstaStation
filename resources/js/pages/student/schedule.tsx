@@ -45,7 +45,7 @@ const SchedulePickup = ({ parcel }: Props) => {
             const getCsrfToken = () => {
                 const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 if (metaToken) return metaToken;
-                
+
                 const cookies = document.cookie.split(';');
                 for (let cookie of cookies) {
                     const [name, value] = cookie.trim().split('=');
@@ -57,7 +57,7 @@ const SchedulePickup = ({ parcel }: Props) => {
             };
 
             const csrfToken = getCsrfToken();
-            
+
             if (!csrfToken) {
                 throw new Error('CSRF token not found. Please refresh the page and try again.');
             }
@@ -75,7 +75,7 @@ const SchedulePickup = ({ parcel }: Props) => {
             }
 
             let hour = parseInt(timeMatch[1]);
-            const minute = timeMatch[2];
+            const minute = parseInt(timeMatch[2]);
             const period = timeMatch[3];
 
             // Convert to 24-hour format
@@ -85,21 +85,38 @@ const SchedulePickup = ({ parcel }: Props) => {
                 hour = 0;
             }
 
+            // Validate hour and minute
+            if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                throw new Error('Invalid time values');
+            }
+
             // Create the scheduled datetime
             const scheduledDate = new Date(selectedDate);
-            scheduledDate.setHours(hour, parseInt(minute), 0, 0);
+            scheduledDate.setHours(hour, minute, 0, 0);
+
+            // Ensure we're working with the correct timezone
+            const localScheduledDate = new Date(scheduledDate.getTime() - scheduledDate.getTimezoneOffset() * 60000);
+
+            // Debug logging
+            console.log('Selected date:', selectedDate);
+            console.log('Selected time slot:', selectedTimeSlotData);
+            console.log('Parsed hour:', hour, 'minute:', minute, 'period:', period);
+            console.log('Final scheduled date:', scheduledDate);
+            console.log('Local scheduled date:', localScheduledDate);
+            console.log('ISO string:', localScheduledDate.toISOString());
 
             // Prepare the request data
             const requestData = {
                 parcel_id: parcel.id,
-                scheduled_datetime: scheduledDate.toISOString(),
+                scheduled_datetime: localScheduledDate.toISOString(),
+                time_slot: selectedTimeSlotData.label, // Store the complete time slot range
             };
 
             console.log('Scheduling pickup with data:', requestData);
 
             const response = await fetch(`/student/schedule/${parcel.id}`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
@@ -113,11 +130,11 @@ const SchedulePickup = ({ parcel }: Props) => {
 
             if (!response.ok) {
                 let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-                
+
                 try {
                     const errorData = await response.json();
                     console.log('Error response:', errorData);
-                    
+
                     if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.errors) {
@@ -132,13 +149,13 @@ const SchedulePickup = ({ parcel }: Props) => {
                     console.log('Error response text:', errorText);
                     errorMessage += `\n\nResponse: ${errorText}`;
                 }
-                
+
                 throw new Error(errorMessage);
             }
 
             const result = await response.json();
             console.log('Success response:', result);
-            
+
             // Show success message and redirect
             alert('Collection scheduled successfully!');
             router.visit('/student/parcel');
@@ -230,7 +247,7 @@ const SchedulePickup = ({ parcel }: Props) => {
     return (
         <AppLayout>
             <div className="fixed inset-0 overflow-y-auto bg-gray-50">
-                    {/* Header */}
+                {/* Header */}
                 <div className="border-b bg-white shadow-sm">
                     <div className="mx-auto max-w-6xl px-6 py-4">
                         <div className="flex items-center justify-between">
@@ -240,10 +257,10 @@ const SchedulePickup = ({ parcel }: Props) => {
                             </div>
                             <button onClick={handleClose} className="rounded-full p-2 transition-colors hover:bg-gray-100">
                                 <X className="h-6 w-6 text-gray-600" />
-                        </button>
-                            </div>
+                            </button>
                         </div>
                     </div>
+                </div>
 
                 <div className="mx-auto max-w-6xl px-6 py-8">
                     {/* Parcel Status Section */}
@@ -319,7 +336,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                                 {daysOfWeek.map((day) => (
                                     <div key={day} className="py-2 text-center text-sm font-medium text-gray-500">
                                         {day}
-                                                    </div>
+                                    </div>
                                 ))}
                                 {getDaysInMonth(currentMonth).map((date, index) => (
                                     <div key={index} className="text-center">
@@ -341,8 +358,8 @@ const SchedulePickup = ({ parcel }: Props) => {
                                             </button>
                                         ) : (
                                             <div className="h-10 w-10"></div>
-                                    )}
-                                </div>
+                                        )}
+                                    </div>
                                 ))}
                             </div>
 
@@ -383,7 +400,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                                         {!slot.available && <span className="text-sm font-medium text-red-500">Full</span>}
                                     </button>
                                 ))}
-                        </div>
+                            </div>
 
                             {/* Note Section */}
                             <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
@@ -433,13 +450,13 @@ const SchedulePickup = ({ parcel }: Props) => {
 
                     {/* Bottom Buttons */}
                     <div className="mt-8 flex justify-center gap-4">
-                            <button
+                        <button
                             onClick={handleClose}
                             className="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
-                            >
-                                Cancel
-                            </button>
-                            <button
+                        >
+                            Cancel
+                        </button>
+                        <button
                             onClick={handleSchedule}
                             disabled={!selectedDate || !selectedTimeSlot || isSubmitting}
                             className="flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-white transition-colors hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-gray-300"
@@ -451,15 +468,13 @@ const SchedulePickup = ({ parcel }: Props) => {
                                 </>
                             ) : (
                                 'Schedule Pickup'
-                                )}
-                            </button>
+                            )}
+                        </button>
                     </div>
                 </div>
             </div>
         </AppLayout>
     );
 };
-
-
 
 export default SchedulePickup;
