@@ -583,23 +583,23 @@ class StudentController extends Controller
                 Log::info('Using existing collection code', ['parcel_id' => $id, 'collection_code' => $collectionCode]);
             }
 
-            // Generate QR code image as base64 - QR code contains only the tracking number
-            Log::info('Generating QR code image', ['parcel_id' => $id, 'tracking_no' => $parcel->tracking_no]);
+            // Generate QR code image as base64 - QR code contains only the parcel code
+            Log::info('Generating QR code image', ['parcel_id' => $id, 'parcel_code' => $parcel->parcel_code]);
 
             $qrCodeImage = QrCode::format('svg')
                 ->size(200) // Reduced from 300 to 200 for faster generation
                 ->margin(5) // Reduced from 10 to 5 for smaller file size
                 ->errorCorrection('M') // Changed from 'H' to 'M' for faster generation
-                ->generate($parcel->tracking_no);
+                ->generate($parcel->parcel_code);
 
             $qrCodeBase64 = base64_encode($qrCodeImage);
 
             Log::info('QR code generated successfully', ['parcel_id' => $id, 'qr_size' => strlen($qrCodeBase64)]);
 
             $response = response()->json([
-                'qr_code' => $parcel->tracking_no, // QR code content is the tracking number
+                'qr_code' => $parcel->parcel_code, // QR code content is the parcel code
                 'collection_code' => $collectionCode,
-                'tracking_no' => $parcel->tracking_no,
+                'parcel_code' => $parcel->parcel_code,
                 'schedule' => $parcel->schedule,
                 'time_slot' => $parcel->time_slot,
                 'qr_code_image' => 'data:image/svg+xml;base64,' . $qrCodeBase64,
