@@ -9,10 +9,11 @@ interface QRCodeModalProps {
         tracking_no: string;
         qr_code_image: string;
     } | null;
+    isLoading?: boolean;
 }
 
-const QRCodeModal = ({ isOpen, onClose, qrCodeData }: QRCodeModalProps) => {
-    if (!isOpen || !qrCodeData) return null;
+const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeModalProps) => {
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -34,21 +35,40 @@ const QRCodeModal = ({ isOpen, onClose, qrCodeData }: QRCodeModalProps) => {
                         {/* QR Code Display */}
                         <div className="flex justify-center">
                             <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                                <img src={qrCodeData.qr_code_image} alt="QR Code" className="h-64 w-64" />
+                                {isLoading ? (
+                                    <div className="flex h-48 w-48 items-center justify-center">
+                                        <div className="text-center">
+                                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+                                            <p className="mt-4 text-sm text-gray-600">Generating QR Code...</p>
+                                        </div>
+                                    </div>
+                                ) : qrCodeData ? (
+                                    <img src={qrCodeData.qr_code_image} alt="QR Code" className="h-48 w-48" />
+                                ) : (
+                                    <div className="flex h-48 w-48 items-center justify-center">
+                                        <div className="text-center">
+                                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+                                            <p className="mt-4 text-sm text-gray-600">Loading QR Code...</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
                         {/* Collection Details */}
-                        <div className="space-y-3 text-center">
-                            <div>
-                                <p className="text-lg font-bold text-gray-900">{qrCodeData.qr_code}</p>
+                        {qrCodeData && !isLoading && (
+                            <div className="space-y-3 text-center">
+                                <div>
+                                    <p className="text-lg font-bold text-gray-900">{qrCodeData.qr_code}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-gray-600">
+                                        Collection Code:{' '}
+                                        <span className="font-['Consolas'] font-bold text-gray-900">{qrCodeData.collection_code}</span>
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <p className="text-sm text-gray-600">
-                                    Collection Code: <span className="font-['Consolas'] font-bold text-gray-900">{qrCodeData.collection_code}</span>
-                                </p>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 

@@ -164,9 +164,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Handle QR code generation
     const handleShowQRCode = async (parcelId: number) => {
         setLoadingQRParcels((prev) => new Set(prev).add(parcelId));
-        try {
-            console.log('Fetching QR code for parcel:', parcelId);
 
+        // Show modal immediately for instant feedback
+        setShowQRModal(true);
+        setQrCodeData(null); // Clear previous data
+
+        try {
             const response = await fetch(`/student/parcel/${parcelId}/qr-code`, {
                 method: 'GET',
                 headers: {
@@ -178,37 +181,29 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 credentials: 'same-origin',
             });
 
-            console.log('QR code response status:', response.status);
-            console.log('QR code response headers:', response.headers);
-
             if (!response.ok) {
                 let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
                 try {
                     const errorData = await response.json();
-                    console.log('Error response data:', errorData);
                     if (errorData.error) {
                         errorMessage = errorData.error;
                     } else if (errorData.message) {
                         errorMessage = errorData.message;
                     }
                 } catch (parseError) {
-                    console.log('Could not parse error response as JSON');
                     const errorText = await response.text();
-                    console.log('Error response text:', errorText);
                     errorMessage += `\n\nResponse: ${errorText}`;
                 }
                 throw new Error(errorMessage);
             }
 
             const data = await response.json();
-            console.log('QR code response data:', data);
 
             if (!data.qr_code_image) {
                 throw new Error('QR code image not generated properly');
             }
 
             setQrCodeData(data);
-            setShowQRModal(true);
         } catch (error) {
             console.error('QR code generation error:', error);
             if (error instanceof Error) {
@@ -216,6 +211,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             } else {
                 addNotification('error', 'QR Code Error', 'Failed to generate QR code');
             }
+            // Close modal on error
+            setShowQRModal(false);
         } finally {
             setLoadingQRParcels((prev) => {
                 const newSet = new Set(prev);
@@ -678,7 +675,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             </div>
 
             {/* QR Code Modal */}
-            <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} />
+            <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} isLoading={loadingQRParcels.size > 0} />
 
             {/* Parcel Details Modal */}
             {showDetailsModal && (

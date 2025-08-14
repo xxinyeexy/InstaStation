@@ -587,16 +587,16 @@ class StudentController extends Controller
             Log::info('Generating QR code image', ['parcel_id' => $id, 'tracking_no' => $parcel->tracking_no]);
 
             $qrCodeImage = QrCode::format('svg')
-                ->size(300)
-                ->margin(10)
-                ->errorCorrection('H')
+                ->size(200) // Reduced from 300 to 200 for faster generation
+                ->margin(5) // Reduced from 10 to 5 for smaller file size
+                ->errorCorrection('M') // Changed from 'H' to 'M' for faster generation
                 ->generate($parcel->tracking_no);
 
             $qrCodeBase64 = base64_encode($qrCodeImage);
 
             Log::info('QR code generated successfully', ['parcel_id' => $id, 'qr_size' => strlen($qrCodeBase64)]);
 
-            return response()->json([
+            $response = response()->json([
                 'qr_code' => $parcel->tracking_no, // QR code content is the tracking number
                 'collection_code' => $collectionCode,
                 'tracking_no' => $parcel->tracking_no,
@@ -604,6 +604,12 @@ class StudentController extends Controller
                 'time_slot' => $parcel->time_slot,
                 'qr_code_image' => 'data:image/svg+xml;base64,' . $qrCodeBase64,
             ]);
+
+            // Add caching headers for better performance
+            $response->header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+            $response->header('ETag', md5($qrCodeBase64));
+
+            return $response;
         } catch (Exception $e) {
             Log::error('Error generating QR code', [
                 'parcel_id' => $id,
