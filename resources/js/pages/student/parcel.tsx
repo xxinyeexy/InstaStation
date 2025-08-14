@@ -15,6 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Define the Parcel interface based on your database structure
 interface Parcel {
     parcel_id: number;
+    parcel_code: string; // Unique code for the parcel
     student_id: number;
     tracking_no: string;
     parcel_status: string;
@@ -77,7 +78,7 @@ interface Notification {
 
 // Extended interface for editing parcel
 interface EditParcelForm {
-    tracking_no: string;
+    parcel_code: string;
     parcel_status: string;
     recipient_name: string;
     email: string;
@@ -100,7 +101,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [parcelList, setParcelList] = useState<Parcel[]>(parcels);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedParcelId, setSelectedParcelId] = useState<number | null>(null);
-    const [selectedTrackingNo, setSelectedTrackingNo] = useState<string | null>(null);
+    const [selectedParcelCode, setSelectedParcelCode] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
     // Parcel details modal states
@@ -112,7 +113,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [showEditModal, setShowEditModal] = useState(false);
     const [editingParcel, setEditingParcel] = useState<Parcel | null>(null);
     const [editForm, setEditForm] = useState<EditParcelForm>({
-        tracking_no: '',
+        parcel_code: '',
         parcel_status: '',
         recipient_name: '',
         email: '',
@@ -238,7 +239,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const handleEditParcel = (parcel: Parcel) => {
         setEditingParcel(parcel);
         setEditForm({
-            tracking_no: parcel.tracking_no || '',
+            parcel_code: parcel.parcel_code || '',
             parcel_status: parcel.parcel_status || '',
             recipient_name: parcel.student_user?.name || '',
             email: parcel.student_user?.email || '',
@@ -274,7 +275,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
                 body: JSON.stringify({
-                    tracking_no: editForm.tracking_no,
+                    parcel_code: editForm.parcel_code,
                     parcel_status: editForm.parcel_status,
                     sender_name: editForm.sender_name,
                     sender_address: editForm.sender_address,
@@ -313,7 +314,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setShowEditModal(false);
         setEditingParcel(null);
         setEditForm({
-            tracking_no: '',
+            parcel_code: '',
             parcel_status: '',
             recipient_name: '',
             email: '',
@@ -359,7 +360,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
         const matchesSearch =
             searchTerm === '' ||
-            parcel.tracking_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.parcel_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.sender?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.student_id?.toString().includes(searchTerm) ||
@@ -439,7 +440,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         if (!searchTerm) return true;
         const q = searchTerm.toLowerCase();
         return (
-            parcel.tracking_no?.toLowerCase().includes(q) ||
+            parcel.parcel_code?.toLowerCase().includes(q) ||
             parcel.sender?.toLowerCase().includes(q) ||
             parcel.location?.toLowerCase().includes(q) ||
             parcel.student_id?.toString().includes(searchTerm) ||
@@ -588,9 +589,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     };
 
     // Handle delete parcel with modal
-    const handleDeleteClick = (parcelId: number, trackingNo: string) => {
+    const handleDeleteClick = (parcelId: number, parcelCode: string) => {
         setSelectedParcelId(parcelId);
-        setSelectedTrackingNo(trackingNo);
+        setSelectedParcelCode(parcelCode);
         setShowDeleteModal(true);
     };
 
@@ -616,15 +617,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== selectedParcelId));
             setShowDeleteModal(false);
             setSelectedParcelId(null);
-            setSelectedTrackingNo(null);
+            setSelectedParcelCode(null);
 
             // Show success notification
-            addNotification('success', 'Parcel Deleted', `Parcel ${selectedTrackingNo} has been successfully deleted.`);
+            addNotification('success', 'Parcel Deleted', `Parcel ${selectedParcelCode} has been successfully deleted.`);
         } catch (error) {
             console.error('Failed to delete parcel:', error);
 
             // Show error notification
-            addNotification('error', 'Delete Failed', `Failed to delete parcel ${selectedTrackingNo}. Please try again.`);
+            addNotification('error', 'Delete Failed', `Failed to delete parcel ${selectedParcelCode}. Please try again.`);
         } finally {
             setIsDeleting(false);
         }
@@ -633,7 +634,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const handleDeleteCancel = () => {
         setShowDeleteModal(false);
         setSelectedParcelId(null);
-        setSelectedTrackingNo(null);
+        setSelectedParcelCode(null);
     };
 
     return (
@@ -706,8 +707,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             <h3 className="mb-3 text-lg font-semibold text-gray-900">Tracking Information</h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
-                                                    <p className="text-lg font-bold text-gray-900">{parcelDetails.tracking_no}</p>
+                                                    <label className="block text-sm font-medium text-gray-600">Parcel Code</label>
+                                                    <p className="text-lg font-bold text-gray-900">{parcelDetails.parcel_code || 'N/A'}</p>
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600">Status</label>
@@ -862,11 +863,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             <h3 className="mb-3 text-lg font-semibold text-gray-900">Tracking Information</h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
+                                                    <label className="block text-sm font-medium text-gray-600">Parcel Code</label>
                                                     <input
                                                         type="text"
-                                                        value={editForm.tracking_no}
-                                                        onChange={(e) => handleEditFormChange('tracking_no', e.target.value)}
+                                                        value={editForm.parcel_code}
+                                                        onChange={(e) => handleEditFormChange('parcel_code', e.target.value)}
                                                         className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
                                                     />
                                                 </div>
@@ -1026,7 +1027,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                         <h2 className="mb-2 text-lg font-semibold text-gray-900">Delete Parcel</h2>
                         <p className="mb-1 text-sm text-gray-600">
-                            Are you sure you want to delete parcel <span className="font-medium text-red-600">{selectedTrackingNo}</span>?
+                            Are you sure you want to delete parcel <span className="font-medium text-red-600">{selectedParcelCode}</span>?
                         </p>
                         <p className="mb-6 px-7 text-left text-xs text-gray-500">
                             This action cannot be undone and will permanently remove all parcel data and history.
@@ -1235,7 +1236,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     />
                                                 </svg>
                                             </div>
-                                            <div className="font-['Consolas'] text-sm font-semibold text-gray-900">{parcel.tracking_no || 'N/A'}</div>
+                                            <div className="font-['Consolas'] text-sm font-semibold text-gray-900">{parcel.parcel_code || 'N/A'}</div>
                                         </div>
                                         <span
                                             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
@@ -1615,7 +1616,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                             {/* Header row */}
                                                             <div className="flex items-center gap-4">
                                                                 <h3 className="font-['Consolas'] text-xl font-bold text-gray-900">
-                                                                    Parcel - {parcel.tracking_no || 'N/A'}
+                                                                    Parcel - {parcel.parcel_code || 'N/A'}
                                                                 </h3>
                                                                 <span
                                                                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}

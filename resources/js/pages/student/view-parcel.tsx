@@ -5,6 +5,7 @@ import { AlarmClock, ArrowLeft, CheckCircle, CircleAlert, CreditCard, Package, U
 // TypeScript interfaces
 interface ParcelData {
     id: number;
+    parcel_code: string;
     tracking_no: string;
     status: string;
     arrivalDate: string;
@@ -142,7 +143,7 @@ const ParcelDetails = ({ parcel, trackingHistory }: Props) => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-gray-700">Parcel ID</label>
-                                    <span className="text-gray-600">#{parcel.id}</span>
+                                    <span className="text-gray-600">{parcel.parcel_code}</span>
                                 </div>
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-gray-700">Status</label>

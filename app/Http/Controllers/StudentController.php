@@ -56,6 +56,7 @@ class StudentController extends Controller
             ->map(function (Parcel $parcel) {
                 return [
                     'parcel_id' => $parcel->parcel_id,
+                    'parcel_code' => $parcel->parcel_code,
                     'student_id' => $parcel->student_id,
                     'tracking_no' => $parcel->tracking_no,
                     'parcel_status' => $parcel->parcel_status,
@@ -118,6 +119,7 @@ class StudentController extends Controller
         // Format parcel data for the view
         $parcelData = [
             'id' => $parcel->parcel_id,
+            'parcel_code' => $parcel->parcel_code,
             'tracking_no' => $parcel->tracking_no,
             'status' => $parcel->parcel_status,
             'arrivalDate' => $parcel->created_at->format('Y-m-d'),
