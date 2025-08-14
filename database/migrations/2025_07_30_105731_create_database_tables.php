@@ -60,6 +60,7 @@ return new class extends Migration
         // 5. Parcels Table
         Schema::create('parcels', function (Blueprint $table) {
             $table->id('parcel_id');
+            $table->string('parcel_code', 20)->unique();
             $table->foreignId('student_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->string('tracking_no', 50)->unique();
             $table->enum('parcel_status', ['Pending Payment', 'Approved', 'Ready For Collection', 'Collected', 'Unclaimed'])->default('Pending Payment');
@@ -68,7 +69,8 @@ return new class extends Migration
             $table->text('size')->nullable();
             $table->string('location', 100)->nullable();
             $table->string('qr_code', 255)->unique()->nullable();
-            $table->timestamp('schedule')->nullable();
+            $table->string('collection_code', 10)->nullable();
+            $table->date('schedule')->nullable();
             $table->string('time_slot', 50)->nullable(); // Store the time slot range (e.g., "2:00 PM - 3:00 PM")
             $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
             $table->foreignId('last_edited_by')->constrained('users', 'id')->onDelete('cascade');

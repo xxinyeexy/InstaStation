@@ -120,7 +120,7 @@ class ParcelController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Parcel registered successfully.',
+                'message' => 'Parcel registered successfully.Code: ${res.data.parcel_code}',
                 'parcel' => $parcel,
                 'student' => [
                     'name' => $student_user->name,

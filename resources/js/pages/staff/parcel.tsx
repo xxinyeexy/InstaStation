@@ -14,6 +14,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Define the Parcel interface based on your database structure
 interface Parcel {
     parcel_id: number;
+    parcel_code: string; // Unique code for the parcel
     student_id: number;
     tracking_no: string;
     parcel_status: string;
@@ -23,6 +24,7 @@ interface Parcel {
     location: string;
     qr_code: string;
     schedule: string;
+    time_slot?: string;
     created_by:
         | number
         | {
@@ -289,7 +291,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
         const matchesSearch =
             searchTerm === '' ||
-            parcel.tracking_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.parcel_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.sender?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.student_id?.toString().includes(searchTerm) ||
@@ -505,6 +507,21 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
+    // Format scheduled date for display
+    const formatScheduledDate = (dateString: string) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-MY', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+            });
+        } catch {
+            return '';
+        }
+    };
+
     // Get status bar color for the top indicator
     const getStatusBarColor = (status: string) => {
         const normalizedStatus = status?.toLowerCase();
@@ -713,6 +730,37 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             </div>
                                         </div>
                                     </div>
+
+                                    {/* Scheduled Pickup Information */}
+                                    {(parcelDetails.parcel_status?.toLowerCase() === 'ready for collection' ||
+                                        parcelDetails.parcel_status?.toLowerCase() === 'ready to collect') &&
+                                        (parcelDetails.schedule || parcelDetails.time_slot) && (
+                                            <div>
+                                                <h3 className="mb-3 text-lg font-semibold text-gray-900">Scheduled  </h3>
+                                                <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-purple-700">Scheduled Date</label>
+                                                            <p className="font-medium text-purple-900">
+                                                                {formatScheduledDate(parcelDetails.schedule) || 'Not set'}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-purple-700">Time Slot</label>
+                                                            <p className="font-medium text-purple-900">{parcelDetails.time_slot || 'Not set'}</p>
+                                                        </div>
+                                                    </div>
+                                                    {formatScheduledDate(parcelDetails.schedule) && parcelDetails.time_slot && (
+                                                        <div className="mt-3 border-t border-purple-200 pt-3">
+                                                            <label className="block text-sm font-medium text-purple-700">Full Schedule</label>
+                                                            <p className="font-semibold text-purple-900">
+                                                                {formatScheduledDate(parcelDetails.schedule)} • {parcelDetails.time_slot}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
 
                                     {/* Timestamps */}
                                     <div className="border-t border-gray-200 pt-4">
@@ -962,7 +1010,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <p className="mb-1 text-sm text-gray-600">
                             Are you sure you want to delete parcel <span className="font-medium text-red-600">{selectedTrackingNo}</span>?
                         </p>
-                        <p className="mb-6 px-7 text-left text-xs text-gray-500">
+                        <p className="mb-9 px-4 text-left text-xs text-gray-500">
                             This action cannot be undone and will permanently remove all parcel data and history.
                         </p>
 
@@ -1237,7 +1285,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         {/* Header row */}
                                                         <div className="flex items-center gap-4">
                                                             <h3 className="font-['Consolas'] text-xl font-bold text-gray-900">
-                                                                {parcel.tracking_no || 'N/A'}
+                                                                {parcel.parcel_code || 'N/A'}
                                                             </h3>
                                                             <span
                                                                 className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
@@ -1321,6 +1369,38 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                     </span>
                                                                 </div>
                                                             </div>
+
+                                                            {/* Scheduled pickup information for Ready For Collection parcels */}
+                                                            {(parcel.parcel_status?.toLowerCase() === 'ready for collection') &&
+                                                                (parcel.schedule || parcel.time_slot) && (
+                                                                    <div className="mt-3 flex items-center gap-3 rounded-xl border border-purple-200 bg-purple-50 px-4 p-3 shadow-sm transition-colors">
+                                                                        <svg
+                                                                            className="h-4 w-4 text-purple-600"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth={2}
+                                                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                                            />
+                                                                        </svg>
+                                                                        <div className="flex flex-col text-left leading-tight">
+                                                                            <span className="text-sm font-semibold text-purple-900">
+                                                                                Scheduled 
+                                                                            </span>
+                                                                            <span className="text-xs text-purple-700">
+                                                                                {formatScheduledDate(parcel.schedule) && parcel.time_slot
+                                                                                    ? `${formatScheduledDate(parcel.schedule)} • ${parcel.time_slot}`
+                                                                                    : parcel.time_slot ||
+                                                                                      formatScheduledDate(parcel.schedule) ||
+                                                                                      'No schedule set'}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                )}
 
                                                             {/* Second line - All staff and timestamp info in one line */}
                                                             <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -1415,7 +1495,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <Edit className="h-5 w-5" />
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDeleteClick(parcel.parcel_id, parcel.tracking_no)}
+                                                        onClick={() => handleDeleteClick(parcel.parcel_id, parcel.parcel_code)}
                                                         className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
                                                     >
                                                         <Trash2 className="h-5 w-5" />
