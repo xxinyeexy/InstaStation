@@ -311,12 +311,6 @@ const SchedulePickup = ({ parcel }: Props) => {
                                 <span className="ml-2 font-medium text-green-900">{parcel.sender}</span>
                             </div>
                             <div>
-                                <span className="text-sm text-green-700">Collection Code:</span>
-                                <span className="ml-2 rounded bg-green-200 px-2 py-1 font-['Consolas'] font-bold text-green-900">
-                                    {parcel.collection_code}
-                                </span>
-                            </div>
-                            <div>
                                 <span className="text-sm text-green-700">Payment Status:</span>
                                 <span className="ml-2 rounded bg-green-200 px-2 py-1 font-medium text-green-900">{parcel.payment_status}</span>
                             </div>
@@ -454,7 +448,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                             <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
                                 <h4 className="mb-1 font-semibold text-yellow-900">Note:</h4>
                                 <p className="text-sm text-yellow-800">
-                                    Please arrive within your selected time slot. Bring your student ID and collection code.
+                                    Please arrive within your selected time slot. Bring your QR code and collection code.
                                 </p>
                             </div>
                         </div>
@@ -486,12 +480,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                                     <span className="text-sm text-blue-700">Location:</span>
                                     <span className="ml-2 font-medium text-blue-900">University Parcel Center</span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-blue-700">Collection Code:</span>
-                                    <span className="rounded bg-blue-200 px-3 py-1 font-['Consolas'] font-bold text-blue-900">
-                                        {parcel.collection_code}
-                                    </span>
-                                </div>
+                              
                             </div>
                         </div>
                     )}
