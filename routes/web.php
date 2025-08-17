@@ -34,6 +34,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/staff/parcel/{id}', [ParcelController::class, 'destroy']);
     Route::get('/staff/parcel/{id}/details', [ParcelController::class, 'getParcelDetails'])->name('staff.parcel.details');
     Route::put('/staff/parcel/{id}', [ParcelController::class, 'update'])->name('staff.parcel.update');
+    Route::get('/staff/parcel/by-code/{code}', [ParcelController::class, 'getParcelByCode'])
+        ->where('code', '.*')
+        ->name('staff.parcel.by-code');
 
     // Student routes
     Route::get('/student/parcel', [StudentController::class, 'student'])

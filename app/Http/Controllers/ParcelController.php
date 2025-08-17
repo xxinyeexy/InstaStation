@@ -226,6 +226,67 @@ class ParcelController extends Controller
     }
 
     /**
+     * Find a parcel by its parcel_code and return details (for QR scan)
+     */
+    public function getParcelByCode(string $code)
+    {
+        try {
+            $cleanCode = trim($code);
+            $normalized = strtolower(preg_replace('/\s+/', '', $cleanCode));
+
+            $parcel = Parcel::with(['studentUser', 'createdBy', 'lastEditedBy'])
+                ->where(function ($q) use ($cleanCode, $normalized) {
+                    $q->where('parcel_code', $cleanCode)
+                        ->orWhere('tracking_no', $cleanCode)
+                        ->orWhere('parcel_id', $cleanCode)
+                        ->orWhereRaw('REPLACE(LOWER(parcel_code), " ", "") = ?', [$normalized])
+                        ->orWhereRaw('REPLACE(LOWER(tracking_no), " ", "") = ?', [$normalized]);
+                })
+                ->first();
+
+            if (!$parcel) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Parcel not found'
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => true,
+                'parcel' => [
+                    'parcel_id' => $parcel->parcel_id,
+                    'parcel_code' => $parcel->parcel_code,
+                    'tracking_no' => $parcel->tracking_no,
+                    'parcel_status' => $parcel->parcel_status,
+                    'sender' => $parcel->sender,
+                    'size' => $parcel->size,
+                    'location' => $parcel->location,
+                    'days' => $parcel->days,
+                    'qr_code' => $parcel->qr_code,
+                    'schedule' => $parcel->schedule,
+                    'time_slot' => $parcel->time_slot,
+                    'created_at' => $parcel->created_at,
+                    'updated_at' => $parcel->updated_at,
+                    'student_id' => $parcel->student_id,
+                    'created_by' => $parcel->created_by,
+                    'last_edited_by' => $parcel->last_edited_by,
+                    'student_user' => $parcel->studentUser ? [
+                        'id' => $parcel->studentUser->id,
+                        'name' => $parcel->studentUser->name,
+                        'matric' => $parcel->studentUser->matric,
+                        'email' => $parcel->studentUser->email,
+                    ] : null,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch parcel by code: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Parcel $parcel)

@@ -1,8 +1,9 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
+import { Html5Qrcode, Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { BellRing, CheckCircle, Edit, Eye, Trash2, X, XCircle } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -128,6 +129,113 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // Notification state
     const [notifications, setNotifications] = useState<Notification[]>([]);
+
+    // QR Scan modal state
+    const [showScanModal, setShowScanModal] = useState(false);
+    const [isScanning, setIsScanning] = useState(false);
+    const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+    const html5Ref = useRef<Html5Qrcode | null>(null);
+    const [cameraError, setCameraError] = useState<string | null>(null);
+    const [availableCameras, setAvailableCameras] = useState<Array<{ id: string; label: string }>>([]);
+    const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
+    const scanContainerId = 'qr-scan-region';
+
+    const openScanModal = () => {
+        setShowScanModal(true);
+    };
+    const closeScanModal = async () => {
+        setShowScanModal(false);
+        try {
+            if (scannerRef.current) {
+                await scannerRef.current.clear().catch(() => {});
+            }
+            if (html5Ref.current) {
+                await html5Ref.current.stop().catch(() => {});
+                try {
+                    await html5Ref.current.clear();
+                } catch {}
+            }
+        } catch {}
+        scannerRef.current = null;
+        html5Ref.current = null;
+    };
+
+    const onDecodeSuccess = useCallback(async (decodedText: string) => {
+        try {
+            const code = decodedText.trim();
+            const resp = await fetch(`/staff/parcel/by-code/${encodeURIComponent(code)}`, {
+                method: 'GET',
+                headers: { Accept: 'application/json' },
+                credentials: 'same-origin',
+            });
+            if (!resp.ok) {
+                addNotification('error', 'Scan Failed', `Parcel not found for code ${code}`);
+                return;
+            }
+            const data = await resp.json();
+            if (!data?.success || !data?.parcel) {
+                addNotification('error', 'Scan Failed', 'No parcel data returned');
+                return;
+            }
+            setParcelDetails(data.parcel as ParcelDetails);
+            setShowDetailsModal(true);
+            await closeScanModal();
+        } catch {
+            addNotification('error', 'Scan Error', 'Could not process QR scan');
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!showScanModal) return;
+        (async () => {
+            setCameraError(null);
+            setIsScanning(true);
+            try {
+                // Enumerate cameras
+                const cams = await Html5Qrcode.getCameras();
+                const list = (cams || []).map((c: any) => ({ id: c.id, label: c.label || 'Camera' }));
+                setAvailableCameras(list);
+                const preferredId = list.find((c) => /back|rear|environment/i.test(c.label))?.id || list[0]?.id || null;
+                setSelectedCameraId(preferredId);
+
+                const html5 = new Html5Qrcode(scanContainerId);
+                html5Ref.current = html5;
+
+                const cameraConfig = preferredId ? { deviceId: { exact: preferredId } } : { facingMode: { ideal: 'environment' } };
+
+                await html5.start(
+                    cameraConfig as any,
+                    { fps: 15, qrbox: { width: 320, height: 320 }, formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], disableFlip: true },
+                    onDecodeSuccess,
+                    () => {},
+                );
+            } catch (e: any) {
+                setCameraError('Camera could not start. Use HTTPS or localhost, allow camera permissions, and ensure a camera is connected.');
+            } finally {
+                setIsScanning(false);
+            }
+        })();
+    }, [showScanModal, onDecodeSuccess]);
+
+    // Restart scanner when switching camera
+    useEffect(() => {
+        if (!showScanModal) return;
+        if (!html5Ref.current) return;
+        if (!selectedCameraId) return;
+        (async () => {
+            try {
+                await html5Ref.current!.stop().catch(() => {});
+                await html5Ref.current!.start(
+                    { deviceId: { exact: selectedCameraId } } as any,
+                    { fps: 15, qrbox: { width: 320, height: 320 }, formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], disableFlip: true },
+                    onDecodeSuccess,
+                    () => {},
+                );
+            } catch (e) {
+                setCameraError('Failed to switch camera');
+            }
+        })();
+    }, [selectedCameraId, showScanModal, onDecodeSuccess]);
 
     // Add notification function
     const addNotification = (type: 'success' | 'error', title: string, message: string) => {
@@ -736,7 +844,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         parcelDetails.parcel_status?.toLowerCase() === 'ready to collect') &&
                                         (parcelDetails.schedule || parcelDetails.time_slot) && (
                                             <div>
-                                                <h3 className="mb-3 text-lg font-semibold text-gray-900">Scheduled  </h3>
+                                                <h3 className="mb-3 text-lg font-semibold text-gray-900">Scheduled </h3>
                                                 <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div>
@@ -806,6 +914,76 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 )}
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* QR Scan Modal */}
+            {showScanModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Scan Parcel QR Code</h2>
+                                <p className="mt-1 text-sm text-gray-600">Point your camera at a parcel QR to find it instantly</p>
+                            </div>
+                            <button
+                                onClick={closeScanModal}
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-6">
+                            <div id={scanContainerId} className="w-full" />
+                            {availableCameras.length > 1 && (
+                                <div className="mt-3 flex items-center gap-2">
+                                    <label className="text-xs text-gray-600">Camera:</label>
+                                    <select
+                                        value={selectedCameraId ?? ''}
+                                        onChange={(e) => setSelectedCameraId(e.target.value)}
+                                        className="rounded border border-gray-300 px-2 py-1 text-xs"
+                                    >
+                                        {availableCameras.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.label || 'Camera'}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                            {cameraError && <p className="mt-2 text-xs text-red-600">{cameraError}</p>}
+                            <div className="mt-3 flex items-center justify-between">
+                                <p className="text-xs text-gray-500">Ensure camera permission is granted.</p>
+                                <button
+                                    onClick={async () => {
+                                        try {
+                                            // try re-init by closing and re-opening scanner
+                                            if (scannerRef.current) {
+                                                await scannerRef.current.clear().catch(() => {});
+                                                scannerRef.current = null;
+                                            }
+                                            if (html5Ref.current) {
+                                                try {
+                                                    await html5Ref.current.stop();
+                                                } catch {}
+                                                try {
+                                                    await html5Ref.current.clear();
+                                                } catch {}
+                                                html5Ref.current = null;
+                                            }
+                                            setTimeout(() => setShowScanModal((v) => v), 0);
+                                        } catch {}
+                                    }}
+                                    className="text-xs font-medium text-blue-600 hover:text-blue-800"
+                                >
+                                    Retry camera
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -1371,9 +1549,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                             </div>
 
                                                             {/* Scheduled pickup information for Ready For Collection parcels */}
-                                                            {(parcel.parcel_status?.toLowerCase() === 'ready for collection') &&
+                                                            {parcel.parcel_status?.toLowerCase() === 'ready for collection' &&
                                                                 (parcel.schedule || parcel.time_slot) && (
-                                                                    <div className="mt-3 flex items-center gap-3 rounded-xl border border-purple-200 bg-purple-50 px-4 p-3 shadow-sm transition-colors">
+                                                                    <div className="mt-3 flex items-center gap-3 rounded-xl border border-purple-200 bg-purple-50 p-3 px-4 shadow-sm transition-colors">
                                                                         <svg
                                                                             className="h-4 w-4 text-purple-600"
                                                                             fill="none"
@@ -1388,9 +1566,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                             />
                                                                         </svg>
                                                                         <div className="flex flex-col text-left leading-tight">
-                                                                            <span className="text-sm font-semibold text-purple-900">
-                                                                                Scheduled 
-                                                                            </span>
+                                                                            <span className="text-sm font-semibold text-purple-900">Scheduled</span>
                                                                             <span className="text-xs text-purple-700">
                                                                                 {formatScheduledDate(parcel.schedule) && parcel.time_slot
                                                                                     ? `${formatScheduledDate(parcel.schedule)} • ${parcel.time_slot}`
@@ -1545,7 +1721,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     </div>
                                     <span className="ml-auto text-gray-400 transition-colors group-hover:text-blue-500">→</span>
                                 </Link>
-                                <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-emerald-200 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:shadow-md">
+                                <button
+                                    onClick={openScanModal}
+                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-emerald-200 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:shadow-md"
+                                >
                                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#f5d0c8,#f5f2f9,#d3b9a6,#fbe5cf,#d4dcfa)]">
                                         <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
@@ -1562,7 +1741,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     </div>
                                     <span className="ml-auto text-gray-400 transition-colors group-hover:text-emerald-500">→</span>
                                 </button>
-                                <button className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-orange-200 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:shadow-md">
+                                <button
+                                    onClick={openScanModal}
+                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-orange-200 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:shadow-md"
+                                >
                                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 transition-all group-hover:scale-110">
                                         <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
