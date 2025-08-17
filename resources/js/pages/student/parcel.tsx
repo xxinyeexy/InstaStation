@@ -1,14 +1,14 @@
 import QRCodeModal from '@/components/qr-code-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { CheckCircle, Trash2, X, XCircle } from 'lucide-react';
 import { useCallback, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Parcel',
-        href: '/staff/parcel',
+        href: '/student/parcel',
     },
 ];
 
@@ -90,7 +90,58 @@ interface EditParcelForm {
     dimensions: string;
     description: string;
 }
+const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCount: number }) => {
+    // Get current time for greeting
+    const getCurrentGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Welcome back';
+        if (hour < 17) return 'Welcome back';
+        return 'Welcome back';
+    };
 
+    // Format user display name
+    const getDisplayName = () => {
+        if (user?.name) {
+            return user.name;
+        }
+        return 'John Doe';
+    };
+
+    // Get user identifier (matric for students, email for staff)
+    const getUserIdentifier = () => {
+        if (user?.matric) {
+            return `Matric ID: ${user.matric}`;
+        }
+        if (user?.email) {
+            return `Email: ${user.email}`;
+        }
+        return `Matric ID: A12345678`;
+    };
+
+    return (
+        <div className="mb-6 rounded-xl border border-gray-300 bg-gradient-to-r from-gray-100 to-gray-200 p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+                {/* Left side - Welcome message */}
+                <div className="flex items-start">
+                    <div>
+                        <h1 className="text-xl font-bold text-gray-900">
+                            {getCurrentGreeting()}, {getDisplayName()}!
+                        </h1>
+                        <p className="mt-0.5 text-sm text-gray-600">{getUserIdentifier()}</p>
+                    </div>
+                </div>
+
+                {/* Right side - Active parcels count */}
+                <div className="flex items-center gap-2 text-right">
+                    <div>
+                        <div className="text-sm text-gray-600">Active Parcels</div>
+                        <div className="text-2xl font-bold text-gray-900">{activeParcelCount}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
 export default function Dashboard({ parcels = [] }: DashboardProps) {
     const { auth } = usePage<SharedData>().props;
     const currentUser = auth.user;
@@ -430,6 +481,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         readyForCollection: parcelList.filter((p) => ['ready for collection', 'ready to collect'].includes(p.parcel_status?.toLowerCase())).length,
         collected: parcelList.filter((p) => p.parcel_status?.toLowerCase() === 'collected').length,
     };
+
+    // Active parcels count for Welcome header (non-collected)
+    const activeParcelCount = tileCounts.myParcels;
 
     // Simple search-based filtering for the card grid (no tabs in redesigned UI)
     const displayParcels = parcelList.filter((parcel) => {
@@ -1062,6 +1116,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
             {/* Background color matching the image */}
             <div className="min-h-screen bg-gray-50 p-6">
+                {/* Welcome header */}
+                <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} />
                 {/* Header tiles matching screenshot */}
                 <div className="mb-6 grid grid-cols-12 gap-4">
                     {/* My Parcels - Purple (icon on right) */}
@@ -1345,8 +1401,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         })}
                     </div>
                 )}
-
-                
             </div>
         </AppLayout>
     );
