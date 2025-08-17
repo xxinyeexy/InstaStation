@@ -128,7 +128,7 @@ class StudentController extends Controller
             'sender' => $parcel->sender ?? 'N/A',
             'location' => $parcel->location ?? 'N/A',
             'days' => $parcel->days ?? 0,
-            'schedule' => $parcel->schedule ? $parcel->schedule->format('Y-m-d H:i:s') : null,
+            'schedule' => optional($parcel->schedule)?->format('Y-m-d H:i:s'),
             'time_slot' => $parcel->time_slot,
             'created_at' => $parcel->created_at,
             'updated_at' => $parcel->updated_at,
@@ -477,13 +477,12 @@ class StudentController extends Controller
             $numbers = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
             $collectionCode = $alphabet . $numbers;
 
-            // Update the parcel with the scheduled datetime, time slot, collection code, and change status to "Ready for Collection"
+            // Update parcel for schedule. Do NOT change last_edited_by here (students shouldn't overwrite staff editor)
             $parcel->update([
                 'schedule' => $request->scheduled_datetime,
                 'time_slot' => $request->time_slot,
                 'collection_code' => $collectionCode,
                 'parcel_status' => 'Ready for Collection',
-                'last_edited_by' => $user->id,
             ]);
 
             Log::info('Parcel scheduled successfully', [
