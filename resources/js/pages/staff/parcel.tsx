@@ -203,12 +203,23 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                 const cameraConfig = preferredId ? { deviceId: { exact: preferredId } } : { facingMode: { ideal: 'environment' } };
 
-                await html5.start(
-                    cameraConfig as any,
-                    { fps: 15, qrbox: { width: 320, height: 320 }, formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], disableFlip: true },
-                    onDecodeSuccess,
-                    () => {},
-                );
+                const scanConfig: any = {
+                    fps: 24,
+                    qrbox: { width: 340, height: 340 },
+                    disableFlip: true,
+                    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    videoConstraints: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                    },
+                };
+
+                await html5.start(cameraConfig as any, scanConfig as any, onDecodeSuccess, () => {});
+                // Hint autofocus after start (typed as any to avoid TS lib gaps)
+                try {
+                    await (html5Ref.current as any)?.applyVideoConstraints?.({ advanced: [{ focusMode: 'continuous' }] });
+                } catch {}
             } catch (e: any) {
                 setCameraError('Camera could not start. Use HTTPS or localhost, allow camera permissions, and ensure a camera is connected.');
             } finally {
@@ -225,12 +236,22 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         (async () => {
             try {
                 await html5Ref.current!.stop().catch(() => {});
-                await html5Ref.current!.start(
-                    { deviceId: { exact: selectedCameraId } } as any,
-                    { fps: 15, qrbox: { width: 320, height: 320 }, formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], disableFlip: true },
-                    onDecodeSuccess,
-                    () => {},
-                );
+                const switchConfig: any = {
+                    fps: 24,
+                    qrbox: { width: 340, height: 340 },
+                    disableFlip: true,
+                    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+                    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+                    videoConstraints: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                    },
+                };
+
+                await html5Ref.current!.start({ deviceId: { exact: selectedCameraId } } as any, switchConfig as any, onDecodeSuccess, () => {});
+                try {
+                    await (html5Ref.current as any)?.applyVideoConstraints?.({ advanced: [{ focusMode: 'continuous' }] });
+                } catch {}
             } catch (e) {
                 setCameraError('Failed to switch camera');
             }
@@ -738,7 +759,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
             {/* Parcel Details Modal */}
             {showDetailsModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
                     <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
                         {/* Modal Header */}
                         <div className="flex items-center justify-between border-b border-gray-200 p-6">
@@ -756,7 +777,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-6">
+                        <div className="max-h-[65vh] overflow-y-auto p-6">
                             {parcelDetails ? (
                                 <div className="space-y-6">
                                     {/* Top Section */}
