@@ -173,6 +173,61 @@ class PaymentController extends Controller
         return redirect()->route('student.payment')->with('success', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
     }
 
+    public function staffIndex(): Response
+    {
+        // Aggregate payment stats for staff dashboard
+        $pendingCount = Payment::whereNull('verified_by')->count();
+        $verifiedToday = Payment::whereNotNull('verified_by')
+            ->whereDate('updated_at', now()->toDateString())
+            ->count();
+        $totalRevenue = Payment::whereNotNull('verified_by')->count() * 1.00; // RM1 each
+        $successRate = null; // not displayed now
+
+        $rows = Payment::with(['parcel.studentUser'])
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique('parcel_id')
+            ->values()
+            ->map(function (Payment $p) {
+                return [
+                    'payment_id' => $p->payment_id,
+                    'tracking_no' => optional($p->parcel)->parcel_code,
+                    'student' => optional($p->parcel?->studentUser)?->name,
+                    'student_matric' => optional($p->parcel?->studentUser)?->matric,
+                    'amount' => 1.00,
+                    'method' => 'bank transfer',
+                    'status' => $p->verified_by ? 'verified' : 'pending',
+                    'submitted_at' => optional($p->created_at)?->toDateString(),
+                    'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
+                ];
+            })->toArray();
+
+        return Inertia::render('staff/verify-payment', [
+            'summary' => [
+                'pending' => $pendingCount,
+                'verified_today' => $verifiedToday,
+                'total_revenue' => $totalRevenue,
+                'success_rate' => $successRate,
+            ],
+            'rows' => $rows,
+        ]);
+    }
+
+    public function approvePayment(int $id)
+    {
+        $payment = Payment::findOrFail($id);
+        $payment->verified_by = Auth::id();
+        $payment->save();
+        return back()->with('success', 'Payment verified.');
+    }
+
+    public function rejectPayment(int $id)
+    {
+        $payment = Payment::findOrFail($id);
+        $payment->delete();
+        return back()->with('success', 'Payment rejected and removed.');
+    }
+
     /**
      * Show the form for creating a new resource.
      */

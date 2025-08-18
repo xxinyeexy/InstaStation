@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ParcelController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -41,14 +42,22 @@ Route::middleware('auth')->group(function () {
     // Student routes
     Route::get('/student/parcel', [StudentController::class, 'student'])
         ->name('student.parcel');
-    Route::get('/student/payment', [\App\Http\Controllers\PaymentController::class, 'index'])
+    Route::get('/student/payment', [PaymentController::class, 'index'])
         ->name('student.payment');
-    Route::get('/student/payment/history', [\App\Http\Controllers\PaymentController::class, 'history'])
+    Route::get('/student/payment/history', [PaymentController::class, 'history'])
         ->name('student.payment.history');
-    Route::get('/student/payment/submit/{id}', [\App\Http\Controllers\PaymentController::class, 'showSubmit'])
+    Route::get('/student/payment/submit/{id}', [PaymentController::class, 'showSubmit'])
         ->name('student.payment.submit');
-    Route::post('/student/payment/submit/{id}', [\App\Http\Controllers\PaymentController::class, 'storeStudentPayment'])
+    Route::post('/student/payment/submit/{id}', [PaymentController::class, 'storeStudentPayment'])
         ->name('student.payment.submit.store');
+
+    // Staff: Verify Payments page
+    Route::get('/staff/payments', [PaymentController::class, 'staffIndex'])
+        ->name('staff.payments');
+    Route::post('/staff/payments/{id}/approve', [PaymentController::class, 'approvePayment'])
+        ->name('staff.payments.approve');
+    Route::post('/staff/payments/{id}/reject', [PaymentController::class, 'rejectPayment'])
+        ->name('staff.payments.reject');
     Route::get('/student/parcel/{id}', [StudentController::class, 'viewParcel'])
         ->name('student.view-parcel');
     Route::get('/student/schedule/{id}', [StudentController::class, 'schedulePickup'])

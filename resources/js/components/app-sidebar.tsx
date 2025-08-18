@@ -63,7 +63,7 @@ const staffNavItems: NavItem[] = [
     },
     {
         title: 'Payment',
-        href: '/staff/payment',
+        href: '/staff/payments',
         icon: WalletCards,
     },
     {
