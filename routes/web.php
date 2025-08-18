@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
     // Student routes
     Route::get('/student/parcel', [StudentController::class, 'student'])
         ->name('student.parcel');
+    Route::get('/student/payment', [\App\Http\Controllers\PaymentController::class, 'index'])
+        ->name('student.payment');
     Route::get('/student/parcel/{id}', [StudentController::class, 'viewParcel'])
         ->name('student.view-parcel');
     Route::get('/student/schedule/{id}', [StudentController::class, 'schedulePickup'])
