@@ -43,6 +43,12 @@ Route::middleware('auth')->group(function () {
         ->name('student.parcel');
     Route::get('/student/payment', [\App\Http\Controllers\PaymentController::class, 'index'])
         ->name('student.payment');
+    Route::get('/student/payment/history', [\App\Http\Controllers\PaymentController::class, 'history'])
+        ->name('student.payment.history');
+    Route::get('/student/payment/submit/{id}', [\App\Http\Controllers\PaymentController::class, 'showSubmit'])
+        ->name('student.payment.submit');
+    Route::post('/student/payment/submit/{id}', [\App\Http\Controllers\PaymentController::class, 'storeStudentPayment'])
+        ->name('student.payment.submit.store');
     Route::get('/student/parcel/{id}', [StudentController::class, 'viewParcel'])
         ->name('student.view-parcel');
     Route::get('/student/schedule/{id}', [StudentController::class, 'schedulePickup'])

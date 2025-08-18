@@ -84,7 +84,7 @@ return new class extends Migration
             $table->foreignId('parcel_id')->constrained('parcels', 'parcel_id')->onDelete('cascade');
             $table->text('payment')->nullable();
             $table->string('file_path', 255);
-            $table->foreignId('verified_by')->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('verified_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
             $table->date('payment_date')->nullable();
             $table->timestamps();
         });

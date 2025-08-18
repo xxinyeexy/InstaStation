@@ -9,6 +9,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Payment extends Model
 {
     use HasFactory;
+    protected $primaryKey = 'payment_id';
+    protected $fillable = [
+        'parcel_id',
+        'payment',
+        'file_path',
+        'verified_by',
+        'payment_date',
+    ];
     public function parcel()
     {
         return $this->belongsTo(Parcel::class, 'parcel_id');

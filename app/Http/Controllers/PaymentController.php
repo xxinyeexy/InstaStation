@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rules\File;
 
 class PaymentController extends Controller
 {
@@ -54,6 +56,27 @@ class PaymentController extends Controller
         $verified = collect($parcels)->where('payment_state', 'Verified')->count();
         $totalPaid = $verified * 1.00; // RM1 each
 
+        // Payment history for this student (with proof image)
+        $payments = Payment::query()
+            ->whereHas('parcel', function ($q) use ($user) {
+                $q->where('student_id', $user->id);
+            })
+            ->with('parcel')
+            ->orderByDesc('created_at')
+            ->get()
+            ->unique('parcel_id')
+            ->map(function (Payment $p) {
+                return [
+                    'payment_id' => $p->payment_id,
+                    'parcel_code' => optional($p->parcel)->parcel_code,
+                    'amount' => 1.00,
+                    'status' => $p->verified_by ? 'Verified' : 'Pending',
+                    'submitted_at' => optional($p->created_at)?->toDateString(),
+                    'verified_at' => $p->verified_by ? optional($p->updated_at)?->toDateString() : null,
+                    'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
+                ];
+            })->toArray();
+
         return Inertia::render('student/payment', [
             'summary' => [
                 'overdue' => $overdue,
@@ -62,7 +85,92 @@ class PaymentController extends Controller
                 'total_paid' => $totalPaid,
             ],
             'rows' => $parcels,
+            'payments' => $payments,
         ]);
+    }
+
+    public function history(): Response
+    {
+        $user = Auth::user();
+
+        $payments = Payment::query()
+            ->whereHas('parcel', function ($q) use ($user) {
+                $q->where('student_id', $user->id);
+            })
+            ->with('parcel')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function (Payment $p) {
+                return [
+                    'payment_id' => $p->payment_id,
+                    'parcel_code' => optional($p->parcel)->parcel_code,
+                    'amount' => 1.00,
+                    'status' => $p->verified_by ? 'Verified' : 'Pending',
+                    'submitted_at' => optional($p->created_at)?->toDateString(),
+                    'verified_at' => $p->verified_by ? optional($p->updated_at)?->toDateString() : null,
+                    'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
+                ];
+            })->toArray();
+
+        return Inertia::render('student/payment-history', [
+            'payments' => $payments,
+        ]);
+    }
+
+    public function showSubmit(int $id): Response
+    {
+        $userId = Auth::id();
+        $parcel = Parcel::where('parcel_id', $id)->where('student_id', $userId)->firstOrFail();
+
+        return Inertia::render('student/payment-submit', [
+            'parcel' => [
+                'parcel_id' => $parcel->parcel_id,
+                'parcel_code' => $parcel->parcel_code,
+                'tracking_no' => $parcel->tracking_no,
+                'sender' => $parcel->sender,
+                'arrival' => optional($parcel->created_at)?->toDateString(),
+                'fee' => 1.00,
+            ],
+        ]);
+    }
+
+    public function storeStudentPayment(Request $request, int $id)
+    {
+        $userId = Auth::id();
+        $parcel = Parcel::where('parcel_id', $id)->where('student_id', $userId)->firstOrFail();
+
+        $validated = $request->validate([
+            'proof' => [
+                'required',
+                File::image()->types(['png', 'jpg', 'jpeg'])->max('10mb'),
+            ],
+        ]);
+
+        $path = $request->file('proof')->store('payment_proofs', 'public');
+
+        // If a payment record already exists for this parcel, update it and replace the file
+        $existing = Payment::where('parcel_id', $parcel->parcel_id)->orderByDesc('created_at')->first();
+        if ($existing) {
+            if (!empty($existing->file_path)) {
+                try {
+                    Storage::disk('public')->delete($existing->file_path);
+                } catch (\Throwable $e) {
+                }
+            }
+            $existing->file_path = $path;
+            $existing->payment_date = now()->toDateString();
+            $existing->verified_by = null; // reset verification on resubmission
+            $existing->save();
+        } else {
+            $payment = new Payment();
+            $payment->parcel_id = $parcel->parcel_id;
+            $payment->file_path = $path;
+            $payment->payment_date = now()->toDateString();
+            // verified_by stays null until staff verifies
+            $payment->save();
+        }
+
+        return redirect()->route('student.payment')->with('success', 'Payment submitted');
     }
 
     /**
