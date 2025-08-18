@@ -170,7 +170,7 @@ class PaymentController extends Controller
             $payment->save();
         }
 
-        return redirect()->route('student.payment')->with('success', 'Payment submitted');
+        return redirect()->route('student.payment')->with('success', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
     }
 
     /**

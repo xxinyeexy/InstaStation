@@ -48,7 +48,8 @@ export default function Alert({
     text = 'text-green-800';
     icon = (
       <svg xmlns="http://www.w3.org/2000/svg" className={`shrink-0 inline w-4 h-4 me-3 ${iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" />
+        <circle cx="12" cy="12" r="10" strokeWidth="2" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" />
       </svg>
     );
   } else if (type === 'warning') {

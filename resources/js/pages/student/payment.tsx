@@ -149,8 +149,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                             </svg>
                                         )}
                                         {r.payment_state === 'Verified' && (
-                                            <CircleCheck className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                            </CircleCheck>
+                                            <CircleCheck className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleCheck>
                                         )}
                                         {r.payment_state}
                                     </span>
@@ -192,12 +191,35 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                         <span
                                             className={`rounded-full p-1 ${p.status === 'Verified' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-700'}`}
                                         >
-                                            {p.status === 'Verified' }
+                                            {p.status === 'Verified' ? (
+                                                <CircleCheck className="h-4 w-4" />
+                                            ) : (
+                                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                    />
+                                                </svg>
+                                            )}
                                         </span>
                                         <span className="font-medium text-gray-900">{p.parcel_code ?? '—'}</span>
                                         <span
-                                            className={`ml-1 inline-flex items-center rounded-full border px-2 py-0.5 text-xs ${p.status === 'Verified' ? 'border-green-200 bg-green-50 text-green-700' : 'border-yellow-200 bg-yellow-50 text-yellow-700'}`}
+                                            className={`ml-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${p.status === 'Verified' ? 'border-green-200 bg-green-50 text-green-700' : 'border-yellow-200 bg-yellow-50 text-yellow-700'}`}
                                         >
+                                            {p.status === 'Verified' ? (
+                                                <CircleCheck className="h-3 w-3" />
+                                            ) : (
+                                                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                    />
+                                                </svg>
+                                            )}
                                             {p.status}
                                         </span>
                                     </div>
