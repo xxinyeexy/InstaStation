@@ -119,12 +119,12 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
     };
 
     return (
-        <div className="mb-6 rounded-xl border border-gray-300 bg-gradient-to-r from-gray-100 to-gray-200 p-4 shadow-sm">
+        <div className="mb-6 rounded-xl border border-green-200 text-green-700 bg-green-100 p-4 shadow-sm">
             <div className="flex items-center justify-between">
                 {/* Left side - Welcome message */}
                 <div className="flex items-start">
                     <div>
-                        <h1 className="text-xl font-bold text-gray-900">
+                        <h1 className="text-xl font-bold text-green-600">
                             {getCurrentGreeting()}, {getDisplayName()}!
                         </h1>
                         <p className="mt-0.5 text-sm text-gray-600">{getUserIdentifier()}</p>
@@ -134,8 +134,8 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
                 {/* Right side - Active parcels count */}
                 <div className="flex items-center gap-2 text-right">
                     <div>
-                        <div className="text-sm text-gray-600">Active Parcels</div>
-                        <div className="text-2xl font-bold text-gray-900">{activeParcelCount}</div>
+                        <div className="text-sm text-green-600">Active Parcels</div>
+                        <div className="text-2xl font-bold text-green-500">{activeParcelCount}</div>
                     </div>
                 </div>
             </div>
