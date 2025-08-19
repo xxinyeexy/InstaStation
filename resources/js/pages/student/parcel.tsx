@@ -2,8 +2,8 @@ import QRCodeModal from '@/components/qr-code-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { CheckCircle, Trash2, X, XCircle } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { CheckCircle, Upload, X, XCircle } from 'lucide-react';
+import { useCallback, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -119,7 +119,7 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
     };
 
     return (
-        <div className="mb-6 rounded-xl border border-green-200 text-green-700 bg-green-100 p-4 shadow-sm">
+        <div className="mb-6 rounded-xl border border-green-200 bg-green-100 p-4 text-green-700 shadow-sm">
             <div className="flex items-center justify-between">
                 {/* Left side - Welcome message */}
                 <div className="flex items-start">
@@ -190,6 +190,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         qr_code_image: string;
     } | null>(null);
     const [loadingQRParcels, setLoadingQRParcels] = useState<Set<number>>(new Set());
+    const [showPayModal, setShowPayModal] = useState(false);
+    const [payParcelId, setPayParcelId] = useState<number | null>(null);
+    const [isUploadingProof, setIsUploadingProof] = useState(false);
+    const proofInputRef = useRef<HTMLInputElement | null>(null);
 
     // Add notification function
     const addNotification = (type: 'success' | 'error', title: string, message: string) => {
@@ -360,8 +364,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
-    
-
     // Get exact counts for each tab from actual database data - USE parcelList instead of parcels
     const getCounts = useCallback(() => {
         return {
@@ -445,8 +447,36 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     });
 
     const handlePayNow = (parcelId: number) => {
-        // Redirect to a payment page (route can be adapted as needed)
-        window.location.href = `/student/payment?parcel=${parcelId}`;
+        setPayParcelId(parcelId);
+        setShowPayModal(true);
+    };
+
+    const handleProofSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        try {
+            const file = e.target.files?.[0];
+            if (!file || payParcelId == null) return;
+            setIsUploadingProof(true);
+            const form = new FormData();
+            form.append('proof', file);
+            const resp = await fetch(`/student/payment/submit/${payParcelId}`, {
+                method: 'POST',
+                body: form,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                credentials: 'same-origin',
+            });
+            if (!resp.ok) throw new Error(`Upload failed (${resp.status})`);
+            addNotification('success', 'Payment Uploaded', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
+            setShowPayModal(false);
+            setPayParcelId(null);
+        } catch (err) {
+            addNotification('error', 'Upload Failed', err instanceof Error ? err.message : 'Failed to upload proof');
+        } finally {
+            setIsUploadingProof(false);
+            if (proofInputRef.current) proofInputRef.current.value = '';
+        }
     };
 
     // Calculate percentage changes (mock calculation for demo purposes)
@@ -631,6 +661,40 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {/* QR Code Modal */}
             <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} isLoading={loadingQRParcels.size > 0} />
 
+            {/* Quick Pay Modal */}
+            {showPayModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                            <div>
+                                <h2 className="text-lg font-semibold text-gray-900">Payment QR Scanner</h2>
+                                <p className="mt-1 text-xs text-gray-600">Scan payment QR code and upload payment proof</p>
+                            </div>
+                            <button
+                                onClick={() => setShowPayModal(false)}
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <div className="mb-4 flex h-35 w-full items-center justify-center rounded-xl border border-dashed border-gray-300">
+                                <img src="/images/qrpayment.png" alt="DuitNow QR" className="h-40 w-40 object-contain" />
+                            </div>
+                            <input ref={proofInputRef} type="file" accept="image/*" onChange={handleProofSelected} className="hidden" />
+                            <button
+                                onClick={() => proofInputRef.current?.click()}
+                                disabled={isUploadingProof}
+                                className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-60"
+                            >
+                                <Upload className="h-4 w-4" />
+                                {isUploadingProof ? 'Uploading...' : 'Upload Payment Proof'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Parcel Details Modal */}
             {showDetailsModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -649,7 +713,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
-
                     </div>
                 </div>
             )}
