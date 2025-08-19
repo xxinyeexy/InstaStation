@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { Check, CircleCheck, Clock, DollarSign, Eye, X } from 'lucide-react';
+import { Check, CircleCheck, CircleX, Clock, DollarSign, Eye, X } from 'lucide-react';
 
 type Summary = {
     pending: number;
@@ -101,13 +101,13 @@ export default function VerifyPayment({ summary, rows }: { summary: Summary; row
                                     onClick={() => router.post(`/staff/payments/${r.payment_id}/approve`)}
                                     className="text-emerald-600 hover:text-emerald-700"
                                 >
-                                    <Check className="h-4 w-4" />
+                                    <CircleCheck className="h-4 w-4" />
                                 </button>
                                 <button
                                     onClick={() => router.post(`/staff/payments/${r.payment_id}/reject`)}
                                     className="text-red-500 hover:text-red-600"
                                 >
-                                    <X className="h-4 w-4" />
+                                    <CircleX className="h-4 w-4" />
                                 </button>
                             </div>
                         </div>
