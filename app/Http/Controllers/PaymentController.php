@@ -21,7 +21,7 @@ class PaymentController extends Controller
     {
         $user = Auth::user();
 
-        // Fetch student's parcels and compute payment status
+        // Fetch student's parcels and compute payment status using latest payment state
         $parcels = Parcel::where('student_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get()
@@ -30,13 +30,19 @@ class PaymentController extends Controller
                 $daysSince = $arrival->diffInDays(now());
                 $status = strtolower($p->parcel_status);
 
-                // Payment state rules
+                // Determine latest payment for this parcel (if any)
+                $latestPayment = Payment::where('parcel_id', $p->parcel_id)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                // Payment state rules (priority: approved/verified payment -> Verified)
                 $paymentState = 'Pending';
-                if ($status === 'collected') {
+                if (($latestPayment && !empty($latestPayment->verified_by)) || in_array($status, ['approved', 'collected'])) {
                     $paymentState = 'Verified';
-                } elseif ($daysSince >= 7 && $status === 'pending payment') {
-                    $paymentState = 'Overdue';
                 } elseif ($status === 'pending payment') {
+                    $paymentState = $daysSince >= 7 ? 'Overdue' : 'Pending';
+                } else {
+                    // For other statuses without verified payment, fall back to Pending
                     $paymentState = 'Pending';
                 }
 
@@ -173,34 +179,52 @@ class PaymentController extends Controller
         return redirect()->route('student.payment')->with('success', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
     }
 
-    public function staffIndex(): Response
+    public function staffIndex(Request $request): Response
     {
-        // Aggregate payment stats for staff dashboard
-        $pendingCount = Payment::whereNull('verified_by')->count();
-        $verifiedToday = Payment::whereNotNull('verified_by')
-            ->whereDate('updated_at', now()->toDateString())
-            ->count();
-        $totalRevenue = Payment::whereNotNull('verified_by')->count() * 1.00; // RM1 each
-        $successRate = null; // not displayed now
+        $q = trim((string) $request->input('q'));
+        $status = $request->input('status');
 
-        $rows = Payment::with(['parcel.studentUser'])
+        // Build collection of latest payment per parcel
+        $latest = Payment::with(['parcel.studentUser'])
             ->orderByDesc('created_at')
             ->get()
             ->unique('parcel_id')
-            ->values()
-            ->map(function (Payment $p) {
-                return [
-                    'payment_id' => $p->payment_id,
-                    'tracking_no' => optional($p->parcel)->parcel_code,
-                    'student' => optional($p->parcel?->studentUser)?->name,
-                    'student_matric' => optional($p->parcel?->studentUser)?->matric,
-                    'amount' => 1.00,
-                    'method' => 'bank transfer',
-                    'status' => $p->verified_by ? 'verified' : 'pending',
-                    'submitted_at' => optional($p->created_at)?->toDateString(),
-                    'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
-                ];
-            })->toArray();
+            ->values();
+
+        // Summary based on latest entries
+        $pendingCount = $latest->whereNull('verified_by')->count();
+        $verifiedToday = $latest->filter(fn($p) => $p->verified_by && optional($p->updated_at)?->toDateString() === now()->toDateString())->count();
+        $totalRevenue = $latest->whereNotNull('verified_by')->count() * 1.00; // RM1 each
+        $successRate = null;
+
+        // Filter
+        $filtered = $latest->filter(function (Payment $p) use ($q, $status) {
+            $matchSearch = true;
+            if ($q !== '') {
+                $haystack = strtolower(trim(($p->parcel->parcel_code ?? '') . ' ' . ($p->parcel?->studentUser->name ?? '') . ' ' . ($p->parcel?->studentUser->matric ?? '')));
+                $matchSearch = str_contains($haystack, strtolower($q));
+            }
+            $matchStatus = true;
+            if (in_array($status, ['pending', 'verified'], true)) {
+                $matchStatus = $status === 'verified' ? (bool) $p->verified_by : !$p->verified_by;
+            }
+            return $matchSearch && $matchStatus;
+        });
+
+        $rows = $filtered->map(function (Payment $p) {
+            return [
+                'payment_id' => $p->payment_id,
+                'tracking_no' => optional($p->parcel)->parcel_code,
+                'student' => optional($p->parcel?->studentUser)?->name,
+                'student_matric' => optional($p->parcel?->studentUser)?->matric,
+                'amount' => 1.00,
+                'method' => 'bank transfer',
+                'status' => $p->verified_by ? 'verified' : 'pending',
+                'submitted_at' => optional($p->created_at)?->toDateString(),
+                'created_at' => optional($p->created_at)?->toIso8601String(),
+                'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
+            ];
+        })->values()->toArray();
 
         return Inertia::render('staff/verify-payment', [
             'summary' => [
@@ -210,6 +234,10 @@ class PaymentController extends Controller
                 'success_rate' => $successRate,
             ],
             'rows' => $rows,
+            'filters' => [
+                'q' => $q,
+                'status' => $status,
+            ],
         ]);
     }
 
@@ -218,13 +246,34 @@ class PaymentController extends Controller
         $payment = Payment::findOrFail($id);
         $payment->verified_by = Auth::id();
         $payment->save();
+        // When a payment is approved by staff, mark parcel as Approved
+        if ($payment->parcel_id) {
+            $parcel = Parcel::find($payment->parcel_id);
+            if ($parcel) {
+                $parcel->parcel_status = 'Approved';
+                $parcel->last_edited_by = Auth::id();
+                $parcel->touch();
+                $parcel->save();
+            }
+        }
         return back()->with('success', 'Payment verified.');
     }
 
     public function rejectPayment(int $id)
     {
         $payment = Payment::findOrFail($id);
+        $parcelId = $payment->parcel_id;
         $payment->delete();
+        // Keep parcel in Pending Payment so student can resubmit
+        if ($parcelId) {
+            $parcel = Parcel::find($parcelId);
+            if ($parcel) {
+                $parcel->parcel_status = 'Pending Payment';
+                $parcel->last_edited_by = Auth::id();
+                $parcel->touch();
+                $parcel->save();
+            }
+        }
         return back()->with('success', 'Payment rejected and removed.');
     }
 
