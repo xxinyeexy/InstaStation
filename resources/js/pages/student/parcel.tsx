@@ -68,8 +68,8 @@ interface DashboardProps {
 
 type TabType = 'All Parcels' | 'Pending Payment' | 'Ready For Collection' | 'Collected' | 'Unclaimed';
 
-// Notification interface
-interface Notification {
+// Toast notification interface for local notifications
+interface ToastNotification {
     id: string;
     type: 'success' | 'error';
     title: string;
@@ -150,6 +150,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [searchTerm, setSearchTerm] = useState('');
     // Use state for parcel list and initialize it with the parcels prop
     const [parcelList, setParcelList] = useState<Parcel[]>(parcels);
+
+    // Removed notification system from parcel.tsx
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedParcelId, setSelectedParcelId] = useState<number | null>(null);
     const [selectedParcelCode, setSelectedParcelCode] = useState<string | null>(null);
@@ -178,8 +180,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     });
     const [isUpdating, setIsUpdating] = useState(false);
 
-    // Notification state
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+    // Toast notification state
+    const [toastNotifications, setToastNotifications] = useState<ToastNotification[]>([]);
 
     // QR Code Modal state
     const [showQRModal, setShowQRModal] = useState(false);
@@ -195,22 +197,26 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [isUploadingProof, setIsUploadingProof] = useState(false);
     const proofInputRef = useRef<HTMLInputElement | null>(null);
 
-    // Add notification function
-    const addNotification = (type: 'success' | 'error', title: string, message: string) => {
+    // Removed notification dropdown state and handlers
+
+    // Add toast notification function
+    const addToastNotification = (type: 'success' | 'error', title: string, message: string) => {
         const id = Date.now().toString();
-        const newNotification: Notification = { id, type, title, message };
-        setNotifications((prev) => [...prev, newNotification]);
+        const newToastNotification: ToastNotification = { id, type, title, message };
+        setToastNotifications((prev) => [...prev, newToastNotification]);
 
         // Auto remove after 5 seconds
         setTimeout(() => {
-            removeNotification(id);
+            removeToastNotification(id);
         }, 5000);
     };
 
-    // Remove notification function
-    const removeNotification = (id: string) => {
-        setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+    // Remove toast notification function
+    const removeToastNotification = (id: string) => {
+        setToastNotifications((prev) => prev.filter((notification) => notification.id !== id));
     };
+
+    // Removed notification click handler
 
     // Navigate to view-parcel page
     const handleViewParcel = (parcelId: number) => {
@@ -263,9 +269,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         } catch (error) {
             console.error('QR code generation error:', error);
             if (error instanceof Error) {
-                addNotification('error', 'QR Code Error', error.message);
+                addToastNotification('error', 'QR Code Error', error.message);
             } else {
-                addNotification('error', 'QR Code Error', 'Failed to generate QR code');
+                addToastNotification('error', 'QR Code Error', 'Failed to generate QR code');
             }
             // Close modal on error
             setShowQRModal(false);
@@ -352,13 +358,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                 setShowEditModal(false);
                 setEditingParcel(null);
-                addNotification('success', 'Success!', 'Parcel updated successfully!');
+                addToastNotification('success', 'Success!', 'Parcel updated successfully!');
             } else {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
         } catch (error) {
             console.error('Failed to update parcel:', error);
-            addNotification('error', 'Error!', 'Failed to update parcel. Please try again.');
+            addToastNotification('error', 'Error!', 'Failed to update parcel. Please try again.');
         } finally {
             setIsUpdating(false);
         }
@@ -468,11 +474,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 credentials: 'same-origin',
             });
             if (!resp.ok) throw new Error(`Upload failed (${resp.status})`);
-            addNotification('success', 'Payment Uploaded', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
+            addToastNotification('success', 'Payment Uploaded', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
             setShowPayModal(false);
             setPayParcelId(null);
+
+            // Refresh parcel data to update payment status
+            router.reload({ only: ['parcels'] });
         } catch (err) {
-            addNotification('error', 'Upload Failed', err instanceof Error ? err.message : 'Failed to upload proof');
+            addToastNotification('error', 'Upload Failed', err instanceof Error ? err.message : 'Failed to upload proof');
         } finally {
             setIsUploadingProof(false);
             if (proofInputRef.current) proofInputRef.current.value = '';
@@ -624,9 +633,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
 
-            {/* Notification Container */}
+            {/* Toast Notification Container */}
             <div className="fixed right-4 bottom-4 z-50 space-y-3">
-                {notifications.map((notification) => (
+                {toastNotifications.map((notification) => (
                     <div
                         key={notification.id}
                         className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${
@@ -648,7 +657,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 <p className="mt-1 text-sm opacity-90">{notification.message}</p>
                             </div>
                             <button
-                                onClick={() => removeNotification(notification.id)}
+                                onClick={() => removeToastNotification(notification.id)}
                                 className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
                             >
                                 <X className="h-4 w-4" />
@@ -720,6 +729,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             <div className="min-h-screen bg-gray-50 p-6">
                 {/* Welcome header */}
                 <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} />
+
+                {/* Removed notification system from parcel.tsx */}
+
                 {/* Header tiles matching screenshot */}
                 <div className="mb-6 grid grid-cols-12 gap-4">
                     {/* My Parcels - Purple (icon on right) */}

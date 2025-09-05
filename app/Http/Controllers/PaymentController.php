@@ -83,6 +83,28 @@ class PaymentController extends Controller
                 ];
             })->toArray();
 
+        // Fetch all notifications for the student (both read and unread)
+        $notifications = \App\Models\Notification::where('notifiable_id', $user->id)
+            ->where('notifiable_type', 'App\Models\User')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($notification) {
+                $data = json_decode($notification->data, true);
+                return [
+                    'id' => $notification->id,
+                    'type' => $notification->type,
+                    'title' => $data['title'] ?? 'Notification',
+                    'message' => $data['message'] ?? '',
+                    'parcel_code' => $data['parcel_code'] ?? null,
+                    'parcel_id' => $data['parcel_id'] ?? null,
+                    'rejected_by' => $data['rejected_by'] ?? null,
+                    'rejected_at' => $data['rejected_at'] ?? null,
+                    'created_at' => $notification->created_at->toDateTimeString(),
+                    'read_at' => $notification->read_at ? $notification->read_at->toDateTimeString() : null,
+                    'is_read' => $notification->read_at !== null,
+                ];
+            });
+
         return Inertia::render('student/payment', [
             'summary' => [
                 'overdue' => $overdue,
@@ -92,6 +114,7 @@ class PaymentController extends Controller
             ],
             'rows' => $parcels,
             'payments' => $payments,
+            'notifications' => $notifications,
         ]);
     }
 
@@ -176,6 +199,13 @@ class PaymentController extends Controller
             $payment->save();
         }
 
+        // Remove any payment rejection notifications for this parcel when resubmitting
+        \App\Models\Notification::where('notifiable_id', $userId)
+            ->where('notifiable_type', 'App\Models\User')
+            ->where('type', 'payment_rejected')
+            ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
+            ->delete();
+
         return redirect()->route('student.payment')->with('success', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
     }
 
@@ -254,6 +284,13 @@ class PaymentController extends Controller
                 $parcel->last_edited_by = Auth::id();
                 $parcel->touch();
                 $parcel->save();
+
+                // Clean up any rejection notifications for this parcel when payment is approved
+                \App\Models\Notification::where('notifiable_id', $parcel->student_id)
+                    ->where('notifiable_type', 'App\Models\User')
+                    ->where('type', 'payment_rejected')
+                    ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
+                    ->delete();
             }
         }
         return back()->with('success', 'Payment verified.');
@@ -263,17 +300,44 @@ class PaymentController extends Controller
     {
         $payment = Payment::findOrFail($id);
         $parcelId = $payment->parcel_id;
-        $payment->delete();
-        // Keep parcel in Pending Payment so student can resubmit
+
+        // Get the parcel and student info before deleting the payment
+        $parcel = null;
+        $student = null;
         if ($parcelId) {
-            $parcel = Parcel::find($parcelId);
-            if ($parcel) {
-                $parcel->parcel_status = 'Pending Payment';
-                $parcel->last_edited_by = Auth::id();
-                $parcel->touch();
-                $parcel->save();
+            $parcel = Parcel::with('studentUser')->find($parcelId);
+            $student = $parcel?->studentUser;
+        }
+
+        $payment->delete();
+
+        // Keep parcel in Pending Payment so student can resubmit
+        if ($parcel) {
+            $parcel->parcel_status = 'Pending Payment';
+            $parcel->last_edited_by = Auth::id();
+            $parcel->touch();
+            $parcel->save();
+
+            // Create notification for the student
+            if ($student) {
+                $notification = new \App\Models\Notification();
+                $notification->id = \Illuminate\Support\Str::uuid();
+                $notification->type = 'payment_rejected';
+                $notification->notifiable_id = $student->id;
+                $notification->notifiable_type = 'App\Models\User';
+                $notification->data = json_encode([
+                    'title' => 'Payment Proof Rejected',
+                    'message' => "Your payment proof for parcel {$parcel->parcel_code} has been rejected. Please resubmit a valid payment proof.",
+                    'parcel_code' => $parcel->parcel_code,
+                    'parcel_id' => $parcel->parcel_id,
+                    'rejected_by' => Auth::user()->name,
+                    'rejected_at' => now()->toDateTimeString(),
+                ]);
+                $notification->read_at = null; // Mark as unread
+                $notification->save();
             }
         }
+
         return back()->with('success', 'Payment rejected and removed.');
     }
 

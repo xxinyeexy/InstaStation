@@ -95,8 +95,30 @@ class StudentController extends Controller
                 ];
             });
 
+        // Fetch unread notifications for the student
+        $notifications = \App\Models\Notification::where('notifiable_id', $user->id)
+            ->where('notifiable_type', 'App\Models\User')
+            ->whereNull('read_at')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($notification) {
+                $data = json_decode($notification->data, true);
+                return [
+                    'id' => $notification->id,
+                    'type' => $notification->type,
+                    'title' => $data['title'] ?? 'Notification',
+                    'message' => $data['message'] ?? '',
+                    'parcel_code' => $data['parcel_code'] ?? null,
+                    'parcel_id' => $data['parcel_id'] ?? null,
+                    'rejected_by' => $data['rejected_by'] ?? null,
+                    'rejected_at' => $data['rejected_at'] ?? null,
+                    'created_at' => $notification->created_at->toDateTimeString(),
+                ];
+            });
+
         return Inertia::render('student/parcel', [
             'parcels' => $parcels,
+            'notifications' => $notifications,
         ]);
     }
 

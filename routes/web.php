@@ -7,6 +7,7 @@ use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -50,6 +51,8 @@ Route::middleware('auth')->group(function () {
         ->name('student.payment.submit');
     Route::post('/student/payment/submit/{id}', [PaymentController::class, 'storeStudentPayment'])
         ->name('student.payment.submit.store');
+    Route::post('/student/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead'])
+        ->name('student.notifications.mark-read');
 
     // Staff: Verify Payments page
     Route::get('/staff/payments', [PaymentController::class, 'staffIndex'])

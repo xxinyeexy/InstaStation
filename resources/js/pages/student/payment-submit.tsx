@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
 type Parcel = {
@@ -28,7 +28,17 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         // useForm already tracks `data`; just force FormData for file upload
-        post(`/student/payment/submit/${parcel.parcel_id}`, { forceFormData: true });
+        post(`/student/payment/submit/${parcel.parcel_id}`, {
+            forceFormData: true,
+            onSuccess: () => {
+                // Navigate back to payment page with fresh data and success indicator
+                router.visit('/student/payment?payment_submitted=true', {
+                    only: ['summary', 'rows', 'payments', 'notifications'],
+                    preserveState: false,
+                    preserveScroll: false,
+                });
+            },
+        });
     };
 
     return (

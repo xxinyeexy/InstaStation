@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link } from '@inertiajs/react';
-import { CircleAlert, CircleCheck, CreditCard, WalletCards } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 type Summary = {
@@ -29,7 +29,32 @@ type PaymentRow = {
     proof_url: string | null;
 };
 
-export default function Payment({ summary, rows, payments }: { summary: Summary; rows: Row[]; payments: PaymentRow[] }) {
+// Notification interface
+interface Notification {
+    id: string;
+    type: string;
+    title: string;
+    message: string;
+    parcel_code?: string;
+    parcel_id?: number;
+    rejected_by?: string;
+    rejected_at?: string;
+    created_at: string;
+    read_at?: string | null;
+    is_read: boolean;
+}
+
+export default function Payment({
+    summary,
+    rows,
+    payments,
+    notifications = [],
+}: {
+    summary: Summary;
+    rows: Row[];
+    payments: PaymentRow[];
+    notifications?: Notification[];
+}) {
     const badge = (state: Row['payment_state']) => {
         if (state === 'Overdue') return 'text-red-600 bg-red-50 border-red-200';
         if (state === 'Verified') return 'text-green-700 bg-green-50 border-green-200';
@@ -37,6 +62,52 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
     };
 
     const [viewerUrl, setViewerUrl] = useState<string | null>(null);
+    const [notificationList, setNotificationList] = useState<Notification[]>(notifications);
+    const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
+
+    // Get flash messages from the page props
+    const { flash } = usePage().props as any;
+
+    // Update notification list when props change (e.g., after payment submission)
+    useEffect(() => {
+        setNotificationList(notifications);
+    }, [notifications]);
+
+    // Refresh data when component mounts (e.g., returning from payment submission)
+    useEffect(() => {
+        // Check if we're returning from a payment submission
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('payment_submitted') === 'true') {
+            // Remove the parameter from URL
+            urlParams.delete('payment_submitted');
+            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+            window.history.replaceState({}, '', newUrl);
+
+            // Show success toast
+            setShowSuccessToast(true);
+            setTimeout(() => setShowSuccessToast(false), 5000);
+        }
+    }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Element;
+            if (!target.closest('.notification-dropdown') && !target.closest('.notification-bell')) {
+                setShowNotificationDropdown(false);
+            }
+        };
+
+        if (showNotificationDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showNotificationDropdown]);
+
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') setViewerUrl(null);
@@ -45,12 +116,103 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
         return () => window.removeEventListener('keydown', onKey as any);
     }, []);
 
+    // Handle notification click
+    const handleNotificationClick = async (notification: Notification) => {
+        console.log('Notification clicked:', notification.id);
+
+        // Close dropdown after clicking
+        setShowNotificationDropdown(false);
+
+        // If it's a payment rejection notification, navigate to payment submission page
+        if (notification.type === 'payment_rejected' && notification.parcel_id) {
+            router.visit(`/student/payment/submit/${notification.parcel_id}`);
+        }
+    };
+
     return (
         <AppLayout>
             <Head title="Payment Centre" />
+
+            {/* Success Toast Notification */}
+            {showSuccessToast && (
+                <div className="fixed right-4 bottom-4 z-50">
+                    <div className="max-w-96 min-w-80 rounded-lg border border-emerald-200 bg-emerald-50/95 p-4 text-emerald-800 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5 flex-shrink-0">
+                                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-sm font-semibold">Payment Submitted Successfully!</h4>
+                                <p className="mt-1 text-sm opacity-90">Your payment proof has been uploaded. Staff will verify within 24 hours.</p>
+                            </div>
+                            <button
+                                onClick={() => setShowSuccessToast(false)}
+                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="space-y-6 p-6">
-                <h1 className="text-xl font-semibold text-gray-900">Payment Centre</h1>
-                <p className="text-sm text-gray-600">Manage your parcel payments</p>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-xl font-semibold text-gray-900">Payment Centre</h1>
+                        <p className="text-sm text-gray-600">Manage your parcel payments</p>
+                    </div>
+
+                    {/* Notification Bell - Always show, badge only when there are notifications */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                            className="notification-bell relative rounded-full bg-white p-3 shadow-md hover:bg-gray-50"
+                        >
+                            <Bell className="h-6 w-6 text-gray-600" />
+                            {notificationList.length > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+                                    {notificationList.length}
+                                </span>
+                            )}
+                        </button>
+
+                        {/* Notification Dropdown */}
+                        {showNotificationDropdown && (
+                            <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-white shadow-lg">
+                                <div className="border-b p-4">
+                                    <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                                </div>
+                                <div className="max-h-96 overflow-y-auto">
+                                    {notificationList.length === 0 ? (
+                                        <div className="p-8 text-center text-sm text-gray-500">No notifications</div>
+                                    ) : (
+                                        notificationList.map((notification) => (
+                                            <div
+                                                key={notification.id}
+                                                className="cursor-pointer border-b bg-white p-4 hover:bg-gray-50"
+                                                onClick={() => handleNotificationClick(notification)}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="mt-1 flex-shrink-0">
+                                                        <AlertCircle className="h-5 w-5 text-red-500" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="text-sm font-semibold text-gray-900">{notification.title}</h4>
+                                                        <p className="mt-1 text-sm text-gray-600">{notification.message}</p>
+                                                        <p className="mt-1 text-xs text-gray-500">
+                                                            {new Date(notification.created_at).toLocaleString()}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
 
                 {/* Tiles */}
                 <div className="grid grid-cols-4 gap-4">

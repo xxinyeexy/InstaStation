@@ -480,7 +480,6 @@ const SchedulePickup = ({ parcel }: Props) => {
                                     <span className="text-sm text-blue-700">Location:</span>
                                     <span className="ml-2 font-medium text-blue-900">University Parcel Center</span>
                                 </div>
-                              
                             </div>
                         </div>
                     )}

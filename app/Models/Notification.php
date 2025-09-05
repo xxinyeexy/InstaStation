@@ -9,6 +9,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Notification extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'id',
+        'type',
+        'notifiable_id',
+        'notifiable_type',
+        'data',
+        'read_at',
+    ];
+
+    protected $casts = [
+        'read_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function notifiable()
     {
         return $this->morphTo();
