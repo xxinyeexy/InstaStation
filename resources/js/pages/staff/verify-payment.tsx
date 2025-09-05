@@ -24,11 +24,91 @@ type Row = {
 export default function VerifyPayment({ summary, rows, filters }: { summary: Summary; rows: Row[]; filters?: { q?: string; status?: string } }) {
     const [detail, setDetail] = useState<Row | null>(null);
     const [list, setList] = useState<Row[]>(rows);
+    const [processingPayments, setProcessingPayments] = useState<Set<number>>(new Set());
 
     // When navigating with filters, ensure local list syncs with server data
     useEffect(() => {
         setList(rows);
     }, [rows]);
+
+    // Handle approve payment with error handling
+    const handleApprovePayment = async (paymentId: number) => {
+        if (processingPayments.has(paymentId)) return; // Prevent multiple clicks
+
+        setProcessingPayments((prev) => new Set(prev).add(paymentId));
+
+        try {
+            // Update UI optimistically
+            setList((prev) => prev.map((x) => (x.payment_id === paymentId ? { ...x, status: 'verified' } : x)));
+            if (detail && detail.payment_id === paymentId) {
+                setDetail((prev) => (prev ? { ...prev, status: 'verified' } : prev));
+            }
+
+            // Make API call
+            await router.post(
+                `/staff/payments/${paymentId}/approve`,
+                {},
+                {
+                    onError: (errors) => {
+                        console.error('Approve payment error:', errors);
+                        // Revert optimistic update on error
+                        setList((prev) => prev.map((x) => (x.payment_id === paymentId ? { ...x, status: 'pending' } : x)));
+                        if (detail && detail.payment_id === paymentId) {
+                            setDetail((prev) => (prev ? { ...prev, status: 'pending' } : prev));
+                        }
+                    },
+                },
+            );
+        } catch (error) {
+            console.error('Approve payment error:', error);
+            // Revert optimistic update on error
+            setList((prev) => prev.map((x) => (x.payment_id === paymentId ? { ...x, status: 'pending' } : x)));
+            if (detail && detail.payment_id === paymentId) {
+                setDetail((prev) => (prev ? { ...prev, status: 'pending' } : prev));
+            }
+        } finally {
+            setProcessingPayments((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(paymentId);
+                return newSet;
+            });
+        }
+    };
+
+    // Handle reject payment with error handling
+    const handleRejectPayment = async (paymentId: number) => {
+        if (processingPayments.has(paymentId)) return; // Prevent multiple clicks
+
+        setProcessingPayments((prev) => new Set(prev).add(paymentId));
+
+        try {
+            // Make API call
+            await router.post(
+                `/staff/payments/${paymentId}/reject`,
+                {},
+                {
+                    onSuccess: () => {
+                        // Remove from list after successful rejection
+                        setList((prev) => prev.filter((x) => x.payment_id !== paymentId));
+                        if (detail && detail.payment_id === paymentId) {
+                            setDetail(null);
+                        }
+                    },
+                    onError: (errors) => {
+                        console.error('Reject payment error:', errors);
+                    },
+                },
+            );
+        } catch (error) {
+            console.error('Reject payment error:', error);
+        } finally {
+            setProcessingPayments((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(paymentId);
+                return newSet;
+            });
+        }
+    };
     return (
         <AppLayout>
             <Head title="Payments" />
@@ -123,22 +203,20 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                 {r.status !== 'verified' && (
                                     <>
                                         <button
-                                            onClick={() => {
-                                                setList((prev) =>
-                                                    prev.map((x) => (x.payment_id === r.payment_id ? { ...x, status: 'verified' } : x)),
-                                                );
-                                                router.post(`/staff/payments/${r.payment_id}/approve`);
-                                            }}
-                                            className="text-emerald-600 hover:text-emerald-700"
+                                            onClick={() => handleApprovePayment(r.payment_id)}
+                                            disabled={processingPayments.has(r.payment_id)}
+                                            className={`text-emerald-600 hover:text-emerald-700 ${
+                                                processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : ''
+                                            }`}
                                         >
                                             <CircleCheck className="h-4 w-4" />
                                         </button>
                                         <button
-                                            onClick={() => {
-                                                router.post(`/staff/payments/${r.payment_id}/reject`);
-                                                // Optionally remove from list (latest proof deleted). Keep row for visibility.
-                                            }}
-                                            className="text-red-500 hover:text-red-600"
+                                            onClick={() => handleRejectPayment(r.payment_id)}
+                                            disabled={processingPayments.has(r.payment_id)}
+                                            className={`text-red-500 hover:text-red-600 ${
+                                                processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : ''
+                                            }`}
                                         >
                                             <CircleX className="h-4 w-4" />
                                         </button>
@@ -203,24 +281,24 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                             {detail.status !== 'verified' && (
                                 <div className="mt-6 flex items-center justify-end gap-3">
                                     <button
-                                        onClick={() => {
-                                            setDetail((d) => (d ? { ...d, status: 'verified' } : d));
-                                            setList((prev) =>
-                                                prev.map((x) => (x.payment_id === (detail as Row).payment_id ? { ...x, status: 'verified' } : x)),
-                                            );
-                                            router.post(`/staff/payments/${detail.payment_id}/approve`);
-                                        }}
-                                        className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                                        onClick={() => handleApprovePayment(detail.payment_id)}
+                                        disabled={processingPayments.has(detail.payment_id)}
+                                        className={`inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 ${
+                                            processingPayments.has(detail.payment_id) ? 'cursor-not-allowed opacity-50' : ''
+                                        }`}
                                     >
-                                        <CircleCheck className="h-4 w-4" /> Verify Payment
+                                        <CircleCheck className="h-4 w-4" />
+                                        {processingPayments.has(detail.payment_id) ? 'Processing...' : 'Verify Payment'}
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            router.post(`/staff/payments/${detail.payment_id}/reject`);
-                                        }}
-                                        className="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                                        onClick={() => handleRejectPayment(detail.payment_id)}
+                                        disabled={processingPayments.has(detail.payment_id)}
+                                        className={`inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 ${
+                                            processingPayments.has(detail.payment_id) ? 'cursor-not-allowed opacity-50' : ''
+                                        }`}
                                     >
-                                        <CircleX className="h-4 w-4" /> Reject Payment
+                                        <CircleX className="h-4 w-4" />
+                                        {processingPayments.has(detail.payment_id) ? 'Processing...' : 'Reject Payment'}
                                     </button>
                                 </div>
                             )}

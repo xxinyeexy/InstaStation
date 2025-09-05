@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\Parcel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -273,72 +274,89 @@ class PaymentController extends Controller
 
     public function approvePayment(int $id)
     {
-        $payment = Payment::findOrFail($id);
-        $payment->verified_by = Auth::id();
-        $payment->save();
-        // When a payment is approved by staff, mark parcel as Approved
-        if ($payment->parcel_id) {
-            $parcel = Parcel::find($payment->parcel_id);
-            if ($parcel) {
-                $parcel->parcel_status = 'Approved';
-                $parcel->last_edited_by = Auth::id();
-                $parcel->touch();
-                $parcel->save();
+        try {
+            $payment = Payment::findOrFail($id);
 
-                // Clean up any rejection notifications for this parcel when payment is approved
-                \App\Models\Notification::where('notifiable_id', $parcel->student_id)
-                    ->where('notifiable_type', 'App\Models\User')
-                    ->where('type', 'payment_rejected')
-                    ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
-                    ->delete();
+            // Check if already verified
+            if ($payment->verified_by) {
+                return back()->with('info', 'Payment already verified.');
             }
+
+            $payment->verified_by = Auth::id();
+            $payment->save();
+
+            // When a payment is approved by staff, mark parcel as Approved
+            if ($payment->parcel_id) {
+                $parcel = Parcel::find($payment->parcel_id);
+                if ($parcel) {
+                    $parcel->parcel_status = 'Approved';
+                    $parcel->last_edited_by = Auth::id();
+                    $parcel->touch();
+                    $parcel->save();
+
+                    // Clean up any rejection notifications for this parcel when payment is approved
+                    \App\Models\Notification::where('notifiable_id', $parcel->student_id)
+                        ->where('notifiable_type', 'App\Models\User')
+                        ->where('type', 'payment_rejected')
+                        ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
+                        ->delete();
+                }
+            }
+            return back()->with('success', 'Payment verified.');
+        } catch (\Exception $e) {
+            Log::error('Error approving payment: ' . $e->getMessage());
+            return back()->with('error', 'Failed to verify payment. Please try again.');
         }
-        return back()->with('success', 'Payment verified.');
     }
 
     public function rejectPayment(int $id)
     {
-        $payment = Payment::findOrFail($id);
-        $parcelId = $payment->parcel_id;
+        try {
+            $payment = Payment::findOrFail($id);
+            $parcelId = $payment->parcel_id;
 
-        // Get the parcel and student info before deleting the payment
-        $parcel = null;
-        $student = null;
-        if ($parcelId) {
-            $parcel = Parcel::with('studentUser')->find($parcelId);
-            $student = $parcel?->studentUser;
-        }
-
-        $payment->delete();
-
-        // Keep parcel in Pending Payment so student can resubmit
-        if ($parcel) {
-            $parcel->parcel_status = 'Pending Payment';
-            $parcel->last_edited_by = Auth::id();
-            $parcel->touch();
-            $parcel->save();
-
-            // Create notification for the student
-            if ($student) {
-                $notification = new \App\Models\Notification();
-                $notification->id = \Illuminate\Support\Str::uuid();
-                $notification->type = 'payment_rejected';
-                $notification->notifiable_id = $student->id;
-                $notification->notifiable_type = 'App\Models\User';
-                $notification->data = json_encode([
-                    'title' => 'Payment Proof Rejected',
-                    'message' => "Your payment proof for parcel {$parcel->parcel_code} has been rejected. Please resubmit a valid payment proof.",
-                    'parcel_code' => $parcel->parcel_code,
-                    'parcel_id' => $parcel->parcel_id,
-                    'rejected_by' => Auth::user()->name,
-                    'rejected_at' => now()->toDateTimeString(),
-                ]);
-                $notification->read_at = null; // Mark as unread
-                $notification->save();
+            // Get the parcel and student info before deleting the payment
+            $parcel = null;
+            $student = null;
+            if ($parcelId) {
+                $parcel = Parcel::with('studentUser')->find($parcelId);
+                $student = $parcel?->studentUser;
             }
-        }
 
-        return back()->with('success', 'Payment rejected and removed.');
+            $payment->delete();
+
+            // Keep parcel in Pending Payment so student can resubmit
+            if ($parcel) {
+                $parcel->parcel_status = 'Pending Payment';
+                $parcel->last_edited_by = Auth::id();
+                $parcel->touch();
+                $parcel->save();
+
+                // Create notification for the student
+                if ($student) {
+                    $notification = new \App\Models\Notification();
+                    $notification->id = \Illuminate\Support\Str::uuid();
+                    $notification->type = 'payment_rejected';
+                    $notification->notifiable_id = $student->id;
+                    $notification->notifiable_type = 'App\Models\User';
+                    $notification->data = json_encode([
+                        'title' => 'Payment Proof Rejected',
+                        'message' => "Your payment proof for parcel {$parcel->parcel_code} has been rejected. Please resubmit a valid payment proof.",
+                        'parcel_code' => $parcel->parcel_code,
+                        'parcel_id' => $parcel->parcel_id,
+                        'rejected_by' => Auth::user()->name,
+                        'rejected_at' => now()->toDateTimeString(),
+                    ]);
+                    $notification->read_at = null; // Mark as unread
+                    $notification->save();
+                }
+            }
+
+            return back()->with('success', 'Payment rejected and removed.');
+        } catch (\Exception $e) {
+            Log::error('Error rejecting payment: ' . $e->getMessage());
+            return back()->with('error', 'Failed to reject payment. Please try again.');
+        }
     }
 
     /**
