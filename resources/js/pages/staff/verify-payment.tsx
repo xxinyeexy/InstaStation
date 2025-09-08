@@ -134,7 +134,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                     <div className="rounded-xl border p-4">
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-600">Pending Payments</div>
-                            <Clock className="h-4 w-4 text-gray-400" />
+                            <Clock className="h-4 w-4 text-orange-400" />
                         </div>
                         <div className="mt-2 text-2xl font-bold">{summary.pending}</div>
                     </div>
@@ -148,7 +148,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                     <div className="rounded-xl border p-4">
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-600">Total Revenue</div>
-                            <DollarSign className="h-4 w-4 text-gray-400" />
+                            <DollarSign className="h-4 w-4 text-yellow-400" />
                         </div>
                         <div className="mt-2 text-2xl font-bold">RM{summary.total_revenue.toFixed(2)}</div>
                     </div>
