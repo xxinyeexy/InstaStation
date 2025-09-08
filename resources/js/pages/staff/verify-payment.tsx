@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { CircleCheck, CircleX, Clock, DollarSign, Eye, X } from 'lucide-react';
+import { CircleCheck, CircleX, Clock, DollarSign, Download, Eye, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 type Summary = {
@@ -108,6 +108,20 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                 return newSet;
             });
         }
+    };
+
+    // Download proof image
+    const handleDownloadImage = () => {
+        if (!detail) return;
+        const url = (detail as any).proof_url as string | null;
+        if (!url) return;
+        const link = document.createElement('a');
+        link.href = url;
+        const filename = detail.tracking_no ? `${detail.tracking_no}.jpg` : 'payment-proof.jpg';
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
     };
     return (
         <AppLayout>
@@ -234,12 +248,22 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                     <h2 className="text-lg font-semibold text-gray-900">Payment Details</h2>
                                     <p className="text-sm text-gray-600">Review payment information and proof</p>
                                 </div>
-                                <button
-                                    onClick={() => setDetail(null)}
-                                    className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                                >
-                                    <X className="h-5 w-5" />
-                                </button>
+                                <div className="flex items-center gap-2">
+                                    {(detail as any)?.proof_url && (
+                                        <button
+                                            onClick={handleDownloadImage}
+                                            className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                        >
+                                            <Download className="h-4 w-4" /> Download
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => setDetail(null)}
+                                        className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                                    >
+                                        <X className="h-5 w-5" />
+                                    </button>
+                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-6 text-sm">
                                 <div>
@@ -278,30 +302,6 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                     )}
                                 </div>
                             </div>
-                            {detail.status !== 'verified' && (
-                                <div className="mt-6 flex items-center justify-end gap-3">
-                                    <button
-                                        onClick={() => handleApprovePayment(detail.payment_id)}
-                                        disabled={processingPayments.has(detail.payment_id)}
-                                        className={`inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 ${
-                                            processingPayments.has(detail.payment_id) ? 'cursor-not-allowed opacity-50' : ''
-                                        }`}
-                                    >
-                                        <CircleCheck className="h-4 w-4" />
-                                        {processingPayments.has(detail.payment_id) ? 'Processing...' : 'Verify Payment'}
-                                    </button>
-                                    <button
-                                        onClick={() => handleRejectPayment(detail.payment_id)}
-                                        disabled={processingPayments.has(detail.payment_id)}
-                                        className={`inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 ${
-                                            processingPayments.has(detail.payment_id) ? 'cursor-not-allowed opacity-50' : ''
-                                        }`}
-                                    >
-                                        <CircleX className="h-4 w-4" />
-                                        {processingPayments.has(detail.payment_id) ? 'Processing...' : 'Reject Payment'}
-                                    </button>
-                                </div>
-                            )}
                         </div>
                     </div>
                 )}
