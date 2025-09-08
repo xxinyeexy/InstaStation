@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { CircleCheck, CircleX, Clock, DollarSign, Download, Eye, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { CircleCheck, CircleX, Clock, DollarSign, Download, Eye, Search, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 type Summary = {
     pending: number;
@@ -25,6 +25,8 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
     const [detail, setDetail] = useState<Row | null>(null);
     const [list, setList] = useState<Row[]>(rows);
     const [processingPayments, setProcessingPayments] = useState<Set<number>>(new Set());
+    const searchInputRef = useRef<HTMLInputElement | null>(null);
+    const typingTimerRef = useRef<number | null>(null);
 
     // When navigating with filters, ensure local list syncs with server data
     useEffect(() => {
@@ -110,6 +112,15 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
         }
     };
 
+    // Trigger search using current input value
+    const performSearch = () => {
+        const value = searchInputRef.current?.value ?? '';
+        const params = new URLSearchParams(window.location.search);
+        params.set('q', value);
+        params.set('status', filters?.status || '');
+        router.get(`/staff/payments?${params.toString()}`);
+    };
+
     // Download proof image
     const handleDownloadImage = () => {
         if (!detail) return;
@@ -156,20 +167,37 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
 
                 <div className="rounded-xl border">
                     <div className="flex items-center justify-between border-b p-4">
-                        <input
-                            className="w-full max-w-xl rounded-md border px-3 py-2 text-sm"
-                            placeholder="Search by parcel code, student name..."
-                            defaultValue={filters?.q || ''}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    const input = e.currentTarget as HTMLInputElement;
-                                    const params = new URLSearchParams(window.location.search);
-                                    params.set('q', input.value);
-                                    params.set('status', filters?.status || '');
-                                    router.get(`/staff/payments?${params.toString()}`);
-                                }
-                            }}
-                        />
+                        <div className="relative w-full max-w-xl">
+                            {/* Search input */}
+                            <input
+                                ref={searchInputRef}
+                                className="w-full rounded-md border py-2 pr-3 pl-9 text-sm"
+                                placeholder="Search parcels..."
+                                defaultValue={filters?.q || ''}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        performSearch();
+                                    }
+                                }}
+                                onChange={() => {
+                                    // Debounce live search while typing
+                                    if (typingTimerRef.current) {
+                                        window.clearTimeout(typingTimerRef.current);
+                                    }
+                                    typingTimerRef.current = window.setTimeout(() => {
+                                        performSearch();
+                                    }, 300);
+                                }}
+                            />
+                            <button
+                                type="button"
+                                onClick={performSearch}
+                                className="absolute top-1/2 left-2 -translate-y-1/2 text-gray-400 hover:text-gray-500"
+                                aria-label="Search"
+                            >
+                                <Search className="h-4 w-4" />
+                            </button>
+                        </div>
                         <select
                             className="ml-4 rounded-md border px-3 py-2 text-sm"
                             defaultValue={filters?.status || ''}
