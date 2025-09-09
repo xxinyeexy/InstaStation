@@ -79,8 +79,8 @@ class StaffController extends Controller
                 'parcels_pending' => $agg && isset($agg->pending) ? $agg->pending : 0,
                 'spent' => (float) ($spent && isset($spent->spent_cnt) ? $spent->spent_cnt : 0),
                 'status' => $s->status ?? 'active',
-                // Prefer last login timestamp if present; otherwise last parcel activity
-                'last_activity' => optional($s->last_login_at ?? ($agg && isset($agg->last_activity) ? $agg->last_activity : null) ?? $s->updated_at)->toDateTimeString(),
+                // Use last_login_at if set, else null
+                'last_activity' => ($s->last_login_at !== null) ? $s->last_login_at->toDateTimeString() : null,
             ];
         })->values();
 

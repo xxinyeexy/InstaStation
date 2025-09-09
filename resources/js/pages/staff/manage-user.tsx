@@ -124,7 +124,36 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                                 <option value="active">active</option>
                                 <option value="inactive">inactive</option>
                             </select>
-                            <button className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50">
+                            <button className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-gray-50"
+                                onClick={() => {
+                                    // Export as CSV
+                                    const csvRows = [
+                                        ['Student ID', 'Name', 'Matric', 'Email', 'Phone', 'Parcels Total', 'Parcels Pending', 'Spent', 'Status', 'Last Activity'],
+                                        ...list.map(r => [
+                                            r.student_id,
+                                            r.name,
+                                            r.matric,
+                                            r.email,
+                                            r.phone || '',
+                                            r.parcels_total,
+                                            r.parcels_pending,
+                                            r.spent,
+                                            r.status || '-',
+                                            r.last_activity || '—'
+                                        ])
+                                    ];
+                                    const csvContent = csvRows.map(e => e.map(String).map(s => '"'+s.replace(/"/g,'""')+'"').join(",")).join("\n");
+                                    const blob = new Blob([csvContent], { type: 'text/csv' });
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = 'user_report.csv';
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(url);
+                                }}
+                            >
                                 <Download className="h-4 w-4" /> Export Report
                             </button>
                         </div>
