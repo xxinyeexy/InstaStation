@@ -74,6 +74,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/student/test-qr-code', [StudentController::class, 'testQRCode'])
         ->name('student.test-qr-code');
 
+    // Staff: Manage Users
+    Route::get('/staff/manage-user', [StaffController::class, 'manageUsers'])
+        ->name('staff.manage-user');
+
     // Parcel routes
     Route::resource('parcels', ParcelController::class);
     Route::get('/staff/add-parcel', [ParcelController::class, 'create'])

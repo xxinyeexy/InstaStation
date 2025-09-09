@@ -68,7 +68,7 @@ const staffNavItems: NavItem[] = [
     },
     {
         title: 'Users',
-        href: '/staff/users',
+        href: '/staff/manage-user',
         icon: ContactRound,
     },
     {
