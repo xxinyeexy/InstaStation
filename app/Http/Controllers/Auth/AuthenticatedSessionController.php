@@ -35,7 +35,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         // Record last login timestamp
-        $user = Auth::user();
+        $user = User::find(Auth::id());
         if ($user) {
             $user->last_login_at = now();
             $user->save();
