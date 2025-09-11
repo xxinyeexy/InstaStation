@@ -404,4 +404,33 @@ class ParcelController extends Controller
 
         return response()->json($students);
     }
+    public function history()
+    {
+        $user = Auth::user();
+
+        $parcels = Parcel::where('student_id', $user->id)
+            ->where('parcel_status', 'collected')
+            ->orderByDesc('schedule')
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'id' => $p->id,
+                    'parcel_code' => $p->parcel_code,
+                    'collected_at' => optional($p->schedule)->toDateString(),
+                    'fee' => $p->fee ?? 0,
+                    'status' => 'Completed',
+                ];
+            });
+
+        $total_collections = $parcels->count();
+        $collections_this_year = $parcels->where('collected_at', '>=', now()->startOfYear()->toDateString())->count();
+        $total_fees = $parcels->sum('fee');
+
+        return Inertia::render('student/history', [
+            'total_collections' => $total_collections,
+            'collections_this_year' => $collections_this_year,
+            'total_fees' => $total_fees,
+            'parcels' => $parcels,
+        ]);
+    }
 }

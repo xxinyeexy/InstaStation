@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
 });
 
 // Staff and Parcel routes - all under auth middleware
@@ -53,6 +54,7 @@ Route::middleware('auth')->group(function () {
         ->name('student.payment.submit.store');
     Route::post('/student/notifications/{id}/mark-read', [NotificationController::class, 'markAsRead'])
         ->name('student.notifications.mark-read');
+    Route::get('/student/history', [ParcelController::class, 'history'])->name('student.history');
 
     // Staff: Verify Payments page
     Route::get('/staff/payments', [PaymentController::class, 'staffIndex'])
