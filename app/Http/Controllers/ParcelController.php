@@ -410,7 +410,7 @@ class ParcelController extends Controller
         $user = Auth::user();
 
         $parcels = Parcel::where('student_id', $user->id)
-            ->where('parcel_status', 'collected')
+            ->whereRaw('LOWER(parcel_status) = ?', ['collected'])
             ->orderByDesc('schedule')
             ->get()
             ->map(function ($p) {
@@ -419,14 +419,16 @@ class ParcelController extends Controller
                     'id' => $p->parcel_id,
                     'parcel_code' => $p->parcel_code,
                     'collected_at' => optional($p->schedule)->toDateString(),
-                    'fee' => $p->fee ?? 0,
+                    // Fee is RM1.00 per collected parcel
+                    'fee' => 1.00,
                     'status' => 'Completed',
                 ];
             });
 
         $total_collections = $parcels->count();
         $collections_this_year = $parcels->where('collected_at', '>=', now()->startOfYear()->toDateString())->count();
-        $total_fees = $parcels->sum('fee');
+        // Total fees reflect RM1 per collected parcel
+        $total_fees = $total_collections * 1.00;
 
         return Inertia::render('student/history', [
             'total_collections' => $total_collections,
