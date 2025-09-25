@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ParcelController extends Controller
 {
@@ -414,7 +415,8 @@ class ParcelController extends Controller
             ->get()
             ->map(function ($p) {
                 return [
-                    'id' => $p->id,
+                    // Frontend expects `id` to be the primary key used by routes (parcel_id)
+                    'id' => $p->parcel_id,
                     'parcel_code' => $p->parcel_code,
                     'collected_at' => optional($p->schedule)->toDateString(),
                     'fee' => $p->fee ?? 0,
@@ -432,5 +434,34 @@ class ParcelController extends Controller
             'total_fees' => $total_fees,
             'parcels' => $parcels,
         ]);
+    }
+
+    public function export($id)
+    {
+        // Preview page rendered via Inertia React page
+        $parcel = Parcel::with(['studentUser', 'payment', 'createdBy', 'lastEditedBy'])
+            ->where('parcel_id', $id)
+            ->firstOrFail();
+
+        return Inertia::render('student/report', [
+            'parcel' => $parcel,
+            'student' => $parcel->studentUser,
+            'payment' => $parcel->payment,
+        ]);
+    }
+
+    public function exportDownload($id)
+    {
+        $parcel = Parcel::with(['studentUser', 'payment', 'createdBy', 'lastEditedBy'])
+            ->where('parcel_id', $id)
+            ->firstOrFail();
+
+        $pdf = Pdf::loadView('exports.parcel_report', [
+            'parcel' => $parcel,
+            'student' => $parcel->studentUser,
+            'payment' => $parcel->payment,
+        ]);
+
+        return $pdf->download('parcel_report_' . ($parcel->parcel_code ?? $parcel->tracking_no ?? $parcel->parcel_id) . '.pdf');
     }
 }

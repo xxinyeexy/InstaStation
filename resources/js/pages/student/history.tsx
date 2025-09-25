@@ -30,7 +30,7 @@ export default function History({
 
   const filteredParcels = parcels.filter(
     (p) =>
-      (p.tracking_no && p.tracking_no.toLowerCase().includes(search.toLowerCase())) ||
+      (p.parcel_code && p.parcel_code.toLowerCase().includes(search.toLowerCase())) ||
       (p.collected_at && p.collected_at.includes(search))
   );
 
