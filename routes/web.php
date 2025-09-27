@@ -8,6 +8,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\FaqController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -80,6 +81,14 @@ Route::middleware('auth')->group(function () {
     // Staff: Manage Users
     Route::get('/staff/manage-user', [StaffController::class, 'manageUsers'])
         ->name('staff.manage-user');
+
+    // Staff: Manage FAQs
+    Route::get('/staff/manage-faq', [FaqController::class, 'index'])->name('staff.manage-faq');
+    Route::post('/staff/faq', [FaqController::class, 'store'])->name('staff.faq.store');
+    Route::put('/staff/faq/{faq}', [FaqController::class, 'update'])->name('staff.faq.update');
+    Route::delete('/staff/faq/{faq}', [FaqController::class, 'destroy'])->name('staff.faq.destroy');
+    Route::post('/staff/faq/{faq}/publish', [FaqController::class, 'publish'])->name('staff.faq.publish');
+    Route::post('/staff/faq/{faq}/unpublish', [FaqController::class, 'unpublish'])->name('staff.faq.unpublish');
 
     // Parcel routes
     Route::resource('parcels', ParcelController::class);
