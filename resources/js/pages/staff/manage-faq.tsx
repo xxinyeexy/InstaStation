@@ -71,9 +71,11 @@ export default function ManageFaq({
 
     const categoryClasses = (cat?: string | null) => {
         const key = (cat || 'General').toLowerCase();
-        if (key.includes('collect')) return 'bg-indigo-100 text-indigo-700';
+        // General: purple; Collection: blue; Payment: green
+        if (key.includes('general')) return 'bg-purple-100 text-purple-700';
+        if (key.includes('collect')) return 'bg-blue-100 text-blue-700';
         if (key.includes('pay')) return 'bg-emerald-100 text-emerald-700';
-        return 'bg-purple-100 text-purple-700';
+        return 'bg-gray-100 text-gray-700';
     };
 
     return (
@@ -150,9 +152,10 @@ export default function ManageFaq({
                                 </div>
                                 <div className="flex shrink-0 items-center gap-3">
                                     {f.faq_status === 'Active' ? (
-                                        <button onClick={() => publish(f.faq_id, 'unpublish')} className="text-sm text-black hover:bg-gray-200 hover:ring-gray-200 
-           active:bg-gray-200
-           focus-visible:outline-none ">
+                                        <button
+                                            onClick={() => publish(f.faq_id, 'unpublish')}
+                                            className="text-sm text-black hover:bg-gray-200 hover:ring-gray-200 focus-visible:outline-none active:bg-gray-200"
+                                        >
                                             Unpublish
                                         </button>
                                     ) : (
@@ -336,7 +339,7 @@ export default function ManageFaq({
                                         onChange={(e) => setAddCategory(e.target.value)}
                                         className="w-full rounded-md border px-3 py-2 text-sm"
                                     >
-                                        <option value="">General</option>
+                                        <option value="">Choose category</option>
                                         {categories
                                             .filter((c, index, arr) => arr.indexOf(c) === index)
                                             .filter((c) => c && c.trim() !== '')

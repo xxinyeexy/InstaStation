@@ -87,19 +87,23 @@ export default function StudentFaq({
                                 All Categories
                             </button>
 
-                            {categories.map((category) => (
-                                <button
-                                    key={category}
-                                    onClick={() => setSelectedCategory(category)}
-                                    className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                                        selectedCategory === category
-                                            ? 'bg-purple-100 text-purple-700'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
-                                >
-                                    {category}
-                                </button>
-                            ))}
+                            {categories.map((category) => {
+                                const c = (category || '').toLowerCase();
+                                let selectedClasses = 'bg-purple-100 text-purple-700';
+                                if (c.includes('collect')) selectedClasses = 'bg-blue-100 text-blue-700';
+                                if (c.includes('pay')) selectedClasses = 'bg-emerald-100 text-emerald-700';
+                                return (
+                                    <button
+                                        key={category}
+                                        onClick={() => setSelectedCategory(category)}
+                                        className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                                            selectedCategory === category ? selectedClasses : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {category}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
