@@ -15,6 +15,7 @@ class FaqSeeder extends Seeder
     public function run(): void
     {
         $faqs = [
+            // General FAQs
             [
                 'faq_question' => 'How do I track my parcel?',
                 'faq_answer' => 'You can track your parcel using the tracking number provided in your notification email or SMS. Simply enter the tracking number on our website or contact our support team.',
@@ -22,20 +23,28 @@ class FaqSeeder extends Seeder
                 'faq_status' => 'Active'
             ],
             [
+                'faq_question' => 'How do I report a missing parcel?',
+                'faq_answer' => 'Please contact our staff immediately or use the online reporting system to report a missing parcel. We will investigate and provide updates.',
+                'category' => 'General',
+                'faq_status' => 'Active'
+            ],
+            [
+                'faq_question' => 'How do I update my contact information?',
+                'faq_answer' => 'You can update your contact information through your account settings on our website or by contacting our support team directly.',
+                'category' => 'General',
+                'faq_status' => 'Active'
+            ],
+            [
+                'faq_question' => 'What should I do if I receive a notification for someone else?',
+                'faq_answer' => 'If you receive a notification for someone else, please contact our support team immediately. Do not attempt to collect parcels that are not addressed to you.',
+                'category' => 'General',
+                'faq_status' => 'Active'
+            ],
+
+            // Collection FAQs
+            [
                 'faq_question' => 'What are the collection hours?',
                 'faq_answer' => 'Collection hours are Monday to Friday from 9:00 AM to 5:00 PM, and Saturday from 9:00 AM to 1:00 PM. We are closed on Sundays and public holidays.',
-                'category' => 'Collection',
-                'faq_status' => 'Active'
-            ],
-            [
-                'faq_question' => 'How do I pay for my parcel?',
-                'faq_answer' => 'You can pay for your parcel using cash, credit/debit cards, or mobile payment methods like Apple Pay and Google Pay at the collection counter.',
-                'category' => 'Payment',
-                'faq_status' => 'Active'
-            ],
-            [
-                'faq_question' => 'What if my parcel is damaged?',
-                'faq_answer' => 'If your parcel is damaged, please report it immediately to our staff and we will assist you with the claim process. Do not sign for damaged parcels.',
                 'category' => 'Collection',
                 'faq_status' => 'Active'
             ],
@@ -58,9 +67,17 @@ class FaqSeeder extends Seeder
                 'faq_status' => 'Active'
             ],
             [
-                'faq_question' => 'How do I report a missing parcel?',
-                'faq_answer' => 'Please contact our staff immediately or use the online reporting system to report a missing parcel. We will investigate and provide updates.',
-                'category' => 'General',
+                'faq_question' => 'What if my parcel is damaged?',
+                'faq_answer' => 'If your parcel is damaged, please report it immediately to our staff and we will assist you with the claim process. Do not sign for damaged parcels.',
+                'category' => 'Collection',
+                'faq_status' => 'Active'
+            ],
+
+            // Payment FAQs
+            [
+                'faq_question' => 'How do I pay for my parcel?',
+                'faq_answer' => 'You can pay for your parcel using cash, credit/debit cards, or mobile payment methods like Apple Pay and Google Pay at the collection counter.',
+                'category' => 'Payment',
                 'faq_status' => 'Active'
             ],
             [
@@ -70,15 +87,27 @@ class FaqSeeder extends Seeder
                 'faq_status' => 'Active'
             ],
             [
-                'faq_question' => 'How do I update my contact information?',
-                'faq_answer' => 'You can update your contact information through your account settings on our website or by contacting our support team directly.',
-                'category' => 'General',
+                'faq_question' => 'Can I pay online before collection?',
+                'faq_answer' => 'Yes, you can pay online through our payment portal using your tracking number. This will speed up your collection process.',
+                'category' => 'Payment',
+                'faq_status' => 'Active'
+            ],
+            [
+                'faq_question' => 'What if I cannot pay the collection fee?',
+                'faq_answer' => 'If you cannot pay the collection fee, please contact our support team to discuss alternative arrangements. We may be able to work out a payment plan.',
+                'category' => 'Payment',
                 'faq_status' => 'Active'
             ]
         ];
 
-        foreach ($faqs as $faq) {
-            Faq::create($faq);
+        // Create FAQs and check for duplicates
+        foreach ($faqs as $faqData) {
+            // Check if FAQ already exists
+            $existingFaq = Faq::where('faq_question', $faqData['faq_question'])->first();
+
+            if (!$existingFaq) {
+                Faq::create($faqData);
+            }
         }
     }
 }

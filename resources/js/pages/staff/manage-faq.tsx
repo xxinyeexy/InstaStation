@@ -73,7 +73,7 @@ export default function ManageFaq({
         const key = (cat || 'General').toLowerCase();
         if (key.includes('collect')) return 'bg-indigo-100 text-indigo-700';
         if (key.includes('pay')) return 'bg-emerald-100 text-emerald-700';
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-purple-100 text-purple-700';
     };
 
     return (
@@ -150,7 +150,9 @@ export default function ManageFaq({
                                 </div>
                                 <div className="flex shrink-0 items-center gap-3">
                                     {f.faq_status === 'Active' ? (
-                                        <button onClick={() => publish(f.faq_id, 'unpublish')} className="text-sm text-blue-600 hover:underline">
+                                        <button onClick={() => publish(f.faq_id, 'unpublish')} className="text-sm text-black hover:bg-gray-200 hover:ring-gray-200 
+           active:bg-gray-200
+           focus-visible:outline-none ">
                                             Unpublish
                                         </button>
                                     ) : (

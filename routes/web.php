@@ -77,6 +77,8 @@ Route::middleware('auth')->group(function () {
         ->name('student.qr-code');
     Route::get('/student/test-qr-code', [StudentController::class, 'testQRCode'])
         ->name('student.test-qr-code');
+    Route::get('/student/faq', [FaqController::class, 'studentIndex'])
+        ->name('student.faq');
 
     // Staff: Manage Users
     Route::get('/staff/manage-user', [StaffController::class, 'manageUsers'])

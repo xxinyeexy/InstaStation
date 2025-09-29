@@ -43,7 +43,7 @@ export function AppSidebar() {
         },
         {
             title: 'FAQs',
-            href: '/student/faqs',
+            href: '/student/faq',
             icon: MessageCircleQuestion,
         },
     ];

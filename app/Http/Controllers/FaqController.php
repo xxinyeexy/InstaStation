@@ -47,11 +47,20 @@ class FaqController extends Controller
             'avg_views' => $faqs->count() ? intval($faqs->avg('views')) : 0,
         ];
 
+        // Get unique categories from all FAQs
+        $categories = Faq::query()
+            ->select('category')
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->unique()
+            ->values();
+
         return Inertia::render('staff/manage-faq', [
             'rows' => $faqs,
             'summary' => $summary,
             'filters' => ['q' => $q, 'category' => $category],
-            'categories' => Faq::query()->select('category')->distinct()->pluck('category')->filter()->values(),
+            'categories' => $categories,
         ]);
     }
 
@@ -129,5 +138,53 @@ class FaqController extends Controller
     {
         $faq->update(['faq_status' => 'Inactive']);
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Display FAQs for students
+     */
+    public function studentIndex(Request $request)
+    {
+        $q = trim((string) $request->get('q', ''));
+        $category = trim((string) $request->get('category', ''));
+
+        $faqsQuery = Faq::where('faq_status', 'Active');
+
+        if ($q !== '') {
+            $faqsQuery->where(function ($qb) use ($q) {
+                $qb->where('faq_question', 'like', "%$q%")
+                    ->orWhere('faq_answer', 'like', "%$q%");
+            });
+        }
+
+        if ($category !== '') {
+            $faqsQuery->where('category', $category);
+        }
+
+        $faqs = $faqsQuery->orderByDesc('updated_at')->get()->map(function (Faq $f) {
+            return [
+                'faq_id' => $f->faq_id,
+                'faq_question' => $f->faq_question,
+                'faq_answer' => $f->faq_answer,
+                'category' => $f->category,
+                'created_at' => optional($f->created_at)->toDateString(),
+                'updated_at' => optional($f->updated_at)->toDateString(),
+            ];
+        });
+
+        // Get unique categories from active FAQs
+        $categories = Faq::where('faq_status', 'Active')
+            ->select('category')
+            ->distinct()
+            ->pluck('category')
+            ->filter()
+            ->unique()
+            ->values();
+
+        return Inertia::render('student/faq', [
+            'faqs' => $faqs,
+            'categories' => $categories,
+            'filters' => ['q' => $q, 'category' => $category],
+        ]);
     }
 }
