@@ -143,7 +143,7 @@ export default function Welcome() {
                             {announcements.map((a: AnnouncementCard) => {
                                 const dateStr = a.publish_date || a.created_at || '';
                                 return (
-                                    <div key={a.announcement_id} className="overflow-hidden rounded-2xl bg-gray-900 text-white">
+                                    <div key={a.announcement_id} className="overflow-hidden rounded-2xl bg-white text-black">
                                         {a.announcement_image && (
                                             <div className="h-40 w-full overflow-hidden">
                                                 <img
@@ -154,13 +154,13 @@ export default function Welcome() {
                                             </div>
                                         )}
                                         <div className="p-4">
-                                            <div className="mb-1 flex items-center gap-2 text-xs text-gray-300">
+                                            <div className="mb-1 flex items-center gap-2 text-xs text-black">
                                                 <span className="inline-flex items-center gap-1">
-                                                    <img src="/favicon.svg" className="h-4 w-4" /> Postal Hub
+                                                    <img src="/favicon.svg" className="h-4 w-4 " /> Postal Hub
                                                 </span>
                                             </div>
-                                            <div className="text-lg font-semibold">{a.announcement_title}</div>
-                                            <div className="mt-2 text-xs text-gray-300">{dateStr ? new Date(dateStr).toLocaleString() : ''}</div>
+                                            <div className="text-lg text-left font-semibold">{a.announcement_title}</div>
+                                            <div className="mt-2 text-xs text-left text-black">{dateStr ? new Date(dateStr).toLocaleString() : ''}</div>
                                         </div>
                                     </div>
                                 );
