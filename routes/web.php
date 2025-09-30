@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Models\Announcement;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StudentController;
@@ -9,9 +11,31 @@ use App\Http\Controllers\ParcelController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\FaqController;
+use App\Http\Controllers\AnnouncementController;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    $today = now()->toDateString();
+
+    $announcements = Announcement::query()
+        ->where('announcement_status', 'Published')
+        ->where(function ($q) use ($today) {
+            $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', $today);
+        })
+        ->orderByDesc(DB::raw('COALESCE(publish_date, created_at)'))
+        ->limit(5)
+        ->get([
+            'announcement_id',
+            'announcement_title',
+            'announcement_content',
+            'announcement_image',
+            'announcement_type',
+            'publish_date',
+            'created_at',
+        ]);
+
+    return Inertia::render('welcome', [
+        'announcements' => $announcements,
+    ]);
 })->name('home');
 
 Route::get('/register', [RegisteredUserController::class, 'create'])
@@ -77,6 +101,12 @@ Route::middleware('auth')->group(function () {
         ->name('student.qr-code');
     Route::get('/student/test-qr-code', [StudentController::class, 'testQRCode'])
         ->name('student.test-qr-code');
+    Route::get('/staff/announcements', [AnnouncementController::class, 'index'])->name('staff.announcements');
+    Route::post('/staff/announcements', [AnnouncementController::class, 'store'])->name('staff.announcements.store');
+    Route::put('/staff/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('staff.announcements.update');
+    Route::delete('/staff/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('staff.announcements.destroy');
+    Route::post('/staff/announcements/{announcement}/publish', [AnnouncementController::class, 'publish'])->name('staff.announcements.publish');
+    Route::post('/staff/announcements/{announcement}/unpublish', [AnnouncementController::class, 'unpublish'])->name('staff.announcements.unpublish');
     Route::get('/student/faq', [FaqController::class, 'studentIndex'])
         ->name('student.faq');
 

@@ -1,9 +1,19 @@
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Package, CreditCard, Bell, MapPin } from 'lucide-react';
+import { Bell, CreditCard, MapPin, Package } from 'lucide-react';
+
+type AnnouncementCard = {
+    announcement_id: number;
+    announcement_title: string;
+    announcement_content: string;
+    announcement_image?: string | null;
+    announcement_type?: string | null;
+    publish_date?: string | null;
+    created_at?: string | null;
+};
 
 export default function Welcome() {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, announcements = [] } = usePage<SharedData & { announcements?: AnnouncementCard[] }>().props as any;
 
     return (
         <>
@@ -13,26 +23,20 @@ export default function Welcome() {
             </Head>
             <div className="min-h-screen bg-[#FFE0F2] p-6">
                 {/* Header */}
-                <header className="flex justify-end gap-4 mb-20">
+                <header className="mb-20 flex justify-end gap-4">
                     <nav className="flex items-center justify-end gap-4">
                         {auth.user ? (
-                            <Link
-                                href={route('dashboard')}
-                                className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors"
-                            >
+                            <Link href={route('dashboard')} className="rounded-lg bg-gray-900 px-6 py-2 text-white transition-colors hover:bg-black">
                                 Dashboard
                             </Link>
                         ) : (
                             <>
-                                <Link
-                                    href={route('login')}
-                                    className="px-4 py-2  bg-white text-black rounded-lg hover:text-black transition-colors"
-                                >
+                                <Link href={route('login')} className="rounded-lg bg-white px-4 py-2 text-black transition-colors hover:text-black">
                                     Login
                                 </Link>
                                 <Link
                                     href={route('register')}
-                                    className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors"
+                                    className="rounded-lg bg-gray-900 px-6 py-2 text-white transition-colors hover:bg-black"
                                 >
                                     Get Started
                                 </Link>
@@ -42,87 +46,77 @@ export default function Welcome() {
                 </header>
 
                 {/* Main Content */}
-                <div className="max-w-4xl mx-auto text-center">
+                <div className="mx-auto max-w-4xl text-center">
                     {/* Logo and Title */}
                     <div className="mb-8">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                        <h1 className="mb-2 text-4xl font-bold text-gray-900">
                             Insta<span className="text-gray-900">Station</span>
                         </h1>
-                        <p className="text-gray-600 text-lg">
-                            Instant Parcel Tracking Dashboard
-                        </p>
+                        <p className="text-lg text-gray-600">Instant Parcel Tracking Dashboard</p>
                     </div>
 
                     {/* Description */}
                     <div className="mb-16">
-                        <p className="text-gray-700 text-lg max-w-2xl mx-auto leading-relaxed">
-                            Streamline parcel management for your university with smart matching,
-                            secure payments, and real-time tracking for both students and staff.
+                        <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-700">
+                            Streamline parcel management for your university with smart matching, secure payments, and real-time tracking for both
+                            students and staff.
                         </p>
                     </div>
 
                     {/* Check for Unclaimed Parcels Button */}
                     <div className="mb-16">
-                        <button className="inline-flex items-center gap-2 px-6 py-3 bg-green-50 text-green-400 rounded-lg hover:bg-green-100 transition-colors">
-                            <Package className="w-5 h-5" />
+                        <button className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-6 py-3 text-green-400 transition-colors hover:bg-green-100">
+                            <Package className="h-5 w-5" />
                             Check for Unclaimed Parcels
                         </button>
                     </div>
 
                     {/* Feature Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                         {/* User Management */}
-                        <div className="bg-purple-50 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                                <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="rounded-xl bg-purple-50 p-6 shadow-lg transition-shadow hover:shadow-xl">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600">
+                                    <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                                     </svg>
                                 </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">User Management</h3>
-                            <p className="text-sm text-gray-600">
-                                Automate name matching and profile management for students and staff
-                            </p>
+                            <h3 className="mb-2 text-lg font-semibold text-gray-900">User Management</h3>
+                            <p className="text-sm text-gray-600">Automate name matching and profile management for students and staff</p>
                         </div>
 
                         {/* Payment Processing */}
-                        <div className="bg-green-50 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                                    <CreditCard className="w-5 h-5 text-white" />
+                        <div className="rounded-xl bg-green-50 p-6 shadow-lg transition-shadow hover:shadow-xl">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600">
+                                    <CreditCard className="h-5 w-5 text-white" />
                                 </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Payment Processing</h3>
-                            <p className="text-sm text-gray-600">
-                                Secure payment handling with proof upload and staff verification
-                            </p>
+                            <h3 className="mb-2 text-lg font-semibold text-gray-900">Payment Processing</h3>
+                            <p className="text-sm text-gray-600">Secure payment handling with proof upload and staff verification</p>
                         </div>
 
                         {/* Smart Notifications */}
-                        <div className="bg-orange-50 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                                <div className="w-8 h-8 bg-orange-600 rounded-lg flex items-center justify-center">
-                                    <Bell className="w-5 h-5 text-white" />
+                        <div className="rounded-xl bg-orange-50 p-6 shadow-lg transition-shadow hover:shadow-xl">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
+                                    <Bell className="h-5 w-5 text-white" />
                                 </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Smart Notifications</h3>
-                            <p className="text-sm text-gray-600">
-                                Automated reminders for collection, payment due, and parcel arrival
-                            </p>
+                            <h3 className="mb-2 text-lg font-semibold text-gray-900">Smart Notifications</h3>
+                            <p className="text-sm text-gray-600">Automated reminders for collection, payment due, and parcel arrival</p>
                         </div>
 
                         {/* Parcel Tracking */}
-                        <div className="bg-blue-50 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 mx-auto">
-                                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                                    <MapPin className="w-5 h-5 text-white" />
+                        <div className="rounded-xl bg-blue-50 p-6 shadow-lg transition-shadow hover:shadow-xl">
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
+                                    <MapPin className="h-5 w-5 text-white" />
                                 </div>
                             </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Parcel Tracking</h3>
-                            <p className="text-sm text-gray-600">
-                                Real-time tracking from arrival to collection with QR codes and notifications
-                            </p>
+                            <h3 className="mb-2 text-lg font-semibold text-gray-900">Parcel Tracking</h3>
+                            <p className="text-sm text-gray-600">Real-time tracking from arrival to collection with QR codes and notifications</p>
                         </div>
                     </div>
 
@@ -131,10 +125,50 @@ export default function Welcome() {
                         <Link
                             href="https://cloud.laravel.com"
                             target="_blank"
-                            className="inline-block px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-black transition-colors"
+                            className="inline-block rounded-lg bg-gray-900 px-8 py-3 text-white transition-colors hover:bg-black"
                         >
                             Deploy now
                         </Link>
+                    </div>
+
+                    {/* Newsletter Section */}
+                    <div className="mt-20">
+                        <div className="mb-4 flex items-center justify-between">
+                            <h2 className="text-2xl font-semibold text-gray-900">Newsletter</h2>
+                            <Link href={route('staff.announcements')} className="text-sm text-gray-600 hover:text-gray-900">
+                                View more
+                            </Link>
+                        </div>
+                        <div className="space-y-6">
+                            {announcements.map((a: AnnouncementCard) => {
+                                const dateStr = a.publish_date || a.created_at || '';
+                                return (
+                                    <div key={a.announcement_id} className="overflow-hidden rounded-2xl bg-gray-900 text-white">
+                                        {a.announcement_image && (
+                                            <div className="h-40 w-full overflow-hidden">
+                                                <img
+                                                    src={`/storage/${a.announcement_image}`}
+                                                    alt="announcement"
+                                                    className="h-40 w-full object-cover"
+                                                />
+                                            </div>
+                                        )}
+                                        <div className="p-4">
+                                            <div className="mb-1 flex items-center gap-2 text-xs text-gray-300">
+                                                <span className="inline-flex items-center gap-1">
+                                                    <img src="/favicon.svg" className="h-4 w-4" /> Postal Hub
+                                                </span>
+                                            </div>
+                                            <div className="text-lg font-semibold">{a.announcement_title}</div>
+                                            <div className="mt-2 text-xs text-gray-300">{dateStr ? new Date(dateStr).toLocaleString() : ''}</div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            {announcements.length === 0 && (
+                                <div className="rounded-xl border bg-white p-6 text-center text-gray-500">No announcements yet.</div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

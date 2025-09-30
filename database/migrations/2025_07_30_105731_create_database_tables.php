@@ -57,7 +57,22 @@ return new class extends Migration
             $table->enum('faq_status', ['Active', 'Inactive'])->default('Active');
             $table->timestamps();
         });
+        Schema::create('announcements', function (Blueprint $table) {
+            $table->id('announcement_id');
 
+            // From the UI
+            $table->string('announcement_title', 150);
+            $table->text('announcement_content');                 // content can exceed 255
+            $table->string('announcement_type', 20)->default('General');
+            $table->string('announcement_image', 255)->nullable(); // Store image path, nullable if no image
+            $table->enum('announcement_status', ['Draft', 'Published'])->default('Draft');
+
+            // Dates from the modal (date pickers)
+            $table->date('publish_date')->nullable();
+            $table->date('expiry_date')->nullable();
+
+            $table->timestamps();
+        });
         // 5. Parcels Table
         Schema::create('parcels', function (Blueprint $table) {
             $table->id('parcel_id');
