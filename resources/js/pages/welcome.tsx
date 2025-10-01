@@ -1,6 +1,7 @@
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Bell, CreditCard, MapPin, Package } from 'lucide-react';
+import { ArrowLeft, Bell, CreditCard, MapPin, Package, X } from 'lucide-react';
+import { useState } from 'react';
 
 type AnnouncementCard = {
     announcement_id: number;
@@ -14,6 +15,17 @@ type AnnouncementCard = {
 
 export default function Welcome() {
     const { auth, announcements = [] } = usePage<SharedData & { announcements?: AnnouncementCard[] }>().props as any;
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementCard | null>(null);
+    const [visibleCount, setVisibleCount] = useState<number>(4);
+
+    // Always reflect the latest announcements first
+    const announcementsSorted = [...announcements].sort((a, b) => {
+        const ad = new Date(a.publish_date || a.created_at || 0).getTime();
+        const bd = new Date(b.publish_date || b.created_at || 0).getTime();
+        return bd - ad; // newest first
+    });
+
+    const displayedAnnouncements = announcementsSorted.slice(0, Math.max(4, visibleCount));
 
     return (
         <>
@@ -135,15 +147,21 @@ export default function Welcome() {
                     <div className="mt-20">
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-2xl font-semibold text-gray-900">Newsletter</h2>
-                            <Link href={route('staff.announcements')} className="text-sm text-gray-600 hover:text-gray-900">
-                                View more
-                            </Link>
+                            {announcementsSorted.length > displayedAnnouncements.length && (
+                                <button onClick={() => setVisibleCount((c) => c + 4)} className="text-sm text-gray-600 hover:text-gray-900">
+                                    View more
+                                </button>
+                            )}
                         </div>
                         <div className="space-y-6">
-                            {announcements.map((a: AnnouncementCard) => {
+                            {displayedAnnouncements.map((a: AnnouncementCard) => {
                                 const dateStr = a.publish_date || a.created_at || '';
                                 return (
-                                    <div key={a.announcement_id} className="overflow-hidden rounded-2xl bg-white text-black">
+                                    <div
+                                        key={a.announcement_id}
+                                        className="cursor-pointer overflow-hidden rounded-2xl bg-white text-black transition-shadow hover:shadow-lg"
+                                        onClick={() => setSelectedAnnouncement(a)}
+                                    >
                                         {a.announcement_image && (
                                             <div className="h-40 w-full overflow-hidden">
                                                 <img
@@ -156,11 +174,13 @@ export default function Welcome() {
                                         <div className="p-4">
                                             <div className="mb-1 flex items-center gap-2 text-xs text-black">
                                                 <span className="inline-flex items-center gap-1">
-                                                    <img src="/favicon.svg" className="h-4 w-4 " /> Postal Hub
+                                                    <img src="/favicon.svg" className="h-4 w-4" /> Postal Hub
                                                 </span>
                                             </div>
-                                            <div className="text-lg text-left font-semibold">{a.announcement_title}</div>
-                                            <div className="mt-2 text-xs text-left text-black">{dateStr ? new Date(dateStr).toLocaleString() : ''}</div>
+                                            <div className="text-left text-lg font-semibold">{a.announcement_title}</div>
+                                            <div className="mt-2 text-left text-xs text-black">
+                                                {dateStr ? new Date(dateStr).toLocaleString() : ''}
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -172,6 +192,62 @@ export default function Welcome() {
                     </div>
                 </div>
             </div>
+
+            {/* Announcement Detail Modal */}
+            {selectedAnnouncement && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/30" onClick={() => setSelectedAnnouncement(null)} />
+                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-white shadow-xl">
+                        {/* Header */}
+                        <div className="flex items-center justify-between border-b p-4">
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => setSelectedAnnouncement(null)} className="text-gray-500 hover:text-gray-700">
+                                    <ArrowLeft size={20} />
+                                </button>
+                                <h2 className="text-lg font-semibold">{selectedAnnouncement.announcement_title}</h2>
+                            </div>
+                            <button onClick={() => setSelectedAnnouncement(null)} className="text-gray-500 hover:text-gray-700">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6">
+                            {/* Image */}
+                            {selectedAnnouncement.announcement_image && (
+                                <div className="mb-6 overflow-hidden rounded-lg">
+                                    <img
+                                        src={`/storage/${selectedAnnouncement.announcement_image}`}
+                                        alt="announcement"
+                                        className="h-64 w-full object-cover"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Sender info */}
+                            <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
+                                <span className="inline-flex items-center gap-1">
+                                    <img src="/favicon.svg" className="h-4 w-4" />
+                                    by Postal Hub
+                                </span>
+                            </div>
+
+                            {/* Date and time */}
+                            <div className="mb-6 flex items-center gap-2 text-sm text-gray-500">
+                                <span>📅</span>
+                                <span>
+                                    {selectedAnnouncement.publish_date || selectedAnnouncement.created_at
+                                        ? new Date(selectedAnnouncement.publish_date || selectedAnnouncement.created_at!).toLocaleString()
+                                        : 'N/A'}
+                                </span>
+                            </div>
+
+                            {/* Content */}
+                            <div className="prose max-w-none text-gray-700">{selectedAnnouncement.announcement_content}</div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

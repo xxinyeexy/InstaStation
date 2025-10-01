@@ -45,6 +45,7 @@ export default function StaffAnnouncements(props: {
 
     // Add modal state
     const [adding, setAdding] = useState(false);
+    const [creating, setCreating] = useState(false);
     // New announcement form state
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -57,19 +58,35 @@ export default function StaffAnnouncements(props: {
 
     const toDateInputValue = (value?: string | null) => {
         if (!value) return '';
-        // Accept already-correct strings or normalize ISO/Date strings
         if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
         const d = new Date(value);
         if (Number.isNaN(d.getTime())) return '';
         return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
     };
 
+    const toDateTimeLocalValue = (value?: string | null) => {
+        if (!value) return '';
+        // Accept already yyyy-MM-ddTHH:mm
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) return value;
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return '';
+        return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    };
+
     const todayStr = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    const nowDateTimeLocal = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     const formatDateTime = (value?: string | null) => {
         if (!value) return '—';
         const d = new Date(value);
         if (Number.isNaN(d.getTime())) return '—';
         return d.toLocaleString();
+    };
+
+    const toIsoStringFromLocal = (value?: string) => {
+        if (!value) return '';
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return '';
+        return d.toISOString();
     };
 
     const filtered = useMemo(() => {
@@ -94,7 +111,7 @@ export default function StaffAnnouncements(props: {
     const publish = async (announcement_id: number, to: 'publish' | 'unpublish') => {
         const body = new FormData();
         if (to === 'publish') {
-            body.append('publish_date', new Date().toISOString().slice(0, 10));
+            body.append('publish_date', new Date().toISOString());
         }
         await fetch(`/staff/announcements/${announcement_id}/${to}`, {
             method: 'POST',
@@ -209,7 +226,7 @@ export default function StaffAnnouncements(props: {
                                     <div className="text-lg font-semibold">{(f as any).announcement_title || (f as any).faq_question}</div>
                                     <div className="mt-2 text-sm text-gray-600">{(f as any).announcement_content || (f as any).faq_answer}</div>
                                     <div className="mt-3 text-xs text-gray-400">
-                                        Created: {(f as any).created_at ? new Date((f as any).created_at).toLocaleDateString() : 'N/A'}
+                                        Publish: {formatDateTime((f as any).publish_date as string | undefined)}
                                     </div>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-3">
@@ -360,20 +377,20 @@ export default function StaffAnnouncements(props: {
                                 <div>
                                     <div className="mb-1 text-sm font-medium">Publish Date</div>
                                     <input
-                                        type="date"
-                                        value={toDateInputValue(editPublishDate)}
+                                        type="datetime-local"
+                                        value={toDateTimeLocalValue(editPublishDate)}
                                         onChange={(e) => setEditPublishDate(e.target.value)}
-                                        min={todayStr}
+                                        min={nowDateTimeLocal}
                                         className="w-full rounded-md border px-3 py-2 text-sm"
                                     />
                                 </div>
                                 <div>
                                     <div className="mb-1 text-sm font-medium">Expiry Date</div>
                                     <input
-                                        type="date"
-                                        value={toDateInputValue(editExpiryDate)}
+                                        type="datetime-local"
+                                        value={toDateTimeLocalValue(editExpiryDate)}
                                         onChange={(e) => setEditExpiryDate(e.target.value)}
-                                        min={editPublishDate ? toDateInputValue(editPublishDate) : todayStr}
+                                        min={editPublishDate ? toDateTimeLocalValue(editPublishDate) || nowDateTimeLocal : nowDateTimeLocal}
                                         className="w-full rounded-md border px-3 py-2 text-sm"
                                     />
                                 </div>
@@ -392,8 +409,8 @@ export default function StaffAnnouncements(props: {
                                         form.append('content', editContent);
                                         form.append('type', editType);
                                         form.append('status', editStatus);
-                                        if (editPublishDate) form.append('publish_date', editPublishDate);
-                                        if (editExpiryDate) form.append('expiry_date', editExpiryDate);
+                                        if (editPublishDate) form.append('publish_date', toIsoStringFromLocal(editPublishDate));
+                                        if (editExpiryDate) form.append('expiry_date', toIsoStringFromLocal(editExpiryDate));
                                         if (editImageFile) form.append('image', editImageFile);
                                         await fetch(`/staff/announcements/${id}`, {
                                             method: 'PUT',
@@ -559,18 +576,20 @@ export default function StaffAnnouncements(props: {
                                 <div>
                                     <div className="mb-1 text-sm font-medium">Publish Date</div>
                                     <input
-                                        type="date"
-                                        value={publishDate}
+                                        type="datetime-local"
+                                        value={toDateTimeLocalValue(publishDate)}
                                         onChange={(e) => setPublishDate(e.target.value)}
+                                        min={nowDateTimeLocal}
                                         className="w-full rounded-md border px-3 py-2 text-sm"
                                     />
                                 </div>
                                 <div>
                                     <div className="mb-1 text-sm font-medium">Expiry Date</div>
                                     <input
-                                        type="date"
-                                        value={expiryDate}
+                                        type="datetime-local"
+                                        value={toDateTimeLocalValue(expiryDate)}
                                         onChange={(e) => setExpiryDate(e.target.value)}
+                                        min={publishDate ? toDateTimeLocalValue(publishDate) || nowDateTimeLocal : nowDateTimeLocal}
                                         className="w-full rounded-md border px-3 py-2 text-sm"
                                     />
                                 </div>
@@ -581,37 +600,56 @@ export default function StaffAnnouncements(props: {
                                 </button>
                                 <button
                                     className="rounded-md bg-gray-900 px-3 py-2 text-sm text-white disabled:opacity-50"
+                                    disabled={creating || !title.trim() || !content.trim()}
+                                    aria-busy={creating}
                                     onClick={async () => {
+                                        if (creating) return;
                                         if (!title.trim() || !content.trim()) return;
-                                        const form = new FormData();
-                                        form.append('title', title);
-                                        form.append('content', content);
-                                        form.append('type', annType);
-                                        form.append('status', annStatus);
-                                        if (publishDate) form.append('publish_date', publishDate);
-                                        if (expiryDate) form.append('expiry_date', expiryDate);
-                                        if (imageFile) form.append('image', imageFile);
-                                        const res = await fetch('/staff/announcements', {
-                                            method: 'POST',
-                                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
-                                            body: form,
-                                        });
-                                        const json = await res.json();
-                                        if (json?.success && json.announcement) {
-                                            setList((prev) => [json.announcement, ...prev]);
+                                        // Prevent creating duplicate announcements with same title and content
+                                        const exists = list.some(
+                                            (r) =>
+                                                ((r as any).announcement_title || (r as any).faq_question || '').trim().toLowerCase() ===
+                                                    title.trim().toLowerCase() &&
+                                                ((r as any).announcement_content || (r as any).faq_answer || '').trim() === content.trim(),
+                                        );
+                                        if (exists) {
+                                            alert('An announcement with the same title and content already exists.');
+                                            return;
                                         }
-                                        setAdding(false);
-                                        setTitle('');
-                                        setContent('');
-                                        setAnnType('General');
-                                        setAnnStatus('Inactive');
-                                        setPublishDate('');
-                                        setExpiryDate('');
-                                        setImageFile(null);
-                                        setImagePreview(null);
+                                        setCreating(true);
+                                        try {
+                                            const form = new FormData();
+                                            form.append('title', title);
+                                            form.append('content', content);
+                                            form.append('type', annType);
+                                            form.append('status', annStatus);
+                                            if (publishDate) form.append('publish_date', toIsoStringFromLocal(publishDate));
+                                            if (expiryDate) form.append('expiry_date', toIsoStringFromLocal(expiryDate));
+                                            if (imageFile) form.append('image', imageFile);
+                                            const res = await fetch('/staff/announcements', {
+                                                method: 'POST',
+                                                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
+                                                body: form,
+                                            });
+                                            const json = await res.json();
+                                            if (json?.success && json.announcement) {
+                                                setList((prev) => [json.announcement, ...prev]);
+                                            }
+                                            setAdding(false);
+                                            setTitle('');
+                                            setContent('');
+                                            setAnnType('General');
+                                            setAnnStatus('Inactive');
+                                            setPublishDate('');
+                                            setExpiryDate('');
+                                            setImageFile(null);
+                                            setImagePreview(null);
+                                        } finally {
+                                            setCreating(false);
+                                        }
                                     }}
                                 >
-                                    Create Announcement
+                                    {creating ? 'Creating…' : 'Create Announcement'}
                                 </button>
                             </div>
                         </div>
