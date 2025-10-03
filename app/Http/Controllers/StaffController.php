@@ -22,6 +22,178 @@ class StaffController extends Controller
     }
 
     /**
+     * Dashboard data for staff
+     */
+    public function dashboard(): Response
+    {
+        // Overview statistics
+        $totalParcels = Parcel::count();
+        $newlyArrived = Parcel::whereDate('created_at', today())->count();
+        $readyForCollection = Parcel::where('parcel_status', 'Ready For Collection')->count();
+        $unclaimed = Parcel::where('parcel_status', 'Unclaimed')->count();
+
+        // Daily operations data for the current week
+        $dailyOperations = [];
+        $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        
+        for ($i = 0; $i < 7; $i++) {
+            $date = now()->startOfWeek()->addDays($i);
+            $lastYearDate = $date->copy()->subYear();
+            
+            $thisYear = Parcel::whereDate('created_at', $date)->count();
+            $lastYear = Parcel::whereDate('created_at', $lastYearDate)->count();
+            
+            $dailyOperations[] = [
+                'day' => $days[$i],
+                'thisYear' => $thisYear,
+                'lastYear' => $lastYear,
+            ];
+        }
+
+        // Parcel senders distribution - get all senders
+        $senders = Parcel::select('sender', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('sender')
+            ->groupBy('sender')
+            ->orderByDesc('count')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'name' => $item->sender,
+                    'value' => $item->count,
+                ];
+            });
+
+        // If no senders data, provide fallback
+        if ($senders->isEmpty()) {
+            $senders = collect([
+                ['name' => 'Shopee', 'value' => 0],
+                ['name' => 'Lazada', 'value' => 0],
+                ['name' => 'Amazon', 'value' => 0],
+                ['name' => 'Grab', 'value' => 0],
+                ['name' => 'Taobao', 'value' => 0],
+                ['name' => 'Zalora', 'value' => 0],
+            ]);
+        }
+
+        // Parcel size distribution
+        $sizeData = Parcel::select('size', DB::raw('COUNT(*) as count'))
+            ->groupBy('size')
+            ->get()
+            ->map(function ($item) {
+                $sizeMap = [
+                    'small' => 'Small',
+                    'medium' => 'Medium', 
+                    'large' => 'Large'
+                ];
+                return [
+                    'size' => $sizeMap[$item->size] ?? ucfirst($item->size),
+                    'count' => $item->count,
+                ];
+            });
+
+        // If no size data, provide fallback
+        if ($sizeData->isEmpty()) {
+            $sizeData = collect([
+                ['size' => 'Small', 'count' => 0],
+                ['size' => 'Medium', 'count' => 0],
+                ['size' => 'Large', 'count' => 0],
+            ]);
+        }
+
+        // Parcel status distribution
+        $statusData = Parcel::select('parcel_status', DB::raw('COUNT(*) as count'))
+            ->groupBy('parcel_status')
+            ->get()
+            ->map(function ($item) use ($totalParcels) {
+                $statusMap = [
+                    'Pending Payment' => 'Payment Verification',
+                    'Ready For Collection' => 'Ready for Collection',
+                    'Collected' => 'Collected',
+                    'Unclaimed' => 'Unclaimed'
+                ];
+                return [
+                    'name' => $statusMap[$item->parcel_status] ?? $item->parcel_status,
+                    'value' => $totalParcels > 0 ? round(($item->count / $totalParcels) * 100, 1) : 0,
+                    'color' => $this->getStatusColor($item->parcel_status),
+                ];
+            });
+
+        // If no status data, provide fallback
+        if ($statusData->isEmpty()) {
+            $statusData = collect([
+                ['name' => 'Payment Verification', 'value' => 0, 'color' => '#374151'],
+                ['name' => 'Ready for Collection', 'value' => 0, 'color' => '#3B82F6'],
+                ['name' => 'Collected', 'value' => 0, 'color' => '#10B981'],
+                ['name' => 'Unclaimed', 'value' => 0, 'color' => '#14B8A6'],
+            ]);
+        }
+
+        // Collection time distribution (based on collection times)
+        $collectionTimeData = [];
+        $hours = ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM'];
+        
+        foreach ($hours as $hour) {
+            $hourValue = str_replace(['AM', 'PM'], '', $hour);
+            $isPM = strpos($hour, 'PM') !== false;
+            if ($isPM && $hourValue != '12') {
+                $hourValue = (int)$hourValue + 12;
+            }
+            
+            $count = Parcel::where('parcel_status', 'Collected')
+                ->whereRaw('HOUR(updated_at) = ?', [$hourValue])
+                ->count();
+            
+            $collectionTimeData[] = [
+                'time' => $hour,
+                'count' => $count,
+            ];
+        }
+
+        // Ensure we always have collection time data
+        if (empty($collectionTimeData)) {
+            $collectionTimeData = [
+                ['time' => '9AM', 'count' => 0],
+                ['time' => '10AM', 'count' => 0],
+                ['time' => '11AM', 'count' => 0],
+                ['time' => '12PM', 'count' => 0],
+                ['time' => '1PM', 'count' => 0],
+                ['time' => '2PM', 'count' => 0],
+                ['time' => '3PM', 'count' => 0],
+                ['time' => '4PM', 'count' => 0],
+            ];
+        }
+
+        return Inertia::render('staff/home', [
+            'overview' => [
+                'totalParcels' => $totalParcels,
+                'newlyArrived' => $newlyArrived,
+                'readyForCollection' => $readyForCollection,
+                'unclaimed' => $unclaimed,
+            ],
+            'dailyOperations' => $dailyOperations,
+            'parcelSenders' => $senders,
+            'parcelSize' => $sizeData,
+            'parcelStatus' => $statusData,
+            'collectionTime' => $collectionTimeData,
+        ]);
+    }
+
+    /**
+     * Get color for parcel status
+     */
+    private function getStatusColor($status)
+    {
+        $colors = [
+            'Pending Payment' => '#374151',
+            'Ready For Collection' => '#3B82F6',
+            'Collected' => '#10B981',
+            'Unclaimed' => '#14B8A6'
+        ];
+        
+        return $colors[$status] ?? '#6B7280';
+    }
+
+    /**
      * Manage users (students) dashboard
      */
     public function manageUsers(Request $request): Response

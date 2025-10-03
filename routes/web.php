@@ -58,6 +58,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/parcels/{id}/export/download', [ParcelController::class, 'exportDownload'])->name('parcels.export.download');
 
     // Staff routes
+    Route::get('/staff/dashboard', [StaffController::class, 'dashboard'])
+        ->name('staff.dashboard');
+    
     Route::get('/staff/parcel', [ParcelController::class, 'index'])
         ->name('staff.parcel');
     Route::patch('/staff/parcel/{id}/collect', [ParcelController::class, 'markAsCollected'])->name('staff.parcel.collect');
