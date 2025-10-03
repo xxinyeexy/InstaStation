@@ -66,9 +66,12 @@ class ClaimController extends Controller
 
             // Only link if it's still unclaimed or not assigned
             $parcel->student_id = $user->id;
-            // Closest existing status to "claimed – awaiting pickup"
+            // Persist recipient details on the row for quick reference
+            $parcel->recipient_name = $user->name;
+            $parcel->recipient_matric = $user->matric;
+            // Claimed – awaiting pickup maps to Pending Payment in your lifecycle
             if (strtolower((string) $parcel->parcel_status) === 'unclaimed') {
-                $parcel->parcel_status = 'Ready For Collection';
+                $parcel->parcel_status = 'Pending Payment';
             }
             $parcel->save();
 
@@ -113,8 +116,10 @@ class ClaimController extends Controller
 
         $user = Auth::user();
         $parcel->student_id = $user->id;
+        $parcel->recipient_name = $user->name;
+        $parcel->recipient_matric = $user->matric;
         if (strtolower((string) $parcel->parcel_status) === 'unclaimed') {
-            $parcel->parcel_status = 'Ready For Collection';
+            $parcel->parcel_status = 'Pending Payment';
         }
         $parcel->save();
 
