@@ -16,7 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Parcel {
     parcel_id: number;
     parcel_code: string; // Unique code for the parcel
-    student_id: number;
+    student_id: number | null;
     tracking_no: string;
     parcel_status: string;
     days: number;
@@ -26,6 +26,8 @@ interface Parcel {
     qr_code: string;
     schedule: string;
     time_slot?: string;
+    recipient_name?: string | null;
+    recipient_matric?: string | null;
     created_by:
         | number
         | {
@@ -423,9 +425,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             parcel.parcel_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.sender?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            parcel.student_id?.toString().includes(searchTerm) ||
+            (parcel.student_id !== null && parcel.student_id?.toString().includes(searchTerm)) ||
             parcel.student_user?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            parcel.student_user?.matric?.toLowerCase().includes(searchTerm.toLowerCase());
+            parcel.student_user?.matric?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.recipient_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.recipient_matric?.toLowerCase().includes(searchTerm.toLowerCase());
 
         return matchesTab && matchesSearch;
     });
@@ -1512,10 +1516,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                             </div>
                                                             <div>
                                                                 <p className="text-sm font-medium text-gray-900">
-                                                                    {parcel.student_user?.name || `${parcel.student_id || 'N/A'}`}
+                                                                    {parcel.student_user?.name || parcel.recipient_name || 'N/A'}
                                                                 </p>
                                                                 <p className="text-xs text-gray-500">
-                                                                    {parcel.student_user?.matric ? ` ${parcel.student_user.matric}` : 'No Matric ID'}
+                                                                    {parcel.student_user?.matric || parcel.recipient_matric || 'No Matric ID'}
                                                                 </p>
                                                             </div>
                                                         </div>

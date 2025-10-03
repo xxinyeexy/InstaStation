@@ -20,6 +20,8 @@ class Parcel extends Model
         'sender',
         'location',
         'student_id',
+        'recipient_name',
+        'recipient_matric',
         'parcel_status',
         'days',
         'qr_code',

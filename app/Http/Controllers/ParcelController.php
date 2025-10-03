@@ -71,6 +71,8 @@ class ParcelController extends Controller
                 'location' => 'nullable|string|max:100',
                 // student is optional; can be matric or user id
                 'student_id' => 'nullable|string',
+                'recipient_name' => 'nullable|string|max:150',
+                'recipient_matric' => 'nullable|string|max:50',
                 'qr_code' => 'nullable|string|max:255',
             ]);
 
@@ -111,6 +113,9 @@ class ParcelController extends Controller
                 'sender' => $validatedData['sender'],
                 'location' => $validatedData['location'],
                 'student_id' => $student_user?->id, // May be null
+                // Save fallback recipient details when student is not linked
+                'recipient_name' => $student_user ? null : ($validatedData['recipient_name'] ?? null),
+                'recipient_matric' => $student_user ? null : ($validatedData['recipient_matric'] ?? ($request->student_id ?: null)),
                 'parcel_status' => $student_user ? 'Pending Payment' : 'Unclaimed',
                 'days' => null,
                 'qr_code' => $validatedData['qr_code'],

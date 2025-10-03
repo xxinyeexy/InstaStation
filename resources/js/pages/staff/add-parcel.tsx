@@ -208,6 +208,8 @@ const showErrorToast = (message: string) => {
                 location: formData.location.trim() || null,
                 // send empty string if none so backend treats as missing
                 student_id: formData.matricId.trim() || '',
+                recipient_name: formData.studentName.trim() || null,
+                recipient_matric: formData.matricId.trim() || null,
                 qr_code: null
             };
 
