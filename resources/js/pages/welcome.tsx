@@ -77,10 +77,10 @@ export default function Welcome() {
 
                     {/* Check for Unclaimed Parcels Button */}
                     <div className="mb-16">
-                        <button className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-6 py-3 text-green-400 transition-colors hover:bg-green-100">
+                        <Link href={route('public.unclaimed')} className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-6 py-3 text-green-600 transition-colors hover:bg-green-100">
                             <Package className="h-5 w-5" />
                             Check for Unclaimed Parcels
-                        </button>
+                        </Link>
                     </div>
 
                     {/* Feature Cards */}

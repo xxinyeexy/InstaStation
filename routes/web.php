@@ -12,6 +12,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\ClaimController;
 
 Route::get('/', function () {
     $today = now()->toDateString();
@@ -37,6 +38,11 @@ Route::get('/', function () {
         'announcements' => $announcements,
     ]);
 })->name('home');
+
+// Public: Unclaimed parcels and claim start
+Route::get('/unclaimed', [ClaimController::class, 'unclaimed'])->name('public.unclaimed');
+Route::post('/claim/start', [ClaimController::class, 'start'])->name('claim.start');
+Route::get('/claim/consume', [ClaimController::class, 'consume'])->name('claim.consume');
 
 Route::get('/register', [RegisteredUserController::class, 'create'])
     ->name('register');
