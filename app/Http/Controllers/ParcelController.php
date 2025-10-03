@@ -69,42 +69,49 @@ class ParcelController extends Controller
                 'size' => 'nullable|string',
                 'sender' => 'required|string|max:50',
                 'location' => 'nullable|string|max:100',
-                'student_id' => 'required|string',
+                // student is optional; can be matric or user id
+                'student_id' => 'nullable|string',
                 'qr_code' => 'nullable|string|max:255',
             ]);
 
             Log::info('Validation passed', ['validated_data' => $validatedData]);
 
-            // Find the student user by matric ID or user ID
-            $student_user = User::where('matric', $request->student_id)
-                ->orWhere('id', $request->student_id)
-                ->where('type', 'student')
-                ->first();
+            // Try resolve student if provided; else allow null and mark Unclaimed
+            $student_user = null;
+            if ($request->filled('student_id')) {
+                $student_user = User::where('type', 'student')
+                    ->where(function ($q) use ($request) {
+                        $q->where('matric', $request->student_id)
+                          ->orWhere('id', $request->student_id);
+                    })
+                    ->first();
 
-            if (!$student_user) {
-                Log::error('Student not found in users table', ['student_id' => $request->student_id]);
-                return response()->json(['message' => 'Student not found with ID: ' . $request->student_id], 404);
+                if (!$student_user) {
+                    Log::warning('Student not found, proceeding as Unclaimed', ['student_id' => $request->student_id]);
+                }
             }
 
-            Log::info('Student user found', [
-                'student_user_id' => $student_user->id,
-                'student_matric' => $student_user->matric,
-                'student_name' => $student_user->name
-            ]);
+            if ($student_user) {
+                Log::info('Student user found', [
+                    'student_user_id' => $student_user->id,
+                    'student_matric' => $student_user->matric,
+                    'student_name' => $student_user->name
+                ]);
+            }
 
             Log::info('Staff user authenticated', [
                 'staff_user_id' => $user->id,
                 'staff_name' => $user->name
             ]);
 
-            // Create the parcel - both student_id and staff IDs reference the users table
+            // Create the parcel - if no student, mark as Unclaimed
             $parcel = Parcel::create([
                 'tracking_no' => $validatedData['tracking_no'],
                 'size' => $validatedData['size'],
                 'sender' => $validatedData['sender'],
                 'location' => $validatedData['location'],
-                'student_id' => $student_user->id, // Reference to users table
-                'parcel_status' => 'Pending Payment',
+                'student_id' => $student_user?->id, // May be null
+                'parcel_status' => $student_user ? 'Pending Payment' : 'Unclaimed',
                 'days' => null,
                 'qr_code' => $validatedData['qr_code'],
                 'schedule' => null, // Schedule should be null initially
@@ -121,12 +128,12 @@ class ParcelController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Parcel registered successfully.Code: ${res.data.parcel_code}',
+                'message' => 'Parcel registered successfully',
                 'parcel' => $parcel,
                 'student' => [
-                    'name' => $student_user->name,
-                    'matric' => $student_user->matric,
-                    'email' => $student_user->email
+                    'name' => $student_user->name ?? null,
+                    'matric' => $student_user->matric ?? null,
+                    'email' => $student_user->email ?? null
                 ]
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {

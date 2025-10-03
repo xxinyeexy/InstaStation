@@ -172,11 +172,7 @@ const showErrorToast = (message: string) => {
             alert('❌ Please enter sender information');
             return;
         }
-        
-        if (!formData.matricId.trim()) {
-            alert('❌ Please select a student or enter matric ID');
-            return;
-        }
+        // student info is optional; if not provided, backend will mark as Unclaimed
 
         setIsSubmitting(true);
 
@@ -210,7 +206,8 @@ const showErrorToast = (message: string) => {
                 size: formData.size || null,
                 sender: formData.sender.trim(),
                 location: formData.location.trim() || null,
-                student_id: formData.matricId.trim(),
+                // send empty string if none so backend treats as missing
+                student_id: formData.matricId.trim() || '',
                 qr_code: null
             };
 
@@ -572,7 +569,7 @@ const showErrorToast = (message: string) => {
                         <p className="mb-3 text-sm text-gray-600">Search for the recipient in the student database</p>
 
                         <div className="mb-4">
-                            <label className="mb-1 block text-sm font-medium text-gray-700">Student Name *</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Student Name</label>
                             <div className="flex gap-2" ref={searchContainerRef}>
                                 <input
                                     type="text"
@@ -580,7 +577,7 @@ const showErrorToast = (message: string) => {
                                     value={formData.studentName}
                                     onChange={(e) => handleInputChange('studentName', e.target.value)}
                                     className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
-                                    required
+                                    
                                 />
                                 <button
                                     onClick={() => handleSearch(formData.studentName)}
@@ -627,14 +624,14 @@ const showErrorToast = (message: string) => {
                         </div>
 
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700">Matric ID *</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700">Matric ID</label>
                             <input
                                 type="text"
                                 placeholder="ID number"
                                 value={formData.matricId}
                                 onChange={(e) => handleInputChange('matricId', e.target.value)}
                                 className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightMatric ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
-                                required
+                                
                             />
                         </div>
                     </div>
@@ -652,7 +649,7 @@ const showErrorToast = (message: string) => {
                         
                             <button
                                 onClick={handleRegister}
-                                disabled={!formData.trackingNumber || !formData.sender || !formData.matricId || isSubmitting}
+                                disabled={!formData.trackingNumber || !formData.sender || isSubmitting}
                                 className="rounded-md bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600 flex items-center gap-2"
                             >
                                 {isSubmitting && (
