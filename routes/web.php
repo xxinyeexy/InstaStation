@@ -43,6 +43,7 @@ Route::get('/', function () {
 Route::get('/unclaimed', [ClaimController::class, 'unclaimed'])->name('public.unclaimed');
 Route::post('/claim/start', [ClaimController::class, 'start'])->name('claim.start');
 Route::get('/claim/consume', [ClaimController::class, 'consume'])->name('claim.consume');
+Route::post('/claim/search', [ClaimController::class, 'search'])->name('claim.search');
 
 Route::get('/register', [RegisteredUserController::class, 'create'])
     ->name('register');

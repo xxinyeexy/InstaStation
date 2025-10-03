@@ -12,6 +12,8 @@ type Parcel = {
     parcel_status: string;
     days?: number | null;
     created_at?: string;
+    recipient_name?: string | null;
+    recipient_matric?: string | null;
 };
 
 export default function Unclaimed({ parcels = [], stats = { unclaimed: 0, highPriority: 0, avgDays: 0 }, filters = { q: '' } }: { parcels: Parcel[]; stats: { unclaimed: number; highPriority: number; avgDays: number }; filters?: { q?: string } }) {
@@ -84,6 +86,7 @@ export default function Unclaimed({ parcels = [], stats = { unclaimed: 0, highPr
                             <tr>
                                 <th className="px-4 py-3">Tracking No</th>
                                 <th className="px-4 py-3">Recipient</th>
+                                <th className="px-4 py-3">Matric</th>
                                 <th className="px-4 py-3">Sender</th>
                                 <th className="px-4 py-3">Arrived</th>
                                 <th className="px-4 py-3">Days</th>
@@ -97,7 +100,8 @@ export default function Unclaimed({ parcels = [], stats = { unclaimed: 0, highPr
                             {filtered.map((p) => (
                                 <tr key={p.parcel_id} className="border-t">
                                     <td className="px-4 py-3 font-mono">{p.tracking_no}</td>
-                                    <td className="px-4 py-3 text-gray-500">—</td>
+                                    <td className="px-4 py-3 text-gray-700">{p.recipient_name ?? '—'}</td>
+                                    <td className="px-4 py-3 text-gray-700">{p.recipient_matric ?? '—'}</td>
                                     <td className="px-4 py-3">{p.sender}</td>
                                     <td className="px-4 py-3 flex items-center gap-1 text-gray-600">
                                         <CalendarDays className="h-4 w-4" /> {p.created_at ? new Date(p.created_at).toISOString().slice(0, 10) : '—'}
