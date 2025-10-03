@@ -137,8 +137,7 @@ const AnimatedChart = ({ children, delay = 0 }: { children: React.ReactNode; del
 };
 
 export default function StaffHome() {
-    const { props } = usePage<{ props: DashboardProps }>();
-    const data = props as DashboardProps;
+    const data = usePage().props as unknown as DashboardProps;
     const [activeTab, setActiveTab] = useState('arrivals');
 
     const handleExport = () => {
