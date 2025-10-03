@@ -139,6 +139,7 @@ const AnimatedChart = ({ children, delay = 0 }: { children: React.ReactNode; del
 export default function StaffHome() {
     const { props } = usePage<{ props: DashboardProps }>();
     const data = props as DashboardProps;
+    const [activeTab, setActiveTab] = useState('arrivals');
 
     const handleExport = () => {
         // Implement export functionality
@@ -147,23 +148,23 @@ export default function StaffHome() {
 
     return (
         <AppSidebarLayout>
-            <div className="space-y-4 animate-in fade-in-0 duration-500 h-full overflow-auto">
+            <div className="space-y-6 animate-in fade-in-0 duration-500">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Overview</h1>
-                        <p className="text-sm text-muted-foreground">
+                        <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
+                        <p className="text-muted-foreground">
                             Welcome back! Here's what's happening with your parcels today.
                         </p>
                     </div>
-                    <Button onClick={handleExport} className="flex items-center gap-2" size="sm">
+                    <Button onClick={handleExport} className="flex items-center gap-2">
                         <Download className="h-4 w-4" />
                         Export
                     </Button>
                 </div>
 
                 {/* Overview Cards */}
-                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <AnimatedChart delay={100}>
                         <OverviewCard
                             title="Total Parcels"
@@ -211,15 +212,37 @@ export default function StaffHome() {
                 </div>
 
                 {/* Main Charts Grid */}
-                <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid gap-6 lg:grid-cols-2">
                     {/* Daily Operations Overview */}
                     <AnimatedChart delay={500}>
                         <Card>
                             <CardHeader>
                                 <CardTitle>Daily Operations Overview</CardTitle>
+                                <div className="flex gap-2 mt-4">
+                                    <button
+                                        onClick={() => setActiveTab('arrivals')}
+                                        className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                                            activeTab === 'arrivals' 
+                                                ? 'bg-primary text-primary-foreground' 
+                                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                        }`}
+                                    >
+                                        Daily Parcels Arrivals This Week
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('status')}
+                                        className={`px-3 py-1 text-sm rounded-md transition-colors ${
+                                            activeTab === 'status' 
+                                                ? 'bg-primary text-primary-foreground' 
+                                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                        }`}
+                                    >
+                                        Operating Status
+                                    </button>
+                                </div>
                             </CardHeader>
                             <CardContent>
-                                <ResponsiveContainer width="100%" height={250}>
+                                <ResponsiveContainer width="100%" height={300}>
                                     <AreaChart data={data.dailyOperations}>
                                         <defs>
                                             <linearGradient id="colorThisYear" x1="0" y1="0" x2="0" y2="1">
@@ -291,7 +314,7 @@ export default function StaffHome() {
                 </div>
 
                 {/* Bottom Charts Grid */}
-                <div className="grid gap-4 lg:grid-cols-3">
+                <div className="grid gap-6 lg:grid-cols-3">
                     {/* Parcel Size */}
                     <AnimatedChart delay={700}>
                         <Card>
@@ -299,11 +322,11 @@ export default function StaffHome() {
                                 <CardTitle>Parcel Size</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <ResponsiveContainer width="100%" height={200}>
+                                <ResponsiveContainer width="100%" height={250}>
                                     <BarChart data={data.parcelSize}>
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                         <XAxis dataKey="size" />
-                                        <YAxis />
+                                        <YAxis tickFormatter={(value) => `${value / 1000}K`} />
                                         <Tooltip 
                                             formatter={(value) => [`${value.toLocaleString()}`, 'Count']}
                                             contentStyle={{ 
@@ -330,7 +353,7 @@ export default function StaffHome() {
                                 <CardTitle>Parcel Status Distribution</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <ResponsiveContainer width="100%" height={200}>
+                                <ResponsiveContainer width="100%" height={250}>
                                     <PieChart>
                                         <Pie
                                             data={data.parcelStatus}
@@ -367,11 +390,11 @@ export default function StaffHome() {
                                 <CardTitle>Collection Time Distribution</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <ResponsiveContainer width="100%" height={200}>
+                                <ResponsiveContainer width="100%" height={250}>
                                     <BarChart data={data.collectionTime}>
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                         <XAxis dataKey="time" />
-                                        <YAxis />
+                                        <YAxis tickFormatter={(value) => `${value / 1000}K`} />
                                         <Tooltip 
                                             formatter={(value) => [`${value.toLocaleString()}`, 'Count']}
                                             contentStyle={{ 

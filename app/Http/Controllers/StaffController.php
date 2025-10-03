@@ -50,11 +50,12 @@ class StaffController extends Controller
             ];
         }
 
-        // Parcel senders distribution - get all senders
+        // Parcel senders distribution
         $senders = Parcel::select('sender', DB::raw('COUNT(*) as count'))
             ->whereNotNull('sender')
             ->groupBy('sender')
             ->orderByDesc('count')
+            ->limit(6)
             ->get()
             ->map(function ($item) {
                 return [
