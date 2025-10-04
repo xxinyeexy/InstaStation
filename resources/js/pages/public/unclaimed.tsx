@@ -29,7 +29,7 @@ export default function Unclaimed({ parcels = [], stats = { unclaimed: 0, highPr
     };
 
     const claim = (parcel_id: number, redirect: 'login' | 'register') => {
-        post(route('claim.start'), { preserveScroll: true, data: { parcel_id, redirect } });
+        router.post(route('claim.start'), { parcel_id, redirect }, { preserveScroll: true });
     };
 
     return (
