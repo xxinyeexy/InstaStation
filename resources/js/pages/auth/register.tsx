@@ -1,8 +1,10 @@
+import { Link } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
 import Alert from '@/components/ui/alert';
 import axios from 'axios'; // Add axios for API requests
 import { Building, IdCard, LoaderCircle, Lock, Mail, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 
 export default function Register() {
     const [formData, setFormData] = useState({
@@ -109,6 +111,15 @@ export default function Register() {
             {/* Floating toast for success */}
             {success && <Alert type="success" message={success} />}
             <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4 py-8">
+                 <Link href="/" className="absolute top-4 left-4 group inline-flex items-center gap-0 overflow-hidden rounded-full bg-gray-900 text-white shadow-lg transition-all duration-300 hover:gap-2 hover:pr-5 hover:shadow-xl">
+                            <div className="flex h-10 w-10 items-center justify-center">
+                              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                            </div>
+                            <span className="max-w-0 overflow-hidden text-sm font-medium transition-all duration-300 group-hover:max-w-xs">
+                              Back
+                            </span>
+                          </Link>
+                  
                 <div className="w-full max-w-xl">
                     {/* Registration Card */}
                     <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm">
