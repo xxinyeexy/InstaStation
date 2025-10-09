@@ -27,7 +27,7 @@ export default function StaffAnnouncements(props: {
     categories?: string[];
     filters?: { q?: string; category?: string };
 }) {
-    const { rows = [], summary = {}, categories = [], filters = {} } = props;
+  const { rows = [], summary: _summary = {}, categories = [], filters = {} } = props;
     const [list, setList] = useState<AnnouncementRow[]>(rows);
     const [q, setQ] = useState(filters?.q || '');
     const [category, setCategory] = useState(filters?.category || '');
@@ -109,28 +109,33 @@ export default function StaffAnnouncements(props: {
     const csrf = (typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') : '') || '';
 
     const publish = async (announcement_id: number, to: 'publish' | 'unpublish') => {
-        const body = new FormData();
-        if (to === 'publish') {
-            body.append('publish_date', new Date().toISOString());
-        }
-        await fetch(`/staff/announcements/${announcement_id}/${to}`, {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
-            body: to === 'publish' ? body : undefined,
-        });
-        setList((prev) =>
-            prev.map((r) =>
-                ((r as any).announcement_id || r.faq_id) === announcement_id
-                    ? {
-                          ...r,
-                          announcement_status: to === 'publish' ? 'Published' : 'Draft',
-                          publish_date: to === 'publish' ? new Date().toISOString().slice(0, 10) : (r as any).publish_date,
-                          faq_status: to === 'publish' ? 'Active' : 'Inactive',
-                      }
-                    : r,
-            ),
-        );
-    };
+    const body = new FormData();
+    const currentTimestamp = new Date().toISOString();
+    
+    if (to === 'publish') {
+        body.append('publish_date', currentTimestamp);
+    }
+    
+    await fetch(`/staff/announcements/${announcement_id}/${to}`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
+        body: to === 'publish' ? body : undefined,
+    });
+    
+    setList((prev) =>
+        prev.map((r) =>
+            ((r as any).announcement_id || r.faq_id) === announcement_id
+                ? {
+                      ...r,
+                      announcement_status: to === 'publish' ? 'Published' : 'Draft',
+                      publish_date: to === 'publish' ? currentTimestamp : (r as any).publish_date,
+                      faq_status: to === 'publish' ? 'Active' : 'Inactive',
+                      updated_at: currentTimestamp,  
+                  }
+                : r,
+        ),
+    );
+};
     const remove = async (announcement_id: number) => {
         await fetch(`/staff/announcements/${announcement_id}`, {
             method: 'DELETE',
@@ -180,7 +185,7 @@ export default function StaffAnnouncements(props: {
                             ref={searchRef}
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
-                            placeholder="Search FAQs..."
+                            placeholder="Search announcements..."
                             className="w-full rounded-md border px-7 py-2 text-sm"
                             onKeyDown={(e) => e.key === 'Enter' && refreshFromServer()}
                         />
@@ -200,7 +205,9 @@ export default function StaffAnnouncements(props: {
                         onClick={() => {
                             setAdding(true);
                             // initialize defaults
-                            setPublishDate(new Date().toISOString().slice(0, 10));
+                                                   setPublishDate(nowDateTimeLocal);
+
+
                         }}
                         className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white"
                     >
@@ -211,11 +218,11 @@ export default function StaffAnnouncements(props: {
                 {/* List */}
                 <div className="space-y-4">
                     {filtered.map((f) => (
-                        <div key={f.faq_id} className="rounded-xl border bg-white">
+                        <div key={f.announcement_id} className="rounded-xl border bg-white">
                             <div className="flex items-start justify-between p-4">
                                 <div className="pr-4">
                                     <div className="mb-2 flex items-center gap-2 text-xs">
-                                        <span className={`rounded-full px-2 py-0.5 ${categoryClasses((f as any).announcement_type || f.category)}`}>
+                                        <span className={`rounded-full px-2 py-0.5 text-xs  ${categoryClasses((f as any).announcement_type || f.category)}`}>
                                             {(f as any).announcement_type || f.category || 'General'}
                                         </span>
                                         {((f as any).announcement_status || (f as any).faq_status) &&
@@ -261,8 +268,8 @@ export default function StaffAnnouncements(props: {
                                             // Map announcement_status to UI status
                                             const isActive = (f as any).announcement_status === 'Published' || (f as any).faq_status === 'Active';
                                             setEditStatus(isActive ? 'Active' : 'Inactive');
-                                            setEditPublishDate(toDateInputValue((f as any).publish_date as string | undefined));
-                                            setEditExpiryDate(toDateInputValue((f as any).expiry_date as string | undefined));
+                                            setEditPublishDate(toDateTimeLocalValue((f as any).publish_date as string | undefined));
+                                            setEditExpiryDate(toDateTimeLocalValue((f as any).expiry_date as string | undefined));
                                             setEditImageFile(null);
                                             setEditImagePreview((f as any).announcement_image ? `/storage/${(f as any).announcement_image}` : null);
                                         }}
@@ -279,7 +286,7 @@ export default function StaffAnnouncements(props: {
                                 </div>
                             </div>
                             <div className="flex items-center justify-end pr-4 pb-3 text-xs text-gray-400">
-                                Updated: {f.updated_at ? new Date(f.updated_at).toLocaleDateString() : 'N/A'}
+                                Updated: {f.updated_at ? new Date(f.updated_at).toLocaleString() : 'N/A'}
                             </div>
                         </div>
                     ))}
@@ -378,7 +385,7 @@ export default function StaffAnnouncements(props: {
                                     <div className="mb-1 text-sm font-medium">Publish Date</div>
                                     <input
                                         type="datetime-local"
-                                        value={toDateTimeLocalValue(editPublishDate)}
+                                        value={editPublishDate}
                                         onChange={(e) => setEditPublishDate(e.target.value)}
                                         min={nowDateTimeLocal}
                                         className="w-full rounded-md border px-3 py-2 text-sm"
@@ -390,7 +397,7 @@ export default function StaffAnnouncements(props: {
                                         type="datetime-local"
                                         value={toDateTimeLocalValue(editExpiryDate)}
                                         onChange={(e) => setEditExpiryDate(e.target.value)}
-                                        min={editPublishDate ? toDateTimeLocalValue(editPublishDate) || nowDateTimeLocal : nowDateTimeLocal}
+                                        min={editPublishDate  || nowDateTimeLocal}
                                         className="w-full rounded-md border px-3 py-2 text-sm"
                                     />
                                 </div>
@@ -430,10 +437,11 @@ export default function StaffAnnouncements(props: {
                                                           announcement_content: editContent,
                                                           announcement_type: editType,
                                                           announcement_status: editStatus === 'Active' ? 'Published' : 'Draft',
-                                                          publish_date: editPublishDate || (r as any).publish_date,
-                                                          expiry_date: editExpiryDate || (r as any).expiry_date,
+                                                          publish_date: editPublishDate ? toIsoStringFromLocal(editPublishDate) : (r as any).publish_date,
 
+ expiry_date: editExpiryDate ? toIsoStringFromLocal(editExpiryDate) : (r as any).expiry_date,
                                                           category: editType,
+                                                          updated_at: new Date().toISOString(), 
                                                       }
                                                     : r,
                                             ),
@@ -655,7 +663,10 @@ export default function StaffAnnouncements(props: {
                         </div>
                     </div>
                 </div>
+                
             )}
+            
         </AppLayout>
+    
     );
 }
