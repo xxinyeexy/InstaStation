@@ -62,7 +62,7 @@ export default function ManageFaq({
             method: 'POST',
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
         });
-        setList((prev) => prev.map((r) => (r.faq_id === faq_id ? { ...r, faq_status: to === 'publish' ? 'Active' : 'Inactive' } : r)));
+        setList((prev) => prev.map((r) => (r.faq_id === faq_id ? { ...r, faq_status: to === 'publish' ? 'Active' : 'Inactive', updated_at: new Date().toISOString() } : r)));
     };
     const remove = async (faq_id: number) => {
         await fetch(`/staff/faq/${faq_id}`, { method: 'DELETE', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf } });
