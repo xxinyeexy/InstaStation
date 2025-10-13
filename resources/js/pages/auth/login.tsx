@@ -82,10 +82,10 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             {success && <Alert type="success" message={success} />}
             {status && !success && <Alert type="success" message={status} />}
 
-            <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4">
+            <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4 dark:bg-gray-900">
                 <Link
                     href="/"
-                    className="group absolute top-4 left-4 inline-flex items-center gap-0 overflow-hidden rounded-full bg-gray-900 text-white shadow-lg transition-all duration-300 hover:gap-2 hover:pr-5 hover:shadow-xl"
+                    className="group absolute top-4 left-4 inline-flex items-center gap-0 overflow-hidden rounded-full bg-gray-900 text-white shadow-lg transition-all duration-300 hover:gap-2 hover:pr-5 hover:shadow-xl dark:bg-gray-700"
                 >
                     <div className="flex h-10 w-10 items-center justify-center">
                         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
@@ -93,19 +93,25 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     <span className="max-w-0 overflow-hidden text-sm font-medium transition-all duration-300 group-hover:max-w-xs">Back</span>
                 </Link>
 
-                <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">
+                <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md dark:bg-card">
                     <div className="mb-6 text-center">
                         <div className="mb-2 flex justify-center">
-                            <div className="rounded-full bg-blue-100 p-3">
-                                <svg className="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-500/20">
+                                <svg
+                                    className="h-6 w-6 text-blue-500 dark:text-blue-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                >
                                     <path d="M3 7l9-4 9 4-9 4-9-4z" />
                                     <path d="M3 17l9 4 9-4" />
                                     <path d="M3 12l9 4 9-4" />
                                 </svg>
                             </div>
                         </div>
-                        <h2 className="text-xl font-semibold text-gray-900">Welcome to InstaStation</h2>
-                        <p className="text-sm text-gray-500">Instant Parcel Tracking Dashboard</p>
+                        <h2 className="text-xl font-semibold text-gray-900 dark:text-card-foreground">Welcome to InstaStation</h2>
+                        <p className="text-sm text-gray-500 dark:text-muted-foreground">Instant Parcel Tracking Dashboard</p>
                     </div>
 
                     <form onSubmit={submit} className="space-y-4" noValidate>
@@ -114,7 +120,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             <Label htmlFor="email" className="sr-only">
                                 Email
                             </Label>
-                            <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <Mail className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-muted-foreground" />
                             <Input
                                 id="email"
                                 type="email"
@@ -132,7 +138,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             <Label htmlFor="password" className="sr-only">
                                 Password
                             </Label>
-                            <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-muted-foreground" />
                             <Input
                                 id="password"
                                 type="password"
@@ -151,13 +157,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             <Label htmlFor="role" className="sr-only">
                                 Role
                             </Label>
-                            <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                            <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-muted-foreground" />
                             <select
                                 id="role"
                                 required
                                 value={data.role}
                                 onChange={(e) => setData('role', e.target.value)}
-                                className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pr-8 pl-10 text-sm focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
+                                className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pr-8 pl-10 text-sm text-gray-900 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border dark:bg-background dark:text-foreground"
                             >
                                 <option value="" disabled>
                                     Select Role
@@ -166,7 +172,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 <option value="staff">Staff</option>
                             </select>
                             <svg
-                                className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-400"
+                                className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-muted-foreground"
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
@@ -185,7 +191,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     checked={data.remember}
                                     onCheckedChange={(checked: boolean | 'indeterminate') => setData('remember', checked === true)}
                                 />
-                                <span>Remember me</span>
+                                <span className="text-gray-700 dark:text-card-foreground">Remember me</span>
                             </label>
                             {canResetPassword && (
                                 <TextLink href={route('password.request')} className="text-green-600 hover:underline">
@@ -202,8 +208,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                     </form>
 
                     {/* Register Link */}
-                    <div className="mt-4 text-center text-sm">
-                        Don’t have an account?{' '}
+                    <div className="mt-4 text-center text-sm text-gray-600 dark:text-muted-foreground">
+                        Don't have an account?{' '}
                         <TextLink href={route('register')} className="text-green-600 hover:underline">
                             Register now
                         </TextLink>

@@ -138,40 +138,40 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
         <AppLayout>
             <Head title="Payments" />
             <div className="space-y-6 p-6">
-                <h1 className="text-xl font-semibold text-gray-900">Payment Verification</h1>
-                <p className="text-sm text-gray-600">Review and verify student payment submissions</p>
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground">Payment Verification</h1>
+                <p className="text-sm text-gray-600 dark:text-muted-foreground">Review and verify student payment submissions</p>
 
                 <div className="grid grid-cols-3 gap-4">
-                    <div className="rounded-xl border p-4">
+                    <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600">Pending Payments</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Pending Payments</div>
                             <Clock className="h-4 w-4 text-orange-400" />
                         </div>
-                        <div className="mt-2 text-2xl font-bold">{summary.pending}</div>
+                        <div className="mt-2 text-2xl font-bold text-foreground">{summary.pending}</div>
                     </div>
-                    <div className="rounded-xl border p-4">
+                    <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600">Verified Today</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Verified Today</div>
                             <CircleCheck className="h-4 w-4 text-emerald-500" />
                         </div>
-                        <div className="mt-2 text-2xl font-bold">{summary.verified_today}</div>
+                        <div className="mt-2 text-2xl font-bold text-foreground">{summary.verified_today}</div>
                     </div>
-                    <div className="rounded-xl border p-4">
+                    <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600">Total Revenue</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Total Revenue</div>
                             <DollarSign className="h-4 w-4 text-yellow-400" />
                         </div>
-                        <div className="mt-2 text-2xl font-bold">RM{summary.total_revenue.toFixed(2)}</div>
+                        <div className="mt-2 text-2xl font-bold text-foreground">RM{summary.total_revenue.toFixed(2)}</div>
                     </div>
                 </div>
 
-                <div className="rounded-xl border">
-                    <div className="flex items-center justify-between border-b p-4">
+                <div className="rounded-xl border border-border bg-card">
+                    <div className="flex items-center justify-between border-b border-border p-4">
                         <div className="relative w-full max-w-xl">
                             {/* Search input */}
                             <input
                                 ref={searchInputRef}
-                                className="w-full rounded-md border py-2 pr-3 pl-9 text-sm"
+                                className="w-full rounded-md border border-border bg-background py-2 pr-3 pl-9 text-sm text-foreground placeholder:text-muted-foreground"
                                 placeholder="Search parcels..."
                                 defaultValue={filters?.q || ''}
                                 onKeyDown={(e) => {
@@ -199,7 +199,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                             </button>
                         </div>
                         <select
-                            className="ml-4 rounded-md border px-3 py-2 text-sm"
+                            className="ml-4 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                             defaultValue={filters?.status || ''}
                             onChange={(e) => {
                                 const params = new URLSearchParams(window.location.search);
@@ -214,7 +214,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                         </select>
                     </div>
 
-                    <div className="grid grid-cols-12 gap-2 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-600">
+                    <div className="grid grid-cols-12 gap-2 bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
                         <div className="col-span-3">Tracking Number</div>
                         <div className="col-span-4">Student</div>
                         <div className="col-span-2">Amount</div>
@@ -223,23 +223,23 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                     </div>
 
                     {list.map((r) => (
-                        <div key={r.payment_id} className="grid grid-cols-12 items-center gap-2 px-4 py-3">
-                            <div className="col-span-3 font-medium">{r.tracking_no ?? '—'}</div>
+                        <div key={r.payment_id} className="grid grid-cols-12 items-center gap-2 border-b border-border px-4 py-3">
+                            <div className="col-span-3 font-medium text-foreground">{r.tracking_no ?? '—'}</div>
                             <div className="col-span-4">
-                                <div className="text-gray-900">{r.student ?? '—'}</div>
-                                <div className="text-xs text-gray-500">{r.student_matric ?? ''}</div>
+                                <div className="text-foreground">{r.student ?? '—'}</div>
+                                <div className="text-xs text-muted-foreground">{r.student_matric ?? ''}</div>
                             </div>
-                            <div className="col-span-2 font-medium">RM{r.amount.toFixed(2)}</div>
+                            <div className="col-span-2 font-medium text-foreground">RM{r.amount.toFixed(2)}</div>
                             <div className="col-span-2">
                                 <span
-                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${r.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200' : 'bg-yellow-50 text-yellow-700 ring-yellow-200'}`}
+                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${r.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-500/20 dark:text-green-400 dark:ring-green-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
                                 >
                                     {r.status === 'verified' ? <CircleCheck className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
                                     {r.status}
                                 </span>
                             </div>
-                            <div className="col-span-1 ml-auto flex items-center justify-end gap-4 text-gray-500">
-                                <button onClick={() => setDetail(r as any)} className="hover:text-gray-700">
+                            <div className="col-span-1 ml-auto flex items-center justify-end gap-4 text-muted-foreground">
+                                <button onClick={() => setDetail(r as any)} className="hover:text-foreground">
                                     <Eye className="h-4 w-4" />
                                 </button>
                                 {r.status !== 'verified' && (
@@ -270,24 +270,24 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                 </div>
                 {detail && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                        <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+                        <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-card">
                             <div className="mb-4 flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-gray-900">Payment Details</h2>
-                                    <p className="text-sm text-gray-600">Review payment information and proof</p>
+                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">Payment Details</h2>
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground">Review payment information and proof</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {(detail as any)?.proof_url && (
                                         <button
                                             onClick={handleDownloadImage}
-                                            className="inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                            className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
                                         >
                                             <Download className="h-4 w-4" /> Download
                                         </button>
                                     )}
                                     <button
                                         onClick={() => setDetail(null)}
-                                        className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+                                        className="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
                                     >
                                         <X className="h-5 w-5" />
                                     </button>
@@ -295,25 +295,25 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                             </div>
                             <div className="grid grid-cols-2 gap-6 text-sm">
                                 <div>
-                                    <div className="text-gray-500">Tracking Number</div>
-                                    <div className="font-medium">{detail.tracking_no}</div>
-                                    <div className="mt-2 text-gray-500">Amount</div>
-                                    <div className="font-medium">RM{detail.amount.toFixed(2)}</div>
-                                    <div className="mt-2 text-gray-500">Status</div>
+                                    <div className="text-gray-500 dark:text-muted-foreground">Tracking Number</div>
+                                    <div className="font-medium text-foreground">{detail.tracking_no}</div>
+                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">Amount</div>
+                                    <div className="font-medium text-foreground">RM{detail.amount.toFixed(2)}</div>
+                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">Status</div>
                                     <span
-                                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${detail.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200' : 'bg-yellow-50 text-yellow-700 ring-yellow-200'}`}
+                                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${detail.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-500/20 dark:text-green-400 dark:ring-green-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
                                     >
                                         {detail.status === 'verified' ? <CircleCheck className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
                                         {detail.status}
                                     </span>
                                 </div>
                                 <div>
-                                    <div className="text-gray-500">Name</div>
-                                    <div className="font-medium">{detail.student ?? '—'}</div>
-                                    <div className="mt-2 text-gray-500">Student ID</div>
-                                    <div className="font-medium">{detail.student_matric ?? '—'}</div>
-                                    <div className="mt-2 text-gray-500">Submitted</div>
-                                    <div className="font-medium">
+                                    <div className="text-gray-500 dark:text-muted-foreground">Name</div>
+                                    <div className="font-medium text-foreground">{detail.student ?? '—'}</div>
+                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">Student ID</div>
+                                    <div className="font-medium text-foreground">{detail.student_matric ?? '—'}</div>
+                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">Submitted</div>
+                                    <div className="font-medium text-foreground">
                                         {(detail as any).created_at
                                             ? new Date((detail as any).created_at).toLocaleString()
                                             : (detail.submitted_at ?? '—')}
@@ -321,12 +321,12 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                 </div>
                             </div>
                             <div className="mt-6">
-                                <div className="text-sm font-medium text-gray-900">Payment Proof</div>
+                                <div className="text-sm font-medium text-gray-900 dark:text-card-foreground">Payment Proof</div>
                                 <div className="mt-2 overflow-hidden rounded-lg ring-1 ring-gray-200">
                                     {(detail as any).proof_url ? (
                                         <img src={(detail as any).proof_url} className="max-h-[60vh] w-full object-contain" />
                                     ) : (
-                                        <div className="p-6 text-center text-sm text-gray-500">No proof uploaded.</div>
+                                        <div className="p-6 text-center text-sm text-gray-500 dark:text-muted-foreground">No proof uploaded.</div>
                                     )}
                                 </div>
                             </div>

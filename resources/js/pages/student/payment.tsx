@@ -56,9 +56,10 @@ export default function Payment({
     notifications?: Notification[];
 }) {
     const badge = (state: Row['payment_state']) => {
-        if (state === 'Overdue') return 'text-red-600 bg-red-50 border-red-200';
-        if (state === 'Verified') return 'text-green-700 bg-green-50 border-green-200';
-        return 'text-yellow-700 bg-yellow-50 border-yellow-200';
+        if (state === 'Overdue') return 'text-destructive bg-destructive/10 border-destructive/20';
+        if (state === 'Verified')
+            return 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20';
+        return 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20';
     };
 
     const [viewerUrl, setViewerUrl] = useState<string | null>(null);
@@ -159,17 +160,17 @@ export default function Payment({
             <div className="space-y-6 p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-xl font-semibold text-gray-900">Payment Centre</h1>
-                        <p className="text-sm text-gray-600">Manage your parcel payments</p>
+                        <h1 className="text-xl font-semibold text-foreground">Payment Centre</h1>
+                        <p className="text-sm text-muted-foreground">Manage your parcel payments</p>
                     </div>
 
                     {/* Notification Bell - Always show, badge only when there are notifications */}
                     <div className="relative">
                         <button
                             onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
-                            className="notification-bell relative rounded-full bg-white p-3 shadow-md hover:bg-gray-50"
+                            className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
                         >
-                            <Bell className="h-6 w-6 text-gray-600" />
+                            <Bell className="h-6 w-6 text-foreground" />
                             {notificationList.length > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
                                     {notificationList.length}
@@ -179,28 +180,28 @@ export default function Payment({
 
                         {/* Notification Dropdown */}
                         {showNotificationDropdown && (
-                            <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-white shadow-lg">
-                                <div className="border-b p-4">
-                                    <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                            <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
+                                <div className="border-b border-border p-4">
+                                    <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
                                 </div>
                                 <div className="max-h-96 overflow-y-auto">
                                     {notificationList.length === 0 ? (
-                                        <div className="p-8 text-center text-sm text-gray-500">No notifications</div>
+                                        <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
                                     ) : (
                                         notificationList.map((notification) => (
                                             <div
                                                 key={notification.id}
-                                                className="cursor-pointer border-b bg-white p-4 hover:bg-gray-50"
+                                                className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
                                                 onClick={() => handleNotificationClick(notification)}
                                             >
                                                 <div className="flex items-start gap-3">
                                                     <div className="mt-1 flex-shrink-0">
-                                                        <AlertCircle className="h-5 w-5 text-red-500" />
+                                                        <AlertCircle className="h-5 w-5 text-destructive" />
                                                     </div>
                                                     <div className="flex-1">
-                                                        <h4 className="text-sm font-semibold text-gray-900">{notification.title}</h4>
-                                                        <p className="mt-1 text-sm text-gray-600">{notification.message}</p>
-                                                        <p className="mt-1 text-xs text-gray-500">
+                                                        <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
+                                                        <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+                                                        <p className="mt-1 text-xs text-muted-foreground">
                                                             {new Date(notification.created_at).toLocaleString()}
                                                         </p>
                                                     </div>
@@ -216,60 +217,60 @@ export default function Payment({
 
                 {/* Tiles */}
                 <div className="grid grid-cols-4 gap-4">
-                    <div className="flex items-start justify-between rounded-xl border p-4">
+                    <div className="flex items-start justify-between rounded-xl border border-border bg-card p-4">
                         <div>
-                            <div className="text-sm text-gray-600">Overdue</div>
-                            <div className="mt-2 text-2xl font-bold">{summary.overdue}</div>
-                            <div className="mt-1 text-xs text-gray-500">Delay payments</div>
+                            <div className="text-sm text-muted-foreground">Overdue</div>
+                            <div className="mt-2 text-2xl font-bold text-card-foreground">{summary.overdue}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">Delay payments</div>
                         </div>
-                        <div className="rounded-full bg-red-100 p-2 text-red-600">
+                        <div className="rounded-full bg-destructive/10 p-2 text-destructive">
                             <CircleAlert className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleAlert>
                         </div>
                     </div>
-                    <div className="flex items-start justify-between rounded-xl border p-4">
+                    <div className="flex items-start justify-between rounded-xl border border-border bg-card p-4">
                         <div>
-                            <div className="text-sm text-gray-600">Pending Items</div>
-                            <div className="mt-2 text-2xl font-bold">{summary.pending}</div>
-                            <div className="mt-1 text-xs text-gray-500">Awaiting payments</div>
+                            <div className="text-sm text-muted-foreground">Pending Items</div>
+                            <div className="mt-2 text-2xl font-bold text-card-foreground">{summary.pending}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">Awaiting payments</div>
                         </div>
-                        <div className="rounded-full bg-yellow-100 p-2 text-yellow-600">
+                        <div className="rounded-full bg-yellow-500/10 p-2 text-yellow-600 dark:text-yellow-400">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
                     </div>
-                    <div className="flex items-start justify-between rounded-xl border p-4">
+                    <div className="flex items-start justify-between rounded-xl border border-border bg-card p-4">
                         <div>
-                            <div className="text-sm text-gray-600">Verified</div>
-                            <div className="mt-2 text-2xl font-bold">{summary.verified}</div>
-                            <div className="mt-1 text-xs text-gray-500">Successfully verified</div>
+                            <div className="text-sm text-muted-foreground">Verified</div>
+                            <div className="mt-2 text-2xl font-bold text-card-foreground">{summary.verified}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">Successfully verified</div>
                         </div>
-                        <div className="rounded-full bg-green-100 p-2 text-green-600">
+                        <div className="rounded-full bg-green-500/10 p-2 text-green-600 dark:text-green-400">
                             <CircleCheck className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleCheck>
                         </div>
                     </div>
-                    <div className="flex items-start justify-between rounded-xl border p-4">
+                    <div className="flex items-start justify-between rounded-xl border border-border bg-card p-4">
                         <div>
-                            <div className="text-sm text-gray-600">Total Paid</div>
-                            <div className="mt-2 text-2xl font-bold">RM {summary.total_paid.toFixed(2)}</div>
-                            <div className="mt-1 text-xs text-gray-500">Received payments</div>
+                            <div className="text-sm text-muted-foreground">Total Paid</div>
+                            <div className="mt-2 text-2xl font-bold text-card-foreground">RM {summary.total_paid.toFixed(2)}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">Received payments</div>
                         </div>
-                        <div className="rounded-full bg-emerald-100 p-2 text-emerald-600">
+                        <div className="rounded-full bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400">
                             <WalletCards className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></WalletCards>
                         </div>
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="rounded-lg border">
-                    <div className="flex items-center gap-2 border-b p-4 text-lg font-semibold">
-                        <span className="rounded-full bg-red-100 p-1 text-red-600">
+                <div className="rounded-lg border border-border bg-card">
+                    <div className="flex items-center gap-2 border-b border-border p-4 text-lg font-semibold text-card-foreground">
+                        <span className="rounded-full bg-destructive/10 p-1 text-destructive">
                             <CircleAlert className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleAlert>
                         </span>
                         Payments Required
                     </div>
-                    <div className="divide-y">
-                        <div className="grid grid-cols-6 gap-2 bg-gray-50 px-4 py-2 text-xs font-medium text-gray-600">
+                    <div className="divide-y divide-border">
+                        <div className="grid grid-cols-6 gap-2 bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
                             <div>Parcel ID</div>
                             <div>Sender</div>
                             <div>Amount</div>
@@ -280,12 +281,12 @@ export default function Payment({
                         {rows.map((r) => (
                             <div
                                 key={r.parcel_id}
-                                className={`grid grid-cols-6 gap-2 px-4 py-3 ${r.payment_state === 'Overdue' ? 'bg-red-50/40' : ''}`}
+                                className={`grid grid-cols-6 gap-2 px-4 py-3 ${r.payment_state === 'Overdue' ? 'bg-destructive/5' : ''}`}
                             >
-                                <div className="font-semibold">{r.parcel_code}</div>
-                                <div className="text-gray-700">{r.sender || '—'}</div>
-                                <div className="font-semibold">RM{r.amount.toFixed(2)}</div>
-                                <div className="text-gray-700">{r.arrival}</div>
+                                <div className="font-semibold text-card-foreground">{r.parcel_code}</div>
+                                <div className="text-muted-foreground">{r.sender || '—'}</div>
+                                <div className="font-semibold text-card-foreground">RM{r.amount.toFixed(2)}</div>
+                                <div className="text-muted-foreground">{r.arrival}</div>
                                 <div>
                                     <span
                                         className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${badge(r.payment_state)}`}
@@ -326,7 +327,7 @@ export default function Payment({
                                             Pay Now
                                         </Link>
                                     ) : (
-                                        <span className="text-xs text-gray-500">Paid</span>
+                                        <span className="text-xs text-muted-foreground">Paid</span>
                                     )}
                                 </div>
                             </div>
@@ -335,23 +336,23 @@ export default function Payment({
                 </div>
 
                 {/* Payment History */}
-                <div className="rounded-xl border">
-                    <div className="flex items-center justify-between border-b p-4">
+                <div className="rounded-xl border border-border bg-card">
+                    <div className="flex items-center justify-between border-b border-border p-4">
                         <div>
-                            <h2 className="text-lg font-semibold text-gray-900">Payment History</h2>
-                            <p className="text-sm text-gray-600">View and manage your payment submissions</p>
+                            <h2 className="text-lg font-semibold text-card-foreground">Payment History</h2>
+                            <p className="text-sm text-muted-foreground">View and manage your payment submissions</p>
                         </div>
                     </div>
                     {payments.length === 0 ? (
-                        <div className="p-8 text-center text-sm text-gray-500">No payments submitted yet.</div>
+                        <div className="p-8 text-center text-sm text-muted-foreground">No payments submitted yet.</div>
                     ) : (
-                        <ul className="divide-y">
+                        <ul className="divide-y divide-border">
                             {payments.map((p) => (
                                 <li key={p.payment_id} className="flex items-center justify-between gap-4 p-4">
                                     {/* Left: code + status */}
                                     <div className="flex items-center gap-2">
                                         <span
-                                            className={`rounded-full p-1 ${p.status === 'Verified' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-700'}`}
+                                            className={`rounded-full p-1 ${p.status === 'Verified' ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'}`}
                                         >
                                             {p.status === 'Verified' ? (
                                                 <CircleCheck className="h-4 w-4" />
@@ -366,9 +367,9 @@ export default function Payment({
                                                 </svg>
                                             )}
                                         </span>
-                                        <span className="font-medium text-gray-900">{p.parcel_code ?? '—'}</span>
+                                        <span className="font-medium text-card-foreground">{p.parcel_code ?? '—'}</span>
                                         <span
-                                            className={`ml-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${p.status === 'Verified' ? 'border-green-200 bg-green-50 text-green-700' : 'border-yellow-200 bg-yellow-50 text-yellow-700'}`}
+                                            className={`ml-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${p.status === 'Verified' ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400' : 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400'}`}
                                         >
                                             {p.status === 'Verified' ? (
                                                 <CircleCheck className="h-3 w-3" />
@@ -386,7 +387,7 @@ export default function Payment({
                                         </span>
                                     </div>
                                     {/* Middle: dates */}
-                                    <div className="ml-auto text-right text-xs text-gray-600">
+                                    <div className="ml-auto text-right text-xs text-muted-foreground">
                                         <div>Submitted: {p.submitted_at ?? '—'}</div>
                                         <div>Verified: {p.verified_at ?? '—'}</div>
                                     </div>
@@ -397,11 +398,11 @@ export default function Payment({
                                                 <img
                                                     src={p.proof_url}
                                                     alt="Payment Proof"
-                                                    className="h-12 w-16 rounded-md object-cover ring-1 ring-gray-200"
+                                                    className="h-12 w-16 rounded-md object-cover ring-1 ring-border"
                                                 />
                                             </button>
                                         ) : (
-                                            <div className="flex h-12 w-16 items-center justify-center rounded-md bg-gray-50 text-gray-400 ring-1 ring-gray-200">
+                                            <div className="flex h-12 w-16 items-center justify-center rounded-md bg-muted text-muted-foreground ring-1 ring-border">
                                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                                     <path
                                                         strokeLinecap="round"
@@ -424,7 +425,7 @@ export default function Payment({
                             <img src={viewerUrl} alt="Payment Proof" className="max-h-[80vh] max-w-[90vw] rounded-lg shadow-2xl" />
                             <button
                                 onClick={() => setViewerUrl(null)}
-                                className="absolute -top-3 -right-3 rounded-full bg-white/90 px-2 py-1 text-sm font-medium text-gray-700 shadow hover:bg-white"
+                                className="absolute -top-3 -right-3 rounded-full border border-border bg-background/90 px-2 py-1 text-sm font-medium text-foreground shadow hover:bg-background"
                             >
                                 Close
                             </button>

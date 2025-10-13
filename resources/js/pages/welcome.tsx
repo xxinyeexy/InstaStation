@@ -89,7 +89,10 @@ export default function Welcome() {
 
                     {/* Check for Unclaimed Parcels Button */}
                     <div className="mb-16">
-                        <Link href={route('public.unclaimed')} className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-6 py-3 text-green-600 transition-colors hover:bg-green-100">
+                        <Link
+                            href={route('public.unclaimed')}
+                            className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-6 py-3 text-green-600 transition-colors hover:bg-green-100"
+                        >
                             <Package className="h-5 w-5" />
                             Check for Unclaimed Parcels
                         </Link>
@@ -189,9 +192,7 @@ export default function Welcome() {
                                                 </span>
                                             </div>
                                             <div className="text-left text-lg font-semibold">{a.announcement_title}</div>
-                                            <div className="mt-2 text-left text-xs text-black">
-                                                {formatDate(a.publish_date || a.created_at)}
-                                            </div>
+                                            <div className="mt-2 text-left text-xs text-black">{formatDate(a.publish_date || a.created_at)}</div>
                                         </div>
                                     </div>
                                 );
@@ -208,16 +209,16 @@ export default function Welcome() {
             {selectedAnnouncement && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setSelectedAnnouncement(null)} />
-                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-white shadow-xl">
+                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-card shadow-xl">
                         {/* Header */}
-                        <div className="flex items-center justify-between border-b p-4">
+                        <div className="flex items-center justify-between border-b border-border p-4">
                             <div className="flex items-center gap-3">
-                                <button onClick={() => setSelectedAnnouncement(null)} className="text-gray-500 hover:text-gray-700">
+                                <button onClick={() => setSelectedAnnouncement(null)} className="text-muted-foreground hover:text-foreground">
                                     <ArrowLeft size={20} />
                                 </button>
-                                <h2 className="text-lg font-semibold">{selectedAnnouncement.announcement_title}</h2>
+                                <h2 className="text-lg font-semibold text-card-foreground">{selectedAnnouncement.announcement_title}</h2>
                             </div>
-                            <button onClick={() => setSelectedAnnouncement(null)} className="text-gray-500 hover:text-gray-700">
+                            <button onClick={() => setSelectedAnnouncement(null)} className="text-muted-foreground hover:text-foreground">
                                 <X size={20} />
                             </button>
                         </div>
@@ -246,9 +247,7 @@ export default function Welcome() {
                             {/* Date and time */}
                             <div className="mb-6 flex items-center gap-2 text-sm text-gray-500">
                                 <span>📅</span>
-                                <span>
-                                    {formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}
-                                </span>
+                                <span>{formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}</span>
                             </div>
 
                             {/* Content */}

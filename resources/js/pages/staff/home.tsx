@@ -1,34 +1,25 @@
-import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-    LineChart, 
-    Line, 
-    Area, 
-    AreaChart, 
-    BarChart, 
-    Bar, 
-    PieChart, 
-    Pie, 
-    Cell,
-    XAxis, 
-    YAxis, 
-    CartesianGrid, 
-    Tooltip, 
-    Legend, 
-    ResponsiveContainer 
-} from 'recharts';
-import { 
-    Package, 
-    Clock, 
-    CheckCircle, 
-    AlertCircle, 
-    Download,
-    TrendingUp,
-    TrendingDown
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { usePage } from '@inertiajs/react';
+import { AlertCircle, CheckCircle, Clock, Download, Package, TrendingDown, TrendingUp } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+    Area,
+    AreaChart,
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Cell,
+    Legend,
+    Line,
+    Pie,
+    PieChart,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+} from 'recharts';
 
 interface DashboardProps {
     overview: {
@@ -61,14 +52,14 @@ interface DashboardProps {
     }>;
 }
 
-const OverviewCard = ({ 
-    title, 
-    value, 
-    icon: Icon, 
-    bgColor, 
+const OverviewCard = ({
+    title,
+    value,
+    icon: Icon,
+    bgColor,
     iconColor,
     trend,
-    trendValue 
+    trendValue,
 }: {
     title: string;
     value: number;
@@ -88,29 +79,26 @@ const OverviewCard = ({
     }, [value]);
 
     return (
-        <Card className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105">
+        <Card className="overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg">
             <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                     <div>
                         <p className="text-sm font-medium text-muted-foreground">{title}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                            <p className="text-3xl font-bold text-foreground">
-                                {animatedValue.toLocaleString()}
-                            </p>
+                        <div className="mt-2 flex items-center gap-2">
+                            <p className="text-3xl font-bold text-foreground">{animatedValue.toLocaleString()}</p>
                             {trend && trendValue && (
-                                <div className={`flex items-center gap-1 text-sm ${
-                                    trend === 'up' ? 'text-green-600' : 'text-red-600'
-                                }`}>
+                                <div
+                                    className={`flex items-center gap-1 text-sm ${
+                                        trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                                    }`}
+                                >
                                     {trend === 'up' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                                     <span>{trendValue}</span>
                                 </div>
                             )}
                         </div>
                     </div>
-                    <div 
-                        className={`p-3 rounded-lg ${bgColor}`}
-                        style={{ backgroundColor: bgColor }}
-                    >
+                    <div className={`rounded-lg p-3 ${bgColor}`} style={{ backgroundColor: bgColor }}>
                         <Icon className={`h-6 w-6 ${iconColor}`} />
                     </div>
                 </div>
@@ -129,11 +117,7 @@ const AnimatedChart = ({ children, delay = 0 }: { children: React.ReactNode; del
         return () => clearTimeout(timer);
     }, [delay]);
 
-    return (
-        <div className={`transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            {children}
-        </div>
-    );
+    return <div className={`transition-all duration-500 ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}>{children}</div>;
 };
 
 export default function StaffHome() {
@@ -147,14 +131,12 @@ export default function StaffHome() {
 
     return (
         <AppSidebarLayout>
-            <div className="space-y-6 p-6 animate-in fade-in-0 duration-500">
+            <div className="space-y-6 p-6 duration-500 animate-in fade-in-0">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
-                        <p className="text-muted-foreground">
-                            Welcome back! Here's what's happening with your parcels today.
-                        </p>
+                        <p className="text-muted-foreground">Welcome back! Here's what's happening with your parcels today.</p>
                     </div>
                     <Button onClick={handleExport} className="flex items-center gap-2">
                         <Download className="h-4 w-4" />
@@ -169,8 +151,8 @@ export default function StaffHome() {
                             title="Total Parcels"
                             value={data.overview.totalParcels}
                             icon={Package}
-                            bgColor="bg-blue-100"
-                            iconColor="text-blue-600"
+                            bgColor="bg-blue-100 dark:bg-blue-500/20"
+                            iconColor="text-blue-600 dark:text-blue-400"
                             trend="up"
                             trendValue="+12%"
                         />
@@ -180,8 +162,8 @@ export default function StaffHome() {
                             title="Newly Arrived"
                             value={data.overview.newlyArrived}
                             icon={Clock}
-                            bgColor="bg-yellow-100"
-                            iconColor="text-yellow-600"
+                            bgColor="bg-yellow-100 dark:bg-yellow-500/20"
+                            iconColor="text-yellow-600 dark:text-yellow-400"
                             trend="up"
                             trendValue="+8%"
                         />
@@ -191,8 +173,8 @@ export default function StaffHome() {
                             title="Ready for Collection"
                             value={data.overview.readyForCollection}
                             icon={CheckCircle}
-                            bgColor="bg-green-100"
-                            iconColor="text-green-600"
+                            bgColor="bg-green-100 dark:bg-green-500/20"
+                            iconColor="text-green-600 dark:text-green-400"
                             trend="down"
                             trendValue="-3%"
                         />
@@ -202,8 +184,8 @@ export default function StaffHome() {
                             title="Unclaimed"
                             value={data.overview.unclaimed}
                             icon={AlertCircle}
-                            bgColor="bg-red-100"
-                            iconColor="text-red-600"
+                            bgColor="bg-red-100 dark:bg-red-500/20"
+                            iconColor="text-red-600 dark:text-red-400"
                             trend="down"
                             trendValue="-15%"
                         />
@@ -217,12 +199,12 @@ export default function StaffHome() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Daily Operations Overview</CardTitle>
-                                <div className="flex gap-2 mt-4">
+                                <div className="mt-4 flex gap-2">
                                     <button
                                         onClick={() => setActiveTab('arrivals')}
-                                        className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                                            activeTab === 'arrivals' 
-                                                ? 'bg-primary text-primary-foreground' 
+                                        className={`rounded-md px-3 py-1 text-sm transition-colors ${
+                                            activeTab === 'arrivals'
+                                                ? 'bg-primary text-primary-foreground'
                                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
@@ -230,9 +212,9 @@ export default function StaffHome() {
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('status')}
-                                        className={`px-3 py-1 text-sm rounded-md transition-colors ${
-                                            activeTab === 'status' 
-                                                ? 'bg-primary text-primary-foreground' 
+                                        className={`rounded-md px-3 py-1 text-sm transition-colors ${
+                                            activeTab === 'status'
+                                                ? 'bg-primary text-primary-foreground'
                                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
@@ -245,19 +227,19 @@ export default function StaffHome() {
                                     <AreaChart data={data.dailyOperations}>
                                         <defs>
                                             <linearGradient id="colorThisYear" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#374151" stopOpacity={0.8}/>
-                                                <stop offset="95%" stopColor="#374151" stopOpacity={0.1}/>
+                                                <stop offset="5%" stopColor="#374151" stopOpacity={0.8} />
+                                                <stop offset="95%" stopColor="#374151" stopOpacity={0.1} />
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                         <XAxis dataKey="day" />
                                         <YAxis />
-                                        <Tooltip 
-                                            contentStyle={{ 
-                                                backgroundColor: 'hsl(var(--card))', 
+                                        <Tooltip
+                                            contentStyle={{
+                                                backgroundColor: 'hsl(var(--card))',
                                                 border: '1px solid hsl(var(--border))',
-                                                borderRadius: '8px'
-                                            }} 
+                                                borderRadius: '8px',
+                                            }}
                                         />
                                         <Legend />
                                         <Area
@@ -268,13 +250,7 @@ export default function StaffHome() {
                                             fill="url(#colorThisYear)"
                                             name="This year"
                                         />
-                                        <Line
-                                            type="monotone"
-                                            dataKey="lastYear"
-                                            stroke="#9CA3AF"
-                                            strokeDasharray="5 5"
-                                            name="Last year"
-                                        />
+                                        <Line type="monotone" dataKey="lastYear" stroke="#9CA3AF" strokeDasharray="5 5" name="Last year" />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </CardContent>
@@ -293,16 +269,16 @@ export default function StaffHome() {
                                         <div key={sender.name} className="flex items-center justify-between">
                                             <span className="text-sm font-medium">{sender.name}</span>
                                             <div className="flex items-center gap-2">
-                                                <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                                                    <div 
-                                                        className="h-full bg-primary rounded-full transition-all duration-1000 ease-out"
-                                                        style={{ 
+                                                <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
+                                                    <div
+                                                        className="h-full rounded-full bg-primary transition-all duration-1000 ease-out"
+                                                        style={{
                                                             width: `${(sender.value / 50) * 100}%`,
-                                                            animationDelay: `${index * 100}ms`
+                                                            animationDelay: `${index * 100}ms`,
                                                         }}
                                                     />
                                                 </div>
-                                                <span className="text-sm text-muted-foreground w-8">{sender.value}</span>
+                                                <span className="w-8 text-sm text-muted-foreground">{sender.value}</span>
                                             </div>
                                         </div>
                                     ))}
@@ -326,19 +302,15 @@ export default function StaffHome() {
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                         <XAxis dataKey="size" />
                                         <YAxis tickFormatter={(value) => `${value / 1000}K`} />
-                                        <Tooltip 
+                                        <Tooltip
                                             formatter={(value) => [`${value.toLocaleString()}`, 'Count']}
-                                            contentStyle={{ 
-                                                backgroundColor: 'hsl(var(--card))', 
+                                            contentStyle={{
+                                                backgroundColor: 'hsl(var(--card))',
                                                 border: '1px solid hsl(var(--border))',
-                                                borderRadius: '8px'
-                                            }} 
+                                                borderRadius: '8px',
+                                            }}
                                         />
-                                        <Bar 
-                                            dataKey="count" 
-                                            fill="#8B5CF6"
-                                            radius={[4, 4, 0, 0]}
-                                        />
+                                        <Bar dataKey="count" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>
@@ -367,13 +339,13 @@ export default function StaffHome() {
                                                 <Cell key={`cell-${index}`} fill={entry.color} />
                                             ))}
                                         </Pie>
-                                        <Tooltip 
+                                        <Tooltip
                                             formatter={(value) => [`${value}%`, 'Percentage']}
-                                            contentStyle={{ 
-                                                backgroundColor: 'hsl(var(--card))', 
+                                            contentStyle={{
+                                                backgroundColor: 'hsl(var(--card))',
                                                 border: '1px solid hsl(var(--border))',
-                                                borderRadius: '8px'
-                                            }} 
+                                                borderRadius: '8px',
+                                            }}
                                         />
                                         <Legend />
                                     </PieChart>
@@ -394,19 +366,15 @@ export default function StaffHome() {
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                         <XAxis dataKey="time" />
                                         <YAxis tickFormatter={(value) => `${value / 1000}K`} />
-                                        <Tooltip 
+                                        <Tooltip
                                             formatter={(value) => [`${value.toLocaleString()}`, 'Count']}
-                                            contentStyle={{ 
-                                                backgroundColor: 'hsl(var(--card))', 
+                                            contentStyle={{
+                                                backgroundColor: 'hsl(var(--card))',
                                                 border: '1px solid hsl(var(--border))',
-                                                borderRadius: '8px'
-                                            }} 
+                                                borderRadius: '8px',
+                                            }}
                                         />
-                                        <Bar 
-                                            dataKey="count" 
-                                            fill="#374151"
-                                            radius={[4, 4, 0, 0]}
-                                        />
+                                        <Bar dataKey="count" fill="#374151" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>

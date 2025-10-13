@@ -508,7 +508,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             case 'approved':
                 return 'border-green-200 bg-green-100 text-green-700';
             default:
-                return 'border-gray-200 bg-gray-100 text-gray-600';
+                return 'border-gray-200 dark:border-border bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground';
         }
     };
 
@@ -520,25 +520,25 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             case 'All Parcels':
                 return isActive
                     ? 'bg-blue-50 text-blue-600 border-blue-200'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200';
+                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-blue-50 dark:hover:bg-blue-500/20 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-500/50';
             case 'Pending Payment':
                 return isActive
                     ? 'bg-orange-50 text-orange-600 border-orange-200'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-orange-50 hover:text-orange-600 hover:border-orange-200';
+                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-orange-50 dark:hover:bg-orange-500/20 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-200 dark:hover:border-orange-500/50';
             case 'Ready For Collection':
                 return isActive
                     ? 'bg-[#EDE9FE] text-[#5B21B6] border-purple-200'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-[#EDE9FE] hover:text-[#5B21B6] hover:border-purple-200';
+                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-[#EDE9FE] dark:hover:bg-purple-500/20 hover:text-[#5B21B6] dark:hover:text-purple-400 hover:border-purple-200 dark:hover:border-purple-500/50';
             case 'Collected':
                 return isActive
                     ? 'bg-[#DCFCE7] text-[#166534] border-green-200'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-[#DCFCE7] hover:text-[#166534] hover:border-green-200';
+                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-[#DCFCE7] dark:hover:bg-green-500/20 hover:text-[#166534] dark:hover:text-green-400 hover:border-green-200 dark:hover:border-green-500/50';
             case 'Unclaimed':
                 return isActive
                     ? 'bg-[#C5C5CF] text-black border-gray-300'
-                    : 'bg-white text-gray-600 border-gray-200 hover:bg-[#C5C5CF] hover:text-black hover:border-gray-300';
+                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-[#C5C5CF] dark:hover:bg-gray-500/20 hover:text-black dark:hover:text-foreground hover:border-gray-300 dark:hover:border-border';
             default:
-                return 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:text-gray-700';
+                return 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-accent hover:text-gray-700 dark:hover:text-foreground';
         }
     };
 
@@ -548,7 +548,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
         if (isActive) {
             // Active badge styles (semi-transparent white)
-            return 'bg-white/50';
+            return 'bg-white/50 dark:bg-background/50';
         } else {
             // Inactive badge styles should match the active tab colors
             switch (tab) {
@@ -764,11 +764,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {/* Parcel Details Modal */}
             {showDetailsModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
+                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-card">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-border">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900">Parcel Details</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-card-foreground">Parcel Details</h2>
 
                                 <p className="text-sm text-gray-600">Complete information about the parcel</p>
                             </div>
@@ -787,11 +787,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     {/* Top Section */}
                                     <div className="grid grid-cols-2 gap-6">
                                         <div>
-                                            <h3 className="mb-3 text-lg font-semibold text-gray-900">Tracking Information</h3>
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
+                                                Tracking Information
+                                            </h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
-                                                    <p className="font-['Consolas'] text-lg font-bold text-gray-900">{parcelDetails.tracking_no}</p>
+                                                    <p className="font-['Consolas'] text-lg font-bold text-gray-900 dark:text-card-foreground">
+                                                        {parcelDetails.tracking_no}
+                                                    </p>
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600">Status</label>
@@ -805,19 +809,27 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         </div>
 
                                         <div>
-                                            <h3 className="mb-3 text-lg font-semibold text-gray-900">Recipient Information</h3>
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
+                                                Recipient Information
+                                            </h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600">Student ID</label>
-                                                    <p className="text-gray-900">{parcelDetails.student_user?.matric || parcelDetails.student_id}</p>
+                                                    <p className="text-gray-900 dark:text-card-foreground">
+                                                        {parcelDetails.student_user?.matric || parcelDetails.student_id}
+                                                    </p>
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600">Name</label>
-                                                    <p className="text-gray-900">{parcelDetails.student_user?.name || 'N/A'}</p>
+                                                    <p className="text-gray-900 dark:text-card-foreground">
+                                                        {parcelDetails.student_user?.name || 'N/A'}
+                                                    </p>
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600">Email</label>
-                                                    <p className="text-gray-900">{parcelDetails.student_user?.email || 'N/A'}</p>
+                                                    <p className="text-gray-900 dark:text-card-foreground">
+                                                        {parcelDetails.student_user?.email || 'N/A'}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
@@ -825,11 +837,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Sender Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Sender Information</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">Sender Information</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-600">Sender</label>
-                                                <p className="text-gray-900">{parcelDetails.sender || 'N/A'}</p>
+                                                <p className="text-gray-900 dark:text-card-foreground">{parcelDetails.sender || 'N/A'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -926,7 +938,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 >
                                     Close
                                 </button>
-                               
                             </div>
                         )}
                     </div>
@@ -938,7 +949,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                     <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-border">
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900">Scan Parcel QR Code</h2>
                                 <p className="mt-1 text-sm text-gray-600">Point your camera at a parcel QR to find it instantly</p>
@@ -1006,9 +1017,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {/* Edit Parcel Modal */}
             {showEditModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
+                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-card">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-border">
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900">Edit Parcel</h2>
                                 <p className="text-sm text-gray-600">Update parcel information</p>
@@ -1034,7 +1045,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     {/* Top Section */}
                                     <div className="grid grid-cols-2 gap-6">
                                         <div>
-                                            <h3 className="mb-3 text-lg font-semibold text-gray-900">Tracking Information</h3>
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
+                                                Tracking Information
+                                            </h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
@@ -1062,7 +1075,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         </div>
 
                                         <div>
-                                            <h3 className="mb-3 text-lg font-semibold text-gray-900">Recipient Information</h3>
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
+                                                Recipient Information
+                                            </h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600">Student ID</label>
@@ -1097,7 +1112,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Sender Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Sender Information</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">Sender Information</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-600">Sender</label>

@@ -17,14 +17,17 @@ const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeM
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
+            <div className="w-full max-w-md rounded-2xl bg-card shadow-2xl">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                <div className="flex items-center justify-between border-b border-border p-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Collection QR Code</h2>
-                        <p className="mt-1 text-sm text-gray-600">Show this QR code to collect your parcel</p>
+                        <h2 className="text-2xl font-bold text-card-foreground">Collection QR Code</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">Show this QR code to collect your parcel</p>
                     </div>
-                    <button onClick={onClose} className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
+                    <button
+                        onClick={onClose}
+                        className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    >
                         <X className="h-6 w-6" />
                     </button>
                 </div>

@@ -2,7 +2,7 @@ import QRCodeModal from '@/components/qr-code-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { CheckCircle, Upload, X, XCircle, Sparkles, Package  } from 'lucide-react';
+import { CheckCircle, Package, Sparkles, Upload, X, XCircle } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -119,32 +119,31 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
     };
 
     return (
-        <div className="mb-6 rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
+        <div className="mb-6 rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100 dark:bg-card dark:ring-border">
             <div className="flex items-center justify-between">
-                 <div>
-                    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+                <div>
+                    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-500/20 dark:text-green-400">
                         <Sparkles className="h-3 w-3" />
-                                       Welcome Back
+                        Welcome Back
                     </div>
 
-                
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">
-                              {getCurrentGreeting()}, {getDisplayName()}!
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-card-foreground">
+                            {getCurrentGreeting()}, {getDisplayName()}!
                         </h1>
-                        <p className="mt-1 text-sm text-gray-500">{getUserIdentifier()}</p>
+                        <p className="mt-1 text-sm text-gray-500 dark:text-muted-foreground">{getUserIdentifier()}</p>
                     </div>
                 </div>
 
                 {/* Right side - Active parcels count */}
-               <div className="text-center">
+                <div className="text-center">
                     <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-600 to-green-600 shadow-lg">
                         <Package className="h-8 w-8 text-white" />
                     </div>
-                    <div className="mt-2 text-2xl font-bold text-gray-900">{activeParcelCount}</div>
-                    <div className="text-xs text-gray-500">Active</div>
+                    <div className="mt-2 text-2xl font-bold text-gray-900 dark:text-card-foreground">{activeParcelCount}</div>
+                    <div className="text-xs text-gray-500 dark:text-muted-foreground">Active</div>
                 </div>
-        </div>
+            </div>
         </div>
     );
 };
@@ -639,391 +638,411 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="space-y-6 p-6">
-
-            {/* Toast Notification Container */}
-            <div className="fixed right-4 bottom-4 z-50 space-y-3">
-                {toastNotifications.map((notification) => (
-                    <div
-                        key={notification.id}
-                        className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${
-                            notification.type === 'success'
-                                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
-                                : 'border-red-200 bg-red-50/95 text-red-800'
-                        } `}
-                    >
-                        <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex-shrink-0">
-                                {notification.type === 'success' ? (
-                                    <CheckCircle className="h-5 w-5 text-emerald-600" />
-                                ) : (
-                                    <XCircle className="h-5 w-5 text-red-600" />
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-semibold">{notification.title}</h4>
-                                <p className="mt-1 text-sm opacity-90">{notification.message}</p>
-                            </div>
-                            <button
-                                onClick={() => removeToastNotification(notification.id)}
-                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {/* QR Code Modal */}
-            <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} isLoading={loadingQRParcels.size > 0} />
-
-            {/* Quick Pay Modal */}
-            {showPayModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
-                            <div>
-                                <h2 className="text-lg font-semibold text-gray-900">Payment QR Scanner</h2>
-                                <p className="mt-1 text-xs text-gray-600">Scan payment QR code and upload payment proof</p>
-                            </div>
-                            <button
-                                onClick={() => setShowPayModal(false)}
-                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                            >
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-                        <div className="p-6">
-                            <div className="mb-4 flex h-35 w-full items-center justify-center rounded-xl border border-dashed border-gray-300">
-                                <img src="/images/qrpayment.png" alt="DuitNow QR" className="h-40 w-40 object-contain" />
-                            </div>
-                            <input ref={proofInputRef} type="file" accept="image/*" onChange={handleProofSelected} className="hidden" />
-                            <button
-                                onClick={() => proofInputRef.current?.click()}
-                                disabled={isUploadingProof}
-                                className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-60"
-                            >
-                                <Upload className="h-4 w-4" />
-                                {isUploadingProof ? 'Uploading...' : 'Upload Payment Proof'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Parcel Details Modal */}
-            {showDetailsModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl">
-                        {/* Modal Header */}
-                        <div className="flex items-center justify-between border-b border-gray-200 p-6">
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900">Parcel Details</h2>
-
-                                <p className="text-sm text-gray-600">Complete information about the parcel</p>
-                            </div>
-                            <button
-                                onClick={handleCloseDetailsModal}
-                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
-                            >
-                                <X className="h-6 w-6" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className="min-h-screen bg-white p-6">
-                {/* Welcome header */}
-                <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} />
-
-                {/* Removed notification system from parcel.tsx */}
-
-                {/* Header tiles matching screenshot */}
-                <div className="mb-6 grid grid-cols-12 gap-4">
-                    {/* My Parcels - Purple (icon on right) */}
-                    <div className="col-span-2 rounded-xl border-3 border-violet-300 bg-violet-50 p-4">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <div className="text-xs text-gray-600">My Parcels</div>
-                                <div className="mt-1 text-3xl font-bold text-violet-700">{tileCounts.myParcels}</div>
-                            </div>
-                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-violet-100 text-violet-600">
-                                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Pending Payment - Yellow (icon on right) */}
-                    <div className="col-span-2 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-4">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <div className="text-xs text-gray-600">Pending Payment</div>
-                                <div className="mt-1 text-3xl font-bold text-yellow-700">{tileCounts.pendingPayment}</div>
-                            </div>
-                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
-                                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Approved - Orange (icon on right) */}
-                    <div className="col-span-2 rounded-xl border-3 border-amber-200 bg-amber-50 p-4">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <div className="text-xs text-gray-600">Approved</div>
-                                <div className="mt-1 text-3xl font-bold text-amber-700">{tileCounts.approved}</div>
-                            </div>
-                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Quick Actions */}
-                    <div className="col-span-4 col-start-9 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm">
-                        <div className="mb-3 text-sm font-semibold text-gray-700">Quick Actions</div>
-                        <button className="flex w-full items-center justify-between rounded-lg bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100">
-                            <span>Generate Reports</span>
-                        </button>
-                    </div>
-
-                    {/* Ready for Collection - Green (icon on right) */}
-                    <div className="col-span-3 rounded-xl border-3 border-green-200 bg-green-50 p-4">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <div className="text-xs text-gray-600">Ready for Collection</div>
-                                <div className="mt-1 text-3xl font-bold text-green-700">{tileCounts.readyForCollection}</div>
-                            </div>
-                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-green-100 text-green-600">
-                                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Collected - Light Blue (icon on right) */}
-                    <div className="col-span-3 rounded-xl border-3 border-blue-200 bg-blue-50 p-4">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <div className="text-xs text-gray-600">Collected</div>
-                                <div className="mt-1 text-3xl font-bold text-blue-700">{tileCounts.collected}</div>
-                            </div>
-                            <div className="flex h-13 w-13 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    className="lucide lucide-package-open-icon lucide-package-open"
-                                >
-                                    <path d="M12 22v-9" />
-                                    <path d="M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z" />
-                                    <path d="M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13" />
-                                    <path d="M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Parcel cards grid */}
-                {displayParcels.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center text-gray-500">No parcels found</div>
-                ) : (
-                    <div className="grid grid-cols-3 gap-6">
-                        {displayParcels.map((parcel) => {
-                            const status = parcel.parcel_status?.toLowerCase();
-                            const isApproved = status === 'approved';
-                            const isPendingPayment = status === 'pending payment';
-                            const isReady = status === 'ready for collection' || status === 'ready to collect';
-                            const isCollected = status === 'collected';
-                            const scheduledDateStr = parcel.schedule
-                                ? new Date(parcel.schedule).toLocaleDateString('en-MY', {
-                                      year: 'numeric',
-                                      month: 'short',
-                                      day: 'numeric',
-                                  })
-                                : '';
-                            return (
-                                <div key={parcel.parcel_id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-                                    <div className="mb-3 flex items-start justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                                                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                                    />
-                                                </svg>
-                                            </div>
-                                            <div className="font-['Consolas'] text-sm font-semibold text-gray-900">{parcel.parcel_code || 'N/A'}</div>
-                                        </div>
-                                        <span
-                                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
-                                        >
-                                            {parcel.parcel_status}
-                                        </span>
-                                    </div>
-
-                                    <div className="mb-2 flex items-center gap-2 text-sm text-gray-600">
-                                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                        </svg>
-                                        <span>Arrived: {formatDate(parcel.created_at)}</span>
-                                    </div>
-
-                                    <div className="mb-4 text-sm">
-                                        <span className="mr-2 text-gray-600">Payment:</span>
-                                        {isApproved ? (
-                                            <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
-                                                Verified
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
-                                                Pending
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        {isPendingPayment && (
-                                            <button
-                                                onClick={() => handlePayNow(parcel.parcel_id)}
-                                                className="flex-1 rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-600"
-                                            >
-                                                Pay Now
-                                            </button>
-                                        )}
-                                        {isApproved && (
-                                            <button
-                                                onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                className="flex-1 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700"
-                                            >
-                                                <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                </svg>
-                                                Collect
-                                            </button>
-                                        )}
-                                        {isReady && (
-                                            <div className="w-full space-y-2">
-                                                {/* Row 1: QR Code and View Details */}
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <button
-                                                        onClick={() => handleShowQRCode(parcel.parcel_id)}
-                                                        disabled={loadingQRParcels.has(parcel.parcel_id)}
-                                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    >
-                                                        {loadingQRParcels.has(parcel.parcel_id) ? (
-                                                            <div className="flex items-center justify-center">
-                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
-                                                            </div>
-                                                        ) : (
-                                                            <>
-                                                                <svg
-                                                                    className="mr-1 inline h-4 w-4"
-                                                                    fill="none"
-                                                                    stroke="currentColor"
-                                                                    viewBox="0 0 24 24"
-                                                                >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
-                                                                    />
-                                                                </svg>
-                                                                Show QR Code
-                                                            </>
-                                                        )}
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleViewParcel(parcel.parcel_id)}
-                                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                                    >
-                                                        View Details
-                                                    </button>
-                                                </div>
-
-                                                {/* Row 2: Scheduled full-width */}
-                                                <button className="w-full rounded-xl bg-gray-50 px-4 py-3 text-gray-700 shadow-sm transition-colors hover:bg-gray-100">
-                                                    <div className="flex items-center gap-3">
-                                                        <svg className="h-4 w-4 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                            />
-                                                        </svg>
-                                                        <div className="flex flex-col text-left leading-tight">
-                                                            <span className="text-sm font-semibold">Scheduled</span>
-                                                            <span className="text-xs text-gray-700">
-                                                                {scheduledDateStr && parcel.time_slot
-                                                                    ? `${scheduledDateStr} • ${parcel.time_slot}`
-                                                                    : parcel.time_slot || scheduledDateStr || ''}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </button>
-                                            </div>
-                                        )}
-                                        {!isReady && (
-                                            <button
-                                                onClick={() => handleViewParcel(parcel.parcel_id)}
-                                                className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                                            >
-                                                View Details
-                                            </button>
-                                        )}
-                                    </div>
+                {/* Toast Notification Container */}
+                <div className="fixed right-4 bottom-4 z-50 space-y-3">
+                    {toastNotifications.map((notification) => (
+                        <div
+                            key={notification.id}
+                            className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${
+                                notification.type === 'success'
+                                    ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800 dark:border-emerald-500/50 dark:bg-emerald-500/20 dark:text-emerald-300'
+                                    : 'border-red-200 bg-red-50/95 text-red-800 dark:border-red-500/50 dark:bg-red-500/20 dark:text-red-300'
+                            } `}
+                        >
+                            <div className="flex items-start gap-3">
+                                <div className="mt-0.5 flex-shrink-0">
+                                    {notification.type === 'success' ? (
+                                        <CheckCircle className="h-5 w-5 text-emerald-600" />
+                                    ) : (
+                                        <XCircle className="h-5 w-5 text-red-600" />
+                                    )}
                                 </div>
-                            );
-                        })}
+                                <div className="flex-1">
+                                    <h4 className="text-sm font-semibold">{notification.title}</h4>
+                                    <p className="mt-1 text-sm opacity-90">{notification.message}</p>
+                                </div>
+                                <button
+                                    onClick={() => removeToastNotification(notification.id)}
+                                    className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10 dark:hover:bg-white/10"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* QR Code Modal */}
+                <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} isLoading={loadingQRParcels.size > 0} />
+
+                {/* Quick Pay Modal */}
+                {showPayModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                        <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl dark:bg-card">
+                            <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                                <div>
+                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">Payment QR Scanner</h2>
+                                    <p className="mt-1 text-xs text-gray-600 dark:text-muted-foreground">
+                                        Scan payment QR code and upload payment proof
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowPayModal(false)}
+                                    className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+                            <div className="p-6">
+                                <div className="mb-4 flex h-35 w-full items-center justify-center rounded-xl border border-dashed border-gray-300 dark:border-border">
+                                    <img src="/images/qrpayment.png" alt="DuitNow QR" className="h-40 w-40 object-contain" />
+                                </div>
+                                <input ref={proofInputRef} type="file" accept="image/*" onChange={handleProofSelected} className="hidden" />
+                                <button
+                                    onClick={() => proofInputRef.current?.click()}
+                                    disabled={isUploadingProof}
+                                    className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-60 dark:border-border dark:bg-muted dark:text-foreground dark:hover:bg-accent"
+                                >
+                                    <Upload className="h-4 w-4" />
+                                    {isUploadingProof ? 'Uploading...' : 'Upload Payment Proof'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
+
+                {/* Parcel Details Modal */}
+                {showDetailsModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                        <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-card">
+                            {/* Modal Header */}
+                            <div className="flex items-center justify-between border-b border-gray-200 p-6">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900 dark:text-card-foreground">Parcel Details</h2>
+
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground">Complete information about the parcel</p>
+                                </div>
+                                <button
+                                    onClick={handleCloseDetailsModal}
+                                    className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
+                                >
+                                    <X className="h-6 w-6" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="min-h-screen bg-white p-6 dark:bg-background">
+                    {/* Welcome header */}
+                    <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} />
+
+                    {/* Removed notification system from parcel.tsx */}
+
+                    {/* Header tiles matching screenshot */}
+                    <div className="mb-6 grid grid-cols-12 gap-4">
+                        {/* My Parcels - Purple (icon on right) */}
+                        <div className="col-span-2 rounded-xl border-3 border-violet-300 bg-violet-50 p-4 dark:border-violet-500/50 dark:bg-violet-500/20">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <div className="text-xs text-gray-600 dark:text-violet-400">My Parcels</div>
+                                    <div className="mt-1 text-3xl font-bold text-violet-700 dark:text-violet-300">{tileCounts.myParcels}</div>
+                                </div>
+                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-violet-100 text-violet-600 dark:bg-violet-500/30 dark:text-violet-300">
+                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Pending Payment - Yellow (icon on right) */}
+                        <div className="col-span-2 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-500/50 dark:bg-yellow-500/20">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <div className="text-xs text-gray-600 dark:text-yellow-400">Pending Payment</div>
+                                    <div className="mt-1 text-3xl font-bold text-yellow-700 dark:text-yellow-300">{tileCounts.pendingPayment}</div>
+                                </div>
+                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 dark:bg-yellow-500/30 dark:text-yellow-300">
+                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Approved - Orange (icon on right) */}
+                        <div className="col-span-2 rounded-xl border-3 border-amber-200 bg-amber-50 p-4 dark:border-amber-500/50 dark:bg-amber-500/20">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <div className="text-xs text-gray-600 dark:text-amber-400">Approved</div>
+                                    <div className="mt-1 text-3xl font-bold text-amber-700 dark:text-amber-300">{tileCounts.approved}</div>
+                                </div>
+                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/30 dark:text-amber-300">
+                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Quick Actions */}
+                        <div className="col-span-4 col-start-9 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm dark:border-border dark:bg-card">
+                            <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-card-foreground">Quick Actions</div>
+                            <button className="flex w-full items-center justify-between rounded-lg bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100 dark:bg-purple-500/20 dark:text-purple-300 dark:hover:bg-purple-500/30">
+                                <span>Generate Reports</span>
+                            </button>
+                        </div>
+
+                        {/* Ready for Collection - Green (icon on right) */}
+                        <div className="col-span-3 rounded-xl border-3 border-green-200 bg-green-50 p-4 dark:border-green-500/50 dark:bg-green-500/20">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <div className="text-xs text-gray-600 dark:text-green-400">Ready for Collection</div>
+                                    <div className="mt-1 text-3xl font-bold text-green-700 dark:text-green-300">{tileCounts.readyForCollection}</div>
+                                </div>
+                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-500/30 dark:text-green-300">
+                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Collected - Light Blue (icon on right) */}
+                        <div className="col-span-3 rounded-xl border-3 border-blue-200 bg-blue-50 p-4 dark:border-blue-500/50 dark:bg-blue-500/20">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <div className="text-xs text-gray-600 dark:text-blue-400">Collected</div>
+                                    <div className="mt-1 text-3xl font-bold text-blue-700 dark:text-blue-300">{tileCounts.collected}</div>
+                                </div>
+                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-500/30 dark:text-blue-300">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        className="lucide lucide-package-open-icon lucide-package-open"
+                                    >
+                                        <path d="M12 22v-9" />
+                                        <path d="M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z" />
+                                        <path d="M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13" />
+                                        <path d="M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Parcel cards grid */}
+                    {displayParcels.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center text-gray-500 dark:border-border dark:bg-card dark:text-muted-foreground">
+                            No parcels found
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-3 gap-6">
+                            {displayParcels.map((parcel) => {
+                                const status = parcel.parcel_status?.toLowerCase();
+                                const isApproved = status === 'approved';
+                                const isPendingPayment = status === 'pending payment';
+                                const isReady = status === 'ready for collection' || status === 'ready to collect';
+                                const isCollected = status === 'collected';
+                                const scheduledDateStr = parcel.schedule
+                                    ? new Date(parcel.schedule).toLocaleDateString('en-MY', {
+                                          year: 'numeric',
+                                          month: 'short',
+                                          day: 'numeric',
+                                      })
+                                    : '';
+                                return (
+                                    <div
+                                        key={parcel.parcel_id}
+                                        className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-border dark:bg-card"
+                                    >
+                                        <div className="mb-3 flex items-start justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
+                                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                                        />
+                                                    </svg>
+                                                </div>
+                                                <div className="font-['Consolas'] text-sm font-semibold text-gray-900 dark:text-card-foreground">
+                                                    {parcel.parcel_code || 'N/A'}
+                                                </div>
+                                            </div>
+                                            <span
+                                                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
+                                            >
+                                                {parcel.parcel_status}
+                                            </span>
+                                        </div>
+
+                                        <div className="mb-2 flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                                            <svg
+                                                className="h-4 w-4 text-gray-400 dark:text-muted-foreground"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                />
+                                            </svg>
+                                            <span>Arrived: {formatDate(parcel.created_at)}</span>
+                                        </div>
+
+                                        <div className="mb-4 text-sm">
+                                            <span className="mr-2 text-gray-600 dark:text-muted-foreground">Payment:</span>
+                                            {isApproved ? (
+                                                <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+                                                    Verified
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
+                                                    Pending
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            {isPendingPayment && (
+                                                <button
+                                                    onClick={() => handlePayNow(parcel.parcel_id)}
+                                                    className="flex-1 rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-600"
+                                                >
+                                                    Pay Now
+                                                </button>
+                                            )}
+                                            {isApproved && (
+                                                <button
+                                                    onClick={() => handleMarkAsCollected(parcel.parcel_id)}
+                                                    className="flex-1 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                                                >
+                                                    <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    Collect
+                                                </button>
+                                            )}
+                                            {isReady && (
+                                                <div className="w-full space-y-2">
+                                                    {/* Row 1: QR Code and View Details */}
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <button
+                                                            onClick={() => handleShowQRCode(parcel.parcel_id)}
+                                                            disabled={loadingQRParcels.has(parcel.parcel_id)}
+                                                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
+                                                        >
+                                                            {loadingQRParcels.has(parcel.parcel_id) ? (
+                                                                <div className="flex items-center justify-center">
+                                                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                                                                </div>
+                                                            ) : (
+                                                                <>
+                                                                    <svg
+                                                                        className="mr-1 inline h-4 w-4"
+                                                                        fill="none"
+                                                                        stroke="currentColor"
+                                                                        viewBox="0 0 24 24"
+                                                                    >
+                                                                        <path
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            strokeWidth={2}
+                                                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
+                                                                        />
+                                                                    </svg>
+                                                                    Show QR Code
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleViewParcel(parcel.parcel_id)}
+                                                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
+                                                        >
+                                                            View Details
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Row 2: Scheduled full-width */}
+                                                    <button className="w-full rounded-xl bg-gray-50 px-4 py-3 text-gray-700 shadow-sm transition-colors hover:bg-gray-100 dark:bg-muted dark:text-foreground dark:hover:bg-accent">
+                                                        <div className="flex items-center gap-3">
+                                                            <svg
+                                                                className="h-4 w-4 text-gray-600 opacity-90 dark:text-muted-foreground"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={2}
+                                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                                />
+                                                            </svg>
+                                                            <div className="flex flex-col text-left leading-tight">
+                                                                <span className="text-sm font-semibold text-gray-900 dark:text-foreground">
+                                                                    Scheduled
+                                                                </span>
+                                                                <span className="text-xs text-gray-700 dark:text-muted-foreground">
+                                                                    {scheduledDateStr && parcel.time_slot
+                                                                        ? `${scheduledDateStr} • ${parcel.time_slot}`
+                                                                        : parcel.time_slot || scheduledDateStr || ''}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                </div>
+                                            )}
+                                            {!isReady && (
+                                                <button
+                                                    onClick={() => handleViewParcel(parcel.parcel_id)}
+                                                    className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
+                                                >
+                                                    View Details
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
             </div>
-             </div>
         </AppLayout>
     );
 }
