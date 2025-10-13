@@ -18,6 +18,18 @@ export default function Welcome() {
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementCard | null>(null);
     const [visibleCount, setVisibleCount] = useState<number>(4);
 
+    // Format date consistently
+    const formatDate = (dateStr?: string | null) => {
+        if (!dateStr) return '';
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return '';
+            return date.toLocaleString();
+        } catch {
+            return '';
+        }
+    };
+
     // Always reflect the latest announcements first
     const announcementsSorted = [...announcements].sort((a, b) => {
         const ad = new Date(a.publish_date || a.created_at || 0).getTime();
@@ -155,7 +167,6 @@ export default function Welcome() {
                         </div>
                         <div className="space-y-6">
                             {displayedAnnouncements.map((a: AnnouncementCard) => {
-                                const dateStr = a.publish_date || a.created_at || '';
                                 return (
                                     <div
                                         key={a.announcement_id}
@@ -179,7 +190,7 @@ export default function Welcome() {
                                             </div>
                                             <div className="text-left text-lg font-semibold">{a.announcement_title}</div>
                                             <div className="mt-2 text-left text-xs text-black">
-                                                {dateStr ? new Date(dateStr).toLocaleString() : ''}
+                                                {formatDate(a.publish_date || a.created_at)}
                                             </div>
                                         </div>
                                     </div>
@@ -236,9 +247,7 @@ export default function Welcome() {
                             <div className="mb-6 flex items-center gap-2 text-sm text-gray-500">
                                 <span>📅</span>
                                 <span>
-                                    {selectedAnnouncement.publish_date || selectedAnnouncement.created_at
-                                        ? new Date(selectedAnnouncement.publish_date || selectedAnnouncement.created_at!).toLocaleString()
-                                        : 'N/A'}
+                                    {formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}
                                 </span>
                             </div>
 

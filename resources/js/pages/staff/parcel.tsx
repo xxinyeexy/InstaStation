@@ -725,7 +725,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title="Parcel" />
 
             {/* Notification Container */}
             <div className="fixed right-4 bottom-4 z-50 space-y-3">
@@ -926,17 +926,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 >
                                     Close
                                 </button>
-                                {parcelDetails.parcel_status?.toLowerCase() !== 'collected' && (
-                                    <button
-                                        onClick={() => {
-                                            handleMarkAsCollected(parcelDetails.parcel_id);
-                                            handleCloseDetailsModal();
-                                        }}
-                                        className="rounded-lg bg-gradient-to-r from-emerald-500 to-green-600 px-4 py-2 text-sm font-medium text-white hover:from-emerald-600 hover:to-green-700"
-                                    >
-                                        Mark as Collected
-                                    </button>
-                                )}
+                               
                             </div>
                         )}
                     </div>
@@ -1032,7 +1022,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Modal Content */}
-                        <div className="p-6">
+                        <div className="max-h-[66vh] overflow-y-auto p-6">
                             {editingParcel ? (
                                 <form
                                     onSubmit={(e) => {
@@ -1245,7 +1235,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             )}
 
             {/* Background color matching the image */}
-            <div className="min-h-screen bg-gray-50 p-6">
+            <div className="min-h-screen bg-white p-6">
                 {/* Top Stats Grid - Using actual database data */}
                 <div className="mb-6 grid grid-cols-3 gap-6">
                     {/* Newly Arrived */}

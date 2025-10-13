@@ -41,7 +41,12 @@ class AuthenticatedSessionController extends Controller
             $user->save();
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        if ($user->role === 'staff') {
+            return redirect()->intended(route('staff.dashboard'));
+        }
+
+        // Default to student parcel page
+         return redirect('/');
     }
 
     /**

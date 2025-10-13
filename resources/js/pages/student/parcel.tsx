@@ -2,7 +2,7 @@ import QRCodeModal from '@/components/qr-code-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { CheckCircle, Upload, X, XCircle } from 'lucide-react';
+import { CheckCircle, Upload, X, XCircle, Sparkles, Package  } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -94,9 +94,9 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
     // Get current time for greeting
     const getCurrentGreeting = () => {
         const hour = new Date().getHours();
-        if (hour < 12) return 'Welcome back';
-        if (hour < 17) return 'Welcome back';
-        return 'Welcome back';
+        if (hour < 12) return 'Good Morning';
+        if (hour < 17) return 'Good Afternoon';
+        return 'Good Evening';
     };
 
     // Format user display name
@@ -119,26 +119,32 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
     };
 
     return (
-        <div className="mb-6 rounded-xl border border-green-200 bg-green-100 p-4 text-green-700 shadow-sm">
+        <div className="mb-6 rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
             <div className="flex items-center justify-between">
-                {/* Left side - Welcome message */}
-                <div className="flex items-start">
+                 <div>
+                    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700">
+                        <Sparkles className="h-3 w-3" />
+                                       Welcome Back
+                    </div>
+
+                
                     <div>
-                        <h1 className="text-xl font-bold text-green-600">
-                            {getCurrentGreeting()}, {getDisplayName()}!
+                        <h1 className="text-2xl font-bold text-gray-900">
+                              {getCurrentGreeting()}, {getDisplayName()}!
                         </h1>
-                        <p className="mt-0.5 text-sm text-gray-600">{getUserIdentifier()}</p>
+                        <p className="mt-1 text-sm text-gray-500">{getUserIdentifier()}</p>
                     </div>
                 </div>
 
                 {/* Right side - Active parcels count */}
-                <div className="flex items-center gap-2 text-right">
-                    <div>
-                        <div className="text-sm text-green-600">Active Parcels</div>
-                        <div className="text-2xl font-bold text-green-500">{activeParcelCount}</div>
+               <div className="text-center">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-600 to-green-600 shadow-lg">
+                        <Package className="h-8 w-8 text-white" />
                     </div>
+                    <div className="mt-2 text-2xl font-bold text-gray-900">{activeParcelCount}</div>
+                    <div className="text-xs text-gray-500">Active</div>
                 </div>
-            </div>
+        </div>
         </div>
     );
 };
@@ -632,6 +638,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
+            <div className="space-y-6 p-6">
 
             {/* Toast Notification Container */}
             <div className="fixed right-4 bottom-4 z-50 space-y-3">
@@ -726,7 +733,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 </div>
             )}
 
-            <div className="min-h-screen bg-gray-50 p-6">
+            <div className="min-h-screen bg-white p-6">
                 {/* Welcome header */}
                 <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} />
 
@@ -735,7 +742,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 {/* Header tiles matching screenshot */}
                 <div className="mb-6 grid grid-cols-12 gap-4">
                     {/* My Parcels - Purple (icon on right) */}
-                    <div className="col-span-2 rounded-xl border border-violet-300 bg-violet-50 p-4">
+                    <div className="col-span-2 rounded-xl border-3 border-violet-300 bg-violet-50 p-4">
                         <div className="flex items-start justify-between">
                             <div>
                                 <div className="text-xs text-gray-600">My Parcels</div>
@@ -755,7 +762,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Pending Payment - Yellow (icon on right) */}
-                    <div className="col-span-2 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+                    <div className="col-span-2 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-4">
                         <div className="flex items-start justify-between">
                             <div>
                                 <div className="text-xs text-gray-600">Pending Payment</div>
@@ -775,7 +782,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Approved - Orange (icon on right) */}
-                    <div className="col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <div className="col-span-2 rounded-xl border-3 border-amber-200 bg-amber-50 p-4">
                         <div className="flex items-start justify-between">
                             <div>
                                 <div className="text-xs text-gray-600">Approved</div>
@@ -795,7 +802,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="col-span-4 col-start-9 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+                    <div className="col-span-4 col-start-9 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm">
                         <div className="mb-3 text-sm font-semibold text-gray-700">Quick Actions</div>
                         <button className="flex w-full items-center justify-between rounded-lg bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100">
                             <span>Generate Reports</span>
@@ -803,7 +810,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Ready for Collection - Green (icon on right) */}
-                    <div className="col-span-3 rounded-xl border border-green-200 bg-green-50 p-4">
+                    <div className="col-span-3 rounded-xl border-3 border-green-200 bg-green-50 p-4">
                         <div className="flex items-start justify-between">
                             <div>
                                 <div className="text-xs text-gray-600">Ready for Collection</div>
@@ -823,7 +830,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Collected - Light Blue (icon on right) */}
-                    <div className="col-span-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+                    <div className="col-span-3 rounded-xl border-3 border-blue-200 bg-blue-50 p-4">
                         <div className="flex items-start justify-between">
                             <div>
                                 <div className="text-xs text-gray-600">Collected</div>
@@ -1016,6 +1023,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
                 )}
             </div>
+             </div>
         </AppLayout>
     );
 }

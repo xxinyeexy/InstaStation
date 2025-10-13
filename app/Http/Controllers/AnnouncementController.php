@@ -158,9 +158,9 @@ class AnnouncementController extends Controller
         return response()->json(['success' => true, 'announcement' => $announcement->fresh()]);
     }
 
-    public function unpublish(Announcement $announcement)
-    {
-        $announcement->update(['announcement_status' => 'Draft']);
-        return response()->json(['success' => true]);
-    }
+  public function unpublish(Announcement $announcement)
+{
+    $announcement->update(['announcement_status' => 'Draft']);
+    return response()->json(['success' => true, 'announcement' => $announcement->fresh()]);
+}
 }

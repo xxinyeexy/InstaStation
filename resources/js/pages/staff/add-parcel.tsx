@@ -4,6 +4,7 @@ import { Html5Qrcode } from 'html5-qrcode';
 import {  XCircle, CircleCheck, AlertTriangle ,ArrowLeft, Camera, QrCode, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { router } from '@inertiajs/react';
 
 const ParcelRegistrationForm = () => {
     const [formData, setFormData] = useState({
@@ -394,7 +395,7 @@ const showErrorToast = (message: string) => {
                 <div className="mx-auto max-w-2xl rounded-lg border bg-white shadow-sm">
                     {/* Header */}
                     <div className="flex items-center gap-3 border-b p-6">
-                        <button className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-800">
+                        <button onClick={() => window.history.length > 1 ? window.history.back() : router.visit('/parcels')} className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-800">
                             <ArrowLeft className="h-4 w-4" />
                             <span className="text-sm">Back</span>
                         </button>

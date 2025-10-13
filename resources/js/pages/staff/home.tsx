@@ -147,7 +147,7 @@ export default function StaffHome() {
 
     return (
         <AppSidebarLayout>
-            <div className="space-y-6 animate-in fade-in-0 duration-500">
+            <div className="space-y-6 p-6 animate-in fade-in-0 duration-500">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
