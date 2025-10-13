@@ -41,12 +41,12 @@ class AuthenticatedSessionController extends Controller
             $user->save();
         }
 
-        if ($user->role === 'staff') {
+        if ($user->type === 'staff') {
             return redirect()->intended(route('staff.dashboard'));
         }
 
-        // Default to student parcel page
-         return redirect('/');
+        // Redirect students to their parcel page
+        return redirect()->intended(route('student.parcel'));
     }
 
     /**

@@ -1,7 +1,4 @@
 // resources/js/Pages/Auth/Login.tsx
-import { Head, useForm, Link } from '@inertiajs/react';
-import { LoaderCircle, Lock, Mail, User } from 'lucide-react';
-import { FormEventHandler, useEffect, useState } from 'react';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import Alert from '@/components/ui/alert';
@@ -9,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft } from 'lucide-react';
-
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeft, LoaderCircle, Lock, Mail, User } from 'lucide-react';
+import { FormEventHandler, useEffect, useState } from 'react';
 
 interface LoginProps {
     status?: string | null;
@@ -63,9 +61,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             onFinish: () => reset('password'),
             onSuccess: () => {
                 setSuccess('Login successful! Redirecting...');
-                setTimeout(() => {
-                    window.location.href = '/dashboard';
-                }, 1500);
+                // Let the backend handle the redirect based on user role
             },
         });
     };
@@ -86,18 +82,18 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             {success && <Alert type="success" message={success} />}
             {status && !success && <Alert type="success" message={status} />}
 
-
             <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4">
-          <Link href="/" className="absolute top-4 left-4 group inline-flex items-center gap-0 overflow-hidden rounded-full bg-gray-900 text-white shadow-lg transition-all duration-300 hover:gap-2 hover:pr-5 hover:shadow-xl">
-            <div className="flex h-10 w-10 items-center justify-center">
-              <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-            </div>
-            <span className="max-w-0 overflow-hidden text-sm font-medium transition-all duration-300 group-hover:max-w-xs">
-              Back
-            </span>
-          </Link>
-  
-               <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">
+                <Link
+                    href="/"
+                    className="group absolute top-4 left-4 inline-flex items-center gap-0 overflow-hidden rounded-full bg-gray-900 text-white shadow-lg transition-all duration-300 hover:gap-2 hover:pr-5 hover:shadow-xl"
+                >
+                    <div className="flex h-10 w-10 items-center justify-center">
+                        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                    </div>
+                    <span className="max-w-0 overflow-hidden text-sm font-medium transition-all duration-300 group-hover:max-w-xs">Back</span>
+                </Link>
+
+                <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md">
                     <div className="mb-6 text-center">
                         <div className="mb-2 flex justify-center">
                             <div className="rounded-full bg-blue-100 p-3">
