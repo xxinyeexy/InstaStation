@@ -301,7 +301,7 @@ export default function StaffHome() {
                                     <BarChart data={data.parcelSize}>
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                         <XAxis dataKey="size" />
-                                        <YAxis tickFormatter={(value) => `${value / 1000}K`} />
+                                        <YAxis domain={[0, 80]} ticks={[0, 20, 40, 60, 80]} />
                                         <Tooltip
                                             formatter={(value) => [`${value.toLocaleString()}`, 'Count']}
                                             contentStyle={{
@@ -365,7 +365,7 @@ export default function StaffHome() {
                                     <BarChart data={data.collectionTime}>
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                         <XAxis dataKey="time" />
-                                        <YAxis tickFormatter={(value) => `${value / 1000}K`} />
+                                        <YAxis domain={[0, 80]} ticks={[0, 20, 40, 60, 80]} />
                                         <Tooltip
                                             formatter={(value) => [`${value.toLocaleString()}`, 'Count']}
                                             contentStyle={{
