@@ -1,7 +1,7 @@
-import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import { type SharedData } from '@/types';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { CalendarDays, CheckCircle, LogIn, PackageSearch, UserPlus } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 type Parcel = {
     parcel_id: number;
@@ -16,7 +16,17 @@ type Parcel = {
     recipient_matric?: string | null;
 };
 
-export default function Unclaimed({ parcels = [], stats = { unclaimed: 0, highPriority: 0, avgDays: 0 }, filters = { q: '' } }: { parcels: Parcel[]; stats: { unclaimed: number; highPriority: number; avgDays: number }; filters?: { q?: string } }) {
+export default function Unclaimed({
+    parcels = [],
+    stats = { unclaimed: 0, highPriority: 0, avgDays: 0 },
+    filters = { q: '' },
+    totalUnclaimed = 0,
+}: {
+    parcels: Parcel[];
+    stats: { unclaimed: number; highPriority: number; avgDays: number };
+    filters?: { q?: string };
+    totalUnclaimed?: number;
+}) {
     const { auth } = usePage<SharedData>().props;
     const [q, setQ] = useState(filters.q || '');
     const { post, processing } = useForm({});
@@ -38,7 +48,7 @@ export default function Unclaimed({ parcels = [], stats = { unclaimed: 0, highPr
             <div className="mx-auto max-w-6xl p-6">
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Unclaimed Parcels</h1>
-                    <div className="text-sm text-gray-500">Total: {parcels.length} parcels</div>
+                    <div className="text-sm text-gray-500">Total: {totalUnclaimed} parcels</div>
                 </div>
 
                 {/* Stats */}
@@ -69,85 +79,90 @@ export default function Unclaimed({ parcels = [], stats = { unclaimed: 0, highPr
                             placeholder="Enter your name or tracking number..."
                             className="w-full rounded-lg border px-3 py-2"
                         />
-                        <button type="submit" className="rounded-lg bg-gray-900 px-4 py-2 text-white hover:bg-black">Search</button>
+                        <button type="submit" className="rounded-lg bg-gray-900 px-4 py-2 text-white hover:bg-black">
+                            Search
+                        </button>
                     </div>
                     <div className="mt-2 text-xs text-gray-500">Tip: Search by your full name, tracking number, or package ID</div>
                 </form>
 
                 {/* Table */}
                 {q === '' ? (
-                    <div className="rounded-xl border bg-white p-8 text-center text-gray-500">Enter your tracking number to search unclaimed parcels.</div>
+                    <div className="rounded-xl border bg-white p-8 text-center text-gray-500">
+                        Enter your tracking number to search unclaimed parcels.
+                    </div>
                 ) : filtered.length === 0 ? (
                     <div className="rounded-xl border bg-white p-8 text-center text-gray-500">No results found.</div>
                 ) : (
-                <div className="overflow-hidden rounded-xl border bg-white">
-                    <table className="min-w-full text-left text-sm">
-                        <thead className="bg-gray-50 text-xs text-gray-500">
-                            <tr>
-                                <th className="px-4 py-3">Tracking No</th>
-                                <th className="px-4 py-3">Recipient</th>
-                                <th className="px-4 py-3">Matric</th>
-                                <th className="px-4 py-3">Sender</th>
-                                <th className="px-4 py-3">Arrived</th>
-                                <th className="px-4 py-3">Days</th>
-                                <th className="px-4 py-3">Size</th>
-                                <th className="px-4 py-3">Location</th>
-                                <th className="px-4 py-3">Status</th>
-                                <th className="px-4 py-3"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.map((p) => (
-                                <tr key={p.parcel_id} className="border-t">
-                                    <td className="px-4 py-3 font-mono">{p.tracking_no}</td>
-                                    <td className="px-4 py-3 text-gray-700">{p.recipient_name ?? '—'}</td>
-                                    <td className="px-4 py-3 text-gray-700">{p.recipient_matric ?? '—'}</td>
-                                    <td className="px-4 py-3">{p.sender}</td>
-                                    <td className="px-4 py-3 flex items-center gap-1 text-gray-600">
-                                        <CalendarDays className="h-4 w-4" /> {p.created_at ? new Date(p.created_at).toISOString().slice(0, 10) : '—'}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <span className="rounded-md bg-orange-50 px-2 py-1 text-xs text-orange-600">{p.days ?? '—'}d</span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs text-emerald-700">{p.size ?? '—'}</span>
-                                    </td>
-                                    <td className="px-4 py-3">{p.location ?? '—'}</td>
-                                    <td className="px-4 py-3">
-                                        <span className="rounded-md bg-rose-50 px-2 py-1 text-xs text-rose-700">unclaimed</span>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex gap-2">
-                                            <button
-                                                disabled={processing}
-                                                onClick={() => claim(p.parcel_id, 'login')}
-                                                className="inline-flex items-center gap-1 rounded-md bg-gray-900 px-3 py-1.5 text-white hover:bg-black disabled:opacity-50"
-                                            >
-                                                <LogIn className="h-4 w-4" /> Yes, it's mine
-                                            </button>
-                                            {!auth.user && (
+                    <div className="overflow-hidden rounded-xl border bg-white">
+                        <table className="min-w-full text-left text-sm">
+                            <thead className="bg-gray-50 text-xs text-gray-500">
+                                <tr>
+                                    <th className="px-4 py-3">Tracking No</th>
+                                    <th className="px-4 py-3">Recipient</th>
+                                    <th className="px-4 py-3">Matric</th>
+                                    <th className="px-4 py-3">Sender</th>
+                                    <th className="px-4 py-3">Arrived</th>
+                                    <th className="px-4 py-3">Days</th>
+                                    <th className="px-4 py-3">Size</th>
+                                    <th className="px-4 py-3">Location</th>
+                                    <th className="px-4 py-3">Status</th>
+                                    <th className="px-4 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filtered.map((p) => (
+                                    <tr key={p.parcel_id} className="border-t">
+                                        <td className="px-4 py-3 font-mono">{p.tracking_no}</td>
+                                        <td className="px-4 py-3 text-gray-700">{p.recipient_name ?? '—'}</td>
+                                        <td className="px-4 py-3 text-gray-700">{p.recipient_matric ?? '—'}</td>
+                                        <td className="px-4 py-3">{p.sender}</td>
+                                        <td className="flex items-center gap-1 px-4 py-3 text-gray-600">
+                                            <CalendarDays className="h-4 w-4" />{' '}
+                                            {p.created_at ? new Date(p.created_at).toISOString().slice(0, 10) : '—'}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className="rounded-md bg-orange-50 px-2 py-1 text-xs text-orange-600">{p.days ?? '—'}d</span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs text-emerald-700">{p.size ?? '—'}</span>
+                                        </td>
+                                        <td className="px-4 py-3">{p.location ?? '—'}</td>
+                                        <td className="px-4 py-3">
+                                            <span className="rounded-md bg-rose-50 px-2 py-1 text-xs text-rose-700">unclaimed</span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex gap-2">
                                                 <button
                                                     disabled={processing}
-                                                    onClick={() => claim(p.parcel_id, 'register')}
-                                                    className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                                                    onClick={() => claim(p.parcel_id, 'login')}
+                                                    className="inline-flex items-center gap-1 rounded-md bg-gray-900 px-3 py-1.5 text-white hover:bg-black disabled:opacity-50"
                                                 >
-                                                    <UserPlus className="h-4 w-4" /> I'm new here
+                                                    <LogIn className="h-4 w-4" /> Yes, it's mine
                                                 </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            {filtered.length === 0 && (
-                                <tr>
-                                    <td className="px-4 py-12 text-center text-gray-500" colSpan={9}>
-                                        No unclaimed parcels match your search.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                                {!auth.user && (
+                                                    <button
+                                                        disabled={processing}
+                                                        onClick={() => claim(p.parcel_id, 'register')}
+                                                        className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                                                    >
+                                                        <UserPlus className="h-4 w-4" /> I'm new here
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {filtered.length === 0 && (
+                                    <tr>
+                                        <td className="px-4 py-12 text-center text-gray-500" colSpan={9}>
+                                            No unclaimed parcels match your search.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
 
                 {/* Helper cards */}
@@ -175,5 +190,3 @@ export default function Unclaimed({ parcels = [], stats = { unclaimed: 0, highPr
         </div>
     );
 }
-
-

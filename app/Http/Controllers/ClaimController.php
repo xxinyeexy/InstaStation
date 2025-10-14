@@ -18,6 +18,11 @@ class ClaimController extends Controller
     {
         $q = (string) $request->get('q', '');
 
+        // Total unclaimed parcels in the entire database (independent of search)
+        $totalUnclaimed = Parcel::query()
+            ->whereRaw('lower(parcel_status) = ?', ['unclaimed'])
+            ->count();
+
         $parcels = collect();
         if ($q !== '') {
             $parcels = Parcel::query()
@@ -34,17 +39,23 @@ class ClaimController extends Controller
                 ->get();
         }
 
-        // Stats only for the current result set
+        // Global stats across the entire database of unclaimed parcels
         $stats = [
-            'unclaimed' => $parcels->count(),
-            'highPriority' => $parcels->where('days', '>=', 7)->count(),
-            'avgDays' => (int) round(max(0, $parcels->avg('days') ?? 0)),
+            'unclaimed' => $totalUnclaimed,
+            'highPriority' => Parcel::query()
+                ->whereRaw('lower(parcel_status) = ?', ['unclaimed'])
+                ->where('days', '>=', 7)
+                ->count(),
+            'avgDays' => (int) round(max(0, (float) (Parcel::query()
+                ->whereRaw('lower(parcel_status) = ?', ['unclaimed'])
+                ->avg('days') ?? 0))),
         ];
 
         return Inertia::render('public/unclaimed', [
             'parcels' => $parcels->values()->toArray(),
             'stats' => $stats,
             'filters' => ['q' => $q],
+            'totalUnclaimed' => $totalUnclaimed,
         ]);
     }
 
@@ -308,5 +319,3 @@ class ClaimController extends Controller
         return $first . '. ' . $last;
     }
 }
-
-
