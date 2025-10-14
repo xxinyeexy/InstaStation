@@ -83,7 +83,7 @@ export default function Unclaimed({
                             Search
                         </button>
                     </div>
-                    <div className="mt-2 text-xs text-gray-500">Tip: Search by your name, tracking number, or student ID</div>
+                    <div className="mt-2 text-xs text-gray-500">Tip: Search by your name, tracking number, or matric ID</div>
                 </form>
 
                 {/* Table */}
@@ -99,8 +99,8 @@ export default function Unclaimed({
                             <thead className="bg-gray-50 text-xs text-gray-500">
                                 <tr>
                                     <th className="px-4 py-3">Tracking No</th>
-                                    <th className="px-4 py-3">Recipient</th>
-                                    <th className="px-4 py-3">Matric</th>
+                                    <th className="px-4 py-3">Student</th>
+                                    <th className="px-4 py-3">Matric ID</th>
                                     <th className="px-4 py-3">Sender</th>
                                     <th className="px-4 py-3">Arrived</th>
                                     <th className="px-4 py-3">Days</th>

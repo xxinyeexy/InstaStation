@@ -84,7 +84,7 @@ class ParcelController extends Controller
                 $student_user = User::where('type', 'student')
                     ->where(function ($q) use ($request) {
                         $q->where('matric', $request->student_id)
-                          ->orWhere('id', $request->student_id);
+                            ->orWhere('id', $request->student_id);
                     })
                     ->first();
 
@@ -196,7 +196,9 @@ class ParcelController extends Controller
     public function getParcelDetails($id)
     {
         try {
+            Log::info('Fetching parcel details for ID: ' . $id);
             $parcel = Parcel::with(['studentUser', 'createdBy', 'lastEditedBy'])->findOrFail($id);
+            Log::info('Parcel found with status: ' . $parcel->parcel_status);
 
             $parcelDetails = [
                 'parcel_id' => $parcel->parcel_id,

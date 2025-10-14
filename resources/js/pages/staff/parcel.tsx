@@ -294,23 +294,55 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setParcelDetails(null);
     };
 
-    // Handle edit parcel
-    const handleEditParcel = (parcel: Parcel) => {
-        setEditingParcel(parcel);
-        setEditForm({
-            tracking_no: parcel.tracking_no || '',
-            parcel_status: parcel.parcel_status || '',
-            recipient_name: parcel.student_user?.name || '',
-            email: parcel.student_user?.email || '',
-            student_id: parcel.student_user?.matric || parcel.student_id?.toString() || '',
-            fee: 1.0, // Default fee
-            sender_name: parcel.sender || '',
-            sender_address: 'N/A', // Not in database
-            weight: 'N/A', // Not in database
-            dimensions: parcel.size || '',
-            description: 'N/A', // Not in database
-        });
-        setShowEditModal(true);
+    // Handle edit parcel - fetch fresh data from database
+    const handleEditParcel = async (parcel: Parcel) => {
+        try {
+            console.log('Fetching fresh parcel data for ID:', parcel.parcel_id);
+
+            // Fetch the latest parcel data from the database
+            const response = await fetch(`/staff/parcel/${parcel.parcel_id}/details`, {
+                method: 'GET',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log('Fresh parcel data received:', data);
+
+            if (!data.success || !data.parcel) {
+                throw new Error('Failed to fetch parcel details');
+            }
+
+            const freshParcel = data.parcel;
+            console.log('Setting edit form with status:', freshParcel.parcel_status);
+            setEditingParcel(freshParcel);
+            setEditForm({
+                tracking_no: freshParcel.tracking_no || '',
+                parcel_status: freshParcel.parcel_status || '',
+                recipient_name: freshParcel.student_user?.name || '',
+                email: freshParcel.student_user?.email || '',
+                student_id: freshParcel.student_user?.matric || freshParcel.student_id?.toString() || '',
+                fee: 1.0, // Default fee
+                sender_name: freshParcel.sender || '',
+                sender_address: 'N/A', // Not in database
+                weight: 'N/A', // Not in database
+                dimensions: freshParcel.size || '',
+                description: 'N/A', // Not in database
+            });
+            setShowEditModal(true);
+        } catch (error) {
+            console.error('Failed to fetch parcel details:', error);
+            addNotification('error', 'Error!', 'Failed to load parcel details. Please try again.');
+        }
     };
 
     // Handle form input changes
@@ -349,7 +381,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             if (response.ok) {
                 const result = await response.json();
 
-                // Update local state
+                // Update local state with the fresh data from server
                 setParcelList((prev) =>
                     prev.map((parcel) => (parcel.parcel_id === editingParcel.parcel_id ? { ...parcel, ...result.parcel } : parcel)),
                 );

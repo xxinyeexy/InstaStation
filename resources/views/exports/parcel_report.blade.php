@@ -73,11 +73,11 @@
             <td>{{ $student->name ?? '-' }}</td>
         </tr>
         <tr>
-            <th>Matric</th>
+            <th>Matric ID</th>
             <td>{{ $student->matric ?? '-' }}</td>
         </tr>
         <tr>
-            <th>Email</th>
+            <th>Email Address</th>
             <td>{{ $student->email ?? '-' }}</td>
         </tr>
     </table>
