@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use App\Models\Parcel;
+use App\Models\Payment;
+use App\Models\User;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -187,90 +189,91 @@ class StudentController extends Controller
         $createdTime = $parcel->created_at;
         $updatedTime = $parcel->updated_at;
 
-        // Always add "Parcel Arrived" as the first event
+        // 1) Parcel Arrived (from DB created_at)
         $history[] = [
             'id' => 1,
             'title' => 'Parcel Arrived',
             'description' => 'Parcel received at university mail center',
             'attribution' => $parcel->createdBy ? "by {$parcel->createdBy->name}" : 'by Mail Center Staff',
-            'timestamp' => $createdTime->format('n/j/Y, g:i:s A'),
+            'timestamp' => $createdTime?->format('n/j/Y, g:i:s A') ?? '',
             'hasAttribution' => true,
             'icon' => 'package',
             'iconColor' => 'blue',
         ];
 
-        // Add "Student Matched" event (15 minutes after arrival)
-        $studentMatchedTime = $createdTime->copy()->addMinutes(15);
+        // 2) Student Matched — use the student's account creation time when available
+        $matchedAt = optional($parcel->studentUser)->created_at ?: $createdTime;
         $history[] = [
             'id' => 2,
             'title' => 'Student Matched',
             'description' => 'Automatically matched to registered student',
             'attribution' => null,
-            'timestamp' => $studentMatchedTime->format('n/j/Y, g:i:s A'),
+            'timestamp' => $matchedAt?->format('n/j/Y, g:i:s A') ?? '',
             'hasAttribution' => false,
             'icon' => 'clock',
             'iconColor' => 'orange',
         ];
 
-        // Add payment-related events based on status
-        // Only include payment events for approved statuses (ready for collection, collected, approved)
-        // Exclude payment events for pending payment status
-        if (in_array(strtolower($parcel->parcel_status), ['ready for collection', 'collected', 'approved'])) {
-            // Payment Submitted (3 hours after arrival)
-            $paymentSubmittedTime = $createdTime->copy()->addHours(3);
+        // Fetch latest payment record for real timestamps
+        $payment = Payment::where('parcel_id', $parcel->parcel_id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($payment) {
+            // 3) Payment Submitted (Payment.created_at)
             $history[] = [
                 'id' => 3,
                 'title' => 'Payment Submitted',
                 'description' => 'Student submitted payment proof via QR scan',
                 'attribution' => $parcel->studentUser ? "by {$parcel->studentUser->name}" : 'by Student',
-                'timestamp' => $paymentSubmittedTime->format('n/j/Y, g:i:s A'),
+                'timestamp' => optional($payment->created_at)?->format('n/j/Y, g:i:s A'),
                 'hasAttribution' => true,
                 'icon' => 'credit-card',
                 'iconColor' => 'green',
             ];
 
-            // Payment Verified (1 hour after payment submitted)
-            $paymentVerifiedTime = $paymentSubmittedTime->copy()->addHour();
-            $history[] = [
-                'id' => 4,
-                'title' => 'Payment Verified',
-                'description' => 'Payment verified and approved by staff',
-                'attribution' => $parcel->lastEditedBy ? "by {$parcel->lastEditedBy->name}" : 'by Staff Member',
-                'timestamp' => $paymentVerifiedTime->format('n/j/Y, g:i:s A'),
-                'hasAttribution' => true,
-                'icon' => 'credit-card',
-                'iconColor' => 'green',
-            ];
-
-            // Ready for Collection (1 minute after payment verified)
-            if (in_array(strtolower($parcel->parcel_status), ['ready for collection', 'collected'])) {
-                $readyTime = $paymentVerifiedTime->copy()->addMinute();
+            // 4) Payment Verified (when verified_by is set → Payment.updated_at, attribution from staff user)
+            if ($payment->verified_by) {
+                $staffName = optional(User::find($payment->verified_by))->name ?? 'Staff Member';
                 $history[] = [
-                    'id' => 5,
-                    'title' => 'Ready for Collection',
-                    'description' => 'Parcel is ready for student collection',
-                    'attribution' => 'by System',
-                    'timestamp' => $readyTime->format('n/j/Y, g:i:s A'),
+                    'id' => 4,
+                    'title' => 'Payment Verified',
+                    'description' => 'Payment verified and approved by staff',
+                    'attribution' => "by {$staffName}",
+                    'timestamp' => optional($payment->updated_at)?->format('n/j/Y, g:i:s A'),
                     'hasAttribution' => true,
-                    'icon' => 'package',
-                    'iconColor' => 'blue',
-                ];
-            }
-
-            // Collected (if status is collected)
-            if (strtolower($parcel->parcel_status) === 'collected') {
-                $collectedTime = $updatedTime;
-                $history[] = [
-                    'id' => 6,
-                    'title' => 'Collected',
-                    'description' => 'Parcel has been collected by student',
-                    'attribution' => $parcel->studentUser ? "by {$parcel->studentUser->name}" : 'by Student',
-                    'timestamp' => $collectedTime->format('n/j/Y, g:i:s A'),
-                    'hasAttribution' => true,
-                    'icon' => 'check-circle',
+                    'icon' => 'credit-card',
                     'iconColor' => 'green',
                 ];
             }
+        }
+
+        // 5) Ready for Collection — timestamp is when the student scheduled (parcel updated_at at scheduling)
+        if (in_array(strtolower($parcel->parcel_status), ['ready for collection', 'collected']) && $parcel->schedule) {
+            $history[] = [
+                'id' => 5,
+                'title' => 'Ready for Collection',
+                'description' => 'Parcel is ready for student collection',
+                'attribution' => 'by System',
+                'timestamp' => optional($updatedTime)?->format('n/j/Y, g:i:s A'),
+                'hasAttribution' => true,
+                'icon' => 'package',
+                'iconColor' => 'blue',
+            ];
+        }
+
+        // 6) Collected (use parcel.updated_at at time of collection)
+        if (strtolower($parcel->parcel_status) === 'collected') {
+            $history[] = [
+                'id' => 6,
+                'title' => 'Collected',
+                'description' => 'Parcel has been collected by student',
+                'attribution' => $parcel->studentUser ? "by {$parcel->studentUser->name}" : 'by Student',
+                'timestamp' => $updatedTime?->format('n/j/Y, g:i:s A') ?? '',
+                'hasAttribution' => true,
+                'icon' => 'check-circle',
+                'iconColor' => 'green',
+            ];
         }
 
         return $history;

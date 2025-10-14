@@ -83,7 +83,7 @@ export default function Unclaimed({
                             Search
                         </button>
                     </div>
-                    <div className="mt-2 text-xs text-gray-500">Tip: Search by your full name, tracking number, or package ID</div>
+                    <div className="mt-2 text-xs text-gray-500">Tip: Search by your name, tracking number, or student ID</div>
                 </form>
 
                 {/* Table */}
