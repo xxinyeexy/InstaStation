@@ -68,8 +68,8 @@ return new class extends Migration
             $table->enum('announcement_status', ['Draft', 'Published'])->default('Draft');
 
             // Dates from the modal (date pickers)
-            $table->date('publish_date')->nullable();
-            $table->date('expiry_date')->nullable();
+            $table->datetime('publish_date')->nullable();
+            $table->datetime('expiry_date')->nullable();
 
             $table->timestamps();
         });

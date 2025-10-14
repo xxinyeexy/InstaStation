@@ -24,8 +24,8 @@ class Announcement extends Model
     ];
 
     protected $casts = [
-        'publish_date' => 'date',
-        'expiry_date'  => 'date',
+        'publish_date' => 'datetime',
+        'expiry_date'  => 'datetime',
     ];
 
     // Optional, but useful:

@@ -561,9 +561,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 case 'Collected':
                     return 'bg-green-100 text-green-600';
                 case 'Unclaimed':
-                    return 'bg-gray-100 text-gray-600';
+                    return 'bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground';
                 default:
-                    return 'bg-gray-100 text-white';
+                    return 'bg-gray-100 dark:bg-muted text-white dark:text-foreground';
             }
         }
     };
@@ -770,11 +770,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900 dark:text-card-foreground">Parcel Details</h2>
 
-                                <p className="text-sm text-gray-600">Complete information about the parcel</p>
+                                <p className="text-sm text-gray-600 dark:text-muted-foreground">Complete information about the parcel</p>
                             </div>
                             <button
                                 onClick={handleCloseDetailsModal}
-                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
                             >
                                 <X className="h-6 w-6" />
                             </button>
@@ -792,13 +792,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                        Tracking Number
+                                                    </label>
                                                     <p className="font-['Consolas'] text-lg font-bold text-gray-900 dark:text-card-foreground">
                                                         {parcelDetails.tracking_no}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Status</label>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                        Status
+                                                    </label>
                                                     <span
                                                         className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${getStatusStyles(parcelDetails.parcel_status)}`}
                                                     >
@@ -814,7 +818,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Student ID</label>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                        Student ID
+                                                    </label>
                                                     <p className="text-gray-900 dark:text-card-foreground">
                                                         {parcelDetails.student_user?.matric || parcelDetails.student_id}
                                                     </p>
@@ -956,7 +962,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             </div>
                             <button
                                 onClick={closeScanModal}
-                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
                             >
                                 <X className="h-6 w-6" />
                             </button>
@@ -1026,7 +1032,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             </div>
                             <button
                                 onClick={handleCloseEditModal}
-                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
                             >
                                 <X className="h-6 w-6" />
                             </button>
@@ -1050,7 +1056,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Tracking Number</label>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                        Tracking Number
+                                                    </label>
                                                     <input
                                                         type="text"
                                                         value={editForm.tracking_no}
@@ -1059,7 +1067,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Status</label>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                        Status
+                                                    </label>
                                                     <select
                                                         value={editForm.parcel_status}
                                                         onChange={(e) => handleEditFormChange('parcel_status', e.target.value)}
@@ -1080,7 +1090,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Student ID</label>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                        Student ID
+                                                    </label>
                                                     <input
                                                         type="text"
                                                         value={editForm.student_id}

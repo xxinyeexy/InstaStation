@@ -57,13 +57,7 @@ export default function ManageFaq({
 
     const csrf = (typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') : '') || '';
 
-    const publish = async (faq_id: number, to: 'publish' | 'unpublish') => {
-        await fetch(`/staff/faq/${faq_id}/${to}`, {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
-        });
-        setList((prev) => prev.map((r) => (r.faq_id === faq_id ? { ...r, faq_status: to === 'publish' ? 'Active' : 'Inactive', updated_at: new Date().toISOString() } : r)));
-    };
+    // Removed publish/unpublish functionality as per request
     const remove = async (faq_id: number) => {
         await fetch(`/staff/faq/${faq_id}`, { method: 'DELETE', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf } });
         setList((prev) => prev.filter((r) => r.faq_id !== faq_id));
@@ -151,21 +145,6 @@ export default function ManageFaq({
                                     </div>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-3">
-                                    {f.faq_status === 'Active' ? (
-                                        <button
-                                            onClick={() => publish(f.faq_id, 'unpublish')}
-                                            className="text-sm text-black hover:bg-gray-200 hover:ring-gray-200 focus-visible:outline-none active:bg-gray-200"
-                                        >
-                                            Unpublish
-                                        </button>
-                                    ) : (
-                                        <button
-                                            onClick={() => publish(f.faq_id, 'publish')}
-                                            className="rounded-full border bg-gray-100 px-3 py-1 text-xs text-gray-600 opacity-80 hover:opacity-100"
-                                        >
-                                            Publish
-                                        </button>
-                                    )}
                                     <button
                                         onClick={() => {
                                             setEditing(f);

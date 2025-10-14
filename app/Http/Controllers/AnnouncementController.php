@@ -150,17 +150,21 @@ class AnnouncementController extends Controller
             'publish_date' => 'sometimes|nullable|date',
         ]);
 
-        $publishDate = $data['publish_date'] ?? ($announcement->publish_date ?: now()->toDateString());
+        $publishDate = $data['publish_date'] ?? ($announcement->publish_date ?: now()->toISOString());
         $announcement->update([
             'announcement_status' => 'Published',
             'publish_date' => $publishDate,
+            'updated_at' => now(),
         ]);
         return response()->json(['success' => true, 'announcement' => $announcement->fresh()]);
     }
 
-  public function unpublish(Announcement $announcement)
-{
-    $announcement->update(['announcement_status' => 'Draft']);
-    return response()->json(['success' => true, 'announcement' => $announcement->fresh()]);
-}
+    public function unpublish(Announcement $announcement)
+    {
+        $announcement->update([
+            'announcement_status' => 'Draft',
+            'updated_at' => now(),
+        ]);
+        return response()->json(['success' => true, 'announcement' => $announcement->fresh()]);
+    }
 }

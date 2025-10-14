@@ -1,10 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
-import Alert from '@/components/ui/alert';
-import { Html5Qrcode } from 'html5-qrcode';
-import {  XCircle, CircleCheck, AlertTriangle ,ArrowLeft, Camera, QrCode, Search, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
 import { router } from '@inertiajs/react';
+import { Html5Qrcode } from 'html5-qrcode';
+import { AlertTriangle, ArrowLeft, Camera, CircleCheck, QrCode, Search, X, XCircle } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const ParcelRegistrationForm = () => {
     const [formData, setFormData] = useState({
@@ -16,44 +14,43 @@ const ParcelRegistrationForm = () => {
         matricId: '',
     });
 
-    
- const Toast = ({ type, message }: { type: 'success' | 'error' | 'warning'; message: string }) => {
-    const iconMap = {
-        success: <CircleCheck className="h-5 w-5 text-green-600" />,
-        error: <XCircle className="h-5 w-5 text-red-600" />,
-        warning: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
-    };
+    const Toast = ({ type, message }: { type: 'success' | 'error' | 'warning'; message: string }) => {
+        const iconMap = {
+            success: <CircleCheck className="h-5 w-5 text-green-600" />,
+            error: <XCircle className="h-5 w-5 text-red-600" />,
+            warning: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
+        };
 
-    const bgMap = {
-        success: 'bg-green-100 border-green-300 text-green-800',
-        error: 'bg-red-100 border-red-300 text-red-800',
-        warning: 'bg-yellow-100 border-yellow-300 text-yellow-800',
-    };
+        const bgMap = {
+            success: 'bg-green-100 dark:bg-green-500/20 border-green-300 dark:border-green-500/50 text-green-800 dark:text-green-300',
+            error: 'bg-red-100 dark:bg-red-500/20 border-red-300 dark:border-red-500/50 text-red-800 dark:text-red-300',
+            warning: 'bg-yellow-100 dark:bg-yellow-500/20 border-yellow-300 dark:border-yellow-500/50 text-yellow-800 dark:text-yellow-300',
+        };
 
-    return (
-        <div
-            className={`fixed top-6 left-1/2 z-50 flex w-fit -translate-x-1/2 items-center gap-2 rounded-md border px-4 py-2 shadow-md animate-fade-in ${bgMap[type]}`}
-        >
-            {iconMap[type]}
-            <span className="text-sm font-medium">{message}</span>
-        </div>
-    );
-};
-  const [errorToast, setErrorToast] = useState<{ show: boolean; message: string }>({
-    show: false,
-    message: '',
-});
-const showErrorToast = (message: string) => {
-    setErrorToast({ show: true, message });
-    setTimeout(() => setErrorToast({ show: false, message: '' }), 3000);
-};
-    const [showRegisterToast, setShowRegisterToast] = useState(false);  
+        return (
+            <div
+                className={`animate-fade-in fixed top-6 left-1/2 z-50 flex w-fit -translate-x-1/2 items-center gap-2 rounded-md border px-4 py-2 shadow-md ${bgMap[type]}`}
+            >
+                {iconMap[type]}
+                <span className="text-sm font-medium">{message}</span>
+            </div>
+        );
+    };
+    const [errorToast, setErrorToast] = useState<{ show: boolean; message: string }>({
+        show: false,
+        message: '',
+    });
+    const showErrorToast = (message: string) => {
+        setErrorToast({ show: true, message });
+        setTimeout(() => setErrorToast({ show: false, message: '' }), 3000);
+    };
+    const [showRegisterToast, setShowRegisterToast] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [isScanning, setIsScanning] = useState(false);
     const [showToast, setShowToast] = useState(false);
     const [highlightTracking, setHighlightTracking] = useState(false);
-    
+
     type Student = {
         student_id: string;
         student_name: string;
@@ -162,13 +159,13 @@ const showErrorToast = (message: string) => {
     const handleRegister = async () => {
         // Prevent double submission
         if (isSubmitting) return;
-        
+
         // Basic validation
         if (!formData.trackingNumber.trim()) {
             alert('❌ Please enter a tracking number');
             return;
         }
-        
+
         if (!formData.sender.trim()) {
             alert('❌ Please enter sender information');
             return;
@@ -183,7 +180,7 @@ const showErrorToast = (message: string) => {
                 // First try to get from meta tag
                 const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 if (metaToken) return metaToken;
-                
+
                 // If no meta tag, try to get from cookies (Laravel's default XSRF-TOKEN)
                 const cookies = document.cookie.split(';');
                 for (let cookie of cookies) {
@@ -196,7 +193,7 @@ const showErrorToast = (message: string) => {
             };
 
             const csrfToken = getCsrfToken();
-            
+
             if (!csrfToken) {
                 throw new Error('CSRF token not found. Please refresh the page and try again.');
             }
@@ -211,18 +208,18 @@ const showErrorToast = (message: string) => {
                 student_id: formData.matricId.trim() || '',
                 recipient_name: formData.studentName.trim() || null,
                 recipient_matric: formData.matricId.trim() || null,
-                qr_code: null
+                qr_code: null,
             };
 
             console.log('Sending request with data:', requestData);
 
             const response = await fetch('/parcels', {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
+                    Accept: 'application/json',
                     'X-CSRF-TOKEN': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
                 credentials: 'same-origin',
                 body: JSON.stringify(requestData),
@@ -232,11 +229,11 @@ const showErrorToast = (message: string) => {
 
             if (!response.ok) {
                 let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-                
+
                 try {
                     const errorData = await response.json();
                     console.log('Error response:', errorData);
-                    
+
                     if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.errors) {
@@ -252,20 +249,19 @@ const showErrorToast = (message: string) => {
                     console.log('Error response text:', errorText);
                     errorMessage += `\n\nResponse: ${errorText}`;
                 }
-                
+
                 throw new Error(errorMessage);
             }
 
             const result = await response.json();
             console.log('Success response:', result);
-            
+
             // Show success message
             setShowRegisterToast(true);
             setTimeout(() => setShowRegisterToast(false), 3000);
-            
+
             // Clear form
             handleCancel();
-            
         } catch (err) {
             console.error('Registration error:', err);
             if (err instanceof Error) {
@@ -380,22 +376,23 @@ const showErrorToast = (message: string) => {
 
     return (
         <AppLayout>
-            
-           {showRegisterToast && <Toast type="success" message=" Parcel registered successfully!" />}
-           {errorToast.show && <Toast type="error" message={errorToast.message} />}
+            {showRegisterToast && <Toast type="success" message=" Parcel registered successfully!" />}
+            {errorToast.show && <Toast type="error" message={errorToast.message} />}
 
-
-            <div className="min-h-screen bg-gray-50 p-4">
+            <div className="min-h-screen bg-gray-50 p-4 dark:bg-background">
                 <style>{`
                     @keyframes scan {
                         0% { transform: translateY(-100px); }
                         100% { transform: translateY(100px); }
                     }
                 `}</style>
-                <div className="mx-auto max-w-2xl rounded-lg border bg-white shadow-sm">
+                <div className="mx-auto max-w-2xl rounded-lg border border-border bg-white shadow-sm dark:bg-card">
                     {/* Header */}
-                    <div className="flex items-center gap-3 border-b p-6">
-                        <button onClick={() => window.history.length > 1 ? window.history.back() : router.visit('/parcels')} className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-800">
+                    <div className="flex items-center gap-3 border-b border-border p-6">
+                        <button
+                            onClick={() => (window.history.length > 1 ? window.history.back() : router.visit('/parcels'))}
+                            className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-800 dark:text-muted-foreground dark:hover:text-foreground"
+                        >
                             <ArrowLeft className="h-4 w-4" />
                             <span className="text-sm">Back</span>
                         </button>
@@ -403,18 +400,18 @@ const showErrorToast = (message: string) => {
 
                     {/* Title */}
                     <div className="px-6 py-4">
-                        <h1 className="mb-2 text-xl font-semibold text-gray-900">📦 Register New Parcel</h1>
-                        <p className="text-sm text-gray-600">Scan the parcel's QR code to auto-fill the details</p>
+                        <h1 className="mb-2 text-xl font-semibold text-gray-900 dark:text-card-foreground">📦 Register New Parcel</h1>
+                        <p className="text-sm text-gray-600 dark:text-muted-foreground">Scan the parcel's QR code to auto-fill the details</p>
                     </div>
 
                     {/* QR Scanner Area */}
                     <div className="mb-6 px-6">
                         {/* Toast Notification */}
-                     {showToast && <Toast type="success" message="Tracking number filled from QR code!" />}
+                        {showToast && <Toast type="success" message="Tracking number filled from QR code!" />}
 
                         {/* Pink Modern QR Scanner Section */}
                         <div className="flex justify-center">
-                            <div className="relative aspect-square w-full max-w-lg overflow-hidden rounded-3xl border-4 border-pink-500 bg-pink-50">
+                            <div className="relative aspect-square w-full max-w-lg overflow-hidden rounded-3xl border-4 border-pink-500 bg-pink-50 dark:border-pink-400 dark:bg-pink-500/20">
                                 {/* Grid Overlay */}
                                 <div
                                     className="pointer-events-none absolute inset-0 z-0"
@@ -427,7 +424,7 @@ const showErrorToast = (message: string) => {
                                 {/* Cancel Button */}
                                 {isScanning && (
                                     <button
-                                        className="absolute top-4 right-4 z-20 rounded-full bg-white/20 p-2 text-pink-500 transition-colors hover:bg-white/40"
+                                        className="absolute top-4 right-4 z-20 rounded-full bg-white/20 p-2 text-pink-500 transition-colors hover:bg-white/40 dark:bg-black/20 dark:text-pink-400 dark:hover:bg-black/40"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             setIsScanning(false);
@@ -440,15 +437,15 @@ const showErrorToast = (message: string) => {
                                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                                     {/* Corner Brackets */}
                                     <div className="pointer-events-none absolute inset-0 z-10">
-                                        <div className="absolute top-6 left-6 h-10 w-10 rounded-tl-xl border-t-4 border-l-4 border-pink-300"></div>
-                                        <div className="absolute top-6 right-6 h-10 w-10 rounded-tr-xl border-t-4 border-r-4 border-pink-300"></div>
-                                        <div className="absolute bottom-6 left-6 h-10 w-10 rounded-bl-xl border-b-4 border-l-4 border-pink-300"></div>
-                                        <div className="absolute right-6 bottom-6 h-10 w-10 rounded-br-xl border-r-4 border-b-4 border-pink-300"></div>
+                                        <div className="absolute top-6 left-6 h-10 w-10 rounded-tl-xl border-t-4 border-l-4 border-pink-300 dark:border-pink-400"></div>
+                                        <div className="absolute top-6 right-6 h-10 w-10 rounded-tr-xl border-t-4 border-r-4 border-pink-300 dark:border-pink-400"></div>
+                                        <div className="absolute bottom-6 left-6 h-10 w-10 rounded-bl-xl border-b-4 border-l-4 border-pink-300 dark:border-pink-400"></div>
+                                        <div className="absolute right-6 bottom-6 h-10 w-10 rounded-br-xl border-r-4 border-b-4 border-pink-300 dark:border-pink-400"></div>
                                     </div>
                                     {/* Animated Scan Line */}
                                     {isScanning && (
                                         <div
-                                            className="animate-horizontal-scan absolute right-10 left-10 z-20 h-1 rounded-full bg-gradient-to-r from-transparent via-pink-300 to-transparent"
+                                            className="animate-horizontal-scan absolute right-10 left-10 z-20 h-1 rounded-full bg-gradient-to-r from-transparent via-pink-300 to-transparent dark:via-pink-400"
                                             style={{ top: 80 }}
                                         />
                                     )}
@@ -457,10 +454,15 @@ const showErrorToast = (message: string) => {
                                     {/* Indeterminate Progress Bar */}
                                     {isScanning && (
                                         <div className="absolute right-0 bottom-0 left-0 z-30 px-8 pb-8">
-                                            <div className="h-3 overflow-hidden rounded-full bg-pink-200/40">
-                                                <div className="animate-indeterminate-bar h-full bg-pink-400" style={{ width: '40%' }}></div>
+                                            <div className="h-3 overflow-hidden rounded-full bg-pink-200/40 dark:bg-pink-500/40">
+                                                <div
+                                                    className="animate-indeterminate-bar h-full bg-pink-400 dark:bg-pink-300"
+                                                    style={{ width: '40%' }}
+                                                ></div>
                                             </div>
-                                            <div className="mt-2 text-center text-lg font-semibold tracking-wide text-pink-500">Scanning...</div>
+                                            <div className="mt-2 text-center text-lg font-semibold tracking-wide text-pink-500 dark:text-pink-400">
+                                                Scanning...
+                                            </div>
                                             <style>{`
                                                 @keyframes indeterminate-bar {
                                                     0% { margin-left: 0%; width: 40%; }
@@ -477,13 +479,15 @@ const showErrorToast = (message: string) => {
                                     {!isScanning && (
                                         <div className="flex h-full flex-col items-center justify-center">
                                             <div className="mb-8">
-                                                <div className="rounded-full bg-pink-100 p-8">
-                                                    <QrCode className="h-20 w-20 text-pink-500" />
+                                                <div className="rounded-full bg-pink-100 p-8 dark:bg-pink-500/20">
+                                                    <QrCode className="h-20 w-20 text-pink-500 dark:text-pink-400" />
                                                 </div>
                                             </div>
-                                            <h3 className="mb-2 text-3xl font-extrabold text-pink-600">Tap to Scan QR Code</h3>
-                                            <p className="mb-4 text-lg text-pink-400">Point camera at parcel QR code for instant recognition</p>
-                                            <div className="flex items-center gap-2 text-base font-medium text-pink-400">
+                                            <h3 className="mb-2 text-3xl font-extrabold text-pink-600 dark:text-pink-400">Tap to Scan QR Code</h3>
+                                            <p className="mb-4 text-lg text-pink-400 dark:text-pink-300">
+                                                Point camera at parcel QR code for instant recognition
+                                            </p>
+                                            <div className="flex items-center gap-2 text-base font-medium text-pink-400 dark:text-pink-300">
                                                 <Camera className="h-5 w-5" />
                                                 <span>AI-Powered Detection</span>
                                             </div>
@@ -514,26 +518,26 @@ const showErrorToast = (message: string) => {
 
                     {/* Parcel Information */}
                     <div className="mb-6 px-6">
-                        <h2 className="mb-4 text-lg font-medium text-gray-900">Parcel Information</h2>
+                        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-card-foreground">Parcel Information</h2>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">Tracking Number *</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Tracking Number *</label>
                                 <input
                                     type="text"
                                     placeholder="Enter tracking number"
                                     value={formData.trackingNumber}
                                     onChange={(e) => handleInputChange('trackingNumber', e.target.value)}
-                                    className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightTracking ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
+                                    className={`w-full rounded-md border border-border bg-background px-3 py-2 text-foreground transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightTracking ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300 dark:border-border'}`}
                                     readOnly={isScanning}
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">Size</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Size</label>
                                 <select
                                     value={formData.size}
                                     onChange={(e) => handleInputChange('size', e.target.value)}
-                                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
+                                    className="w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
                                 >
                                     <option value="">Select size</option>
                                     <option value="Small">Small</option>
@@ -543,24 +547,24 @@ const showErrorToast = (message: string) => {
                                 </select>
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">Sender *</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Sender *</label>
                                 <input
                                     type="text"
                                     placeholder="Sender name"
                                     value={formData.sender}
                                     onChange={(e) => handleInputChange('sender', e.target.value)}
-                                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
+                                    className="w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700">Location</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Location</label>
                                 <input
                                     type="text"
                                     placeholder="Storage location"
                                     value={formData.location}
                                     onChange={(e) => handleInputChange('location', e.target.value)}
-                                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
+                                    className="w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
                                 />
                             </div>
                         </div>
@@ -568,23 +572,22 @@ const showErrorToast = (message: string) => {
 
                     {/* Student Information */}
                     <div className="mb-6 px-6">
-                        <h2 className="mb-4 text-lg font-medium text-gray-900">Student Information</h2>
-                        <p className="mb-3 text-sm text-gray-600">Search for the recipient in the student database</p>
+                        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-card-foreground">Student Information</h2>
+                        <p className="mb-3 text-sm text-gray-600 dark:text-muted-foreground">Search for the recipient in the student database</p>
 
                         <div className="mb-4">
-                            <label className="mb-1 block text-sm font-medium text-gray-700">Student Name</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Student Name</label>
                             <div className="flex gap-2" ref={searchContainerRef}>
                                 <input
                                     type="text"
                                     placeholder="Enter recipient full name"
                                     value={formData.studentName}
                                     onChange={(e) => handleInputChange('studentName', e.target.value)}
-                                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none"
-                                    
+                                    className="flex-1 rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
                                 />
                                 <button
                                     onClick={() => handleSearch(formData.studentName)}
-                                    className="flex items-center gap-2 rounded-md bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200"
+                                    className="flex items-center gap-2 rounded-md bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200 dark:bg-muted dark:text-foreground dark:hover:bg-accent"
                                     disabled={isSearching}
                                 >
                                     {isSearching ? (
@@ -597,28 +600,32 @@ const showErrorToast = (message: string) => {
                             </div>
 
                             {showSearchResults && (
-                                <div className="mt-2 max-h-48 overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg">
+                                <div className="mt-2 max-h-48 overflow-y-auto rounded-md border border-gray-300 bg-white shadow-lg dark:border-border dark:bg-card">
                                     {searchResults.length > 0 ? (
-                                        <ul className="divide-y divide-gray-200">
+                                        <ul className="divide-y divide-gray-200 dark:divide-border">
                                             {searchResults.map((student) => (
                                                 <li
                                                     key={student.student_id}
-                                                    className="flex cursor-pointer items-center justify-between px-4 py-3 transition-colors hover:bg-pink-50"
+                                                    className="flex cursor-pointer items-center justify-between px-4 py-3 transition-colors hover:bg-pink-50 dark:hover:bg-pink-500/20"
                                                     onMouseDown={(e) => {
                                                         e.preventDefault();
                                                         handleStudentSelect(student);
                                                     }}
                                                 >
                                                     <div className="flex flex-col">
-                                                        <span className="font-medium text-gray-900">{student.student_name}</span>
-                                                        <span className="text-sm text-gray-500">{student.email}</span>
+                                                        <span className="font-medium text-gray-900 dark:text-card-foreground">
+                                                            {student.student_name}
+                                                        </span>
+                                                        <span className="text-sm text-gray-500 dark:text-muted-foreground">{student.email}</span>
                                                     </div>
-                                                    <span className="text-sm font-medium text-pink-600">{student.matric_id || 'No Matric ID'}</span>
+                                                    <span className="text-sm font-medium text-pink-600 dark:text-pink-400">
+                                                        {student.matric_id || 'No Matric ID'}
+                                                    </span>
                                                 </li>
                                             ))}
                                         </ul>
                                     ) : (
-                                        <div className="px-4 py-3 text-center text-gray-500">
+                                        <div className="px-4 py-3 text-center text-gray-500 dark:text-muted-foreground">
                                             {isSearching ? 'Searching...' : searchError || 'No students found'}
                                         </div>
                                     )}
@@ -627,37 +634,34 @@ const showErrorToast = (message: string) => {
                         </div>
 
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700">Matric ID</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Matric ID</label>
                             <input
                                 type="text"
                                 placeholder="ID number"
                                 value={formData.matricId}
                                 onChange={(e) => handleInputChange('matricId', e.target.value)}
-                                className={`w-full rounded-md border px-3 py-2 transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightMatric ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300'}`}
-                                
+                                className={`w-full rounded-md border border-border bg-background px-3 py-2 text-foreground transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightMatric ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300 dark:border-border'}`}
                             />
                         </div>
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="rounded-b-lg border-t bg-gray-50 px-6 py-4">
+                    <div className="rounded-b-lg border-t border-border bg-gray-50 px-6 py-4 dark:bg-muted">
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={handleCancel}
-                                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
                                 disabled={isSubmitting}
                             >
                                 Cancel
                             </button>
-                        
+
                             <button
                                 onClick={handleRegister}
                                 disabled={!formData.trackingNumber || !formData.sender || isSubmitting}
-                                className="rounded-md bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600 flex items-center gap-2"
+                                className="flex items-center gap-2 rounded-md bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-700"
                             >
-                                {isSubmitting && (
-                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                )}
+                                {isSubmitting && <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>}
                                 {isSubmitting ? 'Registering...' : 'Register Parcel'}
                             </button>
                         </div>
