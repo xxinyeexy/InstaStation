@@ -463,34 +463,33 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     };
 
     const handleProofSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        try {
-            const file = e.target.files?.[0];
-            if (!file || payParcelId == null) return;
-            setIsUploadingProof(true);
-            const form = new FormData();
-            form.append('proof', file);
-            const resp = await fetch(`/student/payment/submit/${payParcelId}`, {
-                method: 'POST',
-                body: form,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                credentials: 'same-origin',
-            });
-            if (!resp.ok) throw new Error(`Upload failed (${resp.status})`);
-            addToastNotification('success', 'Payment Uploaded', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
-            setShowPayModal(false);
-            setPayParcelId(null);
+        const file = e.target.files?.[0];
+        if (!file || payParcelId == null) return;
+        setIsUploadingProof(true);
 
-            // Refresh parcel data to update payment status
-            router.reload({ only: ['parcels'] });
-        } catch (err) {
-            addToastNotification('error', 'Upload Failed', err instanceof Error ? err.message : 'Failed to upload proof');
-        } finally {
-            setIsUploadingProof(false);
-            if (proofInputRef.current) proofInputRef.current.value = '';
-        }
+        // Use Inertia router to post FormData with proper CSRF/session handling to avoid 419
+        router.post(
+            `/student/payment/submit/${payParcelId}`,
+            { proof: file },
+            {
+                forceFormData: true,
+                onSuccess: () => {
+                    addToastNotification('success', 'Payment Uploaded', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
+                    setShowPayModal(false);
+                    setPayParcelId(null);
+                    router.reload({ only: ['parcels'] });
+                },
+                onError: (errors) => {
+                    const firstError = typeof errors === 'object' ? Object.values(errors)[0] : null;
+                    addToastNotification('error', 'Upload Failed', (firstError as string) || 'Failed to upload proof');
+                },
+                onFinish: () => {
+                    setIsUploadingProof(false);
+                    if (proofInputRef.current) proofInputRef.current.value = '';
+                },
+                preserveScroll: true,
+            },
+        );
     };
 
     // Calculate percentage changes (mock calculation for demo purposes)
