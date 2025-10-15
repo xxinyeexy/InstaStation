@@ -12,6 +12,9 @@ class AnnouncementController extends Controller
 {
     public function index(Request $request)
     {
+        // Check and update expired announcements before displaying
+        Announcement::checkAndUpdateExpired();
+
         $q = trim((string) $request->get('q', ''));
         $type = trim((string) $request->get('type', ''));
 
@@ -82,13 +85,24 @@ class AnnouncementController extends Controller
             $status = $status === 'Active' ? 'Published' : 'Draft';
         }
 
+        // Auto-set status to Published if publish_date is current timestamp or earlier
+        $publishDate = $data['publish_date'] ?? null;
+        $currentTime = now();
+
+        if ($publishDate && $status === 'Draft') {
+            $publishDateTime = \Carbon\Carbon::parse($publishDate);
+            if ($publishDateTime->lte($currentTime)) {
+                $status = 'Published';
+            }
+        }
+
         // Build payload matching existing columns (announcement_*)
         $payload = [
             'announcement_title' => $data['title'],
             'announcement_content' => $data['content'],
             'announcement_type' => $incomingType,
             'announcement_status' => $status,
-            'publish_date' => $data['publish_date'] ?? null,
+            'publish_date' => $publishDate,
             'expiry_date' => $data['expiry_date'] ?? null,
         ];
         if (!empty($data['image_path'])) {
@@ -130,6 +144,18 @@ class AnnouncementController extends Controller
             if (in_array($status, ['Active', 'Inactive'])) {
                 $status = $status === 'Active' ? 'Published' : 'Draft';
             }
+
+            // Auto-set status to Published if publish_date is current timestamp or earlier
+            $publishDate = $data['publish_date'] ?? $announcement->publish_date;
+            $currentTime = now();
+
+            if ($publishDate && $status === 'Draft') {
+                $publishDateTime = \Carbon\Carbon::parse($publishDate);
+                if ($publishDateTime->lte($currentTime)) {
+                    $status = 'Published';
+                }
+            }
+
             $payload['announcement_status'] = $status;
         }
 

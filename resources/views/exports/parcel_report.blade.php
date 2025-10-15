@@ -55,8 +55,8 @@
 
 <body>
     <div class="header">
-        <h1>Parcel Collection Receipt</h1>
-        <div>Generated at: {{ now()->format('Y-m-d H:i') }}</div>
+        <h1>Official Parcel Collection Receipt</h1>
+        <div>This receipt is computer generated and no signature is required.</div>
     </div>
 
     <div class="meta">
@@ -96,16 +96,13 @@
             <th>Location</th>
             <td>{{ $parcel->location ?? '-' }}</td>
         </tr>
-        <tr>
-            <th>QR Code</th>
-            <td>{{ $parcel->qr_code ?? '-' }}</td>
-        </tr>
+        
     </table>
 
     <div class="section-title">Payment</div>
     <table>
         <tr>
-            <th>Fee</th>
+            <th>Service Fee</th>
             <td>
                 @php $fee = $parcel->fee ?? ($payment->amount ?? 1.00); @endphp
                 RM{{ number_format($fee, 2) }}

@@ -1,5 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { CalendarDays, FileText, IdCard, MapPin, Package, UserRound } from 'lucide-react';
+import { CalendarDays, FileText, IdCard, MapPin, Package, UserRound, ArrowLeft } from 'lucide-react';
+import { router } from '@inertiajs/react';
 
 type Student = {
     id?: number;
@@ -29,8 +30,14 @@ type Parcel = {
 
 export default function Report({ parcel, student, payment }: { parcel: Parcel; student?: Student; payment?: Payment }) {
     const parcelId = parcel.parcel_id;
+    
     const download = () => {
         window.location.href = `/parcels/${parcelId}/export/download`;
+    };
+
+    const goBack = () => {
+        // Use Inertia's router to go back
+        router.visit('/student/history');
     };
 
     return (
@@ -38,11 +45,19 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
             <div className="p-6">
                 <div className="mx-auto max-w-3xl rounded-xl border bg-white shadow-sm">
                     <div className="flex items-start justify-between border-b p-5">
-                        <div>
-                            <div className="font-semibold">Parcel Report - {parcel.parcel_code || parcel.parcel_id}</div>
-                            <div className="text-xs text-gray-500">Detailed report for parcel {parcel.parcel_code || parcel.parcel_id}</div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={goBack}
+                                className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                <ArrowLeft size={16} />
+                                Back
+                            </button>
+                            <div>
+                                <div className="font-semibold">Parcel Report - {parcel.parcel_code || parcel.parcel_id}</div>
+                                <div className="text-xs text-gray-500">Detailed report for parcel {parcel.parcel_code || parcel.parcel_id}</div>
+                            </div>
                         </div>
-                  
                     </div>
 
                     <div className="space-y-4 p-5">
@@ -128,7 +143,7 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
 
                         <div className="flex items-center justify-between text-xs text-gray-500">
                             <div>Report generated on {new Date().toLocaleString()}</div>
-                            <button onClick={download} className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white">
+                            <button onClick={download} className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white hover:bg-gray-800 transition-colors">
                                 <FileText size={16} /> Download Report
                             </button>
                         </div>

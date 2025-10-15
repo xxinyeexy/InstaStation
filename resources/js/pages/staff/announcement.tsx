@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Edit2, Eye, Plus, Search, Trash2, X } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 type AnnouncementRow = {
     announcement_id: number;
@@ -43,6 +43,18 @@ export default function StaffAnnouncements(props: {
     const [editImageFile, setEditImageFile] = useState<File | null>(null);
     const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
 
+    // Auto-set status to Published when edit publish date is current or earlier
+    useEffect(() => {
+        if (editPublishDate) {
+            const publishDateTime = new Date(editPublishDate);
+            const currentTime = new Date();
+
+            if (publishDateTime <= currentTime) {
+                setEditStatus('Active'); // Set to Published
+            }
+        }
+    }, [editPublishDate]);
+
     // Add modal state
     const [adding, setAdding] = useState(false);
     const [creating, setCreating] = useState(false);
@@ -55,6 +67,18 @@ export default function StaffAnnouncements(props: {
     const [expiryDate, setExpiryDate] = useState<string>('');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+    // Auto-set status to Published when publish date is current or earlier
+    useEffect(() => {
+        if (publishDate) {
+            const publishDateTime = new Date(publishDate);
+            const currentTime = new Date();
+
+            if (publishDateTime <= currentTime) {
+                setAnnStatus('Active'); // Set to Published
+            }
+        }
+    }, [publishDate]);
 
     const toDateInputValue = (value?: string | null) => {
         if (!value) return '';
@@ -208,8 +232,9 @@ export default function StaffAnnouncements(props: {
                     <button
                         onClick={() => {
                             setAdding(true);
-                            // initialize defaults
+                            // initialize defaults with current timestamp
                             setPublishDate(nowDateTimeLocal);
+                            setAnnStatus('Active'); // Set to Published by default when publish date is current
                         }}
                         className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white dark:bg-gray-700"
                     >
