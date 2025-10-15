@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, LoaderCircle, Lock, Mail, User } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, LoaderCircle, Lock, Mail, User } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
 
 interface LoginProps {
@@ -32,6 +32,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     const [warningKey, setWarningKey] = useState(0);
     const [errorKey, setErrorKey] = useState(0);
     const [success, setSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
@@ -141,14 +142,22 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-muted-foreground" />
                             <Input
                                 id="password"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 placeholder="********"
                                 required
                                 autoComplete="current-password"
-                                className="pl-10"
+                                className="pl-10 pr-10"
                                 value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                disabled={processing}
+                                className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed dark:text-muted-foreground dark:hover:text-foreground"
+                            >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
                             <InputError message={errors.password} />
                         </div>
 

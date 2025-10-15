@@ -1,8 +1,8 @@
 import TextLink from '@/components/text-link';
 import Alert from '@/components/ui/alert';
 import { Link } from '@inertiajs/react';
-import axios from 'axios'; // Add axios for API requests
-import { ArrowLeft, Building, IdCard, LoaderCircle, Lock, Mail, User } from 'lucide-react';
+import axios from 'axios';
+import { ArrowLeft, Building, Eye, EyeOff, IdCard, LoaderCircle, Lock, Mail, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Register() {
@@ -13,7 +13,7 @@ export default function Register() {
         password_confirmation: '',
         userType: 'Student',
         department: '',
-        matric: '', // Add matric to state
+        matric: '',
     });
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState({});
@@ -22,6 +22,8 @@ export default function Register() {
     const [errorKey, setErrorKey] = useState(0);
     const [warning, setWarning] = useState<{ msg: string; key: number } | null>(null);
     const [warningKey, setWarningKey] = useState(0);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
@@ -33,6 +35,7 @@ export default function Register() {
         e.preventDefault();
         let newKey = warningKey + 1;
         setWarningKey(newKey);
+        
         // Manual validation for required fields
         if (!formData.name) {
             setWarning({ msg: 'Please fill out the full name field.', key: newKey });
@@ -58,14 +61,14 @@ export default function Register() {
             setWarning({ msg: 'Please fill out the confirm password field.', key: newKey });
             return;
         }
+        
         setWarning(null);
         setProcessing(true);
+        
         try {
-            // Always use the same endpoint
             const endpoint = '/register';
-            // Map userType to type expected by backend
             const type = formData.userType === 'Student' ? 'student' : 'staff';
-            // Build payload with type
+            
             const payload: any = {
                 name: formData.name,
                 email: formData.email,
@@ -73,13 +76,16 @@ export default function Register() {
                 password_confirmation: formData.password_confirmation,
                 type,
             };
+            
             if (type === 'student') {
                 payload.matric = formData.matric;
             } else {
                 payload.department = formData.department;
             }
+            
             await axios.post(endpoint, payload);
             setSuccess('You may proceed to login now.');
+            
             setTimeout(() => {
                 window.location.href = '/login';
             }, 1500);
@@ -101,14 +107,17 @@ export default function Register() {
         <>
             {/* Floating toast for warning */}
             {warning && <Alert key={warning.key} type="warning" message={warning.msg} />}
+            
             {/* Floating toast for each error */}
             {Object.values(errors)
                 .flat()
                 .map((msg, i) => (
                     <Alert key={`${errorKey}-${i}`} type="error" message={msg as string} />
                 ))}
+            
             {/* Floating toast for success */}
             {success && <Alert type="success" message={success} />}
+            
             <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4 py-8 dark:bg-gray-900">
                 <Link
                     href="/"
@@ -230,10 +239,7 @@ export default function Register() {
                                         Department
                                     </label>
                                     <div className="relative">
-                                        {/* Left Icon */}
                                         <Building className="pointer-events-none absolute top-3.5 left-3 h-4 w-4 text-gray-400 dark:text-muted-foreground" />
-
-                                        {/* Select Field */}
                                         <select
                                             id="department"
                                             required
@@ -251,8 +257,6 @@ export default function Register() {
                                             <option value="General">Operations - General</option>
                                             <option value="Admin">Operations - Admin</option>
                                         </select>
-
-                                        {/* Right Dropdown Arrow */}
                                         <svg
                                             className="pointer-events-none absolute top-3.5 right-3 h-4 w-4 text-gray-400 dark:text-muted-foreground"
                                             fill="none"
@@ -266,7 +270,7 @@ export default function Register() {
                                 </div>
                             )}
 
-                            {/* Password */}
+                            {/* Password Fields */}
                             <div className="flex flex-col gap-4 md:flex-row">
                                 {/* Password */}
                                 <div className="w-full md:w-1/2">
@@ -277,14 +281,22 @@ export default function Register() {
                                         <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400 dark:text-muted-foreground" />
                                         <input
                                             id="password"
-                                            type="password"
+                                            type={showPassword ? 'text' : 'password'}
                                             required
                                             value={formData.password}
                                             onChange={(e) => handleInputChange('password', e.target.value)}
                                             disabled={processing}
                                             placeholder="••••••••"
-                                            className="w-full rounded-lg border border-gray-200 bg-white py-3 pr-4 pl-10 text-gray-900 placeholder-gray-500 focus:border-[#f0bfd7] focus:ring-2 focus:ring-[#fdceef] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground dark:placeholder-muted-foreground"
+                                            className="w-full rounded-lg border border-gray-200 bg-white py-3 pr-10 pl-10 text-gray-900 placeholder-gray-500 focus:border-[#f0bfd7] focus:ring-2 focus:ring-[#fdceef] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground dark:placeholder-muted-foreground"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            disabled={processing}
+                                            className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed dark:text-muted-foreground dark:hover:text-foreground"
+                                        >
+                                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
                                     </div>
                                 </div>
 
@@ -300,14 +312,22 @@ export default function Register() {
                                         <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400 dark:text-muted-foreground" />
                                         <input
                                             id="password_confirmation"
-                                            type="password"
+                                            type={showConfirmPassword ? 'text' : 'password'}
                                             required
                                             value={formData.password_confirmation}
                                             onChange={(e) => handleInputChange('password_confirmation', e.target.value)}
                                             disabled={processing}
                                             placeholder="••••••••"
-                                            className="w-full rounded-lg border border-gray-200 bg-white py-3 pr-4 pl-10 text-gray-900 placeholder-gray-500 focus:border-[#f0bfd7] focus:ring-2 focus:ring-[#fdceef] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground dark:placeholder-muted-foreground"
+                                            className="w-full rounded-lg border border-gray-200 bg-white py-3 pr-10 pl-10 text-gray-900 placeholder-gray-500 focus:border-[#f0bfd7] focus:ring-2 focus:ring-[#fdceef] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground dark:placeholder-muted-foreground"
                                         />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            disabled={processing}
+                                            className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400 hover:text-gray-600 disabled:cursor-not-allowed dark:text-muted-foreground dark:hover:text-foreground"
+                                        >
+                                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
                                     </div>
                                 </div>
                             </div>

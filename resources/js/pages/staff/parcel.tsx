@@ -976,6 +976,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 >
                                     Close
                                 </button>
+                                
                             </div>
                         )}
                     </div>
