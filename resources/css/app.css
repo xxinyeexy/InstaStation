@@ -78,7 +78,7 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
+    --background: oklch(100% 0.00011 271.152);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -111,6 +111,8 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
+    --sidebar-active: oklch(0.87 0 0);
+    --sidebar-active-foreground: oklch(0.145 0 0);
     --applegreen: #34c759;
     --mintgreen: #e6f7e6;
 }
@@ -148,6 +150,8 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
+    --sidebar-active: oklch(0.269 0 0);
+    --sidebar-active-foreground: oklch(0.985 0 0);
     --applegreen: #28a745;
     --mintgreen: #cceacc;
 }
@@ -162,6 +166,8 @@ html[data-appearance='light'] {
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
+    --sidebar-active: oklch(0.87 0 0);
+    --sidebar-active-foreground: oklch(0.145 0 0);
 }
 
 /* Dark mode - default dark colors */
@@ -174,6 +180,8 @@ html[data-appearance='dark'] {
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(0.269 0 0);
     --sidebar-ring: oklch(0.439 0 0);
+    --sidebar-active: oklch(0.269 0 0);
+    --sidebar-active-foreground: oklch(0.985 0 0);
 }
 
 /* System appearance with role-based theming for STUDENT */
@@ -182,10 +190,12 @@ html[data-appearance='system'][data-role='student'] {
     --sidebar-foreground: 5 46 22; /* #052e16 - dark green text */
     --sidebar-primary: 22 163 74; /* #16A34A - green primary */
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 230 247 230; /* #E6F7E6 - mint green accent */
+    --sidebar-accent: 240 253 244; /* lighter green for hover */
     --sidebar-accent-foreground: 5 46 22;
     --sidebar-border: 22 163 74; /* #16A34A - green border */
     --sidebar-ring: 22 163 74;
+    --sidebar-active: 22 163 74; /* #16A34A - dark green for active state */
+    --sidebar-active-foreground: 255 255 255; /* white text on dark green */
 }
 
 /* System appearance with role-based theming for STAFF */
@@ -194,10 +204,12 @@ html[data-appearance='system'][data-role='staff'] {
     --sidebar-foreground: 31 41 55; /* #1f2937 - dark gray text */
     --sidebar-primary: 255 2 154; /* #FF029A - magenta primary */
     --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 255 228 250; /* #FFE4FA - pink accent */
+    --sidebar-accent: 255 240 253; /* lighter pink for hover */
     --sidebar-accent-foreground: 31 41 55;
     --sidebar-border: 255 2 154; /* #FF029A - magenta border */
     --sidebar-ring: 255 2 154;
+    --sidebar-active: 255 2 154; /* #FF029A - dark pink/magenta for active state */
+    --sidebar-active-foreground: 255 255 255; /* white text on dark pink */
 }
 
 /* Apply background colors to sidebar elements */
@@ -212,16 +224,18 @@ html[data-appearance='system'][data-role='staff'] {
     color: rgb(var(--sidebar-accent-foreground));
 }
 
-/* Active sidebar menu item - transparent background with primary color text */
+/* Active sidebar menu item - use light background with colored left border */
 .sidebar [data-sidebar='menu-button'][data-active='true'] {
-    background-color: transparent;
+    background-color: rgb(var(--sidebar));
     color: rgb(var(--sidebar-primary));
     font-weight: 500;
+    position: relative;
+    border-left: 3px solid rgb(var(--sidebar-primary));
 }
 
-/* Keep primary color on hover when active */
+/* Keep active colors on hover when active */
 .sidebar [data-sidebar='menu-button'][data-active='true']:hover {
-    background-color: transparent;
+    background-color: rgb(var(--sidebar));
     color: rgb(var(--sidebar-primary));
 }
 
@@ -236,6 +250,8 @@ html[data-appearance='system'][data-role='student'] [data-slot='sidebar-wrapper'
     --sidebar-foreground: 5 46 22;
     --sidebar-primary: 22 163 74;
     --sidebar-border: 22 163 74;
+    --sidebar-active: 22 163 74;
+    --sidebar-active-foreground: 255 255 255;
 }
 
 html[data-appearance='system'][data-role='staff'] [data-slot='sidebar-wrapper'] {
@@ -243,12 +259,14 @@ html[data-appearance='system'][data-role='staff'] [data-slot='sidebar-wrapper'] 
     --sidebar-foreground: 31 41 55;
     --sidebar-primary: 255 2 154;
     --sidebar-border: 255 2 154;
+    --sidebar-active: 255 2 154;
+    --sidebar-active-foreground: 255 255 255;
 }
 
 @layer base {
-    * {
+    /* * {
         @apply border-border;
-    }
+    } */
 
     body {
         @apply bg-background text-foreground;
