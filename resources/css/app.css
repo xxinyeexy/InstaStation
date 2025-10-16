@@ -73,7 +73,14 @@
     ::before,
     ::backdrop,
     ::file-selector-button {
-        border-color: var(--color-gray-200, currentColor);
+        border-color: transparent;
+    }
+    
+    /* Remove border from body and html */
+    html,
+    body {
+        border: none;
+        border-top: none;
     }
 }
 
@@ -164,7 +171,7 @@ html[data-appearance='light'] {
     --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(0.97 0 0);
     --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-border:  oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
     --sidebar-active: oklch(0.87 0 0);
     --sidebar-active-foreground: oklch(0.145 0 0);
@@ -184,91 +191,108 @@ html[data-appearance='dark'] {
     --sidebar-active-foreground: oklch(0.985 0 0);
 }
 
-/* System appearance with role-based theming for STUDENT */
+/* System appearance with role-based theming for STUDENT - Green theme */
 html[data-appearance='system'][data-role='student'] {
-    --sidebar: 230 247 230; /* #E6F7E6 - mint green background */
-    --sidebar-foreground: 5 46 22; /* #052e16 - dark green text */
-    --sidebar-primary: 22 163 74; /* #16A34A - green primary */
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 240 253 244; /* lighter green for hover */
-    --sidebar-accent-foreground: 5 46 22;
-    --sidebar-border: 22 163 74; /* #16A34A - green border */
-    --sidebar-ring: 22 163 74;
-    --sidebar-active: 22 163 74; /* #16A34A - dark green for active state */
-    --sidebar-active-foreground: 255 255 255; /* white text on dark green */
+    --sidebar: #E6F7E6; /* mint green background */
+    --sidebar-foreground: #052e16; /* dark green text */
+    --sidebar-primary: #16A34A; /* green primary */
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f0fdf4; /* lighter green for hover */
+    --sidebar-accent-foreground: #052e16;
+    --sidebar-border: oklch(0.922 0 0); /* green border */
+    --sidebar-ring: #16A34A;
+    --sidebar-active: #16A34A; /* green for active state */
+    --sidebar-active-foreground: #ffffff; /* white text on green */
 }
 
-/* System appearance with role-based theming for STAFF */
+/* System appearance with role-based theming for STAFF - Pink theme */
 html[data-appearance='system'][data-role='staff'] {
-    --sidebar: 255 228 250; /* #FFE4FA - pink background */
-    --sidebar-foreground: 31 41 55; /* #1f2937 - dark gray text */
-    --sidebar-primary: 255 2 154; /* #FF029A - magenta primary */
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 255 240 253; /* lighter pink for hover */
-    --sidebar-accent-foreground: 31 41 55;
-    --sidebar-border: 255 2 154; /* #FF029A - magenta border */
-    --sidebar-ring: 255 2 154;
-    --sidebar-active: 255 2 154; /* #FF029A - dark pink/magenta for active state */
-    --sidebar-active-foreground: 255 255 255; /* white text on dark pink */
+    --sidebar: #FFE4FA; /* pink background */
+    --sidebar-foreground: #1f2937; /* dark gray text */
+    --sidebar-primary: #FF029A; /* magenta primary */
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #fff0fd; /* lighter pink for hover */
+    --sidebar-accent-foreground: #1f2937;
+    --sidebar-border: oklch(0.922 0 0); /* magenta border */
+    --sidebar-ring: #FF029A;
+    --sidebar-active: #FF029A; /* magenta for active state */
+    --sidebar-active-foreground: #ffffff; /* white text on magenta */
 }
 
 /* Apply background colors to sidebar elements */
-.sidebar[data-sidebar='sidebar'] {
-    background-color: rgb(var(--sidebar));
-    color: rgb(var(--sidebar-foreground));
+.sidebar[data-sidebar='sidebar'],
+[data-slot='sidebar'],
+[data-sidebar='sidebar'] {
+    background-color: var(--sidebar) !important;
+    color: var(--sidebar-foreground) !important;
+    border: none;
 }
 
 /* Sidebar hover states */
-.sidebar [data-sidebar='menu-button']:hover {
-    background-color: rgb(var(--sidebar-accent));
-    color: rgb(var(--sidebar-accent-foreground));
+.sidebar [data-sidebar='menu-button']:hover,
+[data-sidebar='menu-button']:hover {
+    background-color: var(--sidebar-accent) !important;
+    color: var(--sidebar-accent-foreground) !important;
 }
 
 /* Active sidebar menu item - use light background with colored left border */
-.sidebar [data-sidebar='menu-button'][data-active='true'] {
-    background-color: rgb(var(--sidebar));
-    color: rgb(var(--sidebar-primary));
+.sidebar [data-sidebar='menu-button'][data-active='true'],
+[data-sidebar='menu-button'][data-active='true'] {
+    background-color: var(--sidebar) !important;
+    color: var(--sidebar-primary) !important;
     font-weight: 500;
     position: relative;
-    border-left: 3px solid rgb(var(--sidebar-primary));
+    border-left: 3px solid var(--sidebar-primary) !important;
+    border-top: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
 }
 
 /* Keep active colors on hover when active */
-.sidebar [data-sidebar='menu-button'][data-active='true']:hover {
-    background-color: rgb(var(--sidebar));
-    color: rgb(var(--sidebar-primary));
+.sidebar [data-sidebar='menu-button'][data-active='true']:hover,
+[data-sidebar='menu-button'][data-active='true']:hover {
+    background-color: var(--sidebar) !important;
+    color: var(--sidebar-primary) !important;
 }
 
 /* Role-colored sidebar rail */
 [data-slot='sidebar-rail']::after {
-    background-color: rgb(var(--sidebar-primary));
+    background-color: var(--sidebar-primary) !important;
 }
 
 /* Sidebar wrapper for system appearance with roles */
-html[data-appearance='system'][data-role='student'] [data-slot='sidebar-wrapper'] {
-    --sidebar: 230 247 230;
-    --sidebar-foreground: 5 46 22;
-    --sidebar-primary: 22 163 74;
-    --sidebar-border: 22 163 74;
-    --sidebar-active: 22 163 74;
-    --sidebar-active-foreground: 255 255 255;
+html[data-appearance='system'][data-role='student'] [data-slot='sidebar-wrapper'],
+html[data-appearance='system'][data-role='student'] .sidebar {
+    --sidebar: #E6F7E6;
+    --sidebar-foreground: #5f605f;
+    --sidebar-primary: #16A34A;
+    --sidebar-border: #16A34A;
+    --sidebar-active: #16A34A;
+    --sidebar-active-foreground: #ffffff;
 }
 
-html[data-appearance='system'][data-role='staff'] [data-slot='sidebar-wrapper'] {
-    --sidebar: 255 228 250;
-    --sidebar-foreground: 31 41 55;
-    --sidebar-primary: 255 2 154;
-    --sidebar-border: 255 2 154;
-    --sidebar-active: 255 2 154;
-    --sidebar-active-foreground: 255 255 255;
+html[data-appearance='system'][data-role='staff'] [data-slot='sidebar-wrapper'],
+html[data-appearance='system'][data-role='staff'] .sidebar {
+    --sidebar: #FFE4FA;
+    --sidebar-foreground: #5f605f;
+    --sidebar-primary: #FF029A;
+    --sidebar-border: #FF029A;
+    --sidebar-active: #FF029A;
+    --sidebar-active-foreground: #ffffff;
 }
 
 @layer base {
-    /* * {
-        @apply border-border;
-    } */
-
     body {
         @apply bg-background text-foreground;
+        border: none !important;
+        border-top: none !important;
+    }
+    
+    /* Remove any top border from common elements */
+    header,
+    main,
+    nav,
+    .sidebar {
+        border-top: none !important;
     }
 }
