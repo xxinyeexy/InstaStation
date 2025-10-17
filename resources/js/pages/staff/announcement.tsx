@@ -236,7 +236,7 @@ export default function StaffAnnouncements(props: {
                             setPublishDate(nowDateTimeLocal);
                             setAnnStatus('Active'); // Set to Published by default when publish date is current
                         }}
-                        className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white dark:bg-gray-700"
+                        className="inline-flex items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white dark:bg-gray-700"
                     >
                         <Plus size={16} /> New Announcement
                     </button>

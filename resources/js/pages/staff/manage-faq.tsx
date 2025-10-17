@@ -88,12 +88,12 @@ export default function ManageFaq({
 
                 {/* Summary cards */}
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-xl border bg-white p-4">
+                    <div className="rounded-xl border-border border bg-white p-4">
                         <div className="text-sm text-gray-600">Total FAQs</div>
                         <div className="text-2xl font-bold">{list.length}</div>
                         <div className="text-xs text-gray-500">All questions</div>
                     </div>
-                    <div className="rounded-xl border bg-white p-4">
+                    <div className="rounded-xl border-border border bg-white p-4">
                         <div className="text-sm text-gray-600">Published</div>
                         <div className="text-2xl font-bold">{list.filter((r) => r.faq_status === 'Active').length}</div>
                         <div className="text-xs text-gray-500">Visible to students</div>
@@ -109,11 +109,11 @@ export default function ManageFaq({
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
                             placeholder="Search FAQs..."
-                            className="w-full rounded-md border px-7 py-2 text-sm"
+                            className="w-full rounded-md border border-border bg-background px-7 py-2 text-sm text-foreground placeholder:text-muted-foreground"
                             onKeyDown={(e) => e.key === 'Enter' && refreshFromServer()}
                         />
                     </div>
-                    <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-md border px-3 py-2 text-sm">
+                    <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground">
                         <option value="">All Categories</option>
                         {categories
                             .filter((c, index, arr) => arr.indexOf(c) === index)
@@ -126,7 +126,7 @@ export default function ManageFaq({
                     </select>
                     <button
                         onClick={() => setAdding(true)}
-                        className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white"
+                        className="inline-flex items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white"
                     >
                         <Plus size={16} /> Add FAQ
                     </button>
@@ -135,7 +135,7 @@ export default function ManageFaq({
                 {/* List */}
                 <div className="space-y-4">
                     {filtered.map((f) => (
-                        <div key={f.faq_id} className="rounded-xl border bg-white">
+                        <div key={f.faq_id} className="rounded-xl border border-border bg-white">
                             <div className="flex items-start justify-between p-4">
                                 <div className="pr-4">
                                     <div className="mb-2 flex items-center gap-2 text-xs">
@@ -318,16 +318,16 @@ export default function ManageFaq({
                                 <input
                                     value={addQuestion}
                                     onChange={(e) => setAddQuestion(e.target.value)}
-                                    className="w-full rounded-md border px-3 py-2 text-sm"
+                                    className="w-full rounded-md border border-border  px-3 py-2 text-sm"
                                     placeholder="Enter the question..."
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium">Answer</div>
+                                <div className="mb-1 text-sm font-medium ">Answer</div>
                                 <textarea
                                     value={addAnswer}
                                     onChange={(e) => setAddAnswer(e.target.value)}
-                                    className="h-28 w-full rounded-md border px-3 py-2 text-sm"
+                                    className="h-28 w-full rounded-md border-border border px-3 py-2 text-sm"
                                     placeholder="Enter the answer..."
                                 />
                             </div>
@@ -337,7 +337,7 @@ export default function ManageFaq({
                                     <select
                                         value={addCategory}
                                         onChange={(e) => setAddCategory(e.target.value)}
-                                        className="w-full rounded-md border px-3 py-2 text-sm"
+                                        className="w-full rounded-md border border-border  px-3 py-2 text-sm"
                                     >
                                         <option value="">Choose category</option>
                                         {categories
@@ -355,7 +355,7 @@ export default function ManageFaq({
                                     <select
                                         value={addStatus}
                                         onChange={(e) => setAddStatus(e.target.value as 'Active' | 'Inactive')}
-                                        className="w-full rounded-md border px-3 py-2 text-sm"
+                                        className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                     >
                                         <option value="Active">Published</option>
                                         <option value="Inactive">Draft</option>
@@ -367,7 +367,7 @@ export default function ManageFaq({
                                     Cancel
                                 </button>
                                 <button
-                                    className="rounded-md bg-gray-900 px-3 py-2 text-sm text-white disabled:opacity-50"
+                                    className="rounded-md bg-pink-500 px-3 py-2 text-sm text-white disabled:opacity-50"
                                     onClick={async () => {
                                         if (!addQuestion.trim() || !addAnswer.trim()) return;
                                         const res = await fetch('/staff/faq', {
