@@ -310,7 +310,7 @@ export default function StaffHome() {
                                                 borderRadius: '8px',
                                             }}
                                         />
-                                        <Bar dataKey="count" fill="#8B5CF6" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="count" fill="#FF029A" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>
@@ -374,7 +374,7 @@ export default function StaffHome() {
                                                 borderRadius: '8px',
                                             }}
                                         />
-                                        <Bar dataKey="count" fill="#374151" radius={[4, 4, 0, 0]} />
+                                        <Bar dataKey="count" fill="#FF029A" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </CardContent>

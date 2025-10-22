@@ -1,6 +1,6 @@
 import { type SharedData } from '@/types';
-import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { CalendarDays, CheckCircle, LogIn, PackageSearch, UserPlus } from 'lucide-react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { ArrowLeft, CalendarDays, CheckCircle, LogIn, PackageSearch, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
 type Parcel = {
@@ -45,6 +45,15 @@ export default function Unclaimed({
     return (
         <div className="min-h-screen bg-gray-50">
             <Head title="Unclaimed Parcels" />
+            <Link
+                href="/"
+                className="group absolute top-4 left-4 inline-flex items-center gap-0 overflow-hidden rounded-full bg-gray-900 text-white shadow-lg transition-all duration-300 hover:gap-2 hover:pr-5 hover:shadow-xl dark:bg-gray-700"
+            >
+                <div className="flex h-10 w-10 items-center justify-center">
+                    <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+                </div>
+                <span className="max-w-0 overflow-hidden text-sm font-medium transition-all duration-300 group-hover:max-w-xs">Back</span>
+            </Link>
             <div className="mx-auto max-w-6xl p-6">
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-2xl font-semibold">Unclaimed Parcels</h1>
@@ -76,10 +85,10 @@ export default function Unclaimed({
                         <input
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
-                            placeholder="Enter your name or tracking number..."
-                            className="w-full rounded-lg border px-3 py-2"
+                            placeholder="Search your parcels..."
+                            className="w-full rounded-lg border-border border px-3 py-2"
                         />
-                        <button type="submit" className="rounded-lg bg-gray-900 px-4 py-2 text-white hover:bg-black">
+                        <button type="submit" className="rounded-lg bg-pink-500 px-4 py-2 text-white hover:bg-black">
                             Search
                         </button>
                     </div>

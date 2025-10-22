@@ -17,7 +17,6 @@ export default function Welcome() {
     const { auth, announcements = [] } = usePage<SharedData & { announcements?: AnnouncementCard[] }>().props as any;
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementCard | null>(null);
     const [visibleCount, setVisibleCount] = useState<number>(4);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [currentWord, setCurrentWord] = useState(0);
     const words = ['Smart', 'Instant', 'Swift', 'Secure'];
 
@@ -35,12 +34,11 @@ export default function Welcome() {
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) return '';
             return date.toLocaleString(undefined, {
-                // ← Added custom options
                 year: 'numeric',
                 month: 'numeric',
                 day: 'numeric',
                 hour: 'numeric',
-                minute: '2-digit', // ← Only minutes, no seconds
+                minute: '2-digit',
                 hour12: true,
             });
         } catch {
@@ -64,8 +62,8 @@ export default function Welcome() {
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
             <div className="min-h-screen bg-[#FFE0F2] p-6">
-                {/* Header */}
-                <header className="mb-20 flex justify-end gap-4">
+                {/* Header - Slide down from top */}
+                <header className="mb-20 flex justify-end gap-4 duration-700 animate-in fade-in slide-in-from-top-4">
                     <nav className="flex items-center justify-end gap-4">
                         {auth.user ? (
                             <Link href={route('dashboard')} className="rounded-lg bg-gray-900 px-6 py-2 text-white transition-colors hover:bg-black">
@@ -89,15 +87,16 @@ export default function Welcome() {
 
                 {/* Main Content */}
                 <div className="mx-auto max-w-4xl text-center">
-                    <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#FF029A]/20 bg-white/80 px-4 py-2 shadow-lg backdrop-blur-sm duration-700 animate-in fade-in slide-in-from-top-4">
+                    {/* Badge - Fade in and slide from top */}
+                    <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#FF029A]/20 bg-white/80 px-4 py-2 shadow-lg backdrop-blur-sm duration-700 animate-in fade-in slide-in-from-top-4" style={{ animationDelay: '100ms' }}>
                         <Sparkles className="h-4 w-4 text-[#FF029A]" />
                         <span className="bg-gradient-to-r from-[#FF029A] to-[#16A34A] bg-clip-text text-sm font-semibold text-transparent">
-                            Instant Parcel Tracking Dashboard{' '}
+                            Instant Parcel Tracking Dashboard
                         </span>
                     </div>
 
-                    {/* Logo and Title */}
-                    <div className="mb-8">
+                    {/* Logo and Title - Scale up and fade in */}
+                    <div className="mb-8 duration-700 animate-in fade-in zoom-in-95" style={{ animationDelay: '200ms' }}>
                         <h1 className="relative mb-4">
                             <span className="block">
                                 <span className="relative inline-block bg-gradient-to-r from-[#FF029A] via-pink-600 to-[#FF029A] bg-clip-text text-7xl font-black tracking-tight text-transparent">
@@ -121,7 +120,9 @@ export default function Welcome() {
                             </span>
                         </h1>
                     </div>
-                    <div className="flex items-center justify-center gap-1 text-3xl font-bold md:text-4xl">
+
+                    {/* Animated Text - Fade in and slide from bottom */}
+                    <div className="flex items-center justify-center gap-1 text-3xl font-bold duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-4xl" style={{ animationDelay: '300ms' }}>
                         <span className="text-gray-700">The</span>
                         <div className="relative inline-block h-12 w-40 overflow-hidden">
                             {words.map((word, index) => (
@@ -141,13 +142,14 @@ export default function Welcome() {
                         </div>
                         <span className="text-gray-700">Way</span>
                     </div>
-                    <p className="flex items-center justify-center gap-2 text-xl font-semibold text-gray-600 md:text-2xl">
-                        {/* <Zap className="h-6 w-6 text-[#FF029A]" /> */}
+                    
+                    {/* Subtitle - Fade in */}
+                    <p className="flex items-center justify-center gap-2 text-xl font-semibold text-gray-600 duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-2xl" style={{ animationDelay: '400ms' }}>
                         to Track Campus Deliveries
                     </p>
 
-                    {/* Description */}
-                    <div className="mb-16 duration-1000 animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: '400ms' }}>
+                    {/* Description - Fade in and slide from bottom */}
+                    <div className="mb-16 duration-1000 animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: '500ms' }}>
                         <p className="mx-auto max-w-3xl text-xl leading-relaxed text-gray-600">
                             Streamline parcel management for your <span className="font-semibold text-gray-900">university</span> with{' '}
                             <span className="relative inline-block">
@@ -162,10 +164,10 @@ export default function Welcome() {
                             , and <span className="font-semibold text-gray-900">real-time tracking</span> for both students and staff.
                         </p>
                     </div>
-                    {/* Check for Unclaimed Parcels Button */}
-                    <div className="mb-16">
-                        <img src="/images/logo.png" alt="InstaStation" className="mx-auto mb-4 w-70" />
 
+                    {/* Check for Unclaimed Parcels Button - Scale in */}
+                    <div className="mb-16 duration-700 animate-in fade-in zoom-in-95" style={{ animationDelay: '600ms' }}>
+                        <img src="/images/logo.png" alt="InstaStation" className="mx-auto mb-4 w-70" />
                         <Link
                             href={route('public.unclaimed')}
                             className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-6 py-3 text-green-600 transition-colors hover:bg-green-100"
@@ -174,7 +176,9 @@ export default function Welcome() {
                             Check Unclaimed Parcels
                         </Link>
                     </div>
-                    <section className="relative overflow-hidden px-6 py-20">
+
+                    {/* Hero Section - Slide from right */}
+                    <section className="relative overflow-hidden px-6 py-20 duration-1000 animate-in fade-in slide-in-from-right-8" style={{ animationDelay: '700ms' }}>
                         <div className="mx-auto max-w-7xl">
                             <div className="grid items-center gap-12 lg:grid-cols-2">
                                 {/* Left Content */}
@@ -226,10 +230,10 @@ export default function Welcome() {
                         </div>
                     </section>
 
-                    {/* Feature Cards */}
+                    {/* Feature Cards - Staggered fade in from bottom */}
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                         {/* User Management */}
-                        <div className="rounded-xl bg-purple-50 p-6 shadow-lg transition-shadow hover:shadow-xl">
+                        <div className="rounded-xl bg-purple-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl" style={{ animationDelay: '100ms' }}>
                             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600">
                                     <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -242,7 +246,7 @@ export default function Welcome() {
                         </div>
 
                         {/* Payment Processing */}
-                        <div className="rounded-xl bg-green-50 p-6 shadow-lg transition-shadow hover:shadow-xl">
+                        <div className="rounded-xl bg-green-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl" style={{ animationDelay: '200ms' }}>
                             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600">
                                     <CreditCard className="h-5 w-5 text-white" />
@@ -253,7 +257,7 @@ export default function Welcome() {
                         </div>
 
                         {/* Smart Notifications */}
-                        <div className="rounded-xl bg-orange-50 p-6 shadow-lg transition-shadow hover:shadow-xl">
+                        <div className="rounded-xl bg-orange-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl" style={{ animationDelay: '300ms' }}>
                             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
                                     <Bell className="h-5 w-5 text-white" />
@@ -264,7 +268,7 @@ export default function Welcome() {
                         </div>
 
                         {/* Parcel Tracking */}
-                        <div className="rounded-xl bg-blue-50 p-6 shadow-lg transition-shadow hover:shadow-xl">
+                        <div className="rounded-xl bg-blue-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl" style={{ animationDelay: '400ms' }}>
                             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
                                     <MapPin className="h-5 w-5 text-white" />
@@ -275,19 +279,76 @@ export default function Welcome() {
                         </div>
                     </div>
 
-                    {/* Deploy Button */}
-                    <div className="mt-16">
-                        <Link
-                            href="https://cloud.laravel.com"
-                            target="_blank"
-                            className="inline-block rounded-lg bg-gray-900 px-8 py-3 text-white transition-colors hover:bg-black"
-                        >
-                            Deploy now
-                        </Link>
+                    {/* How It Works Section - Fade in and scale */}
+                    <div className="mt-32 rounded-xl bg-white p-12 shadow-xl duration-1000 animate-in fade-in zoom-in-95" style={{ animationDelay: '100ms' }}>
+                        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white duration-700 animate-in fade-in slide-in-from-top-4" style={{ animationDelay: '200ms' }}>
+                            Process
+                        </div>
+                        <h2 className="mb-4 text-4xl font-bold text-gray-900 duration-700 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: '300ms' }}>
+                            How It Works
+                        </h2>
+                        <p className="mx-auto mb-16 max-w-2xl text-lg text-gray-600 duration-700 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: '400ms' }}>
+                            Getting your parcels have never been easier
+                        </p>
+
+                        <div className="relative grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+                            {/* Connecting Line - Hidden on mobile */}
+                            <div className="absolute left-[12.5%] right-[12.5%] top-12 hidden h-0.5 bg-pink-300 lg:block"></div>
+
+                            {/* Step 1 - Parcel Arrival */}
+                            <div className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '500ms' }}>
+                                <div className="relative z-10 mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-[#FF029A] transition-all hover:scale-110 hover:shadow-2xl">
+                                    <Package className="h-10 w-10 text-white" />
+                                    <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
+                                        01
+                                    </div>
+                                </div>
+                                <h3 className="mb-2 text-xl font-bold text-gray-900">Parcel Arrival</h3>
+                                <p className="text-sm text-gray-600">Your parcel is received and securely stored at our facility</p>
+                            </div>
+
+                            {/* Step 2 - Notification Sent */}
+                            <div className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '700ms' }}>
+                                <div className="relative z-10 mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-[#FF029A] shadow-lg transition-all hover:scale-110 hover:shadow-2xl">
+                                    <Bell className="h-10 w-10 text-white" />
+                                    <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
+                                        02
+                                    </div>
+                                </div>
+                                <h3 className="mb-2 text-xl font-bold text-gray-900">Notification Sent</h3>
+                                <p className="text-sm text-gray-600">Receive instant notifications about their parcel arrival.</p>
+                            </div>
+
+                            {/* Step 3 - Payment Processing */}
+                            <div className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '900ms' }}>
+                                <div className="relative z-10 mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-[#FF029A] shadow-lg transition-all hover:scale-110 hover:shadow-2xl">
+                                    <CreditCard className="h-10 w-10 text-white" />
+                                    <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
+                                        03
+                                    </div>
+                                </div>
+                                <h3 className="mb-2 text-xl font-bold text-gray-900">Payment Processing</h3>
+                                <p className="text-sm text-gray-600">Submit payment proof and wait for verification.</p>
+                            </div>
+
+                            {/* Step 4 - QR Collection */}
+                            <div className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '1100ms' }}>
+                                <div className="relative z-10 mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-[#FF029A] shadow-lg transition-all hover:scale-110 hover:shadow-2xl">
+                                    <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                    </svg>
+                                    <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
+                                        04
+                                    </div>
+                                </div>
+                                <h3 className="mb-2 text-xl font-bold text-gray-900">QR Collection</h3>
+                                <p className="text-sm text-gray-600">Show your qrcode or pickup code to collect your parcel hassle-free</p>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Newsletter Section */}
-                    <div className="mt-20">
+                    {/* Newsletter Section - Slide from left */}
+                    <div className="mt-20 duration-700 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '100ms' }}>
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-2xl font-semibold text-gray-900">Newsletter</h2>
                             {announcementsSorted.length > displayedAnnouncements.length && (
@@ -297,11 +358,12 @@ export default function Welcome() {
                             )}
                         </div>
                         <div className="space-y-6">
-                            {displayedAnnouncements.map((a: AnnouncementCard) => {
+                            {displayedAnnouncements.map((a: AnnouncementCard, index: number) => {
                                 return (
                                     <div
                                         key={a.announcement_id}
-                                        className="cursor-pointer overflow-hidden rounded-2xl bg-white text-black transition-shadow hover:shadow-lg"
+                                        className="cursor-pointer overflow-hidden rounded-2xl bg-white text-black transition-shadow hover:shadow-lg duration-700 animate-in fade-in slide-in-from-bottom-4"
+                                        style={{ animationDelay: `${(index + 2) * 100}ms` }}
                                         onClick={() => setSelectedAnnouncement(a)}
                                     >
                                         {a.announcement_image && (
@@ -309,7 +371,7 @@ export default function Welcome() {
                                                 <img
                                                     src={`/storage/${a.announcement_image}`}
                                                     alt="announcement"
-                                                    className="h-40 w-full object-cover"
+                                                    className="h-40 w-full object-cover transition-transform duration-300 hover:scale-105"
                                                 />
                                             </div>
                                         )}
@@ -326,18 +388,27 @@ export default function Welcome() {
                                 );
                             })}
                             {announcements.length === 0 && (
-                                <div className="rounded-xl border bg-white p-6 text-center text-gray-500">No announcements yet.</div>
+                                <div className="rounded-xl border bg-white p-6 text-center text-gray-500 duration-700 animate-in fade-in">No announcements yet.</div>
                             )}
                         </div>
                     </div>
                 </div>
+
+                {/* Footer - Fade in from bottom */}
+                <footer className="mt-20 border-t border-pink-200 bg-white py-8 duration-1000 animate-in fade-in slide-in-from-bottom-8">
+                    <div className="mx-auto max-w-4xl text-center">
+                        <p className="text-xs font-medium text-pink-500">
+                            © INSTASTATION. SINCE 2025. ALL RIGHTS RESERVED.
+                        </p>
+                    </div>
+                </footer>
             </div>
 
             {/* Announcement Detail Modal */}
             {selectedAnnouncement && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center duration-300 animate-in fade-in">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setSelectedAnnouncement(null)} />
-                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-card shadow-xl">
+                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-card shadow-xl duration-300 animate-in zoom-in-95 slide-in-from-bottom-4">
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-border p-4">
                             <div className="flex items-center gap-3">
@@ -375,7 +446,6 @@ export default function Welcome() {
                             {/* Date and time */}
                             <div className="mb-6 flex items-center gap-2 text-sm text-gray-500">
                                 <span>
-                                    {' '}
                                     <Calendar className="h-4 w-4" />
                                 </span>
                                 <span>{formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}</span>
