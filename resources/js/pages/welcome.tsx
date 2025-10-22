@@ -1,7 +1,7 @@
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, Bell, CreditCard, MapPin, Package, X } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, Bell, Calendar, CreditCard, MapPin, Package, Sparkles, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 type AnnouncementCard = {
     announcement_id: number;
@@ -17,6 +17,16 @@ export default function Welcome() {
     const { auth, announcements = [] } = usePage<SharedData & { announcements?: AnnouncementCard[] }>().props as any;
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementCard | null>(null);
     const [visibleCount, setVisibleCount] = useState<number>(4);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const [currentWord, setCurrentWord] = useState(0);
+    const words = ['Smart', 'Instant', 'Swift', 'Secure'];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentWord((prev) => (prev + 1) % words.length);
+        }, 2500);
+        return () => clearInterval(interval);
+    }, []);
 
     // Format date consistently
     const formatDate = (dateStr?: string | null) => {
@@ -24,7 +34,15 @@ export default function Welcome() {
         try {
             const date = new Date(dateStr);
             if (isNaN(date.getTime())) return '';
-            return date.toLocaleString();
+            return date.toLocaleString(undefined, {
+                // ← Added custom options
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit', // ← Only minutes, no seconds
+                hour12: true,
+            });
         } catch {
             return '';
         }
@@ -71,32 +89,142 @@ export default function Welcome() {
 
                 {/* Main Content */}
                 <div className="mx-auto max-w-4xl text-center">
+                    <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#FF029A]/20 bg-white/80 px-4 py-2 shadow-lg backdrop-blur-sm duration-700 animate-in fade-in slide-in-from-top-4">
+                        <Sparkles className="h-4 w-4 text-[#FF029A]" />
+                        <span className="bg-gradient-to-r from-[#FF029A] to-[#16A34A] bg-clip-text text-sm font-semibold text-transparent">
+                            Instant Parcel Tracking Dashboard{' '}
+                        </span>
+                    </div>
+
                     {/* Logo and Title */}
                     <div className="mb-8">
-                        <h1 className="mb-2 text-4xl font-bold text-gray-900">
-                            Insta<span className="text-gray-900">Station</span>
+                        <h1 className="relative mb-4">
+                            <span className="block">
+                                <span className="relative inline-block bg-gradient-to-r from-[#FF029A] via-pink-600 to-[#FF029A] bg-clip-text text-7xl font-black tracking-tight text-transparent">
+                                    Insta
+                                    <span className="relative">
+                                        <span className="relative z-10 bg-gradient-to-r from-gray-900 via-green-600 to-green-700 bg-clip-text text-transparent">
+                                            Station
+                                        </span>
+                                        {/* Underline decoration */}
+                                        <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
+                                            <path d="M1 5.5C50 2.5 100 2.5 199 5.5" stroke="url(#gradient)" strokeWidth="3" strokeLinecap="round" />
+                                            <defs>
+                                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" stopColor="#FF029A" />
+                                                    <stop offset="100%" stopColor="#16A34A" />
+                                                </linearGradient>
+                                            </defs>
+                                        </svg>
+                                    </span>
+                                </span>
+                            </span>
                         </h1>
-                        <p className="text-lg text-gray-600">Instant Parcel Tracking Dashboard</p>
                     </div>
+                    <div className="flex items-center justify-center gap-1 text-3xl font-bold md:text-4xl">
+                        <span className="text-gray-700">The</span>
+                        <div className="relative inline-block h-12 w-40 overflow-hidden">
+                            {words.map((word, index) => (
+                                <div
+                                    key={word}
+                                    className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${
+                                        index === currentWord
+                                            ? 'translate-y-0 opacity-100'
+                                            : index < currentWord
+                                              ? '-translate-y-full opacity-0'
+                                              : 'translate-y-full opacity-0'
+                                    }`}
+                                >
+                                    <span className="bg-gradient-to-r from-[#FF029A] to-[#16A34A] bg-clip-text text-transparent">{word}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <span className="text-gray-700">Way</span>
+                    </div>
+                    <p className="flex items-center justify-center gap-2 text-xl font-semibold text-gray-600 md:text-2xl">
+                        {/* <Zap className="h-6 w-6 text-[#FF029A]" /> */}
+                        to Track Campus Deliveries
+                    </p>
 
                     {/* Description */}
-                    <div className="mb-16">
-                        <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-700">
-                            Streamline parcel management for your university with smart matching, secure payments, and real-time tracking for both
-                            students and staff.
+                    <div className="mb-16 duration-1000 animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: '400ms' }}>
+                        <p className="mx-auto max-w-3xl text-xl leading-relaxed text-gray-600">
+                            Streamline parcel management for your <span className="font-semibold text-gray-900">university</span> with{' '}
+                            <span className="relative inline-block">
+                                <span className="relative z-10 font-semibold text-[#FF029A]">smart matching</span>
+                                <span className="absolute bottom-0 left-0 h-2 w-full bg-[#fffeff]"></span>
+                            </span>
+                            ,{' '}
+                            <span className="relative inline-block">
+                                <span className="relative z-10 font-semibold text-[#16A34A]">secure payments</span>
+                                <span className="absolute bottom-0 left-0 h-2 w-full bg-[#E6F7E6]"></span>
+                            </span>
+                            , and <span className="font-semibold text-gray-900">real-time tracking</span> for both students and staff.
                         </p>
                     </div>
-
                     {/* Check for Unclaimed Parcels Button */}
                     <div className="mb-16">
+                        <img src="/images/logo.png" alt="InstaStation" className="mx-auto mb-4 w-70" />
+
                         <Link
                             href={route('public.unclaimed')}
                             className="inline-flex items-center gap-2 rounded-lg bg-green-50 px-6 py-3 text-green-600 transition-colors hover:bg-green-100"
                         >
                             <Package className="h-5 w-5" />
-                            Check for Unclaimed Parcels
+                            Check Unclaimed Parcels
                         </Link>
                     </div>
+                    <section className="relative overflow-hidden px-6 py-20">
+                        <div className="mx-auto max-w-7xl">
+                            <div className="grid items-center gap-12 lg:grid-cols-2">
+                                {/* Left Content */}
+                                <div className="text-center lg:text-left">
+                                    <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-purple-100 px-4 py-2 text-sm font-medium text-purple-700">
+                                        <span className="h-2 w-2 animate-pulse rounded-full bg-purple-600"></span>
+                                        Smart Campus Solution
+                                    </div>
+                                    <h1
+                                        style={{
+                                            marginBottom: '24px',
+                                            fontSize: '60px',
+                                            fontWeight: '900',
+                                            background: 'linear-gradient(135deg, #FF029A 0%, #FF3BAE 50%, #16A34A 100%)',
+                                            WebkitBackgroundClip: 'text',
+                                            WebkitTextFillColor: 'transparent',
+                                            lineHeight: '1.2',
+                                            letterSpacing: '-2px',
+                                        }}
+                                    >
+                                        InstaStation
+                                    </h1>
+                                    <p className="mb-8 max-w-xl text-xl leading-relaxed text-gray-600">
+                                        A comprehensive parcel tracking and management system designed for universities. Featuring intelligent
+                                        matching, secure payment processing, and seamless real-time tracking for both students and staff.
+                                    </p>
+                                    <div className="flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
+                                        <button className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-pink-600 to-[#FF029A] px-8 py-4 text-base font-semibold text-white transition-all hover:from-purple-700 hover:to-pink-700 hover:shadow-xl">
+                                            <Package className="h-5 w-5" />
+                                            Learn More
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Right Image */}
+                                <div className="relative">
+                                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-purple-400 to-pink-400 opacity-20 blur-3xl"></div>
+                                    <div className="relative rounded-3xl border border-gray-200 bg-white p-8 shadow-2xl">
+                                        <div className="flex aspect-square items-center justify-center rounded-2xl bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100">
+                                            <div className="text-center">
+                                                <div className="mb-8">
+                                                    <img src="/images/logo.png" alt="InstaStation" className="mx-auto mb-4 w-70" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
                     {/* Feature Cards */}
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -188,7 +316,7 @@ export default function Welcome() {
                                         <div className="p-4">
                                             <div className="mb-1 flex items-center gap-2 text-xs text-black">
                                                 <span className="inline-flex items-center gap-1">
-                                                    <img src="/favicon.svg" className="h-4 w-4" /> Postal Hub
+                                                    <Package className="h-4 w-4" /> Postal Hub
                                                 </span>
                                             </div>
                                             <div className="text-left text-lg font-semibold">{a.announcement_title}</div>
@@ -239,14 +367,17 @@ export default function Welcome() {
                             {/* Sender info */}
                             <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
                                 <span className="inline-flex items-center gap-1">
-                                    <img src="/favicon.svg" className="h-4 w-4" />
+                                    <Package className="h-4 w-4" />
                                     by Postal Hub
                                 </span>
                             </div>
 
                             {/* Date and time */}
                             <div className="mb-6 flex items-center gap-2 text-sm text-gray-500">
-                                <span>📅</span>
+                                <span>
+                                    {' '}
+                                    <Calendar className="h-4 w-4" />
+                                </span>
                                 <span>{formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}</span>
                             </div>
 

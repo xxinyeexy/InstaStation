@@ -218,7 +218,7 @@ export default function StaffHome() {
                                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
-                                        Operating Status
+                                        Daily Collection Rate
                                     </button>
                                 </div>
                             </CardHeader>

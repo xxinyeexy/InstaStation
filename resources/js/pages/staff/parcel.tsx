@@ -1754,7 +1754,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     {parcel.parcel_status?.toLowerCase() !== 'collected' && (
                                                         <button
                                                             onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                            className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
+                                                            className="rounded-2xl bg-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
                                                         >
                                                             Mark as Collected
                                                         </button>
