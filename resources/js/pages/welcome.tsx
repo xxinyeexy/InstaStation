@@ -55,6 +55,66 @@ export default function Welcome() {
 
     const displayedAnnouncements = announcementsSorted.slice(0, Math.max(4, visibleCount));
 
+    /**
+     * Intersection Observer animation hook
+     *
+     * Strategy:
+     *  - Find all elements that currently have the `.animate-in` class (your markup uses that a lot).
+     *  - Immediately remove the class and add `.will-animate` (so they don't animate on page-load).
+     *  - Observe them; when they intersect threshold -> re-add `.animate-in` and unobserve.
+     *  - Respect prefers-reduced-motion: treat as "already visible" and add animations back immediately.
+     *
+     * This avoids changing your markup and keeps your tailwind/animation utilities intact.
+     */
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Select elements intended to animate on view
+        const nodes = Array.from(document.querySelectorAll<HTMLElement>('.animate-in'));
+
+        if (nodes.length === 0) return;
+
+        // Prevent page-load animations: mark them as pending
+        nodes.forEach((el) => {
+            el.classList.remove('animate-in');
+            el.classList.add('will-animate');
+        });
+
+        // If user prefers reduced motion, just restore animations (no intersection)
+        if (prefersReduced) {
+            nodes.forEach((el) => {
+                el.classList.remove('will-animate');
+                el.classList.add('animate-in');
+            });
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const target = entry.target as HTMLElement;
+                    if (entry.isIntersecting) {
+                        // small delay support: elements can include style animationDelay inline already
+                        target.classList.remove('will-animate');
+                        target.classList.add('animate-in');
+                        observer.unobserve(target); // animate once
+                    }
+                });
+            },
+            {
+                threshold: 0.15, // element considered in-view when 15% visible
+            }
+        );
+
+        nodes.forEach((el) => observer.observe(el));
+
+        return () => {
+            observer.disconnect();
+        };
+    }, []);
+
     return (
         <>
             <Head title="Welcome">

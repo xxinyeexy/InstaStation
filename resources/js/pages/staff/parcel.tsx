@@ -976,7 +976,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 >
                                     Close
                                 </button>
-                                
+                                  {parcelDetails.parcel_status?.toLowerCase() === 'ready for collection' && (
+            <button
+                onClick={() => {
+                    handleMarkAsCollected(parcelDetails.parcel_id);
+                    handleCloseDetailsModal();
+                }}
+                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:bg-green-700"
+            >
+                Mark as Collected
+            </button>
+        )}
                             </div>
                         )}
                     </div>
@@ -1751,7 +1761,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     >
                                                         <Trash2 className="h-5 w-5" />
                                                     </button>
-                                                    {parcel.parcel_status?.toLowerCase() !== 'collected' && (
+                                                    {parcel.parcel_status?.toLowerCase() == 'ready for collection' && (
                                                         <button
                                                             onClick={() => handleMarkAsCollected(parcel.parcel_id)}
                                                             className="rounded-2xl bg-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
