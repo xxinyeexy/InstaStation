@@ -105,7 +105,7 @@ export default function Welcome() {
             },
             {
                 threshold: 0.15, // element considered in-view when 15% visible
-            }
+            },
         );
 
         nodes.forEach((el) => observer.observe(el));
@@ -148,7 +148,10 @@ export default function Welcome() {
                 {/* Main Content */}
                 <div className="mx-auto max-w-4xl text-center">
                     {/* Badge - Fade in and slide from top */}
-                    <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#FF029A]/20 bg-white/80 px-4 py-2 shadow-lg backdrop-blur-sm duration-700 animate-in fade-in slide-in-from-top-4" style={{ animationDelay: '100ms' }}>
+                    <div
+                        className="mb-8 inline-flex items-center gap-2 rounded-full border border-[#FF029A]/20 bg-white/80 px-4 py-2 shadow-lg backdrop-blur-sm duration-700 animate-in fade-in slide-in-from-top-4"
+                        style={{ animationDelay: '100ms' }}
+                    >
                         <Sparkles className="h-4 w-4 text-[#FF029A]" />
                         <span className="bg-gradient-to-r from-[#FF029A] to-[#16A34A] bg-clip-text text-sm font-semibold text-transparent">
                             Instant Parcel Tracking Dashboard
@@ -182,7 +185,10 @@ export default function Welcome() {
                     </div>
 
                     {/* Animated Text - Fade in and slide from bottom */}
-                    <div className="flex items-center justify-center gap-1 text-3xl font-bold duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-4xl" style={{ animationDelay: '300ms' }}>
+                    <div
+                        className="flex items-center justify-center gap-1 text-3xl font-bold duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-4xl"
+                        style={{ animationDelay: '300ms' }}
+                    >
                         <span className="text-gray-700">The</span>
                         <div className="relative inline-block h-12 w-40 overflow-hidden">
                             {words.map((word, index) => (
@@ -202,9 +208,12 @@ export default function Welcome() {
                         </div>
                         <span className="text-gray-700">Way</span>
                     </div>
-                    
+
                     {/* Subtitle - Fade in */}
-                    <p className="flex items-center justify-center gap-2 text-xl font-semibold text-gray-600 duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-2xl" style={{ animationDelay: '400ms' }}>
+                    <p
+                        className="flex items-center justify-center gap-2 text-xl font-semibold text-gray-600 duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-2xl"
+                        style={{ animationDelay: '400ms' }}
+                    >
                         to Track Campus Deliveries
                     </p>
 
@@ -238,7 +247,10 @@ export default function Welcome() {
                     </div>
 
                     {/* Hero Section - Slide from right */}
-                    <section className="relative overflow-hidden px-6 py-20 duration-1000 animate-in fade-in slide-in-from-right-8" style={{ animationDelay: '700ms' }}>
+                    <section
+                        className="relative overflow-hidden px-6 py-20 duration-1000 animate-in fade-in slide-in-from-right-8"
+                        style={{ animationDelay: '700ms' }}
+                    >
                         <div className="mx-auto max-w-7xl">
                             <div className="grid items-center gap-12 lg:grid-cols-2">
                                 {/* Left Content */}
@@ -293,7 +305,10 @@ export default function Welcome() {
                     {/* Feature Cards - Staggered fade in from bottom */}
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                         {/* User Management */}
-                        <div className="rounded-xl bg-purple-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl" style={{ animationDelay: '100ms' }}>
+                        <div
+                            className="rounded-xl bg-purple-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl"
+                            style={{ animationDelay: '100ms' }}
+                        >
                             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600">
                                     <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -306,7 +321,10 @@ export default function Welcome() {
                         </div>
 
                         {/* Payment Processing */}
-                        <div className="rounded-xl bg-green-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl" style={{ animationDelay: '200ms' }}>
+                        <div
+                            className="rounded-xl bg-green-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl"
+                            style={{ animationDelay: '200ms' }}
+                        >
                             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600">
                                     <CreditCard className="h-5 w-5 text-white" />
@@ -317,7 +335,10 @@ export default function Welcome() {
                         </div>
 
                         {/* Smart Notifications */}
-                        <div className="rounded-xl bg-orange-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl" style={{ animationDelay: '300ms' }}>
+                        <div
+                            className="rounded-xl bg-orange-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl"
+                            style={{ animationDelay: '300ms' }}
+                        >
                             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-orange-100">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-600">
                                     <Bell className="h-5 w-5 text-white" />
@@ -328,7 +349,10 @@ export default function Welcome() {
                         </div>
 
                         {/* Parcel Tracking */}
-                        <div className="rounded-xl bg-blue-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl" style={{ animationDelay: '400ms' }}>
+                        <div
+                            className="rounded-xl bg-blue-50 p-6 shadow-lg transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-xl"
+                            style={{ animationDelay: '400ms' }}
+                        >
                             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
                                     <MapPin className="h-5 w-5 text-white" />
@@ -340,26 +364,41 @@ export default function Welcome() {
                     </div>
 
                     {/* How It Works Section - Fade in and scale */}
-                    <div className="mt-32 rounded-xl bg-white p-12 shadow-xl duration-1000 animate-in fade-in zoom-in-95" style={{ animationDelay: '100ms' }}>
-                        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white duration-700 animate-in fade-in slide-in-from-top-4" style={{ animationDelay: '200ms' }}>
+                    <div
+                        className="mt-32 rounded-xl bg-white p-12 shadow-xl duration-1000 animate-in fade-in zoom-in-95"
+                        style={{ animationDelay: '100ms' }}
+                    >
+                        <div
+                            className="mb-4 inline-flex items-center gap-2 rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white duration-700 animate-in fade-in slide-in-from-top-4"
+                            style={{ animationDelay: '200ms' }}
+                        >
                             Process
                         </div>
-                        <h2 className="mb-4 text-4xl font-bold text-gray-900 duration-700 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: '300ms' }}>
+                        <h2
+                            className="mb-4 text-4xl font-bold text-gray-900 duration-700 animate-in fade-in slide-in-from-bottom-4"
+                            style={{ animationDelay: '300ms' }}
+                        >
                             How It Works
                         </h2>
-                        <p className="mx-auto mb-16 max-w-2xl text-lg text-gray-600 duration-700 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: '400ms' }}>
+                        <p
+                            className="mx-auto mb-16 max-w-2xl text-lg text-gray-600 duration-700 animate-in fade-in slide-in-from-bottom-4"
+                            style={{ animationDelay: '400ms' }}
+                        >
                             Getting your parcels have never been easier
                         </p>
 
                         <div className="relative grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
                             {/* Connecting Line - Hidden on mobile */}
-                            <div className="absolute left-[12.5%] right-[12.5%] top-12 hidden h-0.5 bg-pink-300 lg:block"></div>
+                            <div className="absolute top-12 right-[12.5%] left-[12.5%] hidden h-0.5 bg-pink-300 lg:block"></div>
 
                             {/* Step 1 - Parcel Arrival */}
-                            <div className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '500ms' }}>
+                            <div
+                                className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50"
+                                style={{ animationDelay: '500ms' }}
+                            >
                                 <div className="relative z-10 mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-[#FF029A] transition-all hover:scale-110 hover:shadow-2xl">
                                     <Package className="h-10 w-10 text-white" />
-                                    <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
+                                    <div className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
                                         01
                                     </div>
                                 </div>
@@ -368,10 +407,13 @@ export default function Welcome() {
                             </div>
 
                             {/* Step 2 - Notification Sent */}
-                            <div className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '700ms' }}>
+                            <div
+                                className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50"
+                                style={{ animationDelay: '700ms' }}
+                            >
                                 <div className="relative z-10 mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-[#FF029A] shadow-lg transition-all hover:scale-110 hover:shadow-2xl">
                                     <Bell className="h-10 w-10 text-white" />
-                                    <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
+                                    <div className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
                                         02
                                     </div>
                                 </div>
@@ -380,10 +422,13 @@ export default function Welcome() {
                             </div>
 
                             {/* Step 3 - Payment Processing */}
-                            <div className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '900ms' }}>
+                            <div
+                                className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50"
+                                style={{ animationDelay: '900ms' }}
+                            >
                                 <div className="relative z-10 mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-[#FF029A] shadow-lg transition-all hover:scale-110 hover:shadow-2xl">
                                     <CreditCard className="h-10 w-10 text-white" />
-                                    <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
+                                    <div className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
                                         03
                                     </div>
                                 </div>
@@ -392,12 +437,20 @@ export default function Welcome() {
                             </div>
 
                             {/* Step 4 - QR Collection */}
-                            <div className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '1100ms' }}>
+                            <div
+                                className="relative flex flex-col items-center text-center duration-700 animate-in fade-in zoom-in-50"
+                                style={{ animationDelay: '1100ms' }}
+                            >
                                 <div className="relative z-10 mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-pink-600 to-[#FF029A] shadow-lg transition-all hover:scale-110 hover:shadow-2xl">
                                     <svg className="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                                        />
                                     </svg>
-                                    <div className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
+                                    <div className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-bold text-gray-900 shadow drop-shadow-xl">
                                         04
                                     </div>
                                 </div>
@@ -422,7 +475,7 @@ export default function Welcome() {
                                 return (
                                     <div
                                         key={a.announcement_id}
-                                        className="cursor-pointer overflow-hidden rounded-2xl bg-white text-black transition-shadow hover:shadow-lg duration-700 animate-in fade-in slide-in-from-bottom-4"
+                                        className="cursor-pointer overflow-hidden rounded-2xl bg-white text-black transition-shadow duration-700 animate-in fade-in slide-in-from-bottom-4 hover:shadow-lg"
                                         style={{ animationDelay: `${(index + 2) * 100}ms` }}
                                         onClick={() => setSelectedAnnouncement(a)}
                                     >
@@ -448,27 +501,26 @@ export default function Welcome() {
                                 );
                             })}
                             {announcements.length === 0 && (
-                                <div className="rounded-xl border bg-white p-6 text-center text-gray-500 duration-700 animate-in fade-in">No announcements yet.</div>
+                                <div className="rounded-xl border bg-white p-6 text-center text-gray-500 duration-700 animate-in fade-in">
+                                    No announcements yet.
+                                </div>
                             )}
                         </div>
                     </div>
                 </div>
-
-                {/* Footer - Fade in from bottom */}
-                <footer className="mt-20 border-t border-pink-200 bg-white py-8 duration-1000 animate-in fade-in slide-in-from-bottom-8">
-                    <div className="mx-auto max-w-4xl text-center">
-                        <p className="text-xs font-medium text-pink-500">
-                            © INSTASTATION. SINCE 2025. ALL RIGHTS RESERVED.
-                        </p>
-                    </div>
-                </footer>
             </div>
+            {/* Footer - Fade in from bottom */}
+            <footer className="mt-5 w-full bg-white py-8 duration-1000 animate-in fade-in slide-in-from-bottom-8">
+                <div className="w-full text-center">
+                    <p className="text-xs font-medium text-pink-500">© INSTASTATION. SINCE 2025. ALL RIGHTS RESERVED.</p>
+                </div>
+            </footer>
 
             {/* Announcement Detail Modal */}
             {selectedAnnouncement && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center duration-300 animate-in fade-in">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setSelectedAnnouncement(null)} />
-                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-card shadow-xl duration-300 animate-in zoom-in-95 slide-in-from-bottom-4">
+                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-card shadow-xl duration-300 animate-in slide-in-from-bottom-4 zoom-in-95">
                         {/* Header */}
                         <div className="flex items-center justify-between border-b border-border p-4">
                             <div className="flex items-center gap-3">

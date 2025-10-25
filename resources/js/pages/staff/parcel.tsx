@@ -976,17 +976,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 >
                                     Close
                                 </button>
-                                  {parcelDetails.parcel_status?.toLowerCase() === 'ready for collection' && (
-            <button
-                onClick={() => {
-                    handleMarkAsCollected(parcelDetails.parcel_id);
-                    handleCloseDetailsModal();
-                }}
-                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:bg-green-700"
-            >
-                Mark as Collected
-            </button>
-        )}
+                                {parcelDetails.parcel_status?.toLowerCase() === 'ready for collection' && (
+                                    <button
+                                        onClick={() => {
+                                            handleMarkAsCollected(parcelDetails.parcel_id);
+                                            handleCloseDetailsModal();
+                                        }}
+                                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:bg-green-700"
+                                    >
+                                        Mark as Collected
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
@@ -1793,7 +1793,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             <div className="space-y-4">
                                 <Link
                                     href="/staff/add-parcel"
-                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-blue-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 hover:shadow-md"
+                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-pink-200 hover:bg-gradient-to-r hover:from-pink-50 hover:to-pink-100 hover:shadow-md"
                                 >
                                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-pink-500 transition-all group-hover:scale-110">
                                         <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1804,33 +1804,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         <span className="text-sm font-semibold text-gray-900">Register New Parcel</span>
                                         <p className="text-xs text-gray-500">Add a new parcel to the system</p>
                                     </div>
-                                    <span className="ml-auto text-gray-400 transition-colors group-hover:text-blue-500">→</span>
+                                    <span className="ml-auto text-gray-400 transition-colors group-hover:text-pink-500">→</span>
                                 </Link>
-                                <button
-                                    onClick={openScanModal}
-                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-emerald-200 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100 hover:shadow-md"
-                                >
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,#f5d0c8,#f5f2f9,#d3b9a6,#fbe5cf,#d4dcfa)]">
-                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <span className="text-sm font-semibold text-gray-900">Generate Reports</span>
-                                        <p className="text-xs text-gray-500">Create detailed parcel reports</p>
-                                    </div>
-                                    <span className="ml-auto text-gray-400 transition-colors group-hover:text-emerald-500">→</span>
-                                </button>
+                                
                                 <button
                                     onClick={openScanModal}
                                     className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-orange-200 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:shadow-md"
                                 >
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 transition-all group-hover:scale-110">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br bg-[linear-gradient(135deg,#f5d0c8,#f5f2f9,#d3b9a6,#fbe5cf,#d4dcfa)] transition-all group-hover:scale-110">
                                         <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
