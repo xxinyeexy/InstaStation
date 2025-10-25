@@ -16,7 +16,7 @@ type AnnouncementCard = {
 export default function Welcome() {
     const { auth, announcements = [] } = usePage<SharedData & { announcements?: AnnouncementCard[] }>().props as any;
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementCard | null>(null);
-const [visibleCount, setVisibleCount] = useState(4);
+    const [visibleCount, setVisibleCount] = useState(4);
     const [currentWord, setCurrentWord] = useState(0);
     const words = ['Smart', 'Instant', 'Swift', 'Secure'];
 
@@ -28,23 +28,26 @@ const [visibleCount, setVisibleCount] = useState(4);
     }, []);
 
     // Format date consistently
-    const formatDate = (dateStr?: string | null) => {
-        if (!dateStr) return '';
-        try {
-            const date = new Date(dateStr);
-            if (isNaN(date.getTime())) return '';
-            return date.toLocaleString(undefined, {
-                year: 'numeric',
-                month: 'numeric',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true,
-            });
-        } catch {
-            return '';
-        }
-    };
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return '';
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return '';
+
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+
+        let hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+
+        return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+    } catch {
+        return '';
+    }
+};
 
     // Always reflect the latest announcements first
     const announcementsSorted = [...announcements].sort((a, b) => {
@@ -53,7 +56,7 @@ const [visibleCount, setVisibleCount] = useState(4);
         return bd - ad; // newest first
     });
 
-const displayedAnnouncements = announcementsSorted.slice(0, visibleCount);
+    const displayedAnnouncements = announcementsSorted.slice(0, visibleCount);
 
     /**
      * Intersection Observer animation hook
@@ -464,14 +467,14 @@ const displayedAnnouncements = announcementsSorted.slice(0, visibleCount);
                     <div className="mt-20 duration-700 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '100ms' }}>
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-2xl font-semibold text-gray-900">Newsletter</h2>
-                       {announcementsSorted.length > displayedAnnouncements.length && (
-    <button
-        onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
-        className="text-sm text-gray-600 hover:text-gray-900"
-    >
-        View more
-    </button>
-)}
+                            {announcementsSorted.length > displayedAnnouncements.length && (
+                                <button
+                                    onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
+                                    className="text-sm text-gray-600 hover:text-gray-900"
+                                >
+                                    View more
+                                </button>
+                            )}
                         </div>
                         <div className="space-y-6">
                             {displayedAnnouncements.map((a: AnnouncementCard, index: number) => {
