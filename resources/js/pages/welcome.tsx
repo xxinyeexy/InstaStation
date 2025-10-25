@@ -16,7 +16,7 @@ type AnnouncementCard = {
 export default function Welcome() {
     const { auth, announcements = [] } = usePage<SharedData & { announcements?: AnnouncementCard[] }>().props as any;
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<AnnouncementCard | null>(null);
-    const [visibleCount, setVisibleCount] = useState<number>(4);
+const [visibleCount, setVisibleCount] = useState(4);
     const [currentWord, setCurrentWord] = useState(0);
     const words = ['Smart', 'Instant', 'Swift', 'Secure'];
 
@@ -53,7 +53,7 @@ export default function Welcome() {
         return bd - ad; // newest first
     });
 
-    const displayedAnnouncements = announcementsSorted.slice(0, Math.max(4, visibleCount));
+const displayedAnnouncements = announcementsSorted.slice(0, visibleCount);
 
     /**
      * Intersection Observer animation hook
@@ -464,11 +464,14 @@ export default function Welcome() {
                     <div className="mt-20 duration-700 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '100ms' }}>
                         <div className="mb-4 flex items-center justify-between">
                             <h2 className="text-2xl font-semibold text-gray-900">Newsletter</h2>
-                            {announcementsSorted.length > displayedAnnouncements.length && (
-                                <button onClick={() => setVisibleCount((c) => c + 4)} className="text-sm text-gray-600 hover:text-gray-900">
-                                    View more
-                                </button>
-                            )}
+                       {announcementsSorted.length > displayedAnnouncements.length && (
+    <button
+        onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
+        className="text-sm text-gray-600 hover:text-gray-900"
+    >
+        View more
+    </button>
+)}
                         </div>
                         <div className="space-y-6">
                             {displayedAnnouncements.map((a: AnnouncementCard, index: number) => {

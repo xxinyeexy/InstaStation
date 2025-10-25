@@ -106,7 +106,8 @@ export default function StaffAnnouncements(props: {
         return d.toLocaleString();
     };
 
-   const toIsoStringFromLocal = (value?: string) => {
+ 
+ const toIsoStringFromLocal = (value?: string) => {
         if (!value) return '';
         // datetime-local input gives us "YYYY-MM-DDTHH:mm" in local time
         // We need to convert this to ISO string WITHOUT timezone adjustment
@@ -436,7 +437,7 @@ export default function StaffAnnouncements(props: {
                                     <div className="mb-1 text-sm font-medium text-foreground">Publish Date</div>
                                     <input
                                         type="datetime-local"
-                                        value={publishDate} 
+                                        value={editPublishDate} 
                                         onChange={(e) => setEditPublishDate(e.target.value)}
                                         min={nowDateTimeLocal}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
@@ -446,7 +447,7 @@ export default function StaffAnnouncements(props: {
                                     <div className="mb-1 text-sm font-medium text-foreground">Expiry Date</div>
                                     <input
                                         type="datetime-local"
-                                        value={expiryDate}
+                                        value={editExpiryDate}
                                         onChange={(e) => setEditExpiryDate(e.target.value)}
                                         min={editPublishDate || nowDateTimeLocal}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"

@@ -20,10 +20,10 @@ Route::get('/', function () {
     $announcements = Announcement::query()
         ->where('announcement_status', 'Published')
         ->where(function ($q) use ($today) {
-            $q->whereNull('expiry_date')->orWhereDate('expiry_date', '>=', $today);
+            $q->whereNull('expiry_date')
+              ->orWhereDate('expiry_date', '>=', $today);
         })
         ->orderByDesc(DB::raw('COALESCE(publish_date, created_at)'))
-        ->limit(5)
         ->get([
             'announcement_id',
             'announcement_title',
