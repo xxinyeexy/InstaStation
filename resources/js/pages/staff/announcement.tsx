@@ -106,13 +106,24 @@ export default function StaffAnnouncements(props: {
         return d.toLocaleString();
     };
 
-    const toIsoStringFromLocal = (value?: string) => {
+   const toIsoStringFromLocal = (value?: string) => {
         if (!value) return '';
-        const d = new Date(value);
-        if (Number.isNaN(d.getTime())) return '';
-        return d.toISOString();
+        // datetime-local input gives us "YYYY-MM-DDTHH:mm" in local time
+        // We need to convert this to ISO string WITHOUT timezone adjustment
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        
+        // Get the local datetime components
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        
+        // Return ISO format with 'Z' to indicate UTC (but treat as local time)
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
     };
-
     const filtered = useMemo(() => {
         const needle = q.trim().toLowerCase();
         return list.filter((f) => {
@@ -232,8 +243,10 @@ export default function StaffAnnouncements(props: {
                     <button
                         onClick={() => {
                             setAdding(true);
-                            // initialize defaults with current timestamp
-                            setPublishDate(nowDateTimeLocal);
+        // Initialize with current time in datetime-local format
+                            const now = new Date();
+                            const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                            setPublishDate(localDateTime);
                             setAnnStatus('Active'); // Set to Published by default when publish date is current
                         }}
                         className="inline-flex items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white dark:bg-gray-700"
@@ -423,7 +436,7 @@ export default function StaffAnnouncements(props: {
                                     <div className="mb-1 text-sm font-medium text-foreground">Publish Date</div>
                                     <input
                                         type="datetime-local"
-                                        value={editPublishDate}
+                                        value={publishDate} 
                                         onChange={(e) => setEditPublishDate(e.target.value)}
                                         min={nowDateTimeLocal}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
@@ -433,7 +446,7 @@ export default function StaffAnnouncements(props: {
                                     <div className="mb-1 text-sm font-medium text-foreground">Expiry Date</div>
                                     <input
                                         type="datetime-local"
-                                        value={toDateTimeLocalValue(editExpiryDate)}
+                                        value={expiryDate}
                                         onChange={(e) => setEditExpiryDate(e.target.value)}
                                         min={editPublishDate || nowDateTimeLocal}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
