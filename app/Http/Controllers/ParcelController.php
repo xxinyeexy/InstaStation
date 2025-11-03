@@ -351,6 +351,30 @@ class ParcelController extends Controller
             // Update the parcel
             $parcel->update($updateData);
 
+            // Refresh the model to get latest values after update
+            $parcel->refresh();
+
+            // Ensure that parcels marked as Ready for Collection have a collection_code
+            try {
+                $statusNormalized = strtolower($parcel->parcel_status ?? '');
+                if (in_array($statusNormalized, ['ready for collection', 'ready to collect']) && !$parcel->collection_code) {
+                    // Generate collection code: alphabet + 3 numbers (e.g., A123)
+                    $alphabet = chr(rand(65, 90)); // Random uppercase letter A-Z
+                    $numbers = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
+                    $collectionCode = $alphabet . $numbers;
+
+                    // Persist collection code
+                    $parcel->update(['collection_code' => $collectionCode]);
+                    Log::info('Generated collection code for parcel during status update', ['parcel_id' => $parcel->parcel_id, 'collection_code' => $collectionCode]);
+
+                    // Refresh again so returned parcel contains the new code
+                    $parcel->refresh();
+                }
+            } catch (\Exception $e) {
+                // Log but don't fail the whole request if collection code generation fails
+                Log::error('Failed to generate collection code on parcel update', ['parcel_id' => $parcel->parcel_id ?? $id, 'error' => $e->getMessage()]);
+            }
+
             // Load relationships for response
             $parcel->load(['studentUser', 'createdBy', 'lastEditedBy']);
 

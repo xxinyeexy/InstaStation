@@ -16,6 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Parcel {
     parcel_id: number;
     parcel_code: string; // Unique code for the parcel
+    collection_code?: string | null;
     student_id: number | null;
     tracking_no: string;
     parcel_status: string;
@@ -455,6 +456,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         const matchesSearch =
             searchTerm === '' ||
             parcel.parcel_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            parcel.collection_code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.sender?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             parcel.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (parcel.student_id !== null && parcel.student_id?.toString().includes(searchTerm)) ||
@@ -1556,6 +1558,16 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                 {parcel.parcel_status}
                                                             </span>
                                                         </div>
+
+                                                        {/* Collection code (display if present) */}
+                                                        {parcel.collection_code && (
+                                                            <div className="mt-1">
+                                                                <span className="text-xs text-gray-500">
+                                                                    Collection Code:{' '}
+                                                                    <span className="font-['Consolas'] font-medium text-gray-900">{parcel.collection_code}</span>
+                                                                </span>
+                                                            </div>
+                                                        )}
 
                                                         {/* Student info */}
                                                         <div className="flex items-center gap-3">
