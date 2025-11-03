@@ -828,6 +828,30 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
+    // Calendar / date picker for collections
+    const defaultDate = new Date().toISOString().split('T')[0];
+    const [calendarOpen, setCalendarOpen] = useState(false);
+    const [selectedDate, setSelectedDate] = useState<string>(defaultDate);
+
+    // Compare using local date components to avoid timezone shifts (so "tomorrow" doesn't show today)
+    const isSameLocalDate = (dateStr: string | null | undefined, ymd: string) => {
+        if (!dateStr) return false;
+        const d = new Date(dateStr);
+        if (Number.isNaN(d.getTime())) return false;
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}` === ymd;
+    };
+
+    const collectionsForSelectedDate = parcelList
+        .filter((p) => {
+            return isSameLocalDate(p.schedule, selectedDate);
+        })
+        .sort((a, b) => (a.time_slot || '').localeCompare(b.time_slot || ''));
+
+    const todaysCollections = collectionsForSelectedDate;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Parcel" />
@@ -862,6 +886,54 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 <X className="h-4 w-4" />
                             </button>
                         </div>
+                        {/* Calendar Modal */}
+                        {calendarOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                                <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold">Collections for date</h3>
+                                        <button onClick={() => setCalendarOpen(false)} className="text-sm text-gray-500">Close</button>
+                                    </div>
+                                    <div className="mt-4 flex items-center gap-4">
+                                        <label className="text-sm text-gray-600">Select date</label>
+                                        <input
+                                            type="date"
+                                            value={selectedDate}
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                            className="rounded-md border px-3 py-2"
+                                        />
+                                        <div className="ml-auto text-sm text-gray-600">Found: {collectionsForSelectedDate.length}</div>
+                                    </div>
+                                    <div className="mt-4 space-y-3 max-h-[60vh] overflow-y-auto">
+                                        {collectionsForSelectedDate.length === 0 ? (
+                                            <div className="text-sm text-gray-500">No parcels scheduled on this date.</div>
+                                        ) : (
+                                            collectionsForSelectedDate.map((p) => (
+                                                <div key={p.parcel_id} className="rounded-xl border border-gray-100 p-4">
+                                                    <div className="flex items-start gap-4">
+                                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 font-semibold">
+                                                            <span className="text-sm">{p.time_slot ? p.time_slot.split(' - ')[0] : ''}</span>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="text-sm font-semibold text-gray-900">{p.student_user?.name || p.recipient_name || 'Unknown Student'}</p>
+                                                                { (p.student_user?.matric || p.recipient_matric) && (
+                                                                    <p className="text-xs text-gray-500">({p.student_user?.matric || p.recipient_matric})</p>
+                                                                ) }
+                                                            </div>
+                                                            <div className="mt-1 text-sm text-gray-700">Tracking: <span className="font-mono">{p.tracking_no}</span></div>
+                                                            <div className="mt-1 text-sm text-gray-700">Location: {p.location || 'N/A'} • Size: {p.size || 'N/A'}</div>
+                                                            <div className="mt-1 text-xs text-gray-500">Timeslot: {p.time_slot || formatScheduledDate(p.schedule)}</div>
+                                                            <div className="mt-2 text-xs text-gray-500">Status: <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">{p.parcel_status}</span></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -1825,12 +1897,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                                 {/* Right side - Actions */}
                                                 <div className="flex items-center gap-3">
-                                                    {(parcel.parcel_status?.toLowerCase() === 'ready for collection' || parcel.parcel_status?.toLowerCase() === 'ready to collect') && (
+                                                    {(parcel.parcel_status?.toLowerCase() === 'ready for collection' ||
+                                                        parcel.parcel_status?.toLowerCase() === 'ready to collect') && (
                                                         <button
                                                             onClick={() => sendReminder(parcel.parcel_id)}
                                                             disabled={sendingReminders.has(parcel.parcel_id)}
                                                             className={`rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg ${
-                                                                sendingReminders.has(parcel.parcel_id) ? 'opacity-60 cursor-wait' : ''
+                                                                sendingReminders.has(parcel.parcel_id) ? 'cursor-wait opacity-60' : ''
                                                             }`}
                                                         >
                                                             {sendingReminders.has(parcel.parcel_id) ? (
@@ -1927,7 +2000,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             </div>
                         </div>
 
-                        {/* Recent Notifications */}
+                        {/* Today's Collections */}
                         <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
                             <div className="mb-6 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -1941,32 +2014,44 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             />
                                         </svg>
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900">Recent Notifications</h3>
+                                    <div className="flex items-baseline gap-3">
+                                        <h3 className="text-xl font-bold text-gray-900">{formatScheduledDate(selectedDate)} Collection</h3>
+                                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{todaysCollections.length}</span>
+                                        <input
+                                            type="date"
+                                            value={selectedDate}
+                                            onChange={(e) => setSelectedDate(e.target.value)}
+                                            className="ml-4 rounded-md border px-2 py-1 text-sm"
+                                            aria-label="Select date"
+                                        />
+                                    </div>
                                 </div>
-                                <button className="text-sm font-semibold text-blue-600 transition-colors hover:text-blue-800">View All</button>
+                              
                             </div>
-                            <div className="space-y-4">
-                                <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-emerald-50 hover:to-emerald-100">
-                                    <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-emerald-500"></div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">New Parcel Arrived</p>
-                                        <p className="mt-1 text-xs text-gray-500">5 minutes ago</p>
+                            <div className="space-y-3">
+                                {todaysCollections.length === 0 ? (
+                                    <div className="rounded-xl p-4 text-sm text-gray-500">No collections scheduled for today.</div>
+                                ) : todaysCollections.map((p) => (
+                                    <div key={p.parcel_id} className="rounded-xl border border-gray-100 p-4">
+                                        <div className="flex items-start gap-4">
+                                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 font-semibold">
+                                                <span className="text-sm">{p.time_slot ? p.time_slot.split(' - ')[0] : ''}</span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex flex-col">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-sm font-semibold text-gray-900">{p.student_user?.name || p.recipient_name || 'Unknown Student'}</p>
+                                                        { (p.student_user?.matric || p.recipient_matric) && (
+                                                            <p className="text-xs text-gray-500">({p.student_user?.matric || p.recipient_matric})</p>
+                                                        ) }
+                                                    </div>
+                                                    <div className="mt-1 text-sm text-gray-700">Tracking: <span className="font-mono">{p.tracking_no}</span></div>
+                                                    <div className="mt-1 text-xs text-gray-500">Timeslot: {p.time_slot || formatScheduledDate(p.schedule)}</div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100">
-                                    <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-blue-500"></div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">Parcel Ready for Pickup</p>
-                                        <p className="mt-1 text-xs text-gray-500">1 hour ago</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3 rounded-xl p-4 transition-all hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100">
-                                    <div className="mt-2 h-3 w-3 flex-shrink-0 animate-pulse rounded-full bg-orange-500"></div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">Delivery Enquired</p>
-                                        <p className="mt-1 text-xs text-gray-500">2 hours ago</p>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
                         </div>
                     </div>
