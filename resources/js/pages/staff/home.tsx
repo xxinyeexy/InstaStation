@@ -378,13 +378,25 @@ export default function StaffHome() {
                                             interval={0}
                                             tick={({ x, y, payload }) => {
                                                 const parts = String(payload.value).split(' - ');
+                                                // Render three-line label when we have exactly two parts:
+                                                // Line 1: start time
+                                                // Line 2: a centered hyphen
+                                                // Line 3: end time
                                                 return (
-                                                    <text x={x} y={y + 20} textAnchor="middle" fill="#6B7280" style={{ fontSize: 12 }}>
-                                                        {parts.map((part, i) => (
-                                                            <tspan key={i} x={x} dy={i === 0 ? 0 : 16}>
-                                                                {part}
-                                                            </tspan>
-                                                        ))}
+                                                    <text x={x} y={y + 18} textAnchor="middle" fill="#6B7280" style={{ fontSize: 12 }}>
+                                                        {parts.length === 2 ? (
+                                                            <>
+                                                                <tspan x={x} dy={0}>{parts[0]}</tspan>
+                                                                <tspan x={x} dy={16}>-</tspan>
+                                                                <tspan x={x} dy={16}>{parts[1]}</tspan>
+                                                            </>
+                                                        ) : (
+                                                            parts.map((part, i) => (
+                                                                <tspan key={i} x={x} dy={i === 0 ? 0 : 16}>
+                                                                    {part}
+                                                                </tspan>
+                                                            ))
+                                                        )}
                                                     </text>
                                                 );
                                             }}
