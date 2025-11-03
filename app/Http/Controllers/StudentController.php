@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Storage;
 
 class StudentController extends Controller
 {
@@ -84,8 +85,17 @@ class StudentController extends Controller
                         ]
                         : $parcel->last_edited_by,
 
-                    'created_at' => optional($parcel->created_at)?->toDateTimeString(),
-                    'updated_at' => optional($parcel->updated_at)?->toDateTimeString(),
+                            'created_at' => optional($parcel->created_at)?->toDateTimeString(),
+                            'updated_at' => optional($parcel->updated_at)?->toDateTimeString(),
+                            // include latest payment proof url for quick thumbnail in parcel list
+                            'payment_proof_url' => (function () use ($parcel) {
+                                try {
+                                    $p = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)->orderBy('created_at', 'desc')->first();
+                                    return $p && $p->file_path ? Storage::url($p->file_path) : null;
+                                } catch (\Exception $e) {
+                                    return null;
+                                }
+                            })(),
                     'student_user' => $parcel->studentUser
                         ? [
                             'id' => $parcel->studentUser->id,
@@ -97,26 +107,35 @@ class StudentController extends Controller
                 ];
             });
 
-        // Fetch unread notifications for the student
-        $notifications = \App\Models\Notification::where('notifiable_id', $user->id)
+        // Fetch unread notifications for the student and deduplicate by a stable signature
+        $rawNotifications = \App\Models\Notification::where('notifiable_id', $user->id)
             ->where('notifiable_type', 'App\Models\User')
             ->whereNull('read_at')
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($notification) {
-                $data = json_decode($notification->data, true);
-                return [
-                    'id' => $notification->id,
-                    'type' => $notification->type,
-                    'title' => $data['title'] ?? 'Notification',
-                    'message' => $data['message'] ?? '',
-                    'parcel_code' => $data['parcel_code'] ?? null,
-                    'parcel_id' => $data['parcel_id'] ?? null,
-                    'rejected_by' => $data['rejected_by'] ?? null,
-                    'rejected_at' => $data['rejected_at'] ?? null,
-                    'created_at' => $notification->created_at->toDateTimeString(),
-                ];
-            });
+            ->get();
+
+        $seen = [];
+        $notifications = $rawNotifications->map(function ($notification) use (&$seen) {
+            $data = json_decode($notification->data, true);
+            // Create a stable signature for deduplication: type + parcel_id + message
+            $signature = ($notification->type ?? '') . '|' . ($data['parcel_id'] ?? '') . '|' . ($data['message'] ?? '');
+            if (in_array($signature, $seen, true)) {
+                return null; // will be filtered out
+            }
+            $seen[] = $signature;
+
+            return [
+                'id' => $notification->id,
+                'type' => $notification->type,
+                'title' => $data['title'] ?? 'Notification',
+                'message' => $data['message'] ?? '',
+                'parcel_code' => $data['parcel_code'] ?? null,
+                'parcel_id' => $data['parcel_id'] ?? null,
+                'rejected_by' => $data['rejected_by'] ?? null,
+                'rejected_at' => $data['rejected_at'] ?? null,
+                'created_at' => $notification->created_at->toDateTimeString(),
+            ];
+        })->filter()->values();
 
         return Inertia::render('student/parcel', [
             'parcels' => $parcels,
@@ -174,9 +193,37 @@ class StudentController extends Controller
             ] : null,
         ];
 
+        // Get latest payment (if any) for proof image
+        $payment = Payment::where('parcel_id', $parcel->parcel_id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Mark any unread notifications related to this parcel as read so the
+        // notification badge (red icon) disappears after the student views the
+        // parcel detail page.
+        try {
+            $unread = \App\Models\Notification::where('notifiable_id', $user->id)
+                ->where('notifiable_type', 'App\\Models\\User')
+                ->whereNull('read_at')
+                ->get();
+
+            foreach ($unread as $notif) {
+                $data = json_decode($notif->data, true);
+                if (($data['parcel_id'] ?? null) == $parcel->parcel_id) {
+                    $notif->read_at = now();
+                    $notif->save();
+                }
+            }
+        } catch (\Exception $e) {
+            // Don't block the page render if notification marking fails; log and continue
+            Log::warning('Failed to mark parcel notifications as read', ['parcel_id' => $parcel->parcel_id, 'error' => $e->getMessage()]);
+        }
+
         return Inertia::render('student/view-parcel', [
             'parcel' => $parcelData,
             'trackingHistory' => $trackingHistory,
+            // include latest payment proof url (if any) so the student view can show payment image
+            'payment_proof_url' => $payment && $payment->file_path ? Storage::url($payment->file_path) : null,
         ]);
     }
 

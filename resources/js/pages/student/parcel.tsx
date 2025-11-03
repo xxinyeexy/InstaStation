@@ -2,8 +2,8 @@ import QRCodeModal from '@/components/qr-code-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { CheckCircle, Package, Sparkles, Upload, X, XCircle } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
+import { CheckCircle, Package, Sparkles, Upload, X, XCircle, Bell, AlertCircle } from 'lucide-react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -50,6 +50,7 @@ interface Parcel {
         matric: string;
         email: string;
     };
+    payment_proof_url?: string | null;
 }
 
 // Extended interface for detailed parcel view
@@ -150,6 +151,8 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
 export default function Dashboard({ parcels = [] }: DashboardProps) {
     const { auth } = usePage<SharedData>().props;
     const currentUser = auth.user;
+    const pageProps: any = usePage<SharedData>().props;
+    const serverNotifications: any[] = pageProps.notifications || [];
 
     const [activeTab, setActiveTab] = useState<TabType>('All Parcels');
     const [searchTerm, setSearchTerm] = useState('');
@@ -187,6 +190,63 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // Toast notification state
     const [toastNotifications, setToastNotifications] = useState<ToastNotification[]>([]);
+
+    // In-app server notifications (bell dropdown)
+    const [notificationList, setNotificationList] = useState<any[]>(serverNotifications);
+    const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+
+    // Update notification list when server-sent notifications change
+    useEffect(() => {
+        setNotificationList(serverNotifications || []);
+    }, [serverNotifications]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Element;
+            if (!target.closest('.notification-dropdown') && !target.closest('.notification-bell')) {
+                setShowNotificationDropdown(false);
+            }
+        };
+
+        if (showNotificationDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showNotificationDropdown]);
+
+    const handleNotificationClick = async (notification: any) => {
+        setShowNotificationDropdown(false);
+
+        // Mark as read on the server (if possible) so badge updates persist
+        if (notification.id) {
+            try {
+                await fetch(`/student/notifications/${notification.id}/mark-read`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                    credentials: 'same-origin',
+                });
+            } catch (e) {
+                // ignore network errors — we'll still update UI locally
+                console.warn('Failed to mark notification read', e);
+            }
+
+            // Remove from local notification list so the red badge updates immediately
+            setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+        }
+
+        // If notification contains parcel_id, navigate to its view
+        if (notification.parcel_id) {
+            router.visit(`/student/parcel/${notification.parcel_id}`);
+            return;
+        }
+    };
 
     // QR Code Modal state
     const [showQRModal, setShowQRModal] = useState(false);
@@ -671,6 +731,61 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     ))}
                 </div>
 
+                {/* Notification Bell (opens dropdown of server-side reminders) */}
+                <div className="flex justify-end">
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowNotificationDropdown((s) => !s)}
+                            className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
+                        >
+                            <Bell className="h-6 w-6 text-foreground" />
+                            {notificationList.length > 0 && (
+                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+                                    {notificationList.length}
+                                </span>
+                            )}
+                        </button>
+
+                        {/* Notification Dropdown */}
+                        {showNotificationDropdown && (
+                            <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
+                                <div className="border-b border-border p-4">
+                                    <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
+                                </div>
+                                <div className="max-h-96 overflow-y-auto">
+                                    {notificationList.length === 0 ? (
+                                        <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
+                                    ) : (
+                                        notificationList.map((notification) => (
+                                            <div
+                                                key={notification.id}
+                                                className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
+                                                onClick={() => handleNotificationClick(notification)}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="mt-1 flex-shrink-0">
+                                                        <AlertCircle className="h-5 w-5 text-destructive" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
+                                                        <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+                                                        {notification.parcel_code && (
+                                                            <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
+                                                        )}
+                                                        <p className="mt-1 text-xs text-muted-foreground">{new Date(notification.created_at).toLocaleString()}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* (Removed duplicate in-page reminder box; notifications now shown through the bell dropdown) */}
+
                 {/* QR Code Modal */}
                 <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} isLoading={loadingQRParcels.size > 0} />
 
@@ -935,6 +1050,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 </span>
                                             )}
                                         </div>
+
+                                        {/* Show payment proof thumbnail if available (second photo) */}
+                                        {parcel.payment_proof_url && (
+                                            <div className="mb-3">
+                                                <img src={parcel.payment_proof_url} alt="Payment proof" className="h-20 w-20 rounded-md object-contain border" />
+                                            </div>
+                                        )}
 
                                         <div className="flex items-center gap-2">
                                             {isPendingPayment && (

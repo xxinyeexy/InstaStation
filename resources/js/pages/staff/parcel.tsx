@@ -757,6 +757,58 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setSelectedTrackingNo(null);
     };
 
+    // Reminder sending state (track per-parcel sending)
+    const [sendingReminders, setSendingReminders] = useState<Set<number>>(new Set());
+
+    // Send reminder for a single parcel
+    const sendReminder = async (parcelId: number) => {
+        // optimistic UI - mark as sending
+        setSendingReminders((prev) => new Set(prev).add(parcelId));
+        try {
+            const response = await fetch('/staff/parcels/remind', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ parcel_ids: [parcelId] }),
+            });
+
+            if (!response.ok) {
+                let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                try {
+                    const err = await response.json();
+                    if (err?.message) errorMessage = err.message;
+                } catch {}
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            if (data?.success) {
+                const queued = data.queued ?? 0;
+                const skipped_no_contact = data.skipped_no_contact ?? 0;
+                const skipped_recently = data.skipped_recently ?? 0;
+                let message = `Queued: ${queued}`;
+                if (skipped_no_contact) message += ` • Skipped (no contact): ${skipped_no_contact}`;
+                if (skipped_recently) message += ` • Skipped (already reminded today): ${skipped_recently}`;
+                addNotification('success', 'Reminder Processed', message);
+            } else {
+                addNotification('error', 'Reminder Failed', data.message || 'Failed to queue reminder');
+            }
+        } catch (error: any) {
+            console.error('Failed to send reminder:', error);
+            addNotification('error', 'Error', error?.message || 'Failed to send reminder');
+        } finally {
+            // remove sending flag
+            setSendingReminders((prev) => {
+                const next = new Set(prev);
+                next.delete(parcelId);
+                return next;
+            });
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Parcel" />
@@ -1564,7 +1616,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                             <div className="mt-1">
                                                                 <span className="text-xs text-gray-500">
                                                                     Collection Code:{' '}
-                                                                    <span className="font-['Consolas'] font-medium text-gray-900">{parcel.collection_code}</span>
+                                                                    <span className="font-['Consolas'] font-medium text-gray-900">
+                                                                        {parcel.collection_code}
+                                                                    </span>
                                                                 </span>
                                                             </div>
                                                         )}
@@ -1752,8 +1806,18 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                                 {/* Right side - Actions */}
                                                 <div className="flex items-center gap-3">
-                                                    <button className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg">
-                                                        <BellRing className="h-5 w-5" />
+                                                    <button
+                                                        onClick={() => sendReminder(parcel.parcel_id)}
+                                                        disabled={sendingReminders.has(parcel.parcel_id)}
+                                                        className={`rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg ${
+                                                            sendingReminders.has(parcel.parcel_id) ? 'opacity-60 cursor-wait' : ''
+                                                        }`}
+                                                    >
+                                                        {sendingReminders.has(parcel.parcel_id) ? (
+                                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                                                        ) : (
+                                                            <BellRing className="h-5 w-5" />
+                                                        )}
                                                     </button>
                                                     <button
                                                         onClick={() => handleViewParcel(parcel.parcel_id)}
@@ -1818,7 +1882,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     </div>
                                     <span className="ml-auto text-gray-400 transition-colors group-hover:text-pink-500">→</span>
                                 </Link>
-                                
+
                                 <button
                                     onClick={openScanModal}
                                     className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-orange-200 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:shadow-md"

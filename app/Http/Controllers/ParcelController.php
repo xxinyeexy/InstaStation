@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\SendParcelReminder;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -298,6 +299,71 @@ class ParcelController extends Controller
                 'success' => false,
                 'message' => 'Failed to fetch parcel by code: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Send reminder notifications for parcels.
+     * Accepts JSON body { parcel_ids: [1,2,3] } or { parcel_ids: 'all' }
+     */
+    public function remind(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            if (!$user || ($user->type ?? '') !== 'staff') {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+            }
+
+            $payload = $request->all();
+            if (!array_key_exists('parcel_ids', $payload)) {
+                return response()->json(['success' => false, 'message' => 'parcel_ids is required'], 422);
+            }
+
+            $parcelIds = $payload['parcel_ids'];
+            $today = now()->toDateString();
+
+            // Build base query for eligible parcels (uncollected statuses)
+            $baseQuery = Parcel::whereIn('parcel_status', ['Ready For Collection', 'Ready to Collect', 'Unclaimed', 'Pending Payment'])
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('reminder_sent_at')
+                      ->orWhereDate('reminder_sent_at', '<', $today);
+                });
+
+            if ($parcelIds === 'all') {
+                $parcels = $baseQuery->get();
+            } elseif (is_array($parcelIds)) {
+                $parcels = $baseQuery->whereIn('parcel_id', $parcelIds)->get();
+            } else {
+                return response()->json(['success' => false, 'message' => 'parcel_ids must be array or "all"'], 422);
+            }
+
+            $queued = 0;
+            $skipped = 0;
+            foreach ($parcels as $parcel) {
+                // only notify if parcel has an associated student with email
+                if ($parcel->studentUser && !empty($parcel->studentUser->email)) {
+                    SendParcelReminder::dispatch($parcel);
+                    $queued++;
+                } else {
+                    Log::info('Skipping reminder: no student/email', ['parcel_id' => $parcel->parcel_id]);
+                    $skipped++;
+                }
+            }
+
+            // Determine how many requested but skipped due to already reminded today
+            $requestedCount = ($parcelIds === 'all') ? Parcel::whereIn('parcel_status', ['Ready For Collection', 'Ready to Collect', 'Unclaimed', 'Pending Payment'])->count() : count($parcelIds);
+            $skipped_due_to_recent = max(0, $requestedCount - $queued - $skipped);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Reminders processed',
+                'queued' => $queued,
+                'skipped_no_contact' => $skipped,
+                'skipped_recently' => $skipped_due_to_recent,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to queue reminders: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            return response()->json(['success' => false, 'message' => 'Failed to queue reminders'], 500);
         }
     }
 

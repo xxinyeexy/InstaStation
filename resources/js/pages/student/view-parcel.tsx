@@ -50,9 +50,10 @@ interface TrackingEvent {
 interface Props {
     parcel: ParcelData;
     trackingHistory: TrackingEvent[];
+    payment_proof_url?: string | null;
 }
 
-const ParcelDetails = ({ parcel, trackingHistory }: Props) => {
+const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) => {
     // Function to render icon based on icon name and color
     const renderIcon = (iconName: string, color: string) => {
         const getIconClass = (color: string) => {
@@ -196,6 +197,16 @@ const ParcelDetails = ({ parcel, trackingHistory }: Props) => {
                                 <label className="mb-1 block text-sm font-medium text-gray-700">Days in Storage</label>
                                 <span className="text-gray-600">{parcel.days} days</span>
                             </div>
+
+                            {/* Show payment proof image (if available) */}
+                            {payment_proof_url && (
+                                <div>
+                                    <label className="mb-1 block text-sm font-medium text-gray-700">Payment Proof</label>
+                                    <div className="mt-2">
+                                        <img src={payment_proof_url} alt="Payment proof" className="max-h-48 w-full object-contain rounded-md border" />
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Show scheduled pickup information if available */}
                             {parcel.schedule && parcel.time_slot && (

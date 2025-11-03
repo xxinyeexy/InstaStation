@@ -70,6 +70,8 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/staff/parcel', [ParcelController::class, 'index'])
         ->name('staff.parcel');
+    // Send reminders to students for uncollected parcels (AJAX)
+    Route::post('/staff/parcels/remind', [ParcelController::class, 'remind'])->name('staff.parcels.remind');
     Route::patch('/staff/parcel/{id}/collect', [ParcelController::class, 'markAsCollected'])->name('staff.parcel.collect');
     Route::delete('/staff/parcel/{id}', [ParcelController::class, 'destroy']);
     Route::get('/staff/parcel/{id}/details', [ParcelController::class, 'getParcelDetails'])->name('staff.parcel.details');

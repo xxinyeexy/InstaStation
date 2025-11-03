@@ -85,26 +85,47 @@ class PaymentController extends Controller
             })->toArray();
 
         // Fetch all notifications for the student (both read and unread)
-        $notifications = \App\Models\Notification::where('notifiable_id', $user->id)
+        // but only keep payment-related notifications on the Payment page.
+        $rawNotifications = \App\Models\Notification::where('notifiable_id', $user->id)
             ->where('notifiable_type', 'App\Models\User')
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($notification) {
-                $data = json_decode($notification->data, true);
-                return [
-                    'id' => $notification->id,
-                    'type' => $notification->type,
-                    'title' => $data['title'] ?? 'Notification',
-                    'message' => $data['message'] ?? '',
-                    'parcel_code' => $data['parcel_code'] ?? null,
-                    'parcel_id' => $data['parcel_id'] ?? null,
-                    'rejected_by' => $data['rejected_by'] ?? null,
-                    'rejected_at' => $data['rejected_at'] ?? null,
-                    'created_at' => $notification->created_at->toDateTimeString(),
-                    'read_at' => $notification->read_at ? $notification->read_at->toDateTimeString() : null,
-                    'is_read' => $notification->read_at !== null,
-                ];
-            });
+            ->get();
+
+        // Filter to payment-related entries (based on notification type or payload hints)
+        $paymentCandidates = $rawNotifications->filter(function ($notification) {
+            $data = json_decode($notification->data, true);
+            $type = $notification->type ?? '';
+            $message = strtolower($data['message'] ?? '');
+
+            if (stripos($type, 'payment') !== false) return true;
+            if (!empty($data['rejected_by']) || !empty($data['rejected_at'])) return true;
+            if (strpos($message, 'payment') !== false || strpos($message, 'payment') !== false) return true;
+
+            return false;
+        })->values();
+
+        // Deduplicate by signature (type + parcel_id + message)
+        $seen = [];
+        $notifications = $paymentCandidates->map(function ($notification) use (&$seen) {
+            $data = json_decode($notification->data, true);
+            $signature = ($notification->type ?? '') . '|' . ($data['parcel_id'] ?? '') . '|' . ($data['message'] ?? '');
+            if (in_array($signature, $seen, true)) return null;
+            $seen[] = $signature;
+
+            return [
+                'id' => $notification->id,
+                'type' => $notification->type,
+                'title' => $data['title'] ?? 'Notification',
+                'message' => $data['message'] ?? '',
+                'parcel_code' => $data['parcel_code'] ?? null,
+                'parcel_id' => $data['parcel_id'] ?? null,
+                'rejected_by' => $data['rejected_by'] ?? null,
+                'rejected_at' => $data['rejected_at'] ?? null,
+                'created_at' => $notification->created_at->toDateTimeString(),
+                'read_at' => $notification->read_at ? $notification->read_at->toDateTimeString() : null,
+                'is_read' => $notification->read_at !== null,
+            ];
+        })->filter()->values();
 
         return Inertia::render('student/payment', [
             'summary' => [
