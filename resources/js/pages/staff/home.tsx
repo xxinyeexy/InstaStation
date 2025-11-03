@@ -367,7 +367,28 @@ export default function StaffHome() {
                                 <ResponsiveContainer width="100%" height={250}>
                                     <BarChart data={data.collectionTime}>
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                                        <XAxis dataKey="time" />
+                                        {/*
+                                         Custom multi-line tick so long timeslot labels like
+                                         "9:00 AM - 10:00 AM" show fully across two lines.
+                                         interval=0 forces all ticks to render.
+                                        */}
+                                        <XAxis
+                                            dataKey="time"
+                                            height={60}
+                                            interval={0}
+                                            tick={({ x, y, payload }) => {
+                                                const parts = String(payload.value).split(' - ');
+                                                return (
+                                                    <text x={x} y={y + 20} textAnchor="middle" fill="#6B7280" style={{ fontSize: 12 }}>
+                                                        {parts.map((part, i) => (
+                                                            <tspan key={i} x={x} dy={i === 0 ? 0 : 16}>
+                                                                {part}
+                                                            </tspan>
+                                                        ))}
+                                                    </text>
+                                                );
+                                            }}
+                                        />
                                         <YAxis domain={[0, 80]} ticks={[0, 20, 40, 60, 80]} />
                                         <Tooltip
                                             formatter={(value) => [`${value.toLocaleString()}`, 'Count']}

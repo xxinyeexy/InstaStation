@@ -128,38 +128,34 @@ class StaffController extends Controller
             ]);
         }
 
-        // Collection time distribution (based on collection times)
-        $collectionTimeData = [];
-        $hours = ['9AM', '10AM', '11AM', '12PM', '1PM', '2PM', '3PM', '4PM'];
-        
-        foreach ($hours as $hour) {
-            $hourValue = str_replace(['AM', 'PM'], '', $hour);
-            $isPM = strpos($hour, 'PM') !== false;
-            if ($isPM && $hourValue != '12') {
-                $hourValue = (int)$hourValue + 12;
-            }
-            
-            $count = Parcel::where('parcel_status', 'Collected')
-                ->whereRaw('HOUR(updated_at) = ?', [$hourValue])
-                ->count();
-            
-            $collectionTimeData[] = [
-                'time' => $hour,
-                'count' => $count,
-            ];
-        }
+        // Collection time distribution — aligned to student timeslots.
+        // Count parcels that were scheduled in each timeslot. We consider a
+        // parcel scheduled in a slot if either `time_slot` equals the label or
+        // the `schedule` time falls within the slot's start/end times.
+        $timeSlotRanges = [
+            '9:00 AM - 10:00 AM' => ['09:00:00', '10:00:00'],
+            '10:00 AM - 11:00 AM' => ['10:00:00', '11:00:00'],
+            '11:00 AM - 12:00 PM' => ['11:00:00', '12:00:00'],
+            '2:00 PM - 3:00 PM' => ['14:00:00', '15:00:00'],
+            '3:00 PM - 4:00 PM' => ['15:00:00', '16:00:00'],
+            '4:00 PM - 5:00 PM' => ['16:00:00', '17:00:00'],
+        ];
 
-        // Ensure we always have collection time data
-        if (empty($collectionTimeData)) {
-            $collectionTimeData = [
-                ['time' => '9AM', 'count' => 0],
-                ['time' => '10AM', 'count' => 0],
-                ['time' => '11AM', 'count' => 0],
-                ['time' => '12PM', 'count' => 0],
-                ['time' => '1PM', 'count' => 0],
-                ['time' => '2PM', 'count' => 0],
-                ['time' => '3PM', 'count' => 0],
-                ['time' => '4PM', 'count' => 0],
+        $collectionTimeData = [];
+        foreach ($timeSlotRanges as $label => [$start, $end]) {
+            $count = Parcel::whereNotNull('schedule')
+                ->where(function ($q) use ($label, $start, $end) {
+                    $q->where('time_slot', $label)
+                      ->orWhere(function ($qq) use ($start, $end) {
+                          $qq->whereTime('schedule', '>=', $start)
+                             ->whereTime('schedule', '<', $end);
+                      });
+                })
+                ->count();
+
+            $collectionTimeData[] = [
+                'time' => $label,
+                'count' => $count,
             ];
         }
 
