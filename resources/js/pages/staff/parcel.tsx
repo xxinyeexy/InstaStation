@@ -1806,19 +1806,21 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                                 {/* Right side - Actions */}
                                                 <div className="flex items-center gap-3">
-                                                    <button
-                                                        onClick={() => sendReminder(parcel.parcel_id)}
-                                                        disabled={sendingReminders.has(parcel.parcel_id)}
-                                                        className={`rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg ${
-                                                            sendingReminders.has(parcel.parcel_id) ? 'opacity-60 cursor-wait' : ''
-                                                        }`}
-                                                    >
-                                                        {sendingReminders.has(parcel.parcel_id) ? (
-                                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
-                                                        ) : (
-                                                            <BellRing className="h-5 w-5" />
-                                                        )}
-                                                    </button>
+                                                    {(parcel.parcel_status?.toLowerCase() === 'ready for collection' || parcel.parcel_status?.toLowerCase() === 'ready to collect') && (
+                                                        <button
+                                                            onClick={() => sendReminder(parcel.parcel_id)}
+                                                            disabled={sendingReminders.has(parcel.parcel_id)}
+                                                            className={`rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg ${
+                                                                sendingReminders.has(parcel.parcel_id) ? 'opacity-60 cursor-wait' : ''
+                                                            }`}
+                                                        >
+                                                            {sendingReminders.has(parcel.parcel_id) ? (
+                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                                                            ) : (
+                                                                <BellRing className="h-5 w-5" />
+                                                            )}
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => handleViewParcel(parcel.parcel_id)}
                                                         className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg"

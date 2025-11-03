@@ -200,6 +200,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setNotificationList(serverNotifications || []);
     }, [serverNotifications]);
 
+    // Only show notifications that relate to parcels which are "ready for collection".
+    // This prevents notifications for parcels in statuses like "collected" or "pending payment"
+    // from showing up in the bell dropdown.
+    const visibleNotifications = notificationList.filter((n) => {
+        if (!n.parcel_id) return false; // only consider parcel-related notifications for the bell
+        const parcel = parcelList.find((p) => Number(p.parcel_id) === Number(n.parcel_id));
+        if (!parcel) return false;
+        const status = (parcel.parcel_status || '').toLowerCase();
+        return status === 'ready for collection' || status === 'ready to collect';
+    });
+
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -732,16 +743,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 </div>
 
                 {/* Notification Bell (opens dropdown of server-side reminders) */}
-                <div className="flex justify-end">
-                    <div className="relative">
+                {visibleNotifications.length > 0 && (
+                    <div className="flex justify-end">
+                        <div className="relative">
                         <button
                             onClick={() => setShowNotificationDropdown((s) => !s)}
                             className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
                         >
                             <Bell className="h-6 w-6 text-foreground" />
-                            {notificationList.length > 0 && (
+                            {visibleNotifications.length > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-                                    {notificationList.length}
+                                    {visibleNotifications.length}
                                 </span>
                             )}
                         </button>
@@ -753,10 +765,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
                                 </div>
                                 <div className="max-h-96 overflow-y-auto">
-                                    {notificationList.length === 0 ? (
+                                    {visibleNotifications.length === 0 ? (
                                         <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
                                     ) : (
-                                        notificationList.map((notification) => (
+                                        visibleNotifications.map((notification) => (
                                             <div
                                                 key={notification.id}
                                                 className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
@@ -775,7 +787,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <p className="mt-1 text-xs text-muted-foreground">{new Date(notification.created_at).toLocaleString()}</p>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            )}
                                         ))
                                     )}
                                 </div>
