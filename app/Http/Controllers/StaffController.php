@@ -55,7 +55,6 @@ class StaffController extends Controller
             ->whereNotNull('sender')
             ->groupBy('sender')
             ->orderByDesc('count')
-            ->limit(6)
             ->get()
             ->map(function ($item) {
                 return [

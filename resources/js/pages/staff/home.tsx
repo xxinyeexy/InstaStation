@@ -265,23 +265,26 @@ export default function StaffHome() {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
-                                    {data.parcelSenders.map((sender, index) => (
-                                        <div key={sender.name} className="flex items-center justify-between">
-                                            <span className="text-sm font-medium">{sender.name}</span>
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
-                                                    <div
-                                                        className="h-full rounded-full bg-primary transition-all duration-1000 ease-out"
-                                                        style={{
-                                                            width: `${(sender.value / 50) * 100}%`,
-                                                            animationDelay: `${index * 100}ms`,
-                                                        }}
-                                                    />
+                                    {(() => {
+                                        const maxValue = Math.max(...data.parcelSenders.map((s) => s.value), 1);
+                                        return data.parcelSenders.map((sender, index) => (
+                                            <div key={sender.name} className="flex items-center justify-between">
+                                                <span className="text-sm font-medium">{sender.name}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
+                                                        <div
+                                                            className="h-full rounded-full bg-primary transition-all duration-1000 ease-out"
+                                                            style={{
+                                                                width: `${(sender.value / maxValue) * 100}%`,
+                                                                animationDelay: `${index * 100}ms`,
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <span className="w-8 text-sm text-muted-foreground">{sender.value}</span>
                                                 </div>
-                                                <span className="w-8 text-sm text-muted-foreground">{sender.value}</span>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ));
+                                    })()}
                                 </div>
                             </CardContent>
                         </Card>
