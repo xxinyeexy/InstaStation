@@ -366,6 +366,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify({
                     tracking_no: editForm.tracking_no,
                     parcel_status: editForm.parcel_status,
@@ -611,6 +612,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
+                credentials: 'same-origin',
             });
 
             if (response.ok) {
@@ -727,6 +729,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
+                credentials: 'same-origin',
             });
 
             if (!response.ok) {
@@ -765,11 +768,27 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         // optimistic UI - mark as sending
         setSendingReminders((prev) => new Set(prev).add(parcelId));
         try {
+            // Read CSRF token from meta tag, fallback to XSRF-TOKEN cookie (decoded)
+            const csrfToken = (() => {
+                const meta = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
+                if (meta && meta.getAttribute('content')) return meta.getAttribute('content')!;
+                const cookies = document.cookie ? document.cookie.split(';') : [];
+                for (const c of cookies) {
+                    const [k, v] = c.trim().split('=');
+                    if (k === 'XSRF-TOKEN') return decodeURIComponent(v || '');
+                }
+                return '';
+            })();
+
             const response = await fetch('/staff/parcels/remind', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    // Send both header names for maximum compatibility
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-XSRF-TOKEN': csrfToken,
                 },
                 credentials: 'same-origin',
                 body: JSON.stringify({ parcel_ids: [parcelId] }),

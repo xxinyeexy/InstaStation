@@ -743,9 +743,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 </div>
 
                 {/* Notification Bell (opens dropdown of server-side reminders) */}
-                {visibleNotifications.length > 0 && (
-                    <div className="flex justify-end">
-                        <div className="relative">
+                <div className="flex justify-end">
+                    <div className="relative">
                         <button
                             onClick={() => setShowNotificationDropdown((s) => !s)}
                             className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
@@ -787,7 +786,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <p className="mt-1 text-xs text-muted-foreground">{new Date(notification.created_at).toLocaleString()}</p>
                                                     </div>
                                                 </div>
-                                            )}
+                                            </div>
                                         ))
                                     )}
                                 </div>
