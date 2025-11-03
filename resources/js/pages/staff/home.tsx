@@ -231,6 +231,19 @@ export default function StaffHome() {
                                 <ResponsiveContainer width="100%" height={300}>
                                     {(() => {
                                         const chartData = activeTab === 'arrivals' ? data.dailyArrivals : data.dailyCollected;
+                                        // compute dynamic max across both series (thisYear and lastYear)
+                                        const rawMax = Math.max(
+                                            1,
+                                            ...chartData.flatMap((d) => [Number(d.thisYear || 0), Number(d.lastYear || 0)])
+                                        );
+                                        // add 10% padding and round up to nearest 10 for nicer ticks
+                                        const padded = Math.ceil(rawMax * 1.1);
+                                        let roundedMax = Math.max(10, Math.ceil(padded / 10) * 10);
+                                        // Ensure tick values are integers: choose a step that's an integer
+                                        const step = Math.ceil(roundedMax / 4);
+                                        roundedMax = step * 4; // make max divisible by 4
+                                        const ticks = [0, step, step * 2, step * 3, step * 4];
+
                                         return (
                                             <AreaChart data={chartData}>
                                         <defs>
@@ -241,7 +254,7 @@ export default function StaffHome() {
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                                 <XAxis dataKey="day" />
-                                                <YAxis domain={[0, 80]} ticks={[0, 20, 40, 60, 80]} />
+                                                <YAxis domain={[0, roundedMax]} ticks={ticks} />
                                                 <Tooltip
                                                     formatter={(value) => [`${Number(value).toLocaleString()}`, 'Count']}
                                                     contentStyle={{
@@ -312,20 +325,33 @@ export default function StaffHome() {
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={250}>
-                                    <BarChart data={data.parcelSize}>
-                                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                                        <XAxis dataKey="size" />
-                                        <YAxis domain={[0, 80]} ticks={[0, 20, 40, 60, 80]} />
-                                        <Tooltip
-                                            formatter={(value) => [`${value.toLocaleString()}`, 'Count']}
-                                            contentStyle={{
-                                                backgroundColor: 'hsl(var(--card))',
-                                                border: '1px solid hsl(var(--border))',
-                                                borderRadius: '8px',
-                                            }}
-                                        />
-                                        <Bar dataKey="count" fill="#FF029A" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
+                                    {(() => {
+                                        const rawMax = Math.max(1, ...data.parcelSize.map((d) => Number(d.count || 0)));
+                                        const padded = Math.ceil(rawMax * 1.1);
+                                        // round up to nearest 10 for nicer ticks, but allow small ranges
+                                        let roundedMax = Math.max(10, Math.ceil(padded / 10) * 10);
+                                        // choose integer step divisible into 4 parts
+                                        const step = Math.max(1, Math.ceil(roundedMax / 4));
+                                        roundedMax = step * 4;
+                                        const ticks = [0, step, step * 2, step * 3, step * 4];
+
+                                        return (
+                                            <BarChart data={data.parcelSize}>
+                                                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                                                <XAxis dataKey="size" />
+                                                <YAxis domain={[0, roundedMax]} ticks={ticks} />
+                                                <Tooltip
+                                                    formatter={(value) => [`${Number(value).toLocaleString()}`, 'Count']}
+                                                    contentStyle={{
+                                                        backgroundColor: 'hsl(var(--card))',
+                                                        border: '1px solid hsl(var(--border))',
+                                                        borderRadius: '8px',
+                                                    }}
+                                                />
+                                                <Bar dataKey="count" fill="#FF029A" radius={[4, 4, 0, 0]} />
+                                            </BarChart>
+                                        );
+                                    })()}
                                 </ResponsiveContainer>
                             </CardContent>
                         </Card>
@@ -376,53 +402,60 @@ export default function StaffHome() {
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={250}>
-                                    <BarChart data={data.collectionTime}>
-                                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                                        {/*
-                                         Custom multi-line tick so long timeslot labels like
-                                         "9:00 AM - 10:00 AM" show fully across two lines.
-                                         interval=0 forces all ticks to render.
-                                        */}
-                                        <XAxis
-                                            dataKey="time"
-                                            height={60}
-                                            interval={0}
-                                            tick={({ x, y, payload }) => {
-                                                const parts = String(payload.value).split(' - ');
-                                                // Render three-line label when we have exactly two parts:
-                                                // Line 1: start time
-                                                // Line 2: a centered hyphen
-                                                // Line 3: end time
-                                                return (
-                                                    <text x={x} y={y + 18} textAnchor="middle" fill="#6B7280" style={{ fontSize: 12 }}>
-                                                        {parts.length === 2 ? (
-                                                            <>
-                                                                <tspan x={x} dy={0}>{parts[0]}</tspan>
-                                                                <tspan x={x} dy={16}>-</tspan>
-                                                                <tspan x={x} dy={16}>{parts[1]}</tspan>
-                                                            </>
-                                                        ) : (
-                                                            parts.map((part, i) => (
-                                                                <tspan key={i} x={x} dy={i === 0 ? 0 : 16}>
-                                                                    {part}
-                                                                </tspan>
-                                                            ))
-                                                        )}
-                                                    </text>
-                                                );
-                                            }}
-                                        />
-                                        <YAxis domain={[0, 80]} ticks={[0, 20, 40, 60, 80]} />
-                                        <Tooltip
-                                            formatter={(value) => [`${value.toLocaleString()}`, 'Count']}
-                                            contentStyle={{
-                                                backgroundColor: 'hsl(var(--card))',
-                                                border: '1px solid hsl(var(--border))',
-                                                borderRadius: '8px',
-                                            }}
-                                        />
-                                        <Bar dataKey="count" fill="#FF029A" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
+                                    {(() => {
+                                        const rawMax = Math.max(1, ...data.collectionTime.map((d) => Number(d.count || 0)));
+                                        const padded = Math.ceil(rawMax * 1.1);
+                                        let roundedMax = Math.max(10, Math.ceil(padded / 10) * 10);
+                                        const step = Math.max(1, Math.ceil(roundedMax / 4));
+                                        roundedMax = step * 4;
+                                        const ticks = [0, step, step * 2, step * 3, step * 4];
+
+                                        return (
+                                            <BarChart data={data.collectionTime}>
+                                                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                                                {/**
+                                                 Custom multi-line tick so long timeslot labels like
+                                                 "9:00 AM - 10:00 AM" show fully across two lines.
+                                                 interval=0 forces all ticks to render.
+                                                */}
+                                                <XAxis
+                                                    dataKey="time"
+                                                    height={60}
+                                                    interval={0}
+                                                    tick={({ x, y, payload }) => {
+                                                        const parts = String(payload.value).split(' - ');
+                                                        return (
+                                                            <text x={x} y={y + 18} textAnchor="middle" fill="#6B7280" style={{ fontSize: 12 }}>
+                                                                {parts.length === 2 ? (
+                                                                    <>
+                                                                        <tspan x={x} dy={0}>{parts[0]}</tspan>
+                                                                        <tspan x={x} dy={16}>-</tspan>
+                                                                        <tspan x={x} dy={16}>{parts[1]}</tspan>
+                                                                    </>
+                                                                ) : (
+                                                                    parts.map((part, i) => (
+                                                                        <tspan key={i} x={x} dy={i === 0 ? 0 : 16}>
+                                                                            {part}
+                                                                        </tspan>
+                                                                    ))
+                                                                )}
+                                                            </text>
+                                                        );
+                                                    }}
+                                                />
+                                                <YAxis domain={[0, roundedMax]} ticks={ticks} />
+                                                <Tooltip
+                                                    formatter={(value) => [`${Number(value).toLocaleString()}`, 'Count']}
+                                                    contentStyle={{
+                                                        backgroundColor: 'hsl(var(--card))',
+                                                        border: '1px solid hsl(var(--border))',
+                                                        borderRadius: '8px',
+                                                    }}
+                                                />
+                                                <Bar dataKey="count" fill="#FF029A" radius={[4, 4, 0, 0]} />
+                                            </BarChart>
+                                        );
+                                    })()}
                                 </ResponsiveContainer>
                             </CardContent>
                         </Card>
