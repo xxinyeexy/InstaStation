@@ -1051,12 +1051,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             )}
                                         </div>
 
-                                        {/* Show payment proof thumbnail if available (second photo) */}
-                                        {parcel.payment_proof_url && (
-                                            <div className="mb-3">
-                                                <img src={parcel.payment_proof_url} alt="Payment proof" className="h-20 w-20 rounded-md object-contain border" />
-                                            </div>
-                                        )}
+                                     
 
                                         <div className="flex items-center gap-2">
                                             {isPendingPayment && (
