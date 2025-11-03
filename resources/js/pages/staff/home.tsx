@@ -28,7 +28,12 @@ interface DashboardProps {
         readyForCollection: number;
         unclaimed: number;
     };
-    dailyOperations: Array<{
+    dailyArrivals: Array<{
+        day: string;
+        thisYear: number;
+        lastYear: number;
+    }>;
+    dailyCollected: Array<{
         day: string;
         thisYear: number;
         lastYear: number;
@@ -211,20 +216,23 @@ export default function StaffHome() {
                                         Daily Parcels Arrivals This Week
                                     </button>
                                     <button
-                                        onClick={() => setActiveTab('status')}
+                                        onClick={() => setActiveTab('collected')}
                                         className={`rounded-md px-3 py-1 text-sm transition-colors ${
-                                            activeTab === 'status'
+                                            activeTab === 'collected'
                                                 ? 'bg-primary text-primary-foreground'
                                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
-                                        Daily Collection Rate
+                                        Daily Parcels Collected
                                     </button>
                                 </div>
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={300}>
-                                    <AreaChart data={data.dailyOperations}>
+                                    {(() => {
+                                        const chartData = activeTab === 'arrivals' ? data.dailyArrivals : data.dailyCollected;
+                                        return (
+                                            <AreaChart data={chartData}>
                                         <defs>
                                             <linearGradient id="colorThisYear" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#374151" stopOpacity={0.8} />
@@ -232,26 +240,29 @@ export default function StaffHome() {
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                                        <XAxis dataKey="day" />
-                                        <YAxis />
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: 'hsl(var(--card))',
-                                                border: '1px solid hsl(var(--border))',
-                                                borderRadius: '8px',
-                                            }}
-                                        />
+                                                <XAxis dataKey="day" />
+                                                <YAxis domain={[0, 80]} ticks={[0, 20, 40, 60, 80]} />
+                                                <Tooltip
+                                                    formatter={(value) => [`${Number(value).toLocaleString()}`, 'Count']}
+                                                    contentStyle={{
+                                                        backgroundColor: 'hsl(var(--card))',
+                                                        border: '1px solid hsl(var(--border))',
+                                                        borderRadius: '8px',
+                                                    }}
+                                                />
                                         <Legend />
-                                        <Area
-                                            type="monotone"
-                                            dataKey="thisYear"
-                                            stroke="#374151"
-                                            fillOpacity={1}
-                                            fill="url(#colorThisYear)"
-                                            name="This year"
-                                        />
-                                        <Line type="monotone" dataKey="lastYear" stroke="#9CA3AF" strokeDasharray="5 5" name="Last year" />
-                                    </AreaChart>
+                                                <Area
+                                                    type="monotone"
+                                                    dataKey="thisYear"
+                                                    stroke="#374151"
+                                                    fillOpacity={1}
+                                                    fill="url(#colorThisYear)"
+                                                    name="This year"
+                                                />
+                                                <Line type="monotone" dataKey="lastYear" stroke="#9CA3AF" strokeDasharray="5 5" name="Last year" />
+                                            </AreaChart>
+                                        );
+                                    })()}
                                 </ResponsiveContainer>
                             </CardContent>
                         </Card>

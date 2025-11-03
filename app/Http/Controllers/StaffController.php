@@ -33,20 +33,37 @@ class StaffController extends Controller
         $unclaimed = Parcel::where('parcel_status', 'Unclaimed')->count();
 
         // Daily operations data for the current week
-        $dailyOperations = [];
+        // We'll provide two series: daily arrivals (counts) and daily collection rate (collected/arrivals)
+        $dailyArrivals = [];
+    $dailyCollected = [];
         $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        
+
         for ($i = 0; $i < 7; $i++) {
             $date = now()->startOfWeek()->addDays($i);
             $lastYearDate = $date->copy()->subYear();
-            
-            $thisYear = Parcel::whereDate('created_at', $date)->count();
-            $lastYear = Parcel::whereDate('created_at', $lastYearDate)->count();
-            
-            $dailyOperations[] = [
+
+            // Arrivals = parcels created on that date
+            $thisYearArrivals = Parcel::whereDate('created_at', $date)->count();
+            $lastYearArrivals = Parcel::whereDate('created_at', $lastYearDate)->count();
+
+            // Collected = parcels with status 'Collected' updated on that date
+            $thisYearCollected = Parcel::whereDate('updated_at', $date)
+                ->whereRaw("lower(parcel_status) = 'collected'")
+                ->count();
+            $lastYearCollected = Parcel::whereDate('updated_at', $lastYearDate)
+                ->whereRaw("lower(parcel_status) = 'collected'")
+                ->count();
+
+            $dailyArrivals[] = [
                 'day' => $days[$i],
-                'thisYear' => $thisYear,
-                'lastYear' => $lastYear,
+                'thisYear' => $thisYearArrivals,
+                'lastYear' => $lastYearArrivals,
+            ];
+
+            $dailyCollected[] = [
+                'day' => $days[$i],
+                'thisYear' => $thisYearCollected,
+                'lastYear' => $lastYearCollected,
             ];
         }
 
@@ -166,7 +183,8 @@ class StaffController extends Controller
                 'readyForCollection' => $readyForCollection,
                 'unclaimed' => $unclaimed,
             ],
-            'dailyOperations' => $dailyOperations,
+            'dailyArrivals' => $dailyArrivals,
+            'dailyCollected' => $dailyCollected,
             'parcelSenders' => $senders,
             'parcelSize' => $sizeData,
             'parcelStatus' => $statusData,
