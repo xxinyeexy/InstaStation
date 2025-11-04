@@ -110,20 +110,34 @@ export default function StaffAnnouncements(props: {
  const toIsoStringFromLocal = (value?: string) => {
         if (!value) return '';
         // datetime-local input gives us "YYYY-MM-DDTHH:mm" in local time
-        // We need to convert this to ISO string WITHOUT timezone adjustment
-        const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return '';
-        
-        // Get the local datetime components
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        
-        // Return ISO format with 'Z' to indicate UTC (but treat as local time)
-        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+        // Parse it directly without timezone conversion
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
+            // Parse the components directly
+            const [datePart, timePart] = value.split('T');
+            const [year, month, day] = datePart.split('-');
+            const [hours, minutes] = timePart.split(':');
+            
+            // Create a date using local timezone components
+            const date = new Date(
+                parseInt(year),
+                parseInt(month) - 1,
+                parseInt(day),
+                parseInt(hours),
+                parseInt(minutes),
+                0
+            );
+            
+            // Format to Y-m-d H:i:s without timezone conversion
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            const h = String(date.getHours()).padStart(2, '0');
+            const i = String(date.getMinutes()).padStart(2, '0');
+            const s = String(date.getSeconds()).padStart(2, '0');
+            
+            return `${y}-${m}-${d} ${h}:${i}:${s}`;
+        }
+        return value;
     };
     const filtered = useMemo(() => {
         const needle = q.trim().toLowerCase();
