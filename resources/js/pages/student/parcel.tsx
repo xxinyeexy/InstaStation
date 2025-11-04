@@ -708,6 +708,62 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
+            
+            {/* Notification Bell - Positioned at top right */}
+            <div className="fixed top-4 right-6 z-50">
+                <div className="relative">
+                    <button
+                        onClick={() => setShowNotificationDropdown((s) => !s)}
+                        className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
+                    >
+                        <Bell className="h-6 w-6 text-foreground" />
+                        {visibleNotifications.length > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+                                {visibleNotifications.length}
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Notification Dropdown */}
+                    {showNotificationDropdown && (
+                        <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
+                            <div className="border-b border-border p-4">
+                                <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
+                            </div>
+                            <div className="max-h-96 overflow-y-auto">
+                                {visibleNotifications.length === 0 ? (
+                                    <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
+                                ) : (
+                                    visibleNotifications.map((notification) => (
+                                        <div
+                                            key={notification.id}
+                                            className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
+                                            onClick={() => handleNotificationClick(notification)}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="mt-1 flex-shrink-0">
+                                                    <AlertCircle className="h-5 w-5 text-destructive" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
+                                                    <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+                                                    {notification.parcel_code && (
+                                                        <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
+                                                    )}
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {new Date(notification.created_at).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             <div className="space-y-6 p-6">
                 {/* Toast Notification Container */}
                 <div className="fixed right-4 bottom-4 z-50 space-y-3">
@@ -743,62 +799,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     ))}
                 </div>
 
-                {/* Notification Bell (opens dropdown of server-side reminders) */}
-                <div className="flex justify-end">
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowNotificationDropdown((s) => !s)}
-                            className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
-                        >
-                            <Bell className="h-6 w-6 text-foreground" />
-                            {visibleNotifications.length > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-                                    {visibleNotifications.length}
-                                </span>
-                            )}
-                        </button>
-
-                        {/* Notification Dropdown */}
-                        {showNotificationDropdown && (
-                            <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
-                                <div className="border-b border-border p-4">
-                                    <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
-                                </div>
-                                <div className="max-h-96 overflow-y-auto">
-                                    {visibleNotifications.length === 0 ? (
-                                        <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
-                                    ) : (
-                                        visibleNotifications.map((notification) => (
-                                            <div
-                                                key={notification.id}
-                                                className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
-                                                onClick={() => handleNotificationClick(notification)}
-                                            >
-                                                <div className="flex items-start gap-3">
-                                                    <div className="mt-1 flex-shrink-0">
-                                                        <AlertCircle className="h-5 w-5 text-destructive" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
-                                                        <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
-                                                        {notification.parcel_code && (
-                                                            <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
-                                                        )}
-                                                        <p className="mt-1 text-xs text-muted-foreground">
-                                                            {new Date(notification.created_at).toLocaleString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* (Removed duplicate in-page reminder box; notifications now shown through the bell dropdown) */}
+                <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} />
 
                 {/* QR Code Modal */}
                 <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} isLoading={loadingQRParcels.size > 0} />
@@ -862,10 +863,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 )}
 
                 <div className="min-h-screen bg-white p-6 dark:bg-background">
-                    {/* Welcome header */}
-                    <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} />
-
-                    {/* Removed notification system from parcel.tsx */}
+                   
 
                     {/* Header tiles matching screenshot */}
                     <div className="mb-6 grid grid-cols-12 gap-4">
