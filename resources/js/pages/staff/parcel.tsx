@@ -1342,7 +1342,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
                                                     >
                                                         <option value="Pending Payment">Pending Payment</option>
-                                                        <option value="Ready for Collection">Ready for Collection</option>
+                                                        <option value="Ready For Collection">Ready For Collection</option>
                                                         <option value="Collected">Collected</option>
                                                         <option value="Unclaimed">Unclaimed</option>
                                                     </select>
