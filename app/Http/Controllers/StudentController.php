@@ -6,6 +6,7 @@ use App\Models\Student;
 use App\Models\Parcel;
 use App\Models\Payment;
 use App\Models\User;
+use App\Notifications\ParcelScheduledNotification;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -589,12 +590,39 @@ class StudentController extends Controller
             $numbers = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
             $collectionCode = $alphabet . $numbers;
 
+            // Generate QR code immediately and save it
+            try {
+                $qrCodeSvg = QrCode::format('svg')
+                    ->size(400)
+                    ->margin(1)
+                    ->errorCorrection('H')
+                    ->generate($collectionCode);
+                
+                // Save QR code to storage
+                $qrFileName = 'qr_' . $id . '_' . time() . '.svg';
+                $qrFilePath = 'qrcodes/' . $qrFileName;
+                Storage::disk('public')->put($qrFilePath, $qrCodeSvg);
+                
+                Log::info('QR Code generated and saved during scheduling', [
+                    'parcel_id' => $id,
+                    'collection_code' => $collectionCode,
+                    'qr_path' => $qrFilePath
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to generate QR code during scheduling', [
+                    'parcel_id' => $id,
+                    'error' => $e->getMessage()
+                ]);
+                $qrFilePath = null;
+            }
+
             // Update parcel for schedule. Do NOT change last_edited_by here (students shouldn't overwrite staff editor)
             // Only change status to 'Ready for Collection' if payment is verified
             $updateData = [
                 'schedule' => $request->scheduled_datetime,
                 'time_slot' => $request->time_slot,
                 'collection_code' => $collectionCode,
+                'qr_code' => $qrFilePath, // Save the QR code path
             ];
 
             // Set status to Ready for Collection only if payment is verified
@@ -609,6 +637,28 @@ class StudentController extends Controller
                 'schedule' => $parcel->schedule,
                 'status' => $parcel->parcel_status
             ]);
+
+            // Send email notification with QR code and collection code to student
+            if ($parcel->studentUser && $parcel->studentUser->email) {
+                try {
+                    $parcel->refresh(); // Reload parcel with updated data
+                    $parcel->studentUser->notify(new ParcelScheduledNotification($parcel));
+                    Log::info('Parcel scheduled notification sent', [
+                        'parcel_id' => $parcel->parcel_id,
+                        'parcel_code' => $parcel->parcel_code,
+                        'student_email' => $parcel->studentUser->email,
+                        'collection_code' => $parcel->collection_code,
+                        'schedule' => $parcel->schedule,
+                        'time_slot' => $parcel->time_slot
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send parcel scheduled notification', [
+                        'parcel_id' => $parcel->parcel_id,
+                        'error' => $e->getMessage()
+                    ]);
+                    // Don't fail the whole request if email fails
+                }
+            }
 
             return response()->json([
                 'message' => 'Pickup scheduled successfully',
