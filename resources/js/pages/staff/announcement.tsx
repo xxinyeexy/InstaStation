@@ -106,8 +106,7 @@ export default function StaffAnnouncements(props: {
         return d.toLocaleString();
     };
 
- 
- const toIsoStringFromLocal = (value?: string) => {
+    const toIsoStringFromLocal = (value?: string) => {
         if (!value) return '';
         // datetime-local input gives us "YYYY-MM-DDTHH:mm" in local time
         // Parse it directly without timezone conversion
@@ -116,17 +115,10 @@ export default function StaffAnnouncements(props: {
             const [datePart, timePart] = value.split('T');
             const [year, month, day] = datePart.split('-');
             const [hours, minutes] = timePart.split(':');
-            
+
             // Create a date using local timezone components
-            const date = new Date(
-                parseInt(year),
-                parseInt(month) - 1,
-                parseInt(day),
-                parseInt(hours),
-                parseInt(minutes),
-                0
-            );
-            
+            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), 0);
+
             // Format to Y-m-d H:i:s without timezone conversion
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -134,7 +126,7 @@ export default function StaffAnnouncements(props: {
             const h = String(date.getHours()).padStart(2, '0');
             const i = String(date.getMinutes()).padStart(2, '0');
             const s = String(date.getSeconds()).padStart(2, '0');
-            
+
             return `${y}-${m}-${d} ${h}:${i}:${s}`;
         }
         return value;
@@ -258,7 +250,7 @@ export default function StaffAnnouncements(props: {
                     <button
                         onClick={() => {
                             setAdding(true);
-        // Initialize with current time in datetime-local format
+                            // Initialize with current time in datetime-local format
                             const now = new Date();
                             const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
                             setPublishDate(localDateTime);
@@ -451,7 +443,7 @@ export default function StaffAnnouncements(props: {
                                     <div className="mb-1 text-sm font-medium text-foreground">Publish Date</div>
                                     <input
                                         type="datetime-local"
-                                        value={editPublishDate} 
+                                        value={editPublishDate}
                                         onChange={(e) => setEditPublishDate(e.target.value)}
                                         min={nowDateTimeLocal}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"

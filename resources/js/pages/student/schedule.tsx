@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { router } from '@inertiajs/react';
-import { Calendar, CheckCircle, Clock, MapPin, X } from 'lucide-react';
+import { AlertCircle, Calendar, CheckCircle, Clock, MapPin, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface ParcelData {
@@ -29,6 +29,9 @@ const SchedulePickup = ({ parcel }: Props) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [slotAvailability, setSlotAvailability] = useState<Record<string, { count: number; full: boolean; recommended: boolean }>>({});
     const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
+    const [showErrorToast, setShowErrorToast] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     const handleClose = () => {
         router.visit('/student/parcel');
@@ -36,7 +39,9 @@ const SchedulePickup = ({ parcel }: Props) => {
 
     const handleSchedule = async () => {
         if (!selectedDate || !selectedTimeSlot) {
-            alert('Please select both date and time slot for collection');
+            setErrorMessage('Please select both date and time slot for collection');
+            setShowErrorToast(true);
+            setTimeout(() => setShowErrorToast(false), 5000);
             return;
         }
 
@@ -158,19 +163,27 @@ const SchedulePickup = ({ parcel }: Props) => {
             const result = await response.json();
             console.log('Success response:', result);
 
-            // Show success message, refresh availability for instant feedback, then redirect
-            alert('Collection scheduled successfully!');
+            // Show success toast notification
+            setShowSuccessToast(true);
+            
+            // Refresh availability for instant feedback
             if (selectedDate) {
                 await fetchAvailability(selectedDate);
             }
-            setTimeout(() => router.visit('/student/parcel'), 400);
+            
+            // Redirect after showing the toast for a moment
+            setTimeout(() => {
+                router.visit('/student/parcel');
+            }, 2000);
         } catch (error) {
             console.error('Scheduling error:', error);
             if (error instanceof Error) {
-                alert('🚨 Scheduling failed: ' + error.message);
+                setErrorMessage(error.message);
             } else {
-                alert('🚨 An unexpected error occurred.');
+                setErrorMessage('An unexpected error occurred. Please try again.');
             }
+            setShowErrorToast(true);
+            setTimeout(() => setShowErrorToast(false), 5000);
         } finally {
             setIsSubmitting(false);
         }
@@ -278,6 +291,57 @@ const SchedulePickup = ({ parcel }: Props) => {
 
     return (
         <AppLayout>
+            {/* Success Toast Notification */}
+            {showSuccessToast && (
+                <div className="fixed right-4 top-4 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
+                    <div className="max-w-96 min-w-80 rounded-lg border border-emerald-200 bg-emerald-50/95 p-4 text-emerald-800 shadow-lg backdrop-blur-sm">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5 flex-shrink-0">
+                                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-sm font-semibold">Collection Scheduled Successfully!</h4>
+                                <p className="mt-1 text-sm opacity-90">
+                                    Your pickup has been scheduled for{' '}
+                                    {selectedDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at{' '}
+                                    {timeSlots.find((slot) => slot.id === selectedTimeSlot)?.label}
+                                </p>
+                                <p className="mt-1 text-xs opacity-75">Redirecting to your parcels...</p>
+                            </div>
+                            <button
+                                onClick={() => setShowSuccessToast(false)}
+                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Error Toast Notification */}
+            {showErrorToast && (
+                <div className="fixed right-4 top-4 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
+                    <div className="max-w-96 min-w-80 rounded-lg border border-red-200 bg-red-50/95 p-4 text-red-800 shadow-lg backdrop-blur-sm">
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5 flex-shrink-0">
+                                <AlertCircle className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-sm font-semibold">Scheduling Failed</h4>
+                                <p className="mt-1 text-sm opacity-90">{errorMessage}</p>
+                            </div>
+                            <button
+                                onClick={() => setShowErrorToast(false)}
+                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="fixed inset-0 overflow-y-auto bg-gray-50">
                 {/* Header */}
                 <div className="border-b bg-white shadow-sm">
@@ -287,9 +351,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                                 <h1 className="text-2xl font-bold text-gray-900">Schedule Pickup - {parcel.tracking_no}</h1>
                                 <p className="mt-1 text-gray-600">Choose your preferred date and time for parcel collection</p>
                             </div>
-                            <button onClick={handleClose} className="rounded-full p-2 transition-colors hover:bg-gray-100">
-                                <X className="h-6 w-6 text-gray-600" />
-                            </button>
+                            
                         </div>
                     </div>
                 </div>
