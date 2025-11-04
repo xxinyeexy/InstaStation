@@ -28,59 +28,35 @@ export default function Welcome() {
     }, []);
 
     // Format date consistently
-    const formatDate = (dateStr?: string | null) => {
-        if (!dateStr) return '';
-        try {
-            const date = new Date(dateStr);
-            if (isNaN(date.getTime())) return '';
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return '';
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return '';
 
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
 
-            let hours = date.getHours();
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
+        let hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
 
-            return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
-        } catch {
-            return '';
-        }
-    };
+        return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+    } catch {
+        return '';
+    }
+};
 
-    // Helper to determine whether an announcement is published.
-    const isPublished = (a: any) => {
-        try {
-            // Only consider items with announcement_id (real announcements, not FAQs)
-            if (!a.announcement_id) return false;
-
-            const status = a.announcement_status;
-            // If a status exists, honor it - must be 'Published' (not 'Draft')
-            if (typeof status !== 'undefined' && status !== null) {
-                return status === 'Published';
-            }
-            // Otherwise treat a past publish_date as published
-            if (a.publish_date) {
-                const t = new Date(a.publish_date).getTime();
-                return !Number.isNaN(t) && t <= Date.now();
-            }
-            return false;
-        } catch {
-            return false;
-        }
-    };
-
-    // Filter to only published announcements for the newsletter and sort newest-first
-    const publishedAnnouncements = (announcements || []).filter((a: any) => isPublished(a));
-    const publishedAnnouncementsSorted = [...publishedAnnouncements].sort((a: any, b: any) => {
+    // Always reflect the latest announcements first
+    const announcementsSorted = [...announcements].sort((a, b) => {
         const ad = new Date(a.publish_date || a.created_at || 0).getTime();
         const bd = new Date(b.publish_date || b.created_at || 0).getTime();
         return bd - ad; // newest first
     });
 
-    const publishedCount = publishedAnnouncementsSorted.length;
-    const displayedAnnouncements = publishedAnnouncementsSorted.slice(0, visibleCount);
+    const displayedAnnouncements = announcementsSorted.slice(0, visibleCount);
 
     /**
      * Intersection Observer animation hook
@@ -490,15 +466,10 @@ export default function Welcome() {
                     {/* Newsletter Section - Slide from left */}
                     <div className="mt-20 duration-700 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '100ms' }}>
                         <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-2xl font-semibold text-gray-900">
-                                Newsletter
-                                <span className="ml-3 inline-block rounded-full bg-pink-50 px-3 py-1 text-sm font-medium text-pink-600">
-                                    {publishedCount}
-                                </span>
-                            </h2>
-                            {publishedAnnouncementsSorted.length > displayedAnnouncements.length && (
+                            <h2 className="text-2xl font-semibold text-gray-900">Newsletter</h2>
+                            {announcementsSorted.length > displayedAnnouncements.length && (
                                 <button
-                                    onClick={() => setVisibleCount((c) => Math.min(c + 4, publishedAnnouncementsSorted.length))}
+                                    onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
                                     className="text-sm text-gray-600 hover:text-gray-900"
                                 >
                                     View more

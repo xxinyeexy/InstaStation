@@ -30,7 +30,6 @@ Route::get('/', function () {
             'announcement_content',
             'announcement_image',
             'announcement_type',
-            'announcement_status',
             'publish_date',
             'created_at',
         ]);
