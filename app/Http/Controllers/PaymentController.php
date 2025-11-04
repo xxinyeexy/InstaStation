@@ -317,7 +317,7 @@ class PaymentController extends Controller
                     } else {
                         $parcel->parcel_status = 'Approved';
                     }
-                    
+
                     $parcel->last_edited_by = Auth::id();
                     $parcel->touch();
                     $parcel->save();

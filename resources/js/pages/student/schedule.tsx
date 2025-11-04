@@ -165,12 +165,12 @@ const SchedulePickup = ({ parcel }: Props) => {
 
             // Show success toast notification
             setShowSuccessToast(true);
-            
+
             // Refresh availability for instant feedback
             if (selectedDate) {
                 await fetchAvailability(selectedDate);
             }
-            
+
             // Redirect after showing the toast for a moment
             setTimeout(() => {
                 router.visit('/student/parcel');
@@ -293,7 +293,7 @@ const SchedulePickup = ({ parcel }: Props) => {
         <AppLayout>
             {/* Success Toast Notification */}
             {showSuccessToast && (
-                <div className="fixed right-4 top-4 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
+                <div className="fixed top-4 right-4 z-50 duration-300 animate-in fade-in slide-in-from-top-4">
                     <div className="max-w-96 min-w-80 rounded-lg border border-emerald-200 bg-emerald-50/95 p-4 text-emerald-800 shadow-lg backdrop-blur-sm">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex-shrink-0">
@@ -302,9 +302,8 @@ const SchedulePickup = ({ parcel }: Props) => {
                             <div className="flex-1">
                                 <h4 className="text-sm font-semibold">Collection Scheduled Successfully!</h4>
                                 <p className="mt-1 text-sm opacity-90">
-                                    Your pickup has been scheduled for{' '}
-                                    {selectedDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at{' '}
-                                    {timeSlots.find((slot) => slot.id === selectedTimeSlot)?.label}
+                                    Your pickup has been scheduled for {selectedDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}{' '}
+                                    at {timeSlots.find((slot) => slot.id === selectedTimeSlot)?.label}
                                 </p>
                                 <p className="mt-1 text-xs opacity-75">Redirecting to your parcels...</p>
                             </div>
@@ -321,7 +320,7 @@ const SchedulePickup = ({ parcel }: Props) => {
 
             {/* Error Toast Notification */}
             {showErrorToast && (
-                <div className="fixed right-4 top-4 z-50 animate-in slide-in-from-top-4 fade-in duration-300">
+                <div className="fixed top-4 right-4 z-50 duration-300 animate-in fade-in slide-in-from-top-4">
                     <div className="max-w-96 min-w-80 rounded-lg border border-red-200 bg-red-50/95 p-4 text-red-800 shadow-lg backdrop-blur-sm">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex-shrink-0">
@@ -351,7 +350,6 @@ const SchedulePickup = ({ parcel }: Props) => {
                                 <h1 className="text-2xl font-bold text-gray-900">Schedule Pickup - {parcel.tracking_no}</h1>
                                 <p className="mt-1 text-gray-600">Choose your preferred date and time for parcel collection</p>
                             </div>
-                            
                         </div>
                     </div>
                 </div>

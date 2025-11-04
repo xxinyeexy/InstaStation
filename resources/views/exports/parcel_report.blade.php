@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Parcel Report</title>
+    <title>Parcel Collection Receipt</title>
     <style>
         body {
             font-family: DejaVu Sans, Arial, Helvetica, sans-serif;
@@ -14,19 +14,31 @@
         .header {
             text-align: center;
             margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
         }
 
         .header h1 {
             margin: 0;
             font-size: 20px;
+            color: #2d3748;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 11px;
+            color: #666;
         }
 
         .meta {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
+            background: #f7fafc;
+            padding: 12px;
+            border-radius: 5px;
         }
 
         .meta div {
-            margin: 2px 0;
+            margin: 4px 0;
         }
 
         table {
@@ -44,10 +56,31 @@
 
         th {
             background: #f2f2f2;
+            font-weight: bold;
         }
 
         .section-title {
             margin-top: 18px;
+            font-weight: bold;
+            font-size: 14px;
+            color: #2d3748;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 3px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #888;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+
+        .highlight {
+            background: #d4edda;
+            padding: 2px 6px;
+            border-radius: 3px;
             font-weight: bold;
         }
     </style>
@@ -56,21 +89,24 @@
 <body>
     <div class="header">
         <h1>Official Parcel Collection Receipt</h1>
-        <div>This receipt is computer generated and no signature is required.</div>
+        <p> UNIVERSITI MALAYSIA PAHANG AL-SULTAN ABDULLAH </p>
+        <p style="font-size: 10px;">This receipt is computer generated and no signature is required.</p>
     </div>
 
     <div class="meta">
-        <div><strong>Parcel Code:</strong> {{ $parcel->parcel_code ?? '-' }}</div>
+        <div><strong>Parcel Code:</strong> <span class="highlight">{{ $parcel->parcel_code ?? '-' }}</span></div>
         <div><strong>Tracking No:</strong> {{ $parcel->tracking_no ?? '-' }}</div>
-        <div><strong>Status:</strong> {{ $parcel->parcel_status ?? '-' }}</div>
-        <div><strong>Collected Date:</strong> {{ optional($parcel->schedule)->format('Y-m-d') }}</div>
+        <div><strong>Status:</strong> <span
+                style="color: #38a169; font-weight: bold;">{{ $parcel->parcel_status ?? '-' }}</span></div>
+        <div><strong>Collection Date:</strong>
+            {{ $parcel->updated_at ? $parcel->updated_at->format('d/m/Y h:i A') : '-' }}</div>
     </div>
 
-    <div class="section-title">Student</div>
+    <div class="section-title">Student Information</div>
     <table>
         <tr>
             <th>Name</th>
-            <td>{{ $student->name ?? '-' }}</td>
+            <td>{{ strtoupper($student->name ?? '-') }}</td>
         </tr>
         <tr>
             <th>Matric ID</th>
@@ -96,141 +132,36 @@
             <th>Location</th>
             <td>{{ $parcel->location ?? '-' }}</td>
         </tr>
-        
+        <tr>
+            <th>Collection Code</th>
+            <td>{{ $parcel->collection_code ?? '-' }}</td>
+        </tr>
     </table>
 
-    <div class="section-title">Payment</div>
+    <div class="section-title">Payment Information</div>
     <table>
         <tr>
             <th>Service Fee</th>
             <td>
-                @php $fee = $parcel->fee ?? ($payment->amount ?? 1.00); @endphp
-                RM{{ number_format($fee, 2) }}
+                <strong style="color: #38a169;">RM 1.00</strong>
             </td>
         </tr>
         <tr>
             <th>Payment Status</th>
-            <td>{{ $payment && $payment->verified_by ? 'Verified' : 'Pending/Unverified' }}</td>
+            <td>{{ $payment && $payment->verified_by ? 'Verified' : 'Paid' }}</td>
         </tr>
+        @if ($payment && $payment->payment_date)
+            <tr>
+                <th>Payment Date</th>
+                <td>{{ \Carbon\Carbon::parse($payment->payment_date)->format('d/m/Y') }}</td>
+            </tr>
+        @endif
     </table>
 
-    <p style="margin-top: 20px;">Thank you.</p>
-</body>
-
-</html>
-
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta charset="utf-8">
-    <title>Parcel Report - {{ $parcel->parcel_code ?? $parcel->id }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            color: #222;
-        }
-
-        .header {
-            margin-bottom: 10px;
-        }
-
-        .section {
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 16px;
-        }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 6px;
-        }
-
-        .col {
-            flex: 1 1 200px;
-            margin-right: 16px;
-        }
-
-        .label {
-            font-size: 13px;
-            color: #555;
-        }
-
-        .value {
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        .footer {
-            font-size: 12px;
-            color: #888;
-            margin-top: 24px;
-        }
-
-        .icon {
-            margin-right: 4px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="header">
-        <h2>Parcel Report - {{ $parcel->parcel_code ?? $parcel->id }}</h2>
-        <div style="font-size:13px;color:#888;">Detailed report for parcel {{ $parcel->parcel_code ?? $parcel->id }}
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Parcel Information</div>
-        <div class="row">
-            <div class="col"><span class="label">Parcel ID:</span> <span
-                    class="value">{{ $parcel->parcel_code ?? $parcel->id }}</span></div>
-            <div class="col"><span class="label">Recipient:</span> <span
-                    class="value">{{ $parcel->user->name ?? '-' }}</span></div>
-        </div>
-        <div class="row">
-            <div class="col"><span class="label">Tracking ID:</span> <span
-                    class="value">{{ $parcel->tracking_no ?? '-' }}</span></div>
-            <div class="col"><span class="label">Matric ID:</span> <span
-                    class="value">{{ $parcel->user->matric ?? '-' }}</span></div>
-        </div>
-        <div class="row">
-            <div class="col"><span class="label">Arrival Date:</span> <span
-                    class="value">{{ $parcel->created_at ? $parcel->created_at->toDateString() : '-' }}</span></div>
-            <div class="col"><span class="label">Location:</span> <span
-                    class="value">{{ $parcel->location ?? '-' }}</span></div>
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Package Details</div>
-        <div>Sender: {{ $parcel->sender ?? '-' }}</div>
-        <div>Size: {{ $parcel->size ?? '-' }}</div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Payment Information</div>
-        <div>Payment Status: {{ $parcel->payment->status ?? 'Approved' }}</div>
-        <div>Amount: RM{{ number_format($parcel->fee ?? 1.0, 2) }}</div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Collection Information</div>
-        <div>Collection Date: {{ $parcel->schedule ? \Carbon\Carbon::parse($parcel->schedule)->toDateString() : '-' }}
-        </div>
-        <div>Collection Status: {{ ucfirst($parcel->parcel_status ?? 'Collected') }}</div>
-    </div>
-
     <div class="footer">
-        Report generated on {{ now()->format('n/j/Y \a\t g:i:s A') }}
+        <p><strong>Thank you for using our parcel collection service.</strong></p>
+        <p>© {{ date('Y') }} UMPSA Parcel Centre. All rights reserved.</p>
+        <p>Powered by InstaStation</p>
     </div>
 </body>
 

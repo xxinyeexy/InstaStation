@@ -421,10 +421,10 @@ class StudentController extends Controller
         $latestPayment = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)
             ->orderBy('created_at', 'desc')
             ->first();
-        
+
         $isPaymentVerified = $latestPayment && !empty($latestPayment->verified_by);
         $parcelStatusLower = strtolower($parcel->parcel_status);
-        
+
         // Prevent scheduling if payment is not verified (unless status is already Approved or Ready for Collection)
         if (!$isPaymentVerified && !in_array($parcelStatusLower, ['approved', 'ready for collection'])) {
             // Redirect back to parcel page with error message
@@ -574,9 +574,9 @@ class StudentController extends Controller
             $latestPayment = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)
                 ->orderBy('created_at', 'desc')
                 ->first();
-            
+
             $isPaymentVerified = $latestPayment && !empty($latestPayment->verified_by);
-            
+
             // Only allow scheduling if payment is verified OR parcel status is already Approved
             if (!$isPaymentVerified && !in_array(strtolower($parcel->parcel_status), ['approved', 'ready for collection'])) {
                 return response()->json([
@@ -596,12 +596,12 @@ class StudentController extends Controller
                 'time_slot' => $request->time_slot,
                 'collection_code' => $collectionCode,
             ];
-            
+
             // Set status to Ready for Collection only if payment is verified
             if ($isPaymentVerified) {
                 $updateData['parcel_status'] = 'Ready for Collection';
             }
-            
+
             $parcel->update($updateData);
 
             Log::info('Parcel scheduled successfully', [

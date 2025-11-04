@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Jobs\SendParcelReminder;
+use App\Notifications\ParcelCollectedNotification;
 use Inertia\Inertia;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -162,14 +163,41 @@ class ParcelController extends Controller
     public function markAsCollected($id)
     {
         try {
-            $parcel = \App\Models\Parcel::findOrFail($id);
+            $parcel = \App\Models\Parcel::with(['studentUser'])->findOrFail($id);
             $currentUser = Auth::user();
+
+            // Check if parcel is already collected to prevent duplicate emails
+            $wasAlreadyCollected = $parcel->parcel_status === 'Collected';
 
             $parcel->update([
                 'parcel_status' => 'Collected',
                 'last_edited_by' => $currentUser->id,
                 'updated_at' => now()
             ]);
+
+            // Send email notification with receipt to student ONLY if status changed to Collected
+            if (!$wasAlreadyCollected && $parcel->studentUser && $parcel->studentUser->email) {
+                try {
+                    $parcel->studentUser->notify(new ParcelCollectedNotification($parcel));
+                    Log::info('Parcel collected notification sent', [
+                        'parcel_id' => $parcel->parcel_id,
+                        'parcel_code' => $parcel->parcel_code,
+                        'student_email' => $parcel->studentUser->email,
+                        'collected_by' => $currentUser->name
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send parcel collected notification', [
+                        'parcel_id' => $parcel->parcel_id,
+                        'error' => $e->getMessage()
+                    ]);
+                    // Don't fail the whole request if email fails
+                }
+            } elseif ($wasAlreadyCollected) {
+                Log::info('Parcel already collected, skipping notification', [
+                    'parcel_id' => $parcel->parcel_id,
+                    'parcel_code' => $parcel->parcel_code
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
