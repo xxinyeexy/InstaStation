@@ -48,11 +48,12 @@ const SchedulePickup = ({ parcel }: Props) => {
         setIsSubmitting(true);
 
         try {
-            // Get CSRF token
+            // Get CSRF token from meta tag
             const getCsrfToken = () => {
                 const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 if (metaToken) return metaToken;
 
+                // Fallback: try to get from cookie
                 const cookies = document.cookie.split(';');
                 for (let cookie of cookies) {
                     const [name, value] = cookie.trim().split('=');
@@ -60,13 +61,19 @@ const SchedulePickup = ({ parcel }: Props) => {
                         return decodeURIComponent(value);
                     }
                 }
-                return null;
+                
+                // Last resort: check if it's in the page
+                return document.head.querySelector('[name="csrf-token"]')?.getAttribute('content') || '';
             };
 
             const csrfToken = getCsrfToken();
+            console.log('CSRF Token found:', csrfToken ? 'Yes' : 'No');
 
             if (!csrfToken) {
-                throw new Error('CSRF token not found. Please refresh the page and try again.');
+                setErrorMessage('Session expired. Please refresh the page and try again.');
+                setShowErrorToast(true);
+                setTimeout(() => setShowErrorToast(false), 5000);
+                return;
             }
 
             // Convert selected date and time to a proper datetime string
@@ -129,7 +136,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                     'X-CSRF-TOKEN': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest',
                 },
-                credentials: 'same-origin',
+                credentials: 'include',
                 body: JSON.stringify(requestData),
             });
 
@@ -142,7 +149,10 @@ const SchedulePickup = ({ parcel }: Props) => {
                     const errorData = await response.json();
                     console.log('Error response:', errorData);
 
-                    if (errorData.message) {
+                    // Handle CSRF token mismatch specifically
+                    if (response.status === 419 || (errorData.message && errorData.message.includes('CSRF'))) {
+                        errorMessage = 'Your session has expired. Please refresh the page and try again.';
+                    } else if (errorData.message) {
                         errorMessage = errorData.message;
                     } else if (errorData.errors) {
                         const validationErrors = Object.entries(errorData.errors)
@@ -285,6 +295,29 @@ const SchedulePickup = ({ parcel }: Props) => {
         { id: '16:00-17:00', label: '4:00 PM - 5:00 PM', available: true },
     ];
 
+    // Check if a time slot has passed for today
+    const isTimeSlotPassed = (slotId: string, date: Date | null) => {
+        if (!date) return false;
+        
+        const today = new Date();
+        // If the selected date is not today, the slot hasn't passed
+        if (date.toDateString() !== today.toDateString()) return false;
+        
+        // Parse the slot end time
+        const endTimeMatch = slotId.match(/(\d{1,2}):(\d{2})$/);
+        if (!endTimeMatch) return false;
+        
+        const endHour = parseInt(endTimeMatch[1]);
+        const endMinute = parseInt(endTimeMatch[2]);
+        
+        // Create a date object for the slot end time today
+        const slotEndTime = new Date(today);
+        slotEndTime.setHours(endHour, endMinute, 0, 0);
+        
+        // If current time has passed the slot end time, it's too late
+        return today >= slotEndTime;
+    };
+
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
     const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
@@ -305,7 +338,6 @@ const SchedulePickup = ({ parcel }: Props) => {
                                     Your pickup has been scheduled for {selectedDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}{' '}
                                     at {timeSlots.find((slot) => slot.id === selectedTimeSlot)?.label}
                                 </p>
-                                <p className="mt-1 text-xs opacity-75">Redirecting to your parcels...</p>
                             </div>
                             <button
                                 onClick={() => setShowSuccessToast(false)}
@@ -470,7 +502,8 @@ const SchedulePickup = ({ parcel }: Props) => {
                                     const state = slotAvailability[slot.label];
                                     const isFull = state?.full === true;
                                     const isRecommended = state?.recommended === true;
-                                    const isAvailable = !isFull;
+                                    const hasPassed = isTimeSlotPassed(slot.id, selectedDate);
+                                    const isAvailable = !isFull && !hasPassed;
                                     const isSelectedSlot = selectedTimeSlot === slot.id;
 
                                     return (
@@ -492,13 +525,14 @@ const SchedulePickup = ({ parcel }: Props) => {
                                                 {typeof state?.count === 'number' && (
                                                     <span className="ml-2 text-xs text-gray-500">{state.count}/20</span>
                                                 )}
-                                                {isRecommended && !isFull && (
+                                                {isRecommended && !isFull && !hasPassed && (
                                                     <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
                                                         Recommended
                                                     </span>
                                                 )}
                                             </div>
                                             {isFull && <span className="text-sm font-medium text-red-500">Full</span>}
+                                            {!isFull && hasPassed && <span className="text-sm font-medium text-gray-500">Passed</span>}
                                         </button>
                                     );
                                 })}

@@ -479,6 +479,8 @@ class StudentController extends Controller
         foreach ($this->allowedTimeSlots() as $label) {
             [$start, $end] = $this->timeSlotRanges[$label];
 
+            // Count unique students (not parcels) in this time slot
+            // This ensures multiple parcels from the same student only count as one booking
             $count = Parcel::whereDate('schedule', $date)
                 ->where(function ($q) use ($label, $start, $end) {
                     $q->where('time_slot', $label)
@@ -488,7 +490,8 @@ class StudentController extends Controller
                                 ->whereTime('schedule', '<', $end);
                         });
                 })
-                ->count();
+                ->distinct('student_id')
+                ->count('student_id');
 
             $slots[] = [
                 'label' => $label,
@@ -552,8 +555,11 @@ class StudentController extends Controller
             }
 
             // Enforce capacity: max N participants per slot per date
+            // Count unique students (excluding current user if they already have a booking in this slot)
             $desiredDate = Carbon::parse($request->scheduled_datetime)->toDateString();
             [$start, $end] = $this->timeSlotRanges[$request->time_slot];
+            
+            // Count unique students in this time slot (same user with multiple parcels counts as 1)
             $existingCount = Parcel::whereDate('schedule', $desiredDate)
                 ->where(function ($q) use ($request, $start, $end) {
                     $q->where('time_slot', $request->time_slot)
@@ -563,7 +569,9 @@ class StudentController extends Controller
                                 ->whereTime('schedule', '<', $end);
                         });
                 })
-                ->count();
+                ->where('student_id', '!=', $user->id) // Exclude current user
+                ->distinct('student_id')
+                ->count('student_id');
 
             if ($existingCount >= self::TIME_SLOT_CAPACITY) {
                 return response()->json([

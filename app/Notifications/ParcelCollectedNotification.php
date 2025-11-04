@@ -51,7 +51,7 @@ class ParcelCollectedNotification extends Notification
             ->line('Attached to this email is a receipt for the Parcel Service Fee. Thank you.')
             ->line('')
             ->line('Best regards,  ')
-            ->line('**' . $staffName . '** from Parcel Center UMPSA')
+            ->line('**' . $staffName . '** from UMPSA Parcel Centre')
             ->attachData($pdfContent, $pdfFileName, [
                 'mime' => 'application/pdf',
             ]);
