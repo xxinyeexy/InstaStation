@@ -306,11 +306,18 @@ class PaymentController extends Controller
             $payment->verified_by = Auth::id();
             $payment->save();
 
-            // When a payment is approved by staff, mark parcel as Approved
+            // When a payment is approved by staff, update parcel status appropriately
             if ($payment->parcel_id) {
                 $parcel = Parcel::find($payment->parcel_id);
                 if ($parcel) {
-                    $parcel->parcel_status = 'Approved';
+                    // If parcel already has a schedule, mark as Ready for Collection
+                    // Otherwise, mark as Approved (payment verified, but no schedule yet)
+                    if ($parcel->schedule) {
+                        $parcel->parcel_status = 'Ready for Collection';
+                    } else {
+                        $parcel->parcel_status = 'Approved';
+                    }
+                    
                     $parcel->last_edited_by = Auth::id();
                     $parcel->touch();
                     $parcel->save();

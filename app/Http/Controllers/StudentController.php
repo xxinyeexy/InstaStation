@@ -87,6 +87,17 @@ class StudentController extends Controller
 
                     'created_at' => optional($parcel->created_at)?->toDateTimeString(),
                     'updated_at' => optional($parcel->updated_at)?->toDateTimeString(),
+                    // Check if payment has been verified
+                    'payment_verified' => (function () use ($parcel) {
+                        try {
+                            $p = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)
+                                ->orderBy('created_at', 'desc')
+                                ->first();
+                            return $p && !empty($p->verified_by);
+                        } catch (\Exception $e) {
+                            return false;
+                        }
+                    })(),
                     // include latest payment proof url for quick thumbnail in parcel list
                     'payment_proof_url' => (function () use ($parcel) {
                         try {
@@ -398,13 +409,28 @@ class StudentController extends Controller
     /**
      * Show schedule pickup page for a specific parcel.
      */
-    public function schedulePickup($id): Response
+    public function schedulePickup($id)
     {
         $user = Auth::user();
-        $parcel = Parcel::with(['studentUser', 'createdBy', 'lastEditedBy'])
+        $parcel = Parcel::with(['studentUser', 'createdBy', 'lastEditedBy', 'payment'])
             ->where('parcel_id', $id)
             ->where('student_id', $user->id)
             ->firstOrFail();
+
+        // Check if payment has been verified
+        $latestPayment = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        $isPaymentVerified = $latestPayment && !empty($latestPayment->verified_by);
+        $parcelStatusLower = strtolower($parcel->parcel_status);
+        
+        // Prevent scheduling if payment is not verified (unless status is already Approved or Ready for Collection)
+        if (!$isPaymentVerified && !in_array($parcelStatusLower, ['approved', 'ready for collection'])) {
+            // Redirect back to parcel page with error message
+            return redirect()->route('student.parcel')
+                ->with('error', 'Payment must be verified before you can schedule pickup. Please wait for staff to verify your payment.');
+        }
 
         // Generate collection code (simple format: B + random 3 digits)
         $collectionCode = 'B' . str_pad(rand(100, 999), 3, '0', STR_PAD_LEFT);
@@ -544,18 +570,39 @@ class StudentController extends Controller
                 ], 400);
             }
 
+            // Check if payment has been verified before allowing status change
+            $latestPayment = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+            
+            $isPaymentVerified = $latestPayment && !empty($latestPayment->verified_by);
+            
+            // Only allow scheduling if payment is verified OR parcel status is already Approved
+            if (!$isPaymentVerified && !in_array(strtolower($parcel->parcel_status), ['approved', 'ready for collection'])) {
+                return response()->json([
+                    'message' => 'Payment must be verified before scheduling pickup. Please complete payment verification first.',
+                ], 400);
+            }
+
             // Generate collection code: alphabet + 3 numbers
             $alphabet = chr(rand(65, 90)); // Random uppercase letter A-Z
             $numbers = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
             $collectionCode = $alphabet . $numbers;
 
             // Update parcel for schedule. Do NOT change last_edited_by here (students shouldn't overwrite staff editor)
-            $parcel->update([
+            // Only change status to 'Ready for Collection' if payment is verified
+            $updateData = [
                 'schedule' => $request->scheduled_datetime,
                 'time_slot' => $request->time_slot,
                 'collection_code' => $collectionCode,
-                'parcel_status' => 'Ready for Collection',
-            ]);
+            ];
+            
+            // Set status to Ready for Collection only if payment is verified
+            if ($isPaymentVerified) {
+                $updateData['parcel_status'] = 'Ready for Collection';
+            }
+            
+            $parcel->update($updateData);
 
             Log::info('Parcel scheduled successfully', [
                 'parcel_id' => $parcel->parcel_id,

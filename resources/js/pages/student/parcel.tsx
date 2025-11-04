@@ -51,6 +51,7 @@ interface Parcel {
         email: string;
     };
     payment_proof_url?: string | null;
+    payment_verified?: boolean;
 }
 
 // Extended interface for detailed parcel view
@@ -1053,7 +1054,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                         <div className="mb-4 text-sm">
                                             <span className="mr-2 text-gray-600 dark:text-muted-foreground">Payment:</span>
-                                            {isApproved ? (
+                                            {parcel.payment_verified || isApproved || isReady ? (
                                                 <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
                                                     Verified
                                                 </span>
