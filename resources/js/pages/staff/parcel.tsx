@@ -133,6 +133,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Notification state
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
+    // Collecting state - track which parcels are being collected
+    const [collectingParcels, setCollectingParcels] = useState<Set<number>>(new Set());
+
     // QR Scan modal state
     const [showScanModal, setShowScanModal] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
@@ -605,6 +608,33 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // Updated handleMarkAsCollected function - uses backend response
     const handleMarkAsCollected = async (parcelId: number) => {
+        // Prevent multiple simultaneous requests for the same parcel
+        if (collectingParcels.has(parcelId)) {
+            return;
+        }
+
+        // Add parcel to collecting set
+        setCollectingParcels((prev) => new Set(prev).add(parcelId));
+
+        // Optimistically update the UI immediately
+        setParcelList((prev) =>
+            prev.map((parcel) =>
+                parcel.parcel_id === parcelId
+                    ? {
+                          ...parcel,
+                          parcel_status: 'Collected',
+                          updated_at: new Date().toISOString(),
+                      }
+                    : parcel,
+            ),
+        );
+
+        // Automatically switch to Collected tab to show the updated parcel
+        setActiveTab('Collected');
+
+        // Show success notification immediately
+        addNotification('success', 'Success!', 'Parcel marked as collected successfully!');
+
         try {
             const response = await fetch(`/staff/parcel/${parcelId}/collect`, {
                 method: 'PATCH',
@@ -617,9 +647,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log(`Parcel ${parcelId} marked as collected successfully`);
 
-                // Update the local state with the actual data from the server
+                // Update with actual server data
                 setParcelList((prev) =>
                     prev.map((parcel) =>
                         parcel.parcel_id === parcelId
@@ -632,20 +661,46 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             : parcel,
                     ),
                 );
-
-                // Show success notification
-                addNotification('success', 'Success!', 'Parcel marked as collected successfully!');
-
-                // Automatically switch to Collected tab to show the updated parcel
-                setActiveTab('Collected');
             } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                // Revert the optimistic update on error
+                setParcelList((prev) =>
+                    prev.map((parcel) =>
+                        parcel.parcel_id === parcelId
+                            ? {
+                                  ...parcel,
+                                  parcel_status: 'Ready For Collection',
+                              }
+                            : parcel,
+                    ),
+                );
+
+                // Show error notification
+                addNotification('error', 'Error!', 'Failed to mark parcel as collected. Please try again.');
             }
         } catch (error) {
             console.error('Failed to mark as collected:', error);
 
+            // Revert the optimistic update on error
+            setParcelList((prev) =>
+                prev.map((parcel) =>
+                    parcel.parcel_id === parcelId
+                        ? {
+                              ...parcel,
+                              parcel_status: 'Ready For Collection',
+                          }
+                        : parcel,
+                ),
+            );
+
             // Show error notification
             addNotification('error', 'Error!', 'Failed to mark parcel as collected. Please try again.');
+        } finally {
+            // Remove parcel from collecting set
+            setCollectingParcels((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(parcelId);
+                return newSet;
+            });
         }
     };
 
@@ -1144,9 +1199,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             handleMarkAsCollected(parcelDetails.parcel_id);
                                             handleCloseDetailsModal();
                                         }}
-                                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:bg-green-700"
+                                        disabled={collectingParcels.has(parcelDetails.parcel_id)}
+                                        className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-150 ${
+                                            collectingParcels.has(parcelDetails.parcel_id)
+                                                ? 'cursor-not-allowed bg-green-500 opacity-80'
+                                                : 'bg-green-600 hover:scale-105 hover:bg-green-700 active:scale-95'
+                                        }`}
                                     >
-                                        Mark as Collected
+                                        <CheckCircle className="h-4 w-4" />
+                                        <span>Mark as Collected</span>
                                     </button>
                                 )}
                             </div>
@@ -1951,9 +2012,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     {parcel.parcel_status?.toLowerCase() == 'ready for collection' && (
                                                         <button
                                                             onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                            className="rounded-2xl bg-green-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-emerald-600 hover:to-green-700 hover:shadow-xl"
+                                                            disabled={collectingParcels.has(parcel.parcel_id)}
+                                                            className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-150 ${
+                                                                collectingParcels.has(parcel.parcel_id)
+                                                                    ? 'cursor-not-allowed bg-green-500 opacity-80'
+                                                                    : 'bg-green-600 hover:scale-105 hover:bg-green-700 hover:shadow-xl active:scale-95'
+                                                            }`}
                                                         >
-                                                            Mark as Collected
+                                                            <CheckCircle className="h-4 w-4" />
+                                                            <span>Mark as Collected</span>
                                                         </button>
                                                     )}
                                                 </div>
