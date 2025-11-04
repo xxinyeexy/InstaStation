@@ -37,7 +37,7 @@ export default function StaffAnnouncements(props: {
     const [editTitle, setEditTitle] = useState('');
     const [editContent, setEditContent] = useState('');
     const [editType, setEditType] = useState('');
-    const [editStatus, setEditStatus] = useState<'Active' | 'Inactive'>('Inactive');
+    const [editStatus, setEditStatus] = useState<'Published' | 'Draft'>('Draft');
     const [editPublishDate, setEditPublishDate] = useState<string>('');
     const [editExpiryDate, setEditExpiryDate] = useState<string>('');
     const [editImageFile, setEditImageFile] = useState<File | null>(null);
@@ -50,7 +50,7 @@ export default function StaffAnnouncements(props: {
             const currentTime = new Date();
 
             if (publishDateTime <= currentTime) {
-                setEditStatus('Active'); // Set to Published
+                setEditStatus('Published'); // Set to Published
             }
         }
     }, [editPublishDate]);
@@ -62,7 +62,7 @@ export default function StaffAnnouncements(props: {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [annType, setAnnType] = useState('General');
-    const [annStatus, setAnnStatus] = useState<'Active' | 'Inactive'>('Inactive');
+    const [annStatus, setAnnStatus] = useState<'Published' | 'Draft'>('Draft');
     const [publishDate, setPublishDate] = useState<string>('');
     const [expiryDate, setExpiryDate] = useState<string>('');
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -75,7 +75,7 @@ export default function StaffAnnouncements(props: {
             const currentTime = new Date();
 
             if (publishDateTime <= currentTime) {
-                setAnnStatus('Active'); // Set to Published
+                setAnnStatus('Published'); // Set to Published
             }
         }
     }, [publishDate]);
@@ -106,14 +106,13 @@ export default function StaffAnnouncements(props: {
         return d.toLocaleString();
     };
 
- 
- const toIsoStringFromLocal = (value?: string) => {
+    const toIsoStringFromLocal = (value?: string) => {
         if (!value) return '';
         // datetime-local input gives us "YYYY-MM-DDTHH:mm" in local time
         // We need to convert this to ISO string WITHOUT timezone adjustment
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) return '';
-        
+
         // Get the local datetime components
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -121,7 +120,7 @@ export default function StaffAnnouncements(props: {
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const seconds = String(date.getSeconds()).padStart(2, '0');
-        
+
         // Return ISO format with 'Z' to indicate UTC (but treat as local time)
         return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
     };
@@ -189,6 +188,29 @@ export default function StaffAnnouncements(props: {
         return 'bg-gray-100 text-gray-700';
     };
 
+    // Count published announcements only (exclude FAQ items).
+    // For announcement rows we consider announcement_status === 'Published' authoritative.
+    // If no explicit status is present, fall back to publish_date <= now.
+    const isPublished = (r: AnnouncementRow) => {
+        try {
+            // Only consider rows that are actual Announcements (have announcement_id)
+            if (!(r as any).announcement_id) return false;
+            const status = (r as any).announcement_status;
+            if (typeof status !== 'undefined' && status !== null) {
+                return status === 'Published';
+            }
+            if (r.publish_date) {
+                const t = new Date(r.publish_date).getTime();
+                return !Number.isNaN(t) && t <= Date.now();
+            }
+            return false;
+        } catch {
+            return false;
+        }
+    };
+
+    const publishedCount = list.filter((r) => isPublished(r)).length;
+
     return (
         <AppLayout>
             <div className="space-y-6 p-6">
@@ -206,9 +228,7 @@ export default function StaffAnnouncements(props: {
                     </div>
                     <div className="rounded-xl border border-border bg-card p-4">
                         <div className="text-sm text-gray-600 dark:text-muted-foreground">Published</div>
-                        <div className="text-2xl font-bold text-foreground">
-                            {list.filter((r) => (r as any).announcement_status === 'Published' || r.faq_status === 'Active').length}
-                        </div>
+                        <div className="text-2xl font-bold text-foreground">{publishedCount}</div>
                         <div className="text-xs text-gray-500 dark:text-muted-foreground">Visible to students</div>
                     </div>
                 </div>
@@ -244,11 +264,11 @@ export default function StaffAnnouncements(props: {
                     <button
                         onClick={() => {
                             setAdding(true);
-        // Initialize with current time in datetime-local format
+                            // Initialize with current time in datetime-local format
                             const now = new Date();
                             const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
                             setPublishDate(localDateTime);
-                            setAnnStatus('Active'); // Set to Published by default when publish date is current
+                            setAnnStatus('Published'); // Set to Published by default when publish date is current
                         }}
                         className="inline-flex items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white dark:bg-gray-700"
                     >
@@ -315,8 +335,8 @@ export default function StaffAnnouncements(props: {
                                             setEditContent(((f as any).announcement_content || (f as any).faq_answer) as string);
                                             setEditType(((f as any).announcement_type || (f as any).category || '') as string);
                                             // Map announcement_status to UI status
-                                            const isActive = (f as any).announcement_status === 'Published' || (f as any).faq_status === 'Active';
-                                            setEditStatus(isActive ? 'Active' : 'Inactive');
+                                            const isPublished = (f as any).announcement_status === 'Published' || (f as any).faq_status === 'Active';
+                                            setEditStatus(isPublished ? 'Published' : 'Draft');
                                             setEditPublishDate(toDateTimeLocalValue((f as any).publish_date as string | undefined));
                                             setEditExpiryDate(toDateTimeLocalValue((f as any).expiry_date as string | undefined));
                                             setEditImageFile(null);
@@ -399,11 +419,11 @@ export default function StaffAnnouncements(props: {
                                     <div className="mb-1 text-sm font-medium text-foreground">Status</div>
                                     <select
                                         value={editStatus}
-                                        onChange={(e) => setEditStatus(e.target.value as 'Active' | 'Inactive')}
+                                        onChange={(e) => setEditStatus(e.target.value as 'Published' | 'Draft')}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                                     >
-                                        <option value="Inactive">Draft</option>
-                                        <option value="Active">Published</option>
+                                        <option value="Draft">Draft</option>
+                                        <option value="Published">Published</option>
                                     </select>
                                 </div>
                             </div>
@@ -437,14 +457,14 @@ export default function StaffAnnouncements(props: {
                                     <div className="mb-1 text-sm font-medium text-foreground">Publish Date</div>
                                     <input
                                         type="datetime-local"
-                                        value={editPublishDate} 
+                                        value={editPublishDate}
                                         onChange={(e) => setEditPublishDate(e.target.value)}
                                         min={nowDateTimeLocal}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                                     />
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">Expiry Date</div>
+                                    <div className="font-mweledium mb-1 text-sm text-foreground">Expiry Date</div>
                                     <input
                                         type="datetime-local"
                                         value={editExpiryDate}
@@ -488,7 +508,7 @@ export default function StaffAnnouncements(props: {
                                                           announcement_title: editTitle,
                                                           announcement_content: editContent,
                                                           announcement_type: editType,
-                                                          announcement_status: editStatus === 'Active' ? 'Published' : 'Draft',
+                                                          announcement_status: editStatus,
                                                           publish_date: editPublishDate
                                                               ? toIsoStringFromLocal(editPublishDate)
                                                               : (r as any).publish_date,
@@ -632,11 +652,11 @@ export default function StaffAnnouncements(props: {
                                     <div className="mb-1 text-sm font-medium text-foreground">Status</div>
                                     <select
                                         value={annStatus}
-                                        onChange={(e) => setAnnStatus(e.target.value as 'Active' | 'Inactive')}
+                                        onChange={(e) => setAnnStatus(e.target.value as 'Published' | 'Draft')}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                                     >
-                                        <option value="Inactive">Draft</option>
-                                        <option value="Active">Published</option>
+                                        <option value="Draft">Draft</option>
+                                        <option value="Published">Published</option>
                                     </select>
                                 </div>
                             </div>
@@ -707,7 +727,7 @@ export default function StaffAnnouncements(props: {
                                             setTitle('');
                                             setContent('');
                                             setAnnType('General');
-                                            setAnnStatus('Inactive');
+                                            setAnnStatus('Draft');
                                             setPublishDate('');
                                             setExpiryDate('');
                                             setImageFile(null);

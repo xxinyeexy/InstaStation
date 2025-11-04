@@ -892,7 +892,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-lg font-semibold">Collections for date</h3>
-                                        <button onClick={() => setCalendarOpen(false)} className="text-sm text-gray-500">Close</button>
+                                        <button onClick={() => setCalendarOpen(false)} className="text-sm text-gray-500">
+                                            Close
+                                        </button>
                                     </div>
                                     <div className="mt-4 flex items-center gap-4">
                                         <label className="text-sm text-gray-600">Select date</label>
@@ -904,27 +906,42 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         />
                                         <div className="ml-auto text-sm text-gray-600">Found: {collectionsForSelectedDate.length}</div>
                                     </div>
-                                    <div className="mt-4 space-y-3 max-h-[60vh] overflow-y-auto">
+                                    <div className="mt-4 max-h-[60vh] space-y-3 overflow-y-auto">
                                         {collectionsForSelectedDate.length === 0 ? (
                                             <div className="text-sm text-gray-500">No parcels scheduled on this date.</div>
                                         ) : (
                                             collectionsForSelectedDate.map((p) => (
                                                 <div key={p.parcel_id} className="rounded-xl border border-gray-100 p-4">
                                                     <div className="flex items-start gap-4">
-                                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 font-semibold">
+                                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 font-semibold text-purple-600">
                                                             <span className="text-sm">{p.time_slot ? p.time_slot.split(' - ')[0] : ''}</span>
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2">
-                                                                <p className="text-sm font-semibold text-gray-900">{p.student_user?.name || p.recipient_name || 'Unknown Student'}</p>
-                                                                { (p.student_user?.matric || p.recipient_matric) && (
-                                                                    <p className="text-xs text-gray-500">({p.student_user?.matric || p.recipient_matric})</p>
-                                                                ) }
+                                                                <p className="text-sm font-semibold text-gray-900">
+                                                                    {p.student_user?.name || p.recipient_name || 'Unknown Student'}
+                                                                </p>
+                                                                {(p.student_user?.matric || p.recipient_matric) && (
+                                                                    <p className="text-xs text-gray-500">
+                                                                        ({p.student_user?.matric || p.recipient_matric})
+                                                                    </p>
+                                                                )}
                                                             </div>
-                                                            <div className="mt-1 text-sm text-gray-700">Tracking: <span className="font-mono">{p.tracking_no}</span></div>
-                                                            <div className="mt-1 text-sm text-gray-700">Location: {p.location || 'N/A'} • Size: {p.size || 'N/A'}</div>
-                                                            <div className="mt-1 text-xs text-gray-500">Timeslot: {p.time_slot || formatScheduledDate(p.schedule)}</div>
-                                                            <div className="mt-2 text-xs text-gray-500">Status: <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">{p.parcel_status}</span></div>
+                                                            <div className="mt-1 text-sm text-gray-700">
+                                                                Tracking: <span className="font-mono">{p.tracking_no}</span>
+                                                            </div>
+                                                            <div className="mt-1 text-sm text-gray-700">
+                                                                Location: {p.location || 'N/A'} • Size: {p.size || 'N/A'}
+                                                            </div>
+                                                            <div className="mt-1 text-xs text-gray-500">
+                                                                Timeslot: {p.time_slot || formatScheduledDate(p.schedule)}
+                                                            </div>
+                                                            <div className="mt-2 text-xs text-gray-500">
+                                                                Status:{' '}
+                                                                <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+                                                                    {p.parcel_status}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2016,7 +2033,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     </div>
                                     <div className="flex items-baseline gap-3">
                                         <h3 className="text-xl font-bold text-gray-900">{formatScheduledDate(selectedDate)} Collection</h3>
-                                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">{todaysCollections.length}</span>
+                                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+                                            {todaysCollections.length}
+                                        </span>
                                         <input
                                             type="date"
                                             value={selectedDate}
@@ -2026,32 +2045,41 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         />
                                     </div>
                                 </div>
-                              
                             </div>
                             <div className="space-y-3">
                                 {todaysCollections.length === 0 ? (
                                     <div className="rounded-xl p-4 text-sm text-gray-500">No collections scheduled for today.</div>
-                                ) : todaysCollections.map((p) => (
-                                    <div key={p.parcel_id} className="rounded-xl border border-gray-100 p-4">
-                                        <div className="flex items-start gap-4">
-                                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 font-semibold">
-                                                <span className="text-sm">{p.time_slot ? p.time_slot.split(' - ')[0] : ''}</span>
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex flex-col">
-                                                    <div className="flex items-center gap-2">
-                                                        <p className="text-sm font-semibold text-gray-900">{p.student_user?.name || p.recipient_name || 'Unknown Student'}</p>
-                                                        { (p.student_user?.matric || p.recipient_matric) && (
-                                                            <p className="text-xs text-gray-500">({p.student_user?.matric || p.recipient_matric})</p>
-                                                        ) }
+                                ) : (
+                                    todaysCollections.map((p) => (
+                                        <div key={p.parcel_id} className="rounded-xl border border-gray-100 p-4">
+                                            <div className="flex items-start gap-4">
+                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 font-semibold text-purple-600">
+                                                    <span className="text-sm">{p.time_slot ? p.time_slot.split(' - ')[0] : ''}</span>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex flex-col">
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="text-sm font-semibold text-gray-900">
+                                                                {p.student_user?.name || p.recipient_name || 'Unknown Student'}
+                                                            </p>
+                                                            {(p.student_user?.matric || p.recipient_matric) && (
+                                                                <p className="text-xs text-gray-500">
+                                                                    ({p.student_user?.matric || p.recipient_matric})
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                        <div className="mt-1 text-sm text-gray-700">
+                                                            Tracking: <span className="font-mono">{p.tracking_no}</span>
+                                                        </div>
+                                                        <div className="mt-1 text-xs text-gray-500">
+                                                            Timeslot: {p.time_slot || formatScheduledDate(p.schedule)}
+                                                        </div>
                                                     </div>
-                                                    <div className="mt-1 text-sm text-gray-700">Tracking: <span className="font-mono">{p.tracking_no}</span></div>
-                                                    <div className="mt-1 text-xs text-gray-500">Timeslot: {p.time_slot || formatScheduledDate(p.schedule)}</div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>

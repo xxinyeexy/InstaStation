@@ -203,7 +203,11 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-gray-700">Payment Proof</label>
                                     <div className="mt-2">
-                                        <img src={payment_proof_url} alt="Payment proof" className="max-h-48 w-full object-contain rounded-md border" />
+                                        <img
+                                            src={payment_proof_url}
+                                            alt="Payment proof"
+                                            className="max-h-48 w-full rounded-md border object-contain"
+                                        />
                                     </div>
                                 </div>
                             )}

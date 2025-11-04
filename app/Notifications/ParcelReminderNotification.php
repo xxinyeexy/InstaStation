@@ -43,7 +43,7 @@ class ParcelReminderNotification extends Notification
         }
 
         $mail->action('View Parcel', $url)
-             ->line('If you have already collected the parcel, please ignore this message.');
+            ->line('If you have already collected the parcel, please ignore this message.');
 
         return $mail;
     }

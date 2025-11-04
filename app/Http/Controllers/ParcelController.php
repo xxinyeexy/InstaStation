@@ -326,7 +326,7 @@ class ParcelController extends Controller
             $baseQuery = Parcel::whereIn('parcel_status', ['Ready For Collection', 'Ready to Collect', 'Unclaimed', 'Pending Payment'])
                 ->where(function ($q) use ($today) {
                     $q->whereNull('reminder_sent_at')
-                      ->orWhereDate('reminder_sent_at', '<', $today);
+                        ->orWhereDate('reminder_sent_at', '<', $today);
                 });
 
             if ($parcelIds === 'all') {

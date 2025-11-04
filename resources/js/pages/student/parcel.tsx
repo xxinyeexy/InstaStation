@@ -2,8 +2,8 @@ import QRCodeModal from '@/components/qr-code-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { CheckCircle, Package, Sparkles, Upload, X, XCircle, Bell, AlertCircle } from 'lucide-react';
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { AlertCircle, Bell, CheckCircle, Package, Sparkles, Upload, X, XCircle } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -236,7 +236,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 await fetch(`/student/notifications/${notification.id}/mark-read`, {
                     method: 'POST',
                     headers: {
-                        'Accept': 'application/json',
+                        Accept: 'application/json',
                         'Content-Type': 'application/json',
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
@@ -783,7 +783,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         {notification.parcel_code && (
                                                             <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
                                                         )}
-                                                        <p className="mt-1 text-xs text-muted-foreground">{new Date(notification.created_at).toLocaleString()}</p>
+                                                        <p className="mt-1 text-xs text-muted-foreground">
+                                                            {new Date(notification.created_at).toLocaleString()}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1061,8 +1063,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 </span>
                                             )}
                                         </div>
-
-                                     
 
                                         <div className="flex items-center gap-2">
                                             {isPendingPayment && (

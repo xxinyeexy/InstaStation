@@ -21,7 +21,7 @@ Route::get('/', function () {
         ->where('announcement_status', 'Published')
         ->where(function ($q) use ($today) {
             $q->whereNull('expiry_date')
-              ->orWhereDate('expiry_date', '>=', $today);
+                ->orWhereDate('expiry_date', '>=', $today);
         })
         ->orderByDesc(DB::raw('COALESCE(publish_date, created_at)'))
         ->get([
@@ -30,6 +30,7 @@ Route::get('/', function () {
             'announcement_content',
             'announcement_image',
             'announcement_type',
+            'announcement_status',
             'publish_date',
             'created_at',
         ]);
@@ -67,7 +68,7 @@ Route::middleware('auth')->group(function () {
     // Staff routes
     Route::get('/staff/dashboard', [StaffController::class, 'dashboard'])
         ->name('staff.dashboard');
-    
+
     Route::get('/staff/parcel', [ParcelController::class, 'index'])
         ->name('staff.parcel');
     // Send reminders to students for uncollected parcels (AJAX)

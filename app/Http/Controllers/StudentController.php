@@ -85,17 +85,17 @@ class StudentController extends Controller
                         ]
                         : $parcel->last_edited_by,
 
-                            'created_at' => optional($parcel->created_at)?->toDateTimeString(),
-                            'updated_at' => optional($parcel->updated_at)?->toDateTimeString(),
-                            // include latest payment proof url for quick thumbnail in parcel list
-                            'payment_proof_url' => (function () use ($parcel) {
-                                try {
-                                    $p = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)->orderBy('created_at', 'desc')->first();
-                                    return $p && $p->file_path ? Storage::url($p->file_path) : null;
-                                } catch (\Exception $e) {
-                                    return null;
-                                }
-                            })(),
+                    'created_at' => optional($parcel->created_at)?->toDateTimeString(),
+                    'updated_at' => optional($parcel->updated_at)?->toDateTimeString(),
+                    // include latest payment proof url for quick thumbnail in parcel list
+                    'payment_proof_url' => (function () use ($parcel) {
+                        try {
+                            $p = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)->orderBy('created_at', 'desc')->first();
+                            return $p && $p->file_path ? Storage::url($p->file_path) : null;
+                        } catch (\Exception $e) {
+                            return null;
+                        }
+                    })(),
                     'student_user' => $parcel->studentUser
                         ? [
                             'id' => $parcel->studentUser->id,

@@ -35,7 +35,7 @@ class StaffController extends Controller
         // Daily operations data for the current week
         // We'll provide two series: daily arrivals (counts) and daily collection rate (collected/arrivals)
         $dailyArrivals = [];
-    $dailyCollected = [];
+        $dailyCollected = [];
         $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
         for ($i = 0; $i < 7; $i++) {
@@ -99,7 +99,7 @@ class StaffController extends Controller
             ->map(function ($item) {
                 $sizeMap = [
                     'small' => 'Small',
-                    'medium' => 'Medium', 
+                    'medium' => 'Medium',
                     'large' => 'Large'
                 ];
                 return [
@@ -163,10 +163,10 @@ class StaffController extends Controller
             $count = Parcel::whereNotNull('schedule')
                 ->where(function ($q) use ($label, $start, $end) {
                     $q->where('time_slot', $label)
-                      ->orWhere(function ($qq) use ($start, $end) {
-                          $qq->whereTime('schedule', '>=', $start)
-                             ->whereTime('schedule', '<', $end);
-                      });
+                        ->orWhere(function ($qq) use ($start, $end) {
+                            $qq->whereTime('schedule', '>=', $start)
+                                ->whereTime('schedule', '<', $end);
+                        });
                 })
                 ->count();
 
@@ -203,7 +203,7 @@ class StaffController extends Controller
             'Collected' => '#10B981',
             'Unclaimed' => '#14B8A6'
         ];
-        
+
         return $colors[$status] ?? '#6B7280';
     }
 
