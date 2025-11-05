@@ -106,7 +106,7 @@ class NotificationController extends Controller
                 // Return success anyway since the desired state is achieved
                 return response()->json(['success' => true, 'already_read' => true]);
             }
-            
+
             $notification->read_at = now();
             $notification->save();
 
@@ -122,7 +122,7 @@ class NotificationController extends Controller
             'user_notifications_count' => $userNotifications->count(),
             'sample_notifications' => $userNotifications->take(5)->toArray()
         ]);
-        
+
         return response()->json(['success' => false, 'message' => 'Notification not found'], 404);
     }
 }

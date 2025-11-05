@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::table('notifications', function (Blueprint $table) {
             $table->timestamp('read_at')->nullable()->default(null)->change();
         });
-        
+
         // Set read_at to null for all unread notifications (that were incorrectly marked as read)
         // We'll keep notifications created more than 1 minute ago as unread
         DB::table('notifications')

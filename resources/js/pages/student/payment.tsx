@@ -45,15 +45,7 @@ interface Notification {
     is_read: boolean;
 }
 
-export default function Payment({
-    summary,
-    rows,
-    payments,
-}: {
-    summary: Summary;
-    rows: Row[];
-    payments: PaymentRow[];
-}) {
+export default function Payment({ summary, rows, payments }: { summary: Summary; rows: Row[]; payments: PaymentRow[] }) {
     const badge = (state: Row['payment_state']) => {
         if (state === 'Overdue') return 'text-destructive bg-destructive/10 border-destructive/20';
         if (state === 'Verified')
@@ -63,13 +55,16 @@ export default function Payment({
 
     const pageProps: any = usePage<SharedData>().props;
     const serverNotifications: any[] = pageProps.notifications || [];
-    
+
     // Debug: Log notifications on load
     useEffect(() => {
         console.log('=== PAYMENT PAGE LOADED ===');
         console.log('Payment page - Server notifications received:', serverNotifications);
         console.log('Payment page - Notification count:', serverNotifications.length);
-        console.log('Payment page - Notification IDs:', serverNotifications.map(n => ({ id: n.id, title: n.title, read_at: n.read_at })));
+        console.log(
+            'Payment page - Notification IDs:',
+            serverNotifications.map((n) => ({ id: n.id, title: n.title, read_at: n.read_at })),
+        );
     }, []);
 
     const [viewerUrl, setViewerUrl] = useState<string | null>(null);
@@ -85,9 +80,9 @@ export default function Payment({
     useEffect(() => {
         console.log('Payment page - Server notifications changed:', serverNotifications);
         console.log('Dismissed IDs:', Array.from(dismissedNotificationIds));
-        
+
         // Filter out any notifications that were manually dismissed
-        const filteredNotifications = serverNotifications.filter(n => !dismissedNotificationIds.has(n.id));
+        const filteredNotifications = serverNotifications.filter((n) => !dismissedNotificationIds.has(n.id));
         console.log('Filtered notifications:', filteredNotifications.length);
         setNotificationList(filteredNotifications);
     }, [serverNotifications, dismissedNotificationIds]);
@@ -144,8 +139,8 @@ export default function Payment({
         setShowNotificationDropdown(false);
 
         // Add to dismissed list so it won't come back even if props refresh
-        setDismissedNotificationIds(prev => new Set(prev).add(notification.id));
-        
+        setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
+
         // Optimistically remove from UI immediately for better UX
         setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
 
@@ -163,9 +158,9 @@ export default function Payment({
                     },
                     credentials: 'same-origin',
                 });
-                
+
                 console.log('Response status:', response.status, 'OK:', response.ok);
-                
+
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.log('Server error response:', errorText);
@@ -176,7 +171,7 @@ export default function Payment({
                     }
                     return;
                 }
-                
+
                 const result = await response.json();
                 console.log('Mark as read SUCCESS response:', result);
             } catch (e) {
@@ -188,13 +183,13 @@ export default function Payment({
         // Handle different notification types
         const title = notification.title?.toLowerCase() || '';
         const message = notification.message?.toLowerCase() || '';
-        
+
         // Check if it's a "Parcel Collected" notification - just mark as read and don't navigate
         if (title.includes('parcel collected') || message.includes('successfully collected')) {
             // Just remove from list, no navigation
             return;
         }
-        
+
         // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
             router.visit(`/student/payment/submit/${notification.parcel_id}`);

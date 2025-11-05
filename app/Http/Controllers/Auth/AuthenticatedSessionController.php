@@ -41,6 +41,12 @@ class AuthenticatedSessionController extends Controller
             $user->save();
         }
 
+        // If user hasn't verified email yet, redirect to the intended URL if present (e.g., the email verification link),
+        // otherwise show the verification notice page.
+        if ($user && method_exists($user, 'hasVerifiedEmail') && ! $user->hasVerifiedEmail()) {
+            return redirect()->intended(route('verification.notice'));
+        }
+
         if ($user->type === 'staff') {
             return redirect()->intended(route('staff.dashboard'));
         }

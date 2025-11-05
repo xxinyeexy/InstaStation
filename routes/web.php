@@ -58,8 +58,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
-// Staff and Parcel routes - all under auth middleware
-Route::middleware('auth')->group(function () {
+// Staff and Parcel routes - require authenticated and verified users
+Route::middleware(['auth', 'verified'])->group(function () {
     // Export routes: preview (HTML) and download (PDF)
     Route::get('/parcels/{id}/export', [ParcelController::class, 'export'])->name('parcels.export');
     Route::get('/parcels/{id}/export/download', [ParcelController::class, 'exportDownload'])->name('parcels.export.download');

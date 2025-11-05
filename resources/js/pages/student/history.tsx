@@ -36,7 +36,7 @@ interface Notification {
 export default function History({ total_collections, collections_this_year, total_fees, parcels }: HistoryProps) {
     const pageProps: any = usePage<SharedData>().props;
     const serverNotifications: Notification[] = pageProps.notifications || [];
-    
+
     const [search, setSearch] = useState('');
     const [sortOrder, setSortOrder] = useState<'recent' | 'oldest'>('recent');
     const [showFilters, setShowFilters] = useState(false);
@@ -46,7 +46,7 @@ export default function History({ total_collections, collections_this_year, tota
 
     // Update notification list when props change, filtering out dismissed ones
     useEffect(() => {
-        const filtered = (serverNotifications || []).filter(n => !dismissedNotificationIds.has(n.id));
+        const filtered = (serverNotifications || []).filter((n) => !dismissedNotificationIds.has(n.id));
         setNotificationList(filtered);
     }, [serverNotifications, dismissedNotificationIds]);
 
@@ -73,7 +73,7 @@ export default function History({ total_collections, collections_this_year, tota
         setShowNotificationDropdown(false);
 
         // Track as dismissed so props refresh won't re-add it
-        setDismissedNotificationIds(prev => new Set(prev).add(notification.id));
+        setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
 
         // Optimistically remove from UI immediately
         setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
@@ -91,28 +91,28 @@ export default function History({ total_collections, collections_this_year, tota
                     },
                     credentials: 'same-origin',
                 });
-                
+
                 if (!response.ok) {
                     // Already read or minor error; keep UI updated
                     return;
                 }
-                
+
                 await response.json().catch(() => ({}));
             } catch (e) {
                 // Network error; keep UI updated
             }
         }
-        
+
         // Handle different notification types
         const title = notification.title?.toLowerCase() || '';
         const message = notification.message?.toLowerCase() || '';
-        
+
         // Check if it's a "Parcel Collected" notification - just mark as read and don't navigate
         if (title.includes('parcel collected') || message.includes('successfully collected')) {
             // Just remove from list, no navigation
             return;
         }
-        
+
         // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
             router.visit(`/student/payment/submit/${notification.parcel_id}`);
@@ -125,7 +125,8 @@ export default function History({ total_collections, collections_this_year, tota
 
     const filteredParcels = parcels
         .filter(
-            (p) => (p.parcel_code && p.parcel_code.toLowerCase().includes(search.toLowerCase())) || (p.collected_at && p.collected_at.includes(search)),
+            (p) =>
+                (p.parcel_code && p.parcel_code.toLowerCase().includes(search.toLowerCase())) || (p.collected_at && p.collected_at.includes(search)),
         )
         .sort((a, b) => {
             if (sortOrder === 'recent') {
@@ -138,7 +139,7 @@ export default function History({ total_collections, collections_this_year, tota
     return (
         <AppLayout>
             <Head title="History" />
-            
+
             {/* Notification Bell - Positioned at top right (same as parcel page) */}
             <div className="fixed top-4 right-6 z-50">
                 <div className="relative">
@@ -193,7 +194,7 @@ export default function History({ total_collections, collections_this_year, tota
                     )}
                 </div>
             </div>
-            
+
             <div className="space-y-6 p-6">
                 <div>
                     <h1 className="flex items-center gap-2 text-2xl font-bold">
@@ -230,7 +231,7 @@ export default function History({ total_collections, collections_this_year, tota
                             </div>
                             <input
                                 type="text"
-                                className="w-full rounded-xl border-2 border-gray-200 bg-white py-3.5 pl-12 pr-4 text-sm font-medium transition placeholder:text-gray-400 hover:border-gray-300 focus:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-500/10"
+                                className="w-full rounded-xl border-2 border-gray-200 bg-white py-3.5 pr-4 pl-12 text-sm font-medium transition placeholder:text-gray-400 hover:border-gray-300 focus:border-green-500 focus:ring-4 focus:ring-green-500/10 focus:outline-none"
                                 placeholder="Search by parcel code or collection date..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
@@ -321,7 +322,9 @@ export default function History({ total_collections, collections_this_year, tota
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <span className="font-semibold text-gray-900">Package</span>
-                                                <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">{parcel.parcel_code}</span>
+                                                <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                                                    {parcel.parcel_code}
+                                                </span>
                                             </div>
                                             <div className="mt-1 text-sm text-gray-500">Collected on {parcel.collected_at}</div>
                                         </div>
@@ -336,7 +339,9 @@ export default function History({ total_collections, collections_this_year, tota
                                             <FileText size={16} />
                                             Export
                                         </button>
-                                        <span className="rounded-full bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700">{parcel.status}</span>
+                                        <span className="rounded-full bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700">
+                                            {parcel.status}
+                                        </span>
                                     </div>
                                 </div>
                             ))}

@@ -528,7 +528,7 @@ class StudentController extends Controller
             // Count unique students (excluding current user if they already have a booking in this slot)
             $desiredDate = Carbon::parse($request->scheduled_datetime)->toDateString();
             [$start, $end] = $this->timeSlotRanges[$request->time_slot];
-            
+
             // Count unique students in this time slot (same user with multiple parcels counts as 1)
             $existingCount = Parcel::whereDate('schedule', $desiredDate)
                 ->where(function ($q) use ($request, $start, $end) {
@@ -575,12 +575,12 @@ class StudentController extends Controller
                     ->margin(1)
                     ->errorCorrection('H')
                     ->generate($collectionCode);
-                
+
                 // Save QR code to storage
                 $qrFileName = 'qr_' . $id . '_' . time() . '.svg';
                 $qrFilePath = 'qrcodes/' . $qrFileName;
                 Storage::disk('public')->put($qrFilePath, $qrCodeSvg);
-                
+
                 Log::info('QR Code generated and saved during scheduling', [
                     'parcel_id' => $id,
                     'collection_code' => $collectionCode,

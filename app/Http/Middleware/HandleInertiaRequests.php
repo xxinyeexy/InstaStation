@@ -53,7 +53,7 @@ class HandleInertiaRequests extends Middleware
                 'user_id' => $request->user()->id,
                 'raw_count' => $rawNotifications->count(),
                 'notification_ids' => $rawNotifications->pluck('id')->toArray(),
-                'notification_details' => $rawNotifications->map(function($n) {
+                'notification_details' => $rawNotifications->map(function ($n) {
                     $data = json_decode($n->data, true);
                     return [
                         'id' => $n->id,
@@ -66,7 +66,7 @@ class HandleInertiaRequests extends Middleware
             $seen = [];
             $notifications = $rawNotifications->map(function ($notification) use (&$seen) {
                 $data = json_decode($notification->data, true);
-                
+
                 // Filter out "Parcel Ready for Collection" notifications
                 $title = strtolower($data['title'] ?? '');
                 $message = strtolower($data['message'] ?? '');
@@ -77,7 +77,7 @@ class HandleInertiaRequests extends Middleware
                 ) {
                     return null; // Skip this notification
                 }
-                
+
                 // Create a stable signature for deduplication: type + parcel_id + message
                 $signature = ($notification->type ?? '') . '|' . ($data['parcel_id'] ?? '') . '|' . ($data['message'] ?? '');
                 if (in_array($signature, $seen, true)) {

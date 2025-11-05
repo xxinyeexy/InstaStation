@@ -17,7 +17,7 @@ return new class extends Migration
         DB::table('notifications')
             ->whereRaw('LENGTH(id) < 36')
             ->delete();
-            
+
         echo "Deleted invalid notifications\n";
     }
 

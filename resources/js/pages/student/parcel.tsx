@@ -201,9 +201,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     useEffect(() => {
         console.log('Parcel page - Server notifications changed:', serverNotifications);
         console.log('Dismissed IDs:', Array.from(dismissedNotificationIds));
-        
+
         // Filter out any notifications that were manually dismissed
-        const filteredNotifications = (serverNotifications || []).filter(n => !dismissedNotificationIds.has(n.id));
+        const filteredNotifications = (serverNotifications || []).filter((n) => !dismissedNotificationIds.has(n.id));
         console.log('Filtered notifications:', filteredNotifications.length);
         setNotificationList(filteredNotifications);
     }, [serverNotifications, dismissedNotificationIds]);
@@ -233,11 +233,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         console.log('Notification ID:', notification.id);
         console.log('Notification title:', notification.title);
         console.log('Current notification list length:', notificationList.length);
-        
+
         setShowNotificationDropdown(false);
 
         // Add to dismissed list so it won't come back even if props refresh
-        setDismissedNotificationIds(prev => new Set(prev).add(notification.id));
+        setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
 
         // Optimistically remove from UI immediately for better UX
         console.log('Optimistically removing notification from list');
@@ -251,7 +251,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         if (notification.id) {
             try {
                 console.log('Sending POST to:', `/student/notifications/${notification.id}/mark-read`);
-                
+
                 const response = await fetch(`/student/notifications/${notification.id}/mark-read`, {
                     method: 'POST',
                     headers: {
@@ -262,16 +262,16 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     },
                     credentials: 'same-origin',
                 });
-                
+
                 console.log('Response status:', response.status);
                 console.log('Response ok:', response.ok);
-                
+
                 if (!response.ok) {
                     console.log('Server returned non-OK status (notification may already be read):', response.status);
                     // Don't throw error - the notification is removed from UI which is what matters
                     return;
                 }
-                
+
                 const result = await response.json();
                 console.log('Response JSON:', result);
             } catch (e) {
@@ -285,20 +285,20 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         // Handle different notification types
         const title = notification.title?.toLowerCase() || '';
         const message = notification.message?.toLowerCase() || '';
-        
+
         console.log('Checking notification type...');
         console.log('Title includes "parcel collected"?', title.includes('parcel collected'));
         console.log('Message includes "successfully collected"?', message.includes('successfully collected'));
-        
+
         // Check if it's a "Parcel Collected" notification - just mark as read and don't navigate
         if (title.includes('parcel collected') || message.includes('successfully collected')) {
             console.log('This is a Parcel Collected notification - not navigating');
             // Just remove from list, no navigation
             return;
         }
-        
+
         console.log('Not a parcel collected notification - checking navigation...');
-        
+
         // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
             console.log('Navigating to payment submit page');
@@ -310,7 +310,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             console.log('Navigating to payment page');
             router.visit('/student/payment');
         }
-        
+
         console.log('=== NOTIFICATION CLICK END ===');
     };
 
@@ -762,7 +762,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            
+
             {/* Notification Bell - Positioned at top right */}
             <div className="fixed top-4 right-6 z-50">
                 <div className="relative">
@@ -917,8 +917,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 )}
 
                 <div className="min-h-screen bg-white p-6 dark:bg-background">
-                   
-
                     {/* Header tiles matching screenshot */}
                     <div className="mb-6 grid grid-cols-12 gap-4">
                         {/* My Parcels - Purple (icon on right) */}

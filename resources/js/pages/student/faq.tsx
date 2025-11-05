@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, ChevronRight, Clock, HelpCircle, Mail, MapPin, Phone, Search, X } from 'lucide-react';
+import { AlertCircle, Bell, ChevronRight, Clock, HelpCircle, Mail, MapPin, Phone, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
 type FaqItem = {
@@ -36,7 +36,7 @@ export default function StudentFaq({
 }) {
     const pageProps: any = usePage<SharedData>().props;
     const serverNotifications: Notification[] = pageProps.notifications || [];
-    
+
     const [searchQuery, setSearchQuery] = useState(filters?.q || '');
     const [selectedCategory, setSelectedCategory] = useState(filters?.category || '');
     const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
@@ -46,7 +46,7 @@ export default function StudentFaq({
 
     // Update notification list when props change, filtering out dismissed ones
     useEffect(() => {
-        const filtered = (serverNotifications || []).filter(n => !dismissedNotificationIds.has(n.id));
+        const filtered = (serverNotifications || []).filter((n) => !dismissedNotificationIds.has(n.id));
         setNotificationList(filtered);
     }, [serverNotifications, dismissedNotificationIds]);
 
@@ -73,7 +73,7 @@ export default function StudentFaq({
         setShowNotificationDropdown(false);
 
         // Track as dismissed immediately so it won't reappear from props refresh
-        setDismissedNotificationIds(prev => new Set(prev).add(notification.id));
+        setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
 
         // Optimistically remove from UI
         setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
@@ -91,28 +91,28 @@ export default function StudentFaq({
                     },
                     credentials: 'same-origin',
                 });
-                
+
                 if (!response.ok) {
                     // If already read or minor error, keep UI updated
                     return;
                 }
-                
+
                 await response.json().catch(() => ({}));
             } catch (e) {
                 // Network error - keep UI updated
             }
         }
-        
+
         // Handle different notification types
         const title = notification.title?.toLowerCase() || '';
         const message = notification.message?.toLowerCase() || '';
-        
+
         // Check if it's a "Parcel Collected" notification - just mark as read and don't navigate
         if (title.includes('parcel collected') || message.includes('successfully collected')) {
             // Just remove from list, no navigation
             return;
         }
-        
+
         // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
             router.visit(`/student/payment/submit/${notification.parcel_id}`);
@@ -152,7 +152,7 @@ export default function StudentFaq({
     return (
         <AppLayout>
             <Head title="FAQ" />
-            
+
             {/* Notification Bell - Positioned at top right (same as parcel page) */}
             <div className="fixed top-4 right-6 z-50">
                 <div className="relative">
@@ -207,7 +207,7 @@ export default function StudentFaq({
                     )}
                 </div>
             </div>
-            
+
             <div className="min-h-screen bg-white dark:bg-background">
                 <div className="mx-auto max-w-4xl px-4 py-8">
                     {/* Header */}

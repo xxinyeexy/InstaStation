@@ -51,6 +51,6 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         // Redirect to login page after registration
-        return redirect()->route('login')->with('status', 'Account created successfully! Please sign in.');
+        return redirect()->route('login')->with('status', 'Account created successfully! Please verify your email address via the link we\'ve sent before signing in.');
     }
 }

@@ -61,7 +61,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                         return decodeURIComponent(value);
                     }
                 }
-                
+
                 // Last resort: check if it's in the page
                 return document.head.querySelector('[name="csrf-token"]')?.getAttribute('content') || '';
             };
@@ -298,22 +298,22 @@ const SchedulePickup = ({ parcel }: Props) => {
     // Check if a time slot has passed for today
     const isTimeSlotPassed = (slotId: string, date: Date | null) => {
         if (!date) return false;
-        
+
         const today = new Date();
         // If the selected date is not today, the slot hasn't passed
         if (date.toDateString() !== today.toDateString()) return false;
-        
+
         // Parse the slot end time
         const endTimeMatch = slotId.match(/(\d{1,2}):(\d{2})$/);
         if (!endTimeMatch) return false;
-        
+
         const endHour = parseInt(endTimeMatch[1]);
         const endMinute = parseInt(endTimeMatch[2]);
-        
+
         // Create a date object for the slot end time today
         const slotEndTime = new Date(today);
         slotEndTime.setHours(endHour, endMinute, 0, 0);
-        
+
         // If current time has passed the slot end time, it's too late
         return today >= slotEndTime;
     };
