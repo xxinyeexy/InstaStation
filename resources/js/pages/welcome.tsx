@@ -129,7 +129,10 @@ export default function Welcome() {
                 <header className="mb-20 flex justify-end gap-4 duration-700 animate-in fade-in slide-in-from-top-4">
                     <nav className="flex items-center justify-end gap-4">
                         {auth.user ? (
-                            <Link href={route('dashboard')} className="rounded-lg bg-gray-900 px-6 py-2 text-white transition-colors hover:bg-black">
+                            <Link
+                                href={auth.user.type === 'staff' ? route('staff.dashboard') : route('student.parcel')}
+                                className="rounded-lg bg-gray-900 px-6 py-2 text-white transition-colors hover:bg-black"
+                            >
                                 Dashboard
                             </Link>
                         ) : (
