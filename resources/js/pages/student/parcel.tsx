@@ -221,12 +221,28 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     }, [showNotificationDropdown]);
 
     const handleNotificationClick = async (notification: any) => {
+        console.log('=== NOTIFICATION CLICK START ===');
+        console.log('Full notification object:', JSON.stringify(notification, null, 2));
+        console.log('Notification ID:', notification.id);
+        console.log('Notification title:', notification.title);
+        console.log('Current notification list length:', notificationList.length);
+        
         setShowNotificationDropdown(false);
+
+        // Optimistically remove from UI immediately for better UX
+        console.log('Optimistically removing notification from list');
+        setNotificationList((prev) => {
+            const filtered = prev.filter((n) => n.id !== notification.id);
+            console.log('New list length:', filtered.length);
+            return filtered;
+        });
 
         // Mark as read on the server (if possible) so badge updates persist
         if (notification.id) {
             try {
-                await fetch(`/student/notifications/${notification.id}/mark-read`, {
+                console.log('Sending POST to:', `/student/notifications/${notification.id}/mark-read`);
+                
+                const response = await fetch(`/student/notifications/${notification.id}/mark-read`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -236,23 +252,56 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     },
                     credentials: 'same-origin',
                 });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    console.log('Server returned non-OK status (notification may already be read):', response.status);
+                    // Don't throw error - the notification is removed from UI which is what matters
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('Response JSON:', result);
             } catch (e) {
-                // ignore network errors — we'll still update UI locally
-                console.warn('Failed to mark notification read', e);
+                console.log('Network error marking notification as read (UI already updated):', e);
+                // Don't restore notification to list - better UX to keep it removed
             }
-
-            // Remove from local notification list so the red badge updates immediately
-            setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+        } else {
+            console.error('No notification ID found!');
         }
 
         // Handle different notification types
+        const title = notification.title?.toLowerCase() || '';
+        const message = notification.message?.toLowerCase() || '';
+        
+        console.log('Checking notification type...');
+        console.log('Title includes "parcel collected"?', title.includes('parcel collected'));
+        console.log('Message includes "successfully collected"?', message.includes('successfully collected'));
+        
+        // Check if it's a "Parcel Collected" notification - just mark as read and don't navigate
+        if (title.includes('parcel collected') || message.includes('successfully collected')) {
+            console.log('This is a Parcel Collected notification - not navigating');
+            // Just remove from list, no navigation
+            return;
+        }
+        
+        console.log('Not a parcel collected notification - checking navigation...');
+        
+        // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
+            console.log('Navigating to payment submit page');
             router.visit(`/student/payment/submit/${notification.parcel_id}`);
         } else if (notification.parcel_id) {
+            console.log('Navigating to parcel detail page');
             router.visit(`/student/parcel/${notification.parcel_id}`);
         } else if (notification.type === 'payment_verified') {
+            console.log('Navigating to payment page');
             router.visit('/student/payment');
         }
+        
+        console.log('=== NOTIFICATION CLICK END ===');
     };
 
     // QR Code Modal state

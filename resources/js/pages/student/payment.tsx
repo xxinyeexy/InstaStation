@@ -62,10 +62,16 @@ export default function Payment({
     };
 
     const pageProps: any = usePage<SharedData>().props;
-    const serverNotifications: Notification[] = pageProps.notifications || [];
+    const serverNotifications: any[] = pageProps.notifications || [];
+    
+    // Debug: Log notifications on load
+    useEffect(() => {
+        console.log('Payment page - Server notifications received:', serverNotifications);
+        console.log('Payment page - Notification IDs:', serverNotifications.map(n => ({ id: n.id, title: n.title })));
+    }, []);
 
     const [viewerUrl, setViewerUrl] = useState<string | null>(null);
-    const [notificationList, setNotificationList] = useState<Notification[]>(serverNotifications);
+    const [notificationList, setNotificationList] = useState<any[]>(serverNotifications);
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
 
@@ -74,6 +80,7 @@ export default function Payment({
 
     // Update notification list when props change (e.g., after payment submission)
     useEffect(() => {
+        console.log('Payment page - Updating notification list:', serverNotifications);
         setNotificationList(serverNotifications);
     }, [serverNotifications]);
 
@@ -120,16 +127,22 @@ export default function Payment({
     }, []);
 
     // Handle notification click
-    const handleNotificationClick = async (notification: Notification) => {
-        console.log('Notification clicked:', notification.id);
+    const handleNotificationClick = async (notification: any) => {
+        console.log('Notification clicked - Full object:', notification);
+        console.log('Notification clicked - ID:', notification.id);
+        console.log('Notification clicked - ID type:', typeof notification.id);
 
         // Close dropdown after clicking
         setShowNotificationDropdown(false);
 
+        // Optimistically remove from UI immediately for better UX
+        setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+
         // Mark as read on the server
         if (notification.id) {
             try {
-                await fetch(`/student/notifications/${notification.id}/mark-read`, {
+                console.log('Attempting to mark notification as read:', notification.id);
+                const response = await fetch(`/student/notifications/${notification.id}/mark-read`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -139,15 +152,39 @@ export default function Payment({
                     },
                     credentials: 'same-origin',
                 });
+                
+                console.log('Response status:', response.status, 'OK:', response.ok);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.log('Server error response:', errorText);
+                    console.log('Server returned non-OK status (notification may already be read):', response.status);
+                    // Check if it's a real error or just already marked
+                    if (response.status !== 404) {
+                        console.error('Unexpected error marking notification as read');
+                    }
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('Mark as read SUCCESS response:', result);
             } catch (e) {
-                console.warn('Failed to mark notification read', e);
+                console.error('Exception marking notification as read:', e);
+                // Don't restore notification to list - better UX to keep it removed
             }
-
-            // Remove from local notification list
-            setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
         }
 
-        // If it's a payment rejection notification, navigate to payment submission page
+        // Handle different notification types
+        const title = notification.title?.toLowerCase() || '';
+        const message = notification.message?.toLowerCase() || '';
+        
+        // Check if it's a "Parcel Collected" notification - just mark as read and don't navigate
+        if (title.includes('parcel collected') || message.includes('successfully collected')) {
+            // Just remove from list, no navigation
+            return;
+        }
+        
+        // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
             router.visit(`/student/payment/submit/${notification.parcel_id}`);
         } else if (notification.parcel_id) {

@@ -10,6 +10,10 @@ class Notification extends Model
 {
     use HasFactory;
 
+    // Indicate that the primary key is a UUID string, not an auto-incrementing integer
+    protected $keyType = 'string';
+    public $incrementing = false;
+
     protected $fillable = [
         'id',
         'type',

@@ -73,7 +73,7 @@ export default function History({ total_collections, collections_this_year, tota
         // Mark as read on the server
         if (notification.id) {
             try {
-                await fetch(`/student/notifications/${notification.id}/mark-read`, {
+                const response = await fetch(`/student/notifications/${notification.id}/mark-read`, {
                     method: 'POST',
                     headers: {
                         Accept: 'application/json',
@@ -83,14 +83,34 @@ export default function History({ total_collections, collections_this_year, tota
                     },
                     credentials: 'same-origin',
                 });
+                
+                const result = await response.json();
+                console.log('Mark as read response:', result);
+                
+                if (result.success) {
+                    // Remove from local notification list
+                    setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+                } else {
+                    console.error('Failed to mark notification as read:', result.message);
+                }
             } catch (e) {
-                console.warn('Failed to mark notification read', e);
+                console.error('Failed to mark notification read', e);
+                // Still remove from local list for better UX
+                setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
             }
-
-            // Remove from local notification list
-            setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
         }
         
+        // Handle different notification types
+        const title = notification.title?.toLowerCase() || '';
+        const message = notification.message?.toLowerCase() || '';
+        
+        // Check if it's a "Parcel Collected" notification - just mark as read and don't navigate
+        if (title.includes('parcel collected') || message.includes('successfully collected')) {
+            // Just remove from list, no navigation
+            return;
+        }
+        
+        // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
             router.visit(`/student/payment/submit/${notification.parcel_id}`);
         } else if (notification.parcel_id) {

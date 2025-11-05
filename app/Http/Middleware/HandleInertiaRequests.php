@@ -51,6 +51,18 @@ class HandleInertiaRequests extends Middleware
             $seen = [];
             $notifications = $rawNotifications->map(function ($notification) use (&$seen) {
                 $data = json_decode($notification->data, true);
+                
+                // Filter out "Parcel Ready for Collection" notifications
+                $title = strtolower($data['title'] ?? '');
+                $message = strtolower($data['message'] ?? '');
+                if (
+                    strpos($title, 'ready for collection') !== false ||
+                    strpos($message, 'ready for collection') !== false ||
+                    strpos($message, 'scheduled for pickup') !== false
+                ) {
+                    return null; // Skip this notification
+                }
+                
                 // Create a stable signature for deduplication: type + parcel_id + message
                 $signature = ($notification->type ?? '') . '|' . ($data['parcel_id'] ?? '') . '|' . ($data['message'] ?? '');
                 if (in_array($signature, $seen, true)) {

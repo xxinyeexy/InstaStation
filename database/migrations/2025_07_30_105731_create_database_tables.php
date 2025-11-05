@@ -120,7 +120,7 @@ return new class extends Migration
             $table->unsignedBigInteger('notifiable_id');
             $table->string('notifiable_type');
             $table->text('data');
-            $table->timestamp('read_at')->nullable()->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
     }
