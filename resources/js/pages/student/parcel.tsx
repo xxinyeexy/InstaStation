@@ -201,16 +201,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setNotificationList(serverNotifications || []);
     }, [serverNotifications]);
 
-    // Only show notifications that relate to parcels which are "ready for collection".
-    // This prevents notifications for parcels in statuses like "collected" or "pending payment"
-    // from showing up in the bell dropdown.
-    const visibleNotifications = notificationList.filter((n) => {
-        if (!n.parcel_id) return false; // only consider parcel-related notifications for the bell
-        const parcel = parcelList.find((p) => Number(p.parcel_id) === Number(n.parcel_id));
-        if (!parcel) return false;
-        const status = (parcel.parcel_status || '').toLowerCase();
-        return status === 'ready for collection' || status === 'ready to collect';
-    });
+    // Show ALL notifications (unified across all pages - payment, parcel, etc.)
+    const visibleNotifications = notificationList;
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -253,10 +245,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
         }
 
-        // If notification contains parcel_id, navigate to its view
-        if (notification.parcel_id) {
+        // Handle different notification types
+        if (notification.type === 'payment_rejected' && notification.parcel_id) {
+            router.visit(`/student/payment/submit/${notification.parcel_id}`);
+        } else if (notification.parcel_id) {
             router.visit(`/student/parcel/${notification.parcel_id}`);
-            return;
+        } else if (notification.type === 'payment_verified') {
+            router.visit('/student/payment');
         }
     };
 

@@ -26,9 +26,24 @@ export interface SharedData {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
+    notifications: Notification[];
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
     [key: string]: unknown;
+}
+
+export interface Notification {
+    id: string;
+    type: string;
+    title: string;
+    message: string;
+    parcel_code?: string;
+    parcel_id?: number;
+    rejected_by?: string;
+    rejected_at?: string;
+    created_at: string;
+    read_at?: string | null;
+    is_read: boolean;
 }
 
 export interface User {

@@ -1,6 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
-import { FileText, Search, SlidersHorizontal, Calendar, TrendingDown } from 'lucide-react';
-import { useState } from 'react';
+import { type SharedData } from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
+import { AlertCircle, Bell, Calendar, FileText, Search, SlidersHorizontal, TrendingDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 // Types for props from backend
 interface Parcel {
@@ -19,10 +21,84 @@ interface HistoryProps {
     parcels: Parcel[];
 }
 
+// Notification interface
+interface Notification {
+    id: string;
+    type: string;
+    title: string;
+    message: string;
+    parcel_code?: string;
+    parcel_id?: number;
+    created_at: string;
+    read_at?: string | null;
+}
+
 export default function History({ total_collections, collections_this_year, total_fees, parcels }: HistoryProps) {
+    const pageProps: any = usePage<SharedData>().props;
+    const serverNotifications: Notification[] = pageProps.notifications || [];
+    
     const [search, setSearch] = useState('');
     const [sortOrder, setSortOrder] = useState<'recent' | 'oldest'>('recent');
     const [showFilters, setShowFilters] = useState(false);
+    const [notificationList, setNotificationList] = useState<Notification[]>(serverNotifications);
+    const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+
+    // Update notification list when props change
+    useEffect(() => {
+        setNotificationList(serverNotifications);
+    }, [serverNotifications]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Element;
+            if (!target.closest('.notification-dropdown') && !target.closest('.notification-bell')) {
+                setShowNotificationDropdown(false);
+            }
+        };
+
+        if (showNotificationDropdown) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showNotificationDropdown]);
+
+    // Handle notification click
+    const handleNotificationClick = async (notification: Notification) => {
+        setShowNotificationDropdown(false);
+        
+        // Mark as read on the server
+        if (notification.id) {
+            try {
+                await fetch(`/student/notifications/${notification.id}/mark-read`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                    credentials: 'same-origin',
+                });
+            } catch (e) {
+                console.warn('Failed to mark notification read', e);
+            }
+
+            // Remove from local notification list
+            setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+        }
+        
+        if (notification.type === 'payment_rejected' && notification.parcel_id) {
+            router.visit(`/student/payment/submit/${notification.parcel_id}`);
+        } else if (notification.parcel_id) {
+            router.visit(`/student/parcel/${notification.parcel_id}`);
+        } else if (notification.type === 'payment_verified') {
+            router.visit('/student/payment');
+        }
+    };
 
     const filteredParcels = parcels
         .filter(
@@ -38,6 +114,63 @@ export default function History({ total_collections, collections_this_year, tota
 
     return (
         <AppLayout>
+            <Head title="History" />
+            
+            {/* Notification Bell - Positioned at top right (same as parcel page) */}
+            <div className="fixed top-4 right-6 z-50">
+                <div className="relative">
+                    <button
+                        onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                        className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
+                    >
+                        <Bell className="h-6 w-6 text-foreground" />
+                        {notificationList.length > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+                                {notificationList.length}
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Notification Dropdown */}
+                    {showNotificationDropdown && (
+                        <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
+                            <div className="border-b border-border p-4">
+                                <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
+                            </div>
+                            <div className="max-h-96 overflow-y-auto">
+                                {notificationList.length === 0 ? (
+                                    <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
+                                ) : (
+                                    notificationList.map((notification) => (
+                                        <div
+                                            key={notification.id}
+                                            className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
+                                            onClick={() => handleNotificationClick(notification)}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="mt-1 flex-shrink-0">
+                                                    <AlertCircle className="h-5 w-5 text-destructive" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
+                                                    <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+                                                    {notification.parcel_code && (
+                                                        <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
+                                                    )}
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {new Date(notification.created_at).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+            
             <div className="space-y-6 p-6">
                 <div>
                     <h1 className="flex items-center gap-2 text-2xl font-bold">

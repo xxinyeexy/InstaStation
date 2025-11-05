@@ -1,4 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
+import { type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -48,12 +49,10 @@ export default function Payment({
     summary,
     rows,
     payments,
-    notifications = [],
 }: {
     summary: Summary;
     rows: Row[];
     payments: PaymentRow[];
-    notifications?: Notification[];
 }) {
     const badge = (state: Row['payment_state']) => {
         if (state === 'Overdue') return 'text-destructive bg-destructive/10 border-destructive/20';
@@ -62,8 +61,11 @@ export default function Payment({
         return 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20';
     };
 
+    const pageProps: any = usePage<SharedData>().props;
+    const serverNotifications: Notification[] = pageProps.notifications || [];
+
     const [viewerUrl, setViewerUrl] = useState<string | null>(null);
-    const [notificationList, setNotificationList] = useState<Notification[]>(notifications);
+    const [notificationList, setNotificationList] = useState<Notification[]>(serverNotifications);
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
 
@@ -72,8 +74,8 @@ export default function Payment({
 
     // Update notification list when props change (e.g., after payment submission)
     useEffect(() => {
-        setNotificationList(notifications);
-    }, [notifications]);
+        setNotificationList(serverNotifications);
+    }, [serverNotifications]);
 
     // Refresh data when component mounts (e.g., returning from payment submission)
     useEffect(() => {
@@ -124,15 +126,92 @@ export default function Payment({
         // Close dropdown after clicking
         setShowNotificationDropdown(false);
 
+        // Mark as read on the server
+        if (notification.id) {
+            try {
+                await fetch(`/student/notifications/${notification.id}/mark-read`, {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    },
+                    credentials: 'same-origin',
+                });
+            } catch (e) {
+                console.warn('Failed to mark notification read', e);
+            }
+
+            // Remove from local notification list
+            setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+        }
+
         // If it's a payment rejection notification, navigate to payment submission page
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
             router.visit(`/student/payment/submit/${notification.parcel_id}`);
+        } else if (notification.parcel_id) {
+            router.visit(`/student/parcel/${notification.parcel_id}`);
+        } else if (notification.type === 'payment_verified') {
+            router.visit('/student/payment');
         }
     };
 
     return (
         <AppLayout>
             <Head title="Payment Centre" />
+
+            {/* Notification Bell - Positioned at top right (same as parcel page) */}
+            <div className="fixed top-4 right-6 z-50">
+                <div className="relative">
+                    <button
+                        onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                        className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
+                    >
+                        <Bell className="h-6 w-6 text-foreground" />
+                        {notificationList.length > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+                                {notificationList.length}
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Notification Dropdown */}
+                    {showNotificationDropdown && (
+                        <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
+                            <div className="border-b border-border p-4">
+                                <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
+                            </div>
+                            <div className="max-h-96 overflow-y-auto">
+                                {notificationList.length === 0 ? (
+                                    <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
+                                ) : (
+                                    notificationList.map((notification) => (
+                                        <div
+                                            key={notification.id}
+                                            className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
+                                            onClick={() => handleNotificationClick(notification)}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="mt-1 flex-shrink-0">
+                                                    <AlertCircle className="h-5 w-5 text-destructive" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
+                                                    <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {new Date(notification.created_at).toLocaleString()}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
 
             {/* Success Toast Notification */}
             {showSuccessToast && (
@@ -158,61 +237,9 @@ export default function Payment({
             )}
 
             <div className="space-y-6 p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-xl font-semibold text-foreground">Payment Centre</h1>
-                        <p className="text-sm text-muted-foreground">Manage your parcel payments</p>
-                    </div>
-
-                    {/* Notification Bell - Always show, badge only when there are notifications */}
-                    <div className="relative">
-                        <button
-                            onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
-                            className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
-                        >
-                            <Bell className="h-6 w-6 text-foreground" />
-                            {notificationList.length > 0 && (
-                                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-                                    {notificationList.length}
-                                </span>
-                            )}
-                        </button>
-
-                        {/* Notification Dropdown */}
-                        {showNotificationDropdown && (
-                            <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
-                                <div className="border-b border-border p-4">
-                                    <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
-                                </div>
-                                <div className="max-h-96 overflow-y-auto">
-                                    {notificationList.length === 0 ? (
-                                        <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
-                                    ) : (
-                                        notificationList.map((notification) => (
-                                            <div
-                                                key={notification.id}
-                                                className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
-                                                onClick={() => handleNotificationClick(notification)}
-                                            >
-                                                <div className="flex items-start gap-3">
-                                                    <div className="mt-1 flex-shrink-0">
-                                                        <AlertCircle className="h-5 w-5 text-destructive" />
-                                                    </div>
-                                                    <div className="flex-1">
-                                                        <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
-                                                        <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
-                                                        <p className="mt-1 text-xs text-muted-foreground">
-                                                            {new Date(notification.created_at).toLocaleString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                <div>
+                    <h1 className="text-xl font-semibold text-foreground">Payment Centre</h1>
+                    <p className="text-sm text-muted-foreground">Manage your parcel payments</p>
                 </div>
 
                 {/* Tiles */}

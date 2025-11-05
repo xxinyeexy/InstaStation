@@ -119,39 +119,9 @@ class StudentController extends Controller
                 ];
             });
 
-        // Fetch unread notifications for the student and deduplicate by a stable signature
-        $rawNotifications = \App\Models\Notification::where('notifiable_id', $user->id)
-            ->where('notifiable_type', 'App\Models\User')
-            ->whereNull('read_at')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $seen = [];
-        $notifications = $rawNotifications->map(function ($notification) use (&$seen) {
-            $data = json_decode($notification->data, true);
-            // Create a stable signature for deduplication: type + parcel_id + message
-            $signature = ($notification->type ?? '') . '|' . ($data['parcel_id'] ?? '') . '|' . ($data['message'] ?? '');
-            if (in_array($signature, $seen, true)) {
-                return null; // will be filtered out
-            }
-            $seen[] = $signature;
-
-            return [
-                'id' => $notification->id,
-                'type' => $notification->type,
-                'title' => $data['title'] ?? 'Notification',
-                'message' => $data['message'] ?? '',
-                'parcel_code' => $data['parcel_code'] ?? null,
-                'parcel_id' => $data['parcel_id'] ?? null,
-                'rejected_by' => $data['rejected_by'] ?? null,
-                'rejected_at' => $data['rejected_at'] ?? null,
-                'created_at' => $notification->created_at->toDateTimeString(),
-            ];
-        })->filter()->values();
-
+        // Notifications are now provided globally via HandleInertiaRequests middleware
         return Inertia::render('student/parcel', [
             'parcels' => $parcels,
-            'notifications' => $notifications,
         ]);
     }
 

@@ -39,6 +39,41 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        // Fetch unread notifications for authenticated users (students)
+        $notifications = [];
+        if ($request->user() && strtolower($request->user()->type) === 'student') {
+            $rawNotifications = \App\Models\Notification::where('notifiable_id', $request->user()->id)
+                ->where('notifiable_type', 'App\Models\User')
+                ->whereNull('read_at')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $seen = [];
+            $notifications = $rawNotifications->map(function ($notification) use (&$seen) {
+                $data = json_decode($notification->data, true);
+                // Create a stable signature for deduplication: type + parcel_id + message
+                $signature = ($notification->type ?? '') . '|' . ($data['parcel_id'] ?? '') . '|' . ($data['message'] ?? '');
+                if (in_array($signature, $seen, true)) {
+                    return null; // will be filtered out
+                }
+                $seen[] = $signature;
+
+                return [
+                    'id' => $notification->id,
+                    'type' => $notification->type,
+                    'title' => $data['title'] ?? 'Notification',
+                    'message' => $data['message'] ?? '',
+                    'parcel_code' => $data['parcel_code'] ?? null,
+                    'parcel_id' => $data['parcel_id'] ?? null,
+                    'rejected_by' => $data['rejected_by'] ?? null,
+                    'rejected_at' => $data['rejected_at'] ?? null,
+                    'created_at' => $notification->created_at->toDateTimeString(),
+                    'read_at' => $notification->read_at ? $notification->read_at->toDateTimeString() : null,
+                    'is_read' => $notification->read_at !== null,
+                ];
+            })->filter()->values();
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -46,6 +81,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'notifications' => $notifications,
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),
                 'error' => fn() => $request->session()->get('error'),
