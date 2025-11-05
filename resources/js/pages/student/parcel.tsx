@@ -194,12 +194,19 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // In-app server notifications (bell dropdown)
     const [notificationList, setNotificationList] = useState<any[]>(serverNotifications);
+    const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(new Set());
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
 
-    // Update notification list when server-sent notifications change
+    // Update notification list when server-sent notifications change, filtering out dismissed ones
     useEffect(() => {
-        setNotificationList(serverNotifications || []);
-    }, [serverNotifications]);
+        console.log('Parcel page - Server notifications changed:', serverNotifications);
+        console.log('Dismissed IDs:', Array.from(dismissedNotificationIds));
+        
+        // Filter out any notifications that were manually dismissed
+        const filteredNotifications = (serverNotifications || []).filter(n => !dismissedNotificationIds.has(n.id));
+        console.log('Filtered notifications:', filteredNotifications.length);
+        setNotificationList(filteredNotifications);
+    }, [serverNotifications, dismissedNotificationIds]);
 
     // Show ALL notifications (unified across all pages - payment, parcel, etc.)
     const visibleNotifications = notificationList;
@@ -228,6 +235,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         console.log('Current notification list length:', notificationList.length);
         
         setShowNotificationDropdown(false);
+
+        // Add to dismissed list so it won't come back even if props refresh
+        setDismissedNotificationIds(prev => new Set(prev).add(notification.id));
 
         // Optimistically remove from UI immediately for better UX
         console.log('Optimistically removing notification from list');

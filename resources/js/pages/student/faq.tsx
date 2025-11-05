@@ -41,12 +41,14 @@ export default function StudentFaq({
     const [selectedCategory, setSelectedCategory] = useState(filters?.category || '');
     const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
     const [notificationList, setNotificationList] = useState<Notification[]>(serverNotifications);
+    const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(new Set());
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
 
-    // Update notification list when props change
+    // Update notification list when props change, filtering out dismissed ones
     useEffect(() => {
-        setNotificationList(serverNotifications);
-    }, [serverNotifications]);
+        const filtered = (serverNotifications || []).filter(n => !dismissedNotificationIds.has(n.id));
+        setNotificationList(filtered);
+    }, [serverNotifications, dismissedNotificationIds]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -69,7 +71,13 @@ export default function StudentFaq({
     // Handle notification click
     const handleNotificationClick = async (notification: Notification) => {
         setShowNotificationDropdown(false);
-        
+
+        // Track as dismissed immediately so it won't reappear from props refresh
+        setDismissedNotificationIds(prev => new Set(prev).add(notification.id));
+
+        // Optimistically remove from UI
+        setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+
         // Mark as read on the server
         if (notification.id) {
             try {
@@ -84,19 +92,14 @@ export default function StudentFaq({
                     credentials: 'same-origin',
                 });
                 
-                const result = await response.json();
-                console.log('Mark as read response:', result);
-                
-                if (result.success) {
-                    // Remove from local notification list
-                    setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
-                } else {
-                    console.error('Failed to mark notification as read:', result.message);
+                if (!response.ok) {
+                    // If already read or minor error, keep UI updated
+                    return;
                 }
+                
+                await response.json().catch(() => ({}));
             } catch (e) {
-                console.error('Failed to mark notification read', e);
-                // Still remove from local list for better UX
-                setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+                // Network error - keep UI updated
             }
         }
         

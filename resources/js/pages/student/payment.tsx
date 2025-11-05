@@ -66,23 +66,31 @@ export default function Payment({
     
     // Debug: Log notifications on load
     useEffect(() => {
+        console.log('=== PAYMENT PAGE LOADED ===');
         console.log('Payment page - Server notifications received:', serverNotifications);
-        console.log('Payment page - Notification IDs:', serverNotifications.map(n => ({ id: n.id, title: n.title })));
+        console.log('Payment page - Notification count:', serverNotifications.length);
+        console.log('Payment page - Notification IDs:', serverNotifications.map(n => ({ id: n.id, title: n.title, read_at: n.read_at })));
     }, []);
 
     const [viewerUrl, setViewerUrl] = useState<string | null>(null);
     const [notificationList, setNotificationList] = useState<any[]>(serverNotifications);
+    const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(new Set());
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
 
     // Get flash messages from the page props
     const { flash } = usePage().props as any;
 
-    // Update notification list when props change (e.g., after payment submission)
+    // Update notification list when props change, filtering out dismissed ones
     useEffect(() => {
-        console.log('Payment page - Updating notification list:', serverNotifications);
-        setNotificationList(serverNotifications);
-    }, [serverNotifications]);
+        console.log('Payment page - Server notifications changed:', serverNotifications);
+        console.log('Dismissed IDs:', Array.from(dismissedNotificationIds));
+        
+        // Filter out any notifications that were manually dismissed
+        const filteredNotifications = serverNotifications.filter(n => !dismissedNotificationIds.has(n.id));
+        console.log('Filtered notifications:', filteredNotifications.length);
+        setNotificationList(filteredNotifications);
+    }, [serverNotifications, dismissedNotificationIds]);
 
     // Refresh data when component mounts (e.g., returning from payment submission)
     useEffect(() => {
@@ -135,6 +143,9 @@ export default function Payment({
         // Close dropdown after clicking
         setShowNotificationDropdown(false);
 
+        // Add to dismissed list so it won't come back even if props refresh
+        setDismissedNotificationIds(prev => new Set(prev).add(notification.id));
+        
         // Optimistically remove from UI immediately for better UX
         setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
 

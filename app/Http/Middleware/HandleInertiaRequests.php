@@ -6,6 +6,7 @@ use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
+use Illuminate\Support\Facades\Log;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -47,6 +48,20 @@ class HandleInertiaRequests extends Middleware
                 ->whereNull('read_at')
                 ->orderBy('created_at', 'desc')
                 ->get();
+
+            Log::info('HandleInertiaRequests - Fetched notifications', [
+                'user_id' => $request->user()->id,
+                'raw_count' => $rawNotifications->count(),
+                'notification_ids' => $rawNotifications->pluck('id')->toArray(),
+                'notification_details' => $rawNotifications->map(function($n) {
+                    $data = json_decode($n->data, true);
+                    return [
+                        'id' => $n->id,
+                        'title' => $data['title'] ?? 'N/A',
+                        'read_at' => $n->read_at,
+                    ];
+                })->toArray(),
+            ]);
 
             $seen = [];
             $notifications = $rawNotifications->map(function ($notification) use (&$seen) {
