@@ -3,7 +3,7 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Html5Qrcode, Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { BellRing, CheckCircle, Edit, Eye, Trash2, X, XCircle } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -905,7 +905,45 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         })
         .sort((a, b) => (a.time_slot || '').localeCompare(b.time_slot || ''));
 
-    const todaysCollections = collectionsForSelectedDate;
+    // Group collections by student and time slot so the same student in the same slot is merged
+    const groupedCollections = useMemo(() => {
+        const map = new Map<
+            string,
+            {
+                key: string;
+                time_slot: string | null | undefined;
+                schedule: string | null | undefined;
+                student_name: string;
+                student_matric?: string | null;
+                parcels: Parcel[];
+            }
+        >();
+
+        for (const p of collectionsForSelectedDate) {
+            const studentId = (p.student_user as any)?.id ?? p.student_id ?? p.recipient_matric ?? p.recipient_name ?? 'unknown';
+            const slot = p.time_slot || '';
+            const key = `${studentId}__${slot}`;
+            const name = (p.student_user as any)?.name || p.recipient_name || 'Unknown Student';
+            const matric = (p.student_user as any)?.matric || p.recipient_matric || null;
+
+            if (!map.has(key)) {
+                map.set(key, {
+                    key,
+                    time_slot: p.time_slot,
+                    schedule: p.schedule,
+                    student_name: name,
+                    student_matric: matric,
+                    parcels: [p],
+                });
+            } else {
+                map.get(key)!.parcels.push(p);
+            }
+        }
+
+        return Array.from(map.values()).sort((a, b) => (a.time_slot || '').localeCompare(b.time_slot || ''));
+    }, [collectionsForSelectedDate]);
+
+    const todaysCollections = groupedCollections;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -959,44 +997,46 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             onChange={(e) => setSelectedDate(e.target.value)}
                                             className="rounded-md border px-3 py-2"
                                         />
-                                        <div className="ml-auto text-sm text-gray-600">Found: {collectionsForSelectedDate.length}</div>
+                                        <div className="ml-auto text-sm text-gray-600">Found: {groupedCollections.length}</div>
                                     </div>
                                     <div className="mt-4 max-h-[60vh] space-y-3 overflow-y-auto">
-                                        {collectionsForSelectedDate.length === 0 ? (
+                                        {groupedCollections.length === 0 ? (
                                             <div className="text-sm text-gray-500">No parcels scheduled on this date.</div>
                                         ) : (
-                                            collectionsForSelectedDate.map((p) => (
-                                                <div key={p.parcel_id} className="rounded-xl border border-gray-100 p-4">
+                                            groupedCollections.map((g) => (
+                                                <div key={g.key} className="rounded-xl border border-gray-100 p-4">
                                                     <div className="flex items-start gap-4">
                                                         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 font-semibold text-purple-600">
-                                                            <span className="text-sm">{p.time_slot ? p.time_slot.split(' - ')[0] : ''}</span>
+                                                            <span className="text-sm">{g.time_slot ? g.time_slot.split(' - ')[0] : ''}</span>
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2">
-                                                                <p className="text-sm font-semibold text-gray-900">
-                                                                    {p.student_user?.name || p.recipient_name || 'Unknown Student'}
-                                                                </p>
-                                                                {(p.student_user?.matric || p.recipient_matric) && (
-                                                                    <p className="text-xs text-gray-500">
-                                                                        ({p.student_user?.matric || p.recipient_matric})
-                                                                    </p>
-                                                                )}
+                                                                <p className="text-sm font-semibold text-gray-900">{g.student_name}</p>
+                                                                {g.student_matric && <p className="text-xs text-gray-500">({g.student_matric})</p>}
                                                             </div>
-                                                            <div className="mt-1 text-sm text-gray-700">
-                                                                Tracking: <span className="font-mono">{p.tracking_no}</span>
-                                                            </div>
-                                                            <div className="mt-1 text-sm text-gray-700">
-                                                                Location: {p.location || 'N/A'} • Size: {p.size || 'N/A'}
-                                                            </div>
-                                                            <div className="mt-1 text-xs text-gray-500">
-                                                                Timeslot: {p.time_slot || formatScheduledDate(p.schedule)}
-                                                            </div>
-                                                            <div className="mt-2 text-xs text-gray-500">
-                                                                Status:{' '}
-                                                                <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-                                                                    {p.parcel_status}
+                                                            <div className="mt-1 text-sm text-gray-700">Parcels: {g.parcels.length}</div>
+                                                            <div className="mt-1 truncate text-sm text-gray-700">
+                                                                Codes:{' '}
+                                                                <span className="font-mono">
+                                                                    {g.parcels.map((pp) => pp.parcel_code || pp.tracking_no).join(', ')}
                                                                 </span>
                                                             </div>
+                                                            <div className="mt-1 text-xs text-gray-500">
+                                                                Timeslot: {g.time_slot || formatScheduledDate(g.schedule || '')}
+                                                            </div>
+                                                            {(() => {
+                                                                const statuses = Array.from(
+                                                                    new Set(g.parcels.map((pp) => (pp.parcel_status || '').toString())),
+                                                                );
+                                                                return (
+                                                                    <div className="mt-2 text-xs text-gray-500">
+                                                                        Status:{' '}
+                                                                        <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+                                                                            {statuses.length === 1 ? statuses[0] : 'Multiple'}
+                                                                        </span>
+                                                                    </div>
+                                                                );
+                                                            })()}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2117,29 +2157,33 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 {todaysCollections.length === 0 ? (
                                     <div className="rounded-xl p-4 text-sm text-gray-500">No collections scheduled for today.</div>
                                 ) : (
-                                    todaysCollections.map((p) => (
-                                        <div key={p.parcel_id} className="rounded-xl border border-gray-100 p-4">
+                                    todaysCollections.map((g) => (
+                                        <div key={g.key} className="rounded-xl border border-gray-100 p-4">
                                             <div className="flex items-start gap-4">
                                                 <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 font-semibold text-purple-600">
-                                                    <span className="text-sm">{p.time_slot ? p.time_slot.split(' - ')[0] : ''}</span>
+                                                    <span className="text-sm">{g.time_slot ? g.time_slot.split(' - ')[0] : ''}</span>
                                                 </div>
                                                 <div className="flex-1">
                                                     <div className="flex flex-col">
                                                         <div className="flex items-center gap-2">
-                                                            <p className="text-sm font-semibold text-gray-900">
-                                                                {p.student_user?.name || p.recipient_name || 'Unknown Student'}
-                                                            </p>
-                                                            {(p.student_user?.matric || p.recipient_matric) && (
-                                                                <p className="text-xs text-gray-500">
-                                                                    ({p.student_user?.matric || p.recipient_matric})
-                                                                </p>
-                                                            )}
+                                                            <p className="text-sm font-semibold text-gray-900">{g.student_name}</p>
+                                                            {g.student_matric && <p className="text-xs text-gray-500">({g.student_matric})</p>}
                                                         </div>
-                                                        <div className="mt-1 text-sm text-gray-700">
-                                                            Tracking: <span className="font-mono">{p.tracking_no}</span>
+                                                        <div className="mt-1 text-xs text-gray-700">
+                                                            <span className="font-medium">Parcel ID:</span>
+                                                            <div className="mt-1 flex flex-wrap gap-1">
+                                                                {g.parcels.map((pp) => (
+                                                                    <span
+                                                                        key={pp.parcel_code}
+                                                                        className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-[11px] text-gray-800"
+                                                                    >
+                                                                        {pp.parcel_code}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
                                                         </div>
                                                         <div className="mt-1 text-xs text-gray-500">
-                                                            Timeslot: {p.time_slot || formatScheduledDate(p.schedule)}
+                                                            Timeslot: {g.time_slot || formatScheduledDate(g.schedule || '')}
                                                         </div>
                                                     </div>
                                                 </div>
