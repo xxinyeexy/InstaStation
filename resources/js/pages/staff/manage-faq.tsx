@@ -193,7 +193,7 @@ export default function ManageFaq({
                                     {f.faq_status === 'Active' ? (
                                         <button
                                             onClick={() => publish(f.faq_id, 'unpublish')}
-                                            className="text-sm text-black hover:bg-gray-200 hover:ring-gray-200 focus-visible:outline-none active:bg-gray-200"
+                                            className="text-sm text-black hover:bg-pink-50 hover:scale-110 hover:text-pink-600 hover:shadow-lg focus-visible:outline-none active:bg-gray-200"
                                         >
                                             Unpublish
                                         </button>

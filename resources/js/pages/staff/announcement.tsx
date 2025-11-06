@@ -313,7 +313,7 @@ export default function StaffAnnouncements(props: {
                                 <div className="flex shrink-0 items-center gap-3">
                                     <button
                                         onClick={() => setViewing(f)}
-                                        className="rounded-full border border-border bg-muted px-2 py-1 text-xs text-muted-foreground hover:bg-accent"
+                                        className="rounded-full border border-border bg-muted px-2 py-1 text-xs hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg text-muted-foreground"
                                         title="View"
                                     >
                                         <Eye size={16} />
