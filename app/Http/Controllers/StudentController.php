@@ -624,8 +624,9 @@ class StudentController extends Controller
                 'qr_code' => $qrFilePath, // Save the QR code path
             ];
 
-            // Set status to Ready for Collection only if payment is verified
-            if ($isPaymentVerified) {
+            // Set status to Ready for Collection when scheduling completes
+            // If payment is verified OR the parcel is already in 'Approved' state, move to Ready for Collection.
+            if ($isPaymentVerified || strtolower($parcel->parcel_status) === 'approved') {
                 $updateData['parcel_status'] = 'Ready for Collection';
             }
 
@@ -666,6 +667,7 @@ class StudentController extends Controller
                     'tracking_no' => $parcel->tracking_no,
                     'scheduled_datetime' => $parcel->schedule,
                     'time_slot' => $parcel->time_slot,
+                    'status' => $parcel->parcel_status,
                 ]
             ]);
         } catch (ModelNotFoundException $e) {

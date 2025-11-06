@@ -181,10 +181,10 @@ const SchedulePickup = ({ parcel }: Props) => {
                 await fetchAvailability(selectedDate);
             }
 
-            // Redirect after showing the toast for a moment
+            // Redirect quickly for a smoother experience
             setTimeout(() => {
                 router.visit('/student/parcel');
-            }, 2000);
+            }, 600);
         } catch (error) {
             console.error('Scheduling error:', error);
             if (error instanceof Error) {
