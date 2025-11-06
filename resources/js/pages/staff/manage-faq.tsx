@@ -41,6 +41,12 @@ export default function ManageFaq({
     const [addCategory, setAddCategory] = useState('');
     const [addStatus, setAddStatus] = useState<'Active' | 'Inactive'>('Active');
 
+    // Delete confirmation modal state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedDeleteId, setSelectedDeleteId] = useState<number | null>(null);
+    const [selectedDeleteLabel, setSelectedDeleteLabel] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const filtered = useMemo(() => {
         const needle = q.trim().toLowerCase();
         return list.filter((f) => {
@@ -62,11 +68,40 @@ export default function ManageFaq({
             method: 'POST',
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
         });
-        setList((prev) => prev.map((r) => (r.faq_id === faq_id ? { ...r, faq_status: to === 'publish' ? 'Active' : 'Inactive', updated_at: new Date().toISOString() } : r)));
+        setList((prev) =>
+            prev.map((r) =>
+                r.faq_id === faq_id ? { ...r, faq_status: to === 'publish' ? 'Active' : 'Inactive', updated_at: new Date().toISOString() } : r,
+            ),
+        );
     };
     const remove = async (faq_id: number) => {
         await fetch(`/staff/faq/${faq_id}`, { method: 'DELETE', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf } });
         setList((prev) => prev.filter((r) => r.faq_id !== faq_id));
+    };
+
+    const handleDeleteClick = (faq_id: number, question: string) => {
+        setSelectedDeleteId(faq_id);
+        setSelectedDeleteLabel(question);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!selectedDeleteId) return;
+        setIsDeleting(true);
+        try {
+            await remove(selectedDeleteId);
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteModal(false);
+            setSelectedDeleteId(null);
+            setSelectedDeleteLabel(null);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setShowDeleteModal(false);
+        setSelectedDeleteId(null);
+        setSelectedDeleteLabel(null);
     };
 
     const categoryClasses = (cat?: string | null) => {
@@ -88,12 +123,12 @@ export default function ManageFaq({
 
                 {/* Summary cards */}
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-xl border-border border bg-white p-4">
+                    <div className="rounded-xl border border-border bg-white p-4">
                         <div className="text-sm text-gray-600">Total FAQs</div>
                         <div className="text-2xl font-bold">{list.length}</div>
                         <div className="text-xs text-gray-500">All questions</div>
                     </div>
-                    <div className="rounded-xl border-border border bg-white p-4">
+                    <div className="rounded-xl border border-border bg-white p-4">
                         <div className="text-sm text-gray-600">Published</div>
                         <div className="text-2xl font-bold">{list.filter((r) => r.faq_status === 'Active').length}</div>
                         <div className="text-xs text-gray-500">Visible to students</div>
@@ -113,7 +148,11 @@ export default function ManageFaq({
                             onKeyDown={(e) => e.key === 'Enter' && refreshFromServer()}
                         />
                     </div>
-                    <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground">
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                    >
                         <option value="">All Categories</option>
                         {categories
                             .filter((c, index, arr) => arr.indexOf(c) === index)
@@ -174,11 +213,14 @@ export default function ManageFaq({
                                             setEditCategory(f.category || '');
                                             setEditStatus(f.faq_status);
                                         }}
-                                        className="text-gray-500 hover:text-gray-700"
+                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg"
                                     >
                                         <Edit2 size={14} />
                                     </button>
-                                    <button onClick={() => remove(f.faq_id)} className="text-red-600 hover:text-red-700">
+                                    <button
+                                        onClick={() => handleDeleteClick(f.faq_id, f.faq_question)}
+                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
+                                    >
                                         <Trash2 size={14} />
                                     </button>
                                 </div>
@@ -199,6 +241,7 @@ export default function ManageFaq({
                         <div className="mb-4 flex items-start justify-between">
                             <div>
                                 <div className="text-lg font-semibold">Edit FAQ</div>
+
                                 <div className="text-xs text-gray-500">Update the FAQ information</div>
                             </div>
                             <button className="text-gray-500 hover:text-gray-700" onClick={() => setEditing(null)}>
@@ -299,6 +342,49 @@ export default function ManageFaq({
                 </div>
             )}
 
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/30" onClick={handleDeleteCancel} />
+                    <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                            <Trash2 className="h-6 w-6 text-red-600" />
+                        </div>
+                        <h2 className="mb-2 text-lg font-semibold text-gray-900">Delete FAQ</h2>
+                        <p className="mb-1 text-sm text-gray-600">
+                            Are you sure you want to delete
+                            {selectedDeleteLabel ? (
+                                <>
+                                    {' '}
+                                    <span className="font-medium text-red-600">{selectedDeleteLabel}</span>
+                                </>
+                            ) : (
+                                ' this FAQ'
+                            )}
+                            ?
+                        </p>
+                        <p className="mb-6 px-4 text-left text-xs text-gray-500">
+                            This action cannot be undone and will permanently remove this FAQ.
+                        </p>
+                        <div className="flex justify-center gap-3">
+                            <button
+                                onClick={handleDeleteCancel}
+                                disabled={isDeleting}
+                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirm}
+                                disabled={isDeleting}
+                                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {isDeleting ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {adding && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setAdding(false)} />
@@ -318,16 +404,16 @@ export default function ManageFaq({
                                 <input
                                     value={addQuestion}
                                     onChange={(e) => setAddQuestion(e.target.value)}
-                                    className="w-full rounded-md border border-border  px-3 py-2 text-sm"
+                                    className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                     placeholder="Enter the question..."
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium ">Answer</div>
+                                <div className="mb-1 text-sm font-medium">Answer</div>
                                 <textarea
                                     value={addAnswer}
                                     onChange={(e) => setAddAnswer(e.target.value)}
-                                    className="h-28 w-full rounded-md border-border border px-3 py-2 text-sm"
+                                    className="h-28 w-full rounded-md border border-border px-3 py-2 text-sm"
                                     placeholder="Enter the answer..."
                                 />
                             </div>
@@ -337,7 +423,7 @@ export default function ManageFaq({
                                     <select
                                         value={addCategory}
                                         onChange={(e) => setAddCategory(e.target.value)}
-                                        className="w-full rounded-md border border-border  px-3 py-2 text-sm"
+                                        className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                     >
                                         <option value="">Choose category</option>
                                         {categories

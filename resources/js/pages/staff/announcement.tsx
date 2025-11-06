@@ -66,6 +66,11 @@ export default function StaffAnnouncements(props: {
     const [publishDate, setPublishDate] = useState<string>('');
     const [expiryDate, setExpiryDate] = useState<string>('');
     const [imageFile, setImageFile] = useState<File | null>(null);
+    // Delete confirmation modal state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedDeleteId, setSelectedDeleteId] = useState<number | null>(null);
+    const [selectedDeleteLabel, setSelectedDeleteLabel] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
 
     // Auto-set status to Published when publish date is current or earlier
@@ -73,7 +78,6 @@ export default function StaffAnnouncements(props: {
         if (publishDate) {
             const publishDateTime = new Date(publishDate);
             const currentTime = new Date();
-
             if (publishDateTime <= currentTime) {
                 setAnnStatus('Active'); // Set to Published
             }
@@ -111,22 +115,13 @@ export default function StaffAnnouncements(props: {
         // datetime-local input gives us "YYYY-MM-DDTHH:mm" in local time
         // Parse it directly without timezone conversion
         if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
-            // Parse the components directly
-            const [datePart, timePart] = value.split('T');
-            const [year, month, day] = datePart.split('-');
-            const [hours, minutes] = timePart.split(':');
-
-            // Create a date using local timezone components
-            const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), parseInt(hours), parseInt(minutes), 0);
-
-            // Format to Y-m-d H:i:s without timezone conversion
+            const date = new Date(value);
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
             const d = String(date.getDate()).padStart(2, '0');
             const h = String(date.getHours()).padStart(2, '0');
             const i = String(date.getMinutes()).padStart(2, '0');
             const s = String(date.getSeconds()).padStart(2, '0');
-
             return `${y}-${m}-${d} ${h}:${i}:${s}`;
         }
         return value;
@@ -145,7 +140,7 @@ export default function StaffAnnouncements(props: {
 
     const refreshFromServer = () => {
         // Simple client-side filter reflects UI immediately; full refresh on navigation
-        window.location.href = `/staff/manage-faq?` + new URLSearchParams({ q, category }).toString();
+        window.location.href = `/staff/announcements?` + new URLSearchParams({ q, category }).toString();
     };
 
     const csrf = (typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') : '') || '';
@@ -184,6 +179,30 @@ export default function StaffAnnouncements(props: {
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
         });
         setList((prev) => prev.filter((r) => ((r as any).announcement_id || r.faq_id) !== announcement_id));
+    };
+
+    // Delete confirmation handlers
+    const handleDeleteClick = (id: number, title: string) => {
+        setSelectedDeleteId(id);
+        setSelectedDeleteLabel(title);
+        setShowDeleteModal(true);
+    };
+    const handleDeleteConfirm = async () => {
+        if (!selectedDeleteId) return;
+        setIsDeleting(true);
+        try {
+            await remove(selectedDeleteId);
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteModal(false);
+            setSelectedDeleteId(null);
+            setSelectedDeleteLabel(null);
+        }
+    };
+    const handleDeleteCancel = () => {
+        setShowDeleteModal(false);
+        setSelectedDeleteId(null);
+        setSelectedDeleteLabel(null);
     };
 
     const categoryClasses = (cat?: string | null) => {
@@ -328,13 +347,18 @@ export default function StaffAnnouncements(props: {
                                             setEditImageFile(null);
                                             setEditImagePreview((f as any).announcement_image ? `/storage/${(f as any).announcement_image}` : null);
                                         }}
-                                        className="text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
+                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg"
                                     >
                                         <Edit2 size={14} />
                                     </button>
                                     <button
-                                        onClick={() => remove(((f as any).announcement_id || f.faq_id) as number)}
-                                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                        onClick={() =>
+                                            handleDeleteClick(
+                                                ((f as any).announcement_id || f.faq_id) as number,
+                                                (((f as any).announcement_title || (f as any).faq_question) as string) || ''
+                                            )
+                                        }
+                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
                                     >
                                         <Trash2 size={14} />
                                     </button>
@@ -348,6 +372,49 @@ export default function StaffAnnouncements(props: {
                     {filtered.length === 0 && <div className="py-16 text-center text-gray-400 dark:text-muted-foreground">No results.</div>}
                 </div>
             </div>
+
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/30" onClick={handleDeleteCancel} />
+                    <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl dark:bg-card">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                            <Trash2 className="h-6 w-6 text-red-600" />
+                        </div>
+                        <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-foreground">Delete Announcement</h2>
+                        <p className="mb-1 text-sm text-gray-600 dark:text-muted-foreground">
+                            Are you sure you want to delete
+                            {selectedDeleteLabel ? (
+                                <>
+                                    {' '}
+                                    <span className="font-medium text-red-600">{selectedDeleteLabel}</span>
+                                </>
+                            ) : (
+                                ' this announcement'
+                            )}
+                            ?
+                        </p>
+                        <p className="mb-6 px-4 text-left text-xs text-gray-500 dark:text-muted-foreground">
+                            This action cannot be undone and will permanently remove this announcement.
+                        </p>
+                        <div className="flex justify-center gap-3">
+                            <button
+                                onClick={handleDeleteCancel}
+                                disabled={isDeleting}
+                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-card dark:text-muted-foreground"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirm}
+                                disabled={isDeleting}
+                                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {isDeleting ? 'Deleting...' : 'Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {editing && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
