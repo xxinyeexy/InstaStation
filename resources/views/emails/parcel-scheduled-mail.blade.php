@@ -17,7 +17,7 @@
                     <!-- Header -->
                     <tr>
                         <td
-                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                            style="background: linear-gradient(135deg, #FF13A0 0%, #269850 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">InstaStation</h1>
                         </td>
                     </tr>
@@ -41,14 +41,26 @@
                                 Please show this QR Code to the staff upon collection.
                             </h3>
 
-                            @if ($qrCodeBase64)
-                                <!-- QR Code Section -->
+                            @if (!empty($qrCodeUrl))
+                                <!-- QR Code Section (hosted URL preferred for Gmail/Outlook web) -->
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                                     <tr>
-                                        <td align="center"
-                                            style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
+                                        <td align="center" style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
                                             <div style="display: inline-block; background: #fef3c7; padding: 20px;">
-                                                <img src="data:image/svg+xml;base64,{{ $qrCodeBase64 }}"
+                                                <img src="{{ $qrCodeUrl }}"
+                                                    alt="QR Code: {{ $collectionCode }}" width="300" height="300"
+                                                    style="display: block; width: 300px; height: 300px; max-width: 300px;" />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            @elseif (!empty($qrCodeBase64))
+                                <!-- Fallback: Inline base64 PNG (some clients may block data URIs) -->
+                                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                                    <tr>
+                                        <td align="center" style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
+                                            <div style="display: inline-block; background: #fef3c7; padding: 20px;">
+                                                <img src="data:{{ ($qrCodeMime ?? 'image/png') }};base64,{{ $qrCodeBase64 }}"
                                                     alt="QR Code: {{ $collectionCode }}" width="300" height="300"
                                                     style="display: block; width: 300px; height: 300px; max-width: 300px;" />
                                             </div>
@@ -83,7 +95,7 @@
 
                             <p style="font-size: 16px; color: #4b5563; margin: 30px 0 10px 0;">
                                 Best regards,<br>
-                                <strong>ZAIRY</strong> from UMPSA Parcel Center
+                               UMPSA Parcel Centre
                             </p>
                         </td>
                     </tr>

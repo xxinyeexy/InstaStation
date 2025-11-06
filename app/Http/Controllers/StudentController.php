@@ -568,30 +568,51 @@ class StudentController extends Controller
             $numbers = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
             $collectionCode = $alphabet . $numbers;
 
-            // Generate QR code immediately and save it
+            // Generate QR code immediately and save it (prefer PNG for email compatibility)
             try {
-                $qrCodeSvg = QrCode::format('svg')
+                // Try PNG first (best compatibility across email clients)
+                $qrBinary = QrCode::format('png')
                     ->size(400)
                     ->margin(1)
                     ->errorCorrection('H')
                     ->generate($collectionCode);
 
-                // Save QR code to storage
-                $qrFileName = 'qr_' . $id . '_' . time() . '.svg';
+                $qrExt = 'png';
+                $qrFileName = 'qr_' . $id . '_' . time() . '.' . $qrExt;
                 $qrFilePath = 'qrcodes/' . $qrFileName;
-                Storage::disk('public')->put($qrFilePath, $qrCodeSvg);
+                Storage::disk('public')->put($qrFilePath, $qrBinary);
 
-                Log::info('QR Code generated and saved during scheduling', [
+                Log::info('QR Code (PNG) generated and saved during scheduling', [
                     'parcel_id' => $id,
                     'collection_code' => $collectionCode,
                     'qr_path' => $qrFilePath
                 ]);
             } catch (\Exception $e) {
-                Log::error('Failed to generate QR code during scheduling', [
-                    'parcel_id' => $id,
-                    'error' => $e->getMessage()
-                ]);
-                $qrFilePath = null;
+                // Fallback to SVG if PNG generation fails (e.g., missing GD/Imagick)
+                try {
+                    $qrSvg = QrCode::format('svg')
+                        ->size(400)
+                        ->margin(1)
+                        ->errorCorrection('H')
+                        ->generate($collectionCode);
+
+                    $qrExt = 'svg';
+                    $qrFileName = 'qr_' . $id . '_' . time() . '.' . $qrExt;
+                    $qrFilePath = 'qrcodes/' . $qrFileName;
+                    Storage::disk('public')->put($qrFilePath, $qrSvg);
+
+                    Log::warning('PNG QR generation failed; saved SVG instead', [
+                        'parcel_id' => $id,
+                        'error' => $e->getMessage(),
+                        'qr_path' => $qrFilePath
+                    ]);
+                } catch (\Exception $e2) {
+                    Log::error('Failed to generate QR code during scheduling', [
+                        'parcel_id' => $id,
+                        'error' => $e2->getMessage()
+                    ]);
+                    $qrFilePath = null;
+                }
             }
 
             // Update parcel for schedule. Do NOT change last_edited_by here (students shouldn't overwrite staff editor)
