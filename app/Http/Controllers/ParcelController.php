@@ -370,7 +370,8 @@ class ParcelController extends Controller
             foreach ($parcels as $parcel) {
                 // only notify if parcel has an associated student with email
                 if ($parcel->studentUser && !empty($parcel->studentUser->email)) {
-                    SendParcelReminder::dispatch($parcel);
+                    // Dispatch synchronously to ensure immediate delivery even without a queue worker
+                    \App\Jobs\SendParcelReminder::dispatchSync($parcel);
                     $queued++;
                 } else {
                     Log::info('Skipping reminder: no student/email', ['parcel_id' => $parcel->parcel_id]);

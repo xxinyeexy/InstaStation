@@ -815,24 +815,21 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setSelectedTrackingNo(null);
     };
 
-    // Reminder sending state (track per-parcel sending)
-    const [sendingReminders, setSendingReminders] = useState<Set<number>>(new Set());
-
-    // Send reminder for a single parcel
+    // Send reminder for a single parcel (fire-and-forget with no loading state)
     const sendReminder = async (parcelId: number) => {
-        // optimistic UI - mark as sending
-        setSendingReminders((prev) => new Set(prev).add(parcelId));
         try {
             // Read CSRF token from meta tag, fallback to XSRF-TOKEN cookie (decoded)
             const csrfToken = (() => {
                 const meta = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
                 if (meta && meta.getAttribute('content')) return meta.getAttribute('content')!;
-                const cookies = document.cookie ? document.cookie.split(';') : [];
-                for (const c of cookies) {
-                    const [k, v] = c.trim().split('=');
-                    if (k === 'XSRF-TOKEN') return decodeURIComponent(v || '');
-                }
-                return '';
+                // Robust cookie parsing: preserve '=' characters in value
+                const getCookie = (name: string) => {
+                    const match = document.cookie.split('; ').find((row) => row && row.startsWith(name + '='));
+                    if (!match) return '';
+                    return match.split('=').slice(1).join('=');
+                };
+                const raw = getCookie('XSRF-TOKEN');
+                return raw ? decodeURIComponent(raw) : '';
             })();
 
             const response = await fetch('/staff/parcels/remind', {
@@ -873,13 +870,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         } catch (error: any) {
             console.error('Failed to send reminder:', error);
             addNotification('error', 'Error', error?.message || 'Failed to send reminder');
-        } finally {
-            // remove sending flag
-            setSendingReminders((prev) => {
-                const next = new Set(prev);
-                next.delete(parcelId);
-                return next;
-            });
         }
     };
 
@@ -2019,16 +2009,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         parcel.parcel_status?.toLowerCase() === 'ready to collect') && (
                                                         <button
                                                             onClick={() => sendReminder(parcel.parcel_id)}
-                                                            disabled={sendingReminders.has(parcel.parcel_id)}
-                                                            className={`rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg ${
-                                                                sendingReminders.has(parcel.parcel_id) ? 'cursor-wait opacity-60' : ''
-                                                            }`}
+                                                            className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg"
                                                         >
-                                                            {sendingReminders.has(parcel.parcel_id) ? (
-                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
-                                                            ) : (
-                                                                <BellRing className="h-5 w-5" />
-                                                            )}
+                                                            <BellRing className="h-5 w-5" />
                                                         </button>
                                                     )}
                                                     <button

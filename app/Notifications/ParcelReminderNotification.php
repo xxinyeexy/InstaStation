@@ -52,32 +52,28 @@ class ParcelReminderNotification extends Notification
             default => $reminderNumber . 'th Reminder',
         };
 
-        $mail = (new MailMessage)
-            ->subject($ordinal . ': Parcel Ready for Collection (' . $parcelCode . ')')
-            ->greeting('Hello ' . ($notifiable->name ?? ''))
-            ->line("This is a reminder that your parcel ({$parcelCode}) is awaiting collection.")
-            ->line('Location: ' . ($parcel->location ?? 'N/A'))
-            ->line('Status: ' . ($parcel->parcel_status ?? 'N/A'));
-
-        // Include schedule/time slot details if available
+        // Prepare view variables
+        $scheduled = null;
         if (!empty($parcel->schedule)) {
             try {
-                $date = \Carbon\Carbon::parse($parcel->schedule)->format('d/m/Y (D)');
-                $slot = $parcel->time_slot ? ' from ' . $parcel->time_slot : '';
-                $mail->line('Scheduled collection: ' . $date . $slot);
+                $scheduled = \Carbon\Carbon::parse($parcel->schedule)->format('d/m/Y (D)');
             } catch (\Throwable $e) {
-                // ignore parse errors
+                $scheduled = null;
             }
         }
 
-        if ($collectionCode) {
-            $mail->line('Collection Code: ' . $collectionCode);
-        }
-
-        $mail->action('View Parcel', $url)
-            ->line('If you have already collected the parcel, please ignore this message.');
-
-        return $mail;
+        return (new MailMessage)
+            ->subject($ordinal . ': Parcel Ready for Collection (' . $parcelCode . ')')
+            ->view('emails.parcel-reminder', [
+                'ordinal' => $ordinal,
+                'studentName' => $notifiable->name ?? '',
+                'parcelCode' => $parcelCode,
+                'collectionCode' => $collectionCode,
+                'status' => $parcel->parcel_status ?? 'N/A',
+                'scheduled' => $scheduled,
+                'timeSlot' => $parcel->time_slot ?? '',
+                'actionUrl' => $url,
+            ]);
     }
 
     public function toDatabase($notifiable)

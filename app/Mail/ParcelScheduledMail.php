@@ -39,23 +39,23 @@ class ParcelScheduledMail extends Mailable
         $this->studentName = strtoupper($studentName);
         $this->parcelCode = $parcel->parcel_code ?? $parcel->tracking_no ?? $parcel->parcel_id;
         $this->collectionCode = $parcel->collection_code ?? 'N/A';
-        
-        $this->scheduledDate = $parcel->schedule 
-            ? \Carbon\Carbon::parse($parcel->schedule)->format('d/m/Y (D)') 
+
+        $this->scheduledDate = $parcel->schedule
+            ? \Carbon\Carbon::parse($parcel->schedule)->format('d/m/Y (D)')
             : 'Not set';
-        
+
         $this->timeSlot = $parcel->time_slot ?? 'Not set';
-        
+
         $this->scheduleDetails = $this->scheduledDate;
         if ($parcel->time_slot) {
             $this->scheduleDetails .= ' from ' . $parcel->time_slot;
         }
-        
+
         // Get QR code path and convert to base64
         if ($parcel->qr_code && Storage::disk('public')->exists($parcel->qr_code)) {
             $this->qrCodePath = Storage::disk('public')->path($parcel->qr_code);
             $this->qrCodeMime = File::mimeType($this->qrCodePath) ?: 'image/png';
-            
+
             // Read QR code and convert to base64 for inline display
             $qrContent = Storage::disk('public')->get($parcel->qr_code);
             $this->qrCodeBase64 = base64_encode($qrContent);
