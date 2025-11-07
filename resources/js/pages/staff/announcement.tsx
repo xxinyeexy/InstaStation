@@ -321,7 +321,7 @@ export default function StaffAnnouncements(props: {
                                     {(f as any).announcement_status === 'Published' || (f as any).faq_status === 'Active' ? (
                                         <button
                                             onClick={() => publish(((f as any).announcement_id || f.faq_id) as number, 'unpublish')}
-                                            className="text-sm text-foreground hover:bg-accent hover:ring-border focus-visible:outline-none active:bg-accent"
+                                            className="text-sm text-foreground hover:bg-pink-50 hover:text-pink-600 hover:shadow-lg focus-visible:outline-none active:bg-gray-200"
                                         >
                                             Unpublish
                                         </button>
