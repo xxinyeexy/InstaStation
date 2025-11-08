@@ -209,7 +209,7 @@ export default function StaffHome() {
                                         onClick={() => setActiveTab('arrivals')}
                                         className={`rounded-md px-3 py-1 text-sm transition-colors ${
                                             activeTab === 'arrivals'
-                                                ? 'bg-primary text-primary-foreground'
+                                                ? 'bg-secondary text-primary-foreground'
                                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
@@ -219,7 +219,7 @@ export default function StaffHome() {
                                         onClick={() => setActiveTab('collected')}
                                         className={`rounded-md px-3 py-1 text-sm transition-colors ${
                                             activeTab === 'collected'
-                                                ? 'bg-primary text-primary-foreground'
+                                                ? 'bg-secondary text-primary-foreground'
                                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
@@ -232,10 +232,7 @@ export default function StaffHome() {
                                     {(() => {
                                         const chartData = activeTab === 'arrivals' ? data.dailyArrivals : data.dailyCollected;
                                         // compute dynamic max across both series (thisYear and lastYear)
-                                        const rawMax = Math.max(
-                                            1,
-                                            ...chartData.flatMap((d) => [Number(d.thisYear || 0), Number(d.lastYear || 0)])
-                                        );
+                                        const rawMax = Math.max(1, ...chartData.flatMap((d) => [Number(d.thisYear || 0), Number(d.lastYear || 0)]));
                                         // add 10% padding and round up to nearest 10 for nicer ticks
                                         const padded = Math.ceil(rawMax * 1.1);
                                         let roundedMax = Math.max(10, Math.ceil(padded / 10) * 10);
@@ -246,13 +243,13 @@ export default function StaffHome() {
 
                                         return (
                                             <AreaChart data={chartData}>
-                                        <defs>
-                                            <linearGradient id="colorThisYear" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#374151" stopOpacity={0.8} />
-                                                <stop offset="95%" stopColor="#374151" stopOpacity={0.1} />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                                                <defs>
+                                                    <linearGradient id="colorThisYear" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="3%" stopColor="#FFFFFF" stopOpacity={0.8} />
+                                                        <stop offset="98%" stopColor="#FF029A" stopOpacity={0.1} />
+                                                    </linearGradient>
+                                                </defs>
+                                                <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                                 <XAxis dataKey="day" />
                                                 <YAxis domain={[0, roundedMax]} ticks={ticks} />
                                                 <Tooltip
@@ -263,7 +260,7 @@ export default function StaffHome() {
                                                         borderRadius: '8px',
                                                     }}
                                                 />
-                                        <Legend />
+                                                <Legend />
                                                 <Area
                                                     type="monotone"
                                                     dataKey="thisYear"
@@ -297,7 +294,7 @@ export default function StaffHome() {
                                                 <div className="flex items-center gap-2">
                                                     <div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
                                                         <div
-                                                            className="h-full rounded-full bg-primary transition-all duration-1000 ease-out"
+                                                            className="h-full rounded-full bg-secondary transition-all duration-1000 ease-out"
                                                             style={{
                                                                 width: `${(sender.value / maxValue) * 100}%`,
                                                                 animationDelay: `${index * 100}ms`,
@@ -375,9 +372,11 @@ export default function StaffHome() {
                                             paddingAngle={2}
                                             dataKey="value"
                                         >
-                                            {data.parcelStatus.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} />
-                                            ))}
+                                            {data.parcelStatus.map((entry, index) => {
+                                                // Professional color palette
+                                                const colors = ['#6366F1', '#FF029A', '#7B40F2', '#34c759', '#191818'];
+                                                return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                                            })}
                                         </Pie>
                                         <Tooltip
                                             formatter={(value) => [`${value}%`, 'Percentage']}
@@ -428,9 +427,15 @@ export default function StaffHome() {
                                                             <text x={x} y={y + 18} textAnchor="middle" fill="#6B7280" style={{ fontSize: 12 }}>
                                                                 {parts.length === 2 ? (
                                                                     <>
-                                                                        <tspan x={x} dy={0}>{parts[0]}</tspan>
-                                                                        <tspan x={x} dy={16}>-</tspan>
-                                                                        <tspan x={x} dy={16}>{parts[1]}</tspan>
+                                                                        <tspan x={x} dy={0}>
+                                                                            {parts[0]}
+                                                                        </tspan>
+                                                                        <tspan x={x} dy={16}>
+                                                                            -
+                                                                        </tspan>
+                                                                        <tspan x={x} dy={16}>
+                                                                            {parts[1]}
+                                                                        </tspan>
                                                                     </>
                                                                 ) : (
                                                                     parts.map((part, i) => (
