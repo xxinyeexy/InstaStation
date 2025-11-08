@@ -2,7 +2,7 @@ import QRCodeModal from '@/components/qr-code-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, CheckCircle, Package, Sparkles, Upload, X, XCircle } from 'lucide-react';
+import { AlertCircle, Bell, CheckCircle, MapPin, Package, Sparkles, Upload, X, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -352,6 +352,62 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Remove toast notification function
     const removeToastNotification = (id: string) => {
         setToastNotifications((prev) => prev.filter((notification) => notification.id !== id));
+    };
+
+    // ========= Locations Quick Action =========
+    type Hub = {
+        name: string;
+        operating: { start: string; end: string }; // 24h format 'HH:MM'
+        addressQuery: string; // used for Google Maps search
+    };
+
+    const hubs: Hub[] = [
+        {
+            name: 'Postal Hub, Universiti Malaysia Pahang Al-Sultan Abdullah, Gambang Campus',
+            operating: { start: '09:00', end: '18:00' },
+            addressQuery: 'Universiti Malaysia Pahang Al-Sultan Abdullah Gambang Campus',
+        },
+        {
+            name: 'Postal Hub, Universiti Malaysia Pahang Al-Sultan Abdullah, Pekan Campus',
+            operating: { start: '08:00', end: '22:00' },
+            addressQuery: 'Universiti Malaysia Pahang Al-Sultan Abdullah Pekan Campus',
+        },
+    ];
+
+    const isHubOpenNow = (hub: Hub) => {
+        try {
+            const now = new Date();
+            const [sh, sm] = hub.operating.start.split(':').map(Number);
+            const [eh, em] = hub.operating.end.split(':').map(Number);
+            const start = new Date(now);
+            start.setHours(sh, sm, 0, 0);
+            const end = new Date(now);
+            end.setHours(eh, em, 0, 0);
+            // Handle ranges that pass midnight: treat end < start as next day
+            if (end <= start) end.setDate(end.getDate() + 1);
+            return now >= start && now <= end;
+        } catch {
+            return false;
+        }
+    };
+
+    const [showLocations, setShowLocations] = useState(false);
+    const [selectedHub, setSelectedHub] = useState<Hub | null>(null);
+
+    const openMaps = (query: string) => {
+        const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+        window.open(url, '_blank');
+    };
+
+    // Format HH:MM (24h) to h:mma/p format (e.g., 22:00 -> 10:00 PM)
+    const toAmPm = (hhmm: string) => {
+        const [hRaw, mRaw] = hhmm.split(':');
+        const h = Number(hRaw);
+        const m = Number(mRaw);
+        if (Number.isNaN(h) || Number.isNaN(m)) return hhmm;
+        const period = h >= 12 ? 'PM' : 'AM';
+        const hour12 = ((h + 11) % 12) + 1;
+        return `${hour12}:${String(m).padStart(2, '0')} ${period}`;
     };
 
     // Removed notification click handler
@@ -927,7 +983,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     {/* Header tiles matching screenshot */}
                     <div className="mb-6 grid grid-cols-12 gap-x-4 gap-y-1">
                         {/* My Parcels - Purple (icon on right) */}
-                        <div className="col-span-3 rounded-xl border-3 border-violet-300 bg-violet-50 p-4 h-30 dark:border-violet-500/50 dark:bg-violet-500/20">
+                        <div className="col-span-3 h-30 rounded-xl border-3 border-violet-300 bg-violet-50 p-4 dark:border-violet-500/50 dark:bg-violet-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-violet-400">My Parcels</div>
@@ -947,7 +1003,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Pending Payment - Yellow (icon on right) */}
-                        <div className="col-span-3 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-4 h-30 dark:border-yellow-500/50 dark:bg-yellow-500/20">
+                        <div className="col-span-3 h-30 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-500/50 dark:bg-yellow-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-yellow-400">Pending Payment</div>
@@ -967,7 +1023,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Approved - Orange (icon on right) */}
-                        <div className="col-span-3 rounded-xl border-3 border-amber-200 bg-amber-50 p-4 h-30 dark:border-amber-500/50 dark:bg-amber-500/20">
+                        <div className="col-span-3 h-30 rounded-xl border-3 border-amber-200 bg-amber-50 p-4 dark:border-amber-500/50 dark:bg-amber-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-amber-400">Approved</div>
@@ -992,14 +1048,20 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             <button className="flex w-full items-center justify-between rounded-lg bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100 dark:bg-purple-500/20 dark:text-purple-300 dark:hover:bg-purple-500/30">
                                 <span>Generate Reports</span>
                             </button>
-                          
-                            <button className="flex w-full items-center justify-between rounded-lg bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700 hover:bg-orange-100 dark:bg-orange-500/20 dark:text-orange-300 dark:hover:bg-orange-500/30">
+
+                            <button
+                                onClick={() => {
+                                    setSelectedHub(hubs[0]);
+                                    setShowLocations(true);
+                                }}
+                                className="flex w-full items-center justify-between rounded-lg bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700 hover:bg-orange-100 dark:bg-orange-500/20 dark:text-orange-300 dark:hover:bg-orange-500/30"
+                            >
                                 <span>Locations</span>
                             </button>
                         </div>
 
                         {/* Ready for Collection - Green (icon on right) */}
-                        <div className="col-span-3 rounded-xl border-3 border-green-200 bg-green-50 p-4 h-30 dark:border-green-500/50 dark:bg-green-500/20">
+                        <div className="col-span-3 h-30 rounded-xl border-3 border-green-200 bg-green-50 p-4 dark:border-green-500/50 dark:bg-green-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-green-400">Ready for Collection</div>
@@ -1018,8 +1080,103 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             </div>
                         </div>
 
+                        {/* Locations Modal */}
+                        {showLocations && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+                                <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-card">
+                                    <div className="mb-4 flex items-center justify-between border-b pb-4">
+                                        <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-card-foreground">
+                                            <MapPin className="h-5 w-5" /> Parcel Locations
+                                        </h2>
+                                        <button
+                                            onClick={() => {
+                                                setShowLocations(false);
+                                                setSelectedHub(null);
+                                            }}
+                                            className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
+                                        >
+                                            <X className="h-5 w-5" />
+                                        </button>
+                                    </div>
+                                    <div className="max-h-[60vh] space-y-4 overflow-y-auto">
+                                        {hubs.map((hub) => {
+                                            const open = isHubOpenNow(hub);
+                                            return (
+                                                <div
+                                                    key={hub.name}
+                                                    className={`rounded-lg border p-4 transition-colors ${
+                                                        selectedHub?.name === hub.name
+                                                            ? 'border-blue-300 bg-blue-50 dark:border-blue-500/50 dark:bg-blue-500/20'
+                                                            : 'border-gray-200 bg-gray-50 dark:border-border dark:bg-muted/30'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-start justify-between">
+                                                        <div>
+                                                            <h3 className="text-sm font-semibold text-gray-900 dark:text-card-foreground">
+                                                                {hub.name}
+                                                            </h3>
+                                                            <p className="mt-1 text-xs text-gray-600 dark:text-muted-foreground">
+                                                                Operating time: {toAmPm(hub.operating.start)} to {toAmPm(hub.operating.end)}
+                                                            </p>
+                                                            <p className="mt-1 text-xs">
+                                                                Status:{' '}
+                                                                <span
+                                                                    className={`font-semibold ${
+                                                                        open
+                                                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                                                            : 'text-red-600 dark:text-red-400'
+                                                                    }`}
+                                                                >
+                                                                    {open ? 'OPEN' : 'CLOSE'}
+                                                                </span>
+                                                            </p>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => setSelectedHub(hub)}
+                                                            className="rounded-md px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/20"
+                                                        >
+                                                            {selectedHub?.name === hub.name ? 'Selected' : 'Select'}
+                                                        </button>
+                                                    </div>
+                                                    {selectedHub?.name === hub.name && (
+                                                        <div className="mt-3 space-y-3">
+                                                            <div className="rounded-md border bg-white p-2 text-center text-xs dark:border-border dark:bg-card">
+                                                                {/* Keyless Google Maps embed using q + output=embed (no API key needed) */}
+                                                                <iframe
+                                                                    title={`Map-${hub.name}`}
+                                                                    src={`https://www.google.com/maps?q=${encodeURIComponent(hub.addressQuery)}&output=embed`}
+                                                                    className="h-64 w-full rounded-md border"
+                                                                    loading="lazy"
+                                                                    referrerPolicy="no-referrer-when-downgrade"
+                                                                />
+                                                                <p className="mt-2 text-[10px] text-gray-500 dark:text-muted-foreground">
+                                                                    Map view via Google Maps (embedded search).
+                                                                </p>
+                                                            </div>
+                                                            <div className="flex justify-end gap-2">
+                                                                <button
+                                                                    onClick={() => openMaps(hub.addressQuery)}
+                                                                    className="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+                                                                >
+                                                                    Open in Google Maps
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                        {hubs.length === 0 && (
+                                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500 dark:border-border dark:bg-muted/30 dark:text-muted-foreground">
+                                                No locations available.
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         {/* Collected - Light Blue (icon on right) */}
-                        <div className="col-span-3 rounded-xl border-3 border-blue-200 bg-blue-50 p-4 h-30 dark:border-blue-500/50 dark:bg-blue-500/20">
+                        <div className="col-span-3 h-30 rounded-xl border-3 border-blue-200 bg-blue-50 p-4 dark:border-blue-500/50 dark:bg-blue-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-blue-400">Collected</div>
