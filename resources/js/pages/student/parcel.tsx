@@ -918,9 +918,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                 <div className="min-h-screen bg-white p-6 dark:bg-background">
                     {/* Header tiles matching screenshot */}
-                    <div className="mb-6 grid grid-cols-12 gap-4">
+                    <div className="mb-6 grid grid-cols-12 gap-x-4 gap-y-1">
                         {/* My Parcels - Purple (icon on right) */}
-                        <div className="col-span-2 rounded-xl border-3 border-violet-300 bg-violet-50 p-4 dark:border-violet-500/50 dark:bg-violet-500/20">
+                        <div className="col-span-3 rounded-xl border-3 border-violet-300 bg-violet-50 p-4 h-30 dark:border-violet-500/50 dark:bg-violet-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-violet-400">My Parcels</div>
@@ -940,7 +940,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Pending Payment - Yellow (icon on right) */}
-                        <div className="col-span-2 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-500/50 dark:bg-yellow-500/20">
+                        <div className="col-span-3 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-4 h-30 dark:border-yellow-500/50 dark:bg-yellow-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-yellow-400">Pending Payment</div>
@@ -960,7 +960,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Approved - Orange (icon on right) */}
-                        <div className="col-span-2 rounded-xl border-3 border-amber-200 bg-amber-50 p-4 dark:border-amber-500/50 dark:bg-amber-500/20">
+                        <div className="col-span-3 rounded-xl border-3 border-amber-200 bg-amber-50 p-4 h-30 dark:border-amber-500/50 dark:bg-amber-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-amber-400">Approved</div>
@@ -980,15 +980,19 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="col-span-4 col-start-9 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm dark:border-border dark:bg-card">
+                        <div className="col-span-2 col-start-11 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm dark:border-border dark:bg-card">
                             <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-card-foreground">Quick Actions</div>
                             <button className="flex w-full items-center justify-between rounded-lg bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100 dark:bg-purple-500/20 dark:text-purple-300 dark:hover:bg-purple-500/30">
                                 <span>Generate Reports</span>
                             </button>
+                          
+                            <button className="flex w-full items-center justify-between rounded-lg bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700 hover:bg-orange-100 dark:bg-orange-500/20 dark:text-orange-300 dark:hover:bg-orange-500/30">
+                                <span>Locations</span>
+                            </button>
                         </div>
 
                         {/* Ready for Collection - Green (icon on right) */}
-                        <div className="col-span-3 rounded-xl border-3 border-green-200 bg-green-50 p-4 dark:border-green-500/50 dark:bg-green-500/20">
+                        <div className="col-span-3 rounded-xl border-3 border-green-200 bg-green-50 p-4 h-30 dark:border-green-500/50 dark:bg-green-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-green-400">Ready for Collection</div>
@@ -1008,7 +1012,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Collected - Light Blue (icon on right) */}
-                        <div className="col-span-3 rounded-xl border-3 border-blue-200 bg-blue-50 p-4 dark:border-blue-500/50 dark:bg-blue-500/20">
+                        <div className="col-span-3 rounded-xl border-3 border-blue-200 bg-blue-50 p-4 h-30 dark:border-blue-500/50 dark:bg-blue-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-blue-400">Collected</div>

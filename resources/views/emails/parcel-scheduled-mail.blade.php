@@ -45,10 +45,11 @@
                                 <!-- QR Code Section (hosted URL preferred for Gmail/Outlook web) -->
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                                     <tr>
-                                        <td align="center" style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
+                                        <td align="center"
+                                            style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
                                             <div style="display: inline-block; background: #fef3c7; padding: 20px;">
-                                                <img src="{{ $qrCodeUrl }}"
-                                                    alt="QR Code: {{ $collectionCode }}" width="300" height="300"
+                                                <img src="{{ $qrCodeUrl }}" alt="QR Code: {{ $collectionCode }}"
+                                                    width="300" height="300"
                                                     style="display: block; width: 300px; height: 300px; max-width: 300px;" />
                                             </div>
                                         </td>
@@ -58,9 +59,10 @@
                                 <!-- Fallback: Inline base64 PNG (some clients may block data URIs) -->
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                                     <tr>
-                                        <td align="center" style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
+                                        <td align="center"
+                                            style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
                                             <div style="display: inline-block; background: #fef3c7; padding: 20px;">
-                                                <img src="data:{{ ($qrCodeMime ?? 'image/png') }};base64,{{ $qrCodeBase64 }}"
+                                                <img src="data:{{ $qrCodeMime ?? 'image/png' }};base64,{{ $qrCodeBase64 }}"
                                                     alt="QR Code: {{ $collectionCode }}" width="300" height="300"
                                                     style="display: block; width: 300px; height: 300px; max-width: 300px;" />
                                             </div>
@@ -95,7 +97,7 @@
 
                             <p style="font-size: 16px; color: #4b5563; margin: 30px 0 10px 0;">
                                 Best regards,<br>
-                               UMPSA Parcel Centre
+                                UMPSA Parcel Centre
                             </p>
                         </td>
                     </tr>
