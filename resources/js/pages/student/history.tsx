@@ -103,7 +103,7 @@ export default function History({ total_collections, collections_this_year, tota
             }
         }
 
-        // Handle different notification types
+    // Handle different notification types (sticky rejection stays unread & visible)
         const title = notification.title?.toLowerCase() || '';
         const message = notification.message?.toLowerCase() || '';
 
@@ -115,6 +115,7 @@ export default function History({ total_collections, collections_this_year, tota
 
         // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
+            // Navigate but keep notification visible (not dismissed in this view; other pages manage visibility)
             router.visit(`/student/payment/submit/${notification.parcel_id}`);
         } else if (notification.parcel_id) {
             router.visit(`/student/parcel/${notification.parcel_id}`);

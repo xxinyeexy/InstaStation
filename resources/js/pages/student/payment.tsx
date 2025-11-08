@@ -94,6 +94,12 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
         if (urlParams.get('payment_submitted') === 'true') {
             // Remove the parameter from URL
             urlParams.delete('payment_submitted');
+            const clearedParcel = urlParams.get('cleared_parcel');
+            if (clearedParcel) {
+                // Remove sticky rejection notifications for this parcel from UI if still present (backend already deleted DB rows)
+                setNotificationList((prev) => prev.filter((n) => String(n.parcel_id) !== clearedParcel || n.type !== 'payment_rejected'));
+                urlParams.delete('cleared_parcel');
+            }
             const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
             window.history.replaceState({}, '', newUrl);
 
@@ -138,14 +144,18 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
         // Close dropdown after clicking
         setShowNotificationDropdown(false);
 
-        // Add to dismissed list so it won't come back even if props refresh
-        setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
+        // Keep payment_rejected visible until resubmission; others can be dismissed immediately
+        const isStickyRejection = notification.type === 'payment_rejected';
+        if (!isStickyRejection) {
+            // Add to dismissed list so it won't come back even if props refresh
+            setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
 
-        // Optimistically remove from UI immediately for better UX
-        setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+            // Optimistically remove from UI immediately for better UX
+            setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+        }
 
-        // Mark as read on the server
-        if (notification.id) {
+        // Mark as read on the server unless it is sticky (payment_rejected)
+        if (notification.id && !isStickyRejection) {
             try {
                 console.log('Attempting to mark notification as read:', notification.id);
                 const response = await fetch(`/student/notifications/${notification.id}/mark-read`, {
@@ -192,6 +202,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
 
         // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
+            // Navigate but keep the notification visible (will be cleared after resubmission by backend)
             router.visit(`/student/payment/submit/${notification.parcel_id}`);
         } else if (notification.parcel_id) {
             router.visit(`/student/parcel/${notification.parcel_id}`);

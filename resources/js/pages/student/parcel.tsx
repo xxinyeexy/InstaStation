@@ -236,19 +236,26 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
         setShowNotificationDropdown(false);
 
-        // Add to dismissed list so it won't come back even if props refresh
-        setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
+        // If this is a payment_rejected notification, do NOT dismiss/read yet.
+        // Student must resubmit proof; keep it visible.
+        const isStickyRejection = notification.type === 'payment_rejected';
+        if (!isStickyRejection) {
+            // Add to dismissed list so it won't come back even if props refresh
+            setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
 
-        // Optimistically remove from UI immediately for better UX
-        console.log('Optimistically removing notification from list');
-        setNotificationList((prev) => {
-            const filtered = prev.filter((n) => n.id !== notification.id);
-            console.log('New list length:', filtered.length);
-            return filtered;
-        });
+            // Optimistically remove from UI immediately for better UX
+            console.log('Optimistically removing notification from list');
+            setNotificationList((prev) => {
+                const filtered = prev.filter((n) => n.id !== notification.id);
+                console.log('New list length:', filtered.length);
+                return filtered;
+            });
+        } else {
+            console.log('Sticky payment_rejected notification - keeping visible until resubmission.');
+        }
 
-        // Mark as read on the server (if possible) so badge updates persist
-        if (notification.id) {
+        // Mark as read on the server ONLY if not sticky
+        if (notification.id && !isStickyRejection) {
             try {
                 console.log('Sending POST to:', `/student/notifications/${notification.id}/mark-read`);
 
@@ -301,7 +308,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
         // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
-            console.log('Navigating to payment submit page');
+            console.log('Navigating to payment submit page (sticky notification retained)');
             router.visit(`/student/payment/submit/${notification.parcel_id}`);
         } else if (notification.parcel_id) {
             console.log('Navigating to parcel detail page');
@@ -980,7 +987,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="col-span-2 col-start-11 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm dark:border-border dark:bg-card">
+                        <div className="col-span-4 col-start-11 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm dark:border-border dark:bg-card">
                             <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-card-foreground">Quick Actions</div>
                             <button className="flex w-full items-center justify-between rounded-lg bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100 dark:bg-purple-500/20 dark:text-purple-300 dark:hover:bg-purple-500/30">
                                 <span>Generate Reports</span>
