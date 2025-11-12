@@ -313,7 +313,7 @@ export default function StaffAnnouncements(props: {
                                 <div className="flex shrink-0 items-center gap-3">
                                     <button
                                         onClick={() => setViewing(f)}
-                                        className="rounded-full border border-border bg-muted px-2 py-1 text-xs hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg text-muted-foreground"
+                                        className="rounded-full border border-border bg-muted px-2 py-1 text-xs text-muted-foreground hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg"
                                         title="View"
                                     >
                                         <Eye size={16} />
@@ -355,7 +355,7 @@ export default function StaffAnnouncements(props: {
                                         onClick={() =>
                                             handleDeleteClick(
                                                 ((f as any).announcement_id || f.faq_id) as number,
-                                                (((f as any).announcement_title || (f as any).faq_question) as string) || ''
+                                                (((f as any).announcement_title || (f as any).faq_question) as string) || '',
                                             )
                                         }
                                         className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"

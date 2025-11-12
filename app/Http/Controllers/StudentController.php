@@ -408,6 +408,7 @@ class StudentController extends Controller
 
         $parcelData = [
             'id' => $parcel->parcel_id,
+            'parcel_code' => $parcel->parcel_code ?? ($parcel->tracking_no ?? (string)$parcel->parcel_id),
             'tracking_no' => $parcel->tracking_no,
             'status' => $parcel->parcel_status,
             'collection_code' => $collectionCode,

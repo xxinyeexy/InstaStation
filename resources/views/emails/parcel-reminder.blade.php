@@ -25,13 +25,7 @@
                                 <p style="margin:0 0 12px 0;">Collection Code: <strong>{{ $collectionCode }}</strong></p>
                             @endif
                             <p style="margin:0 0 20px 0;">Please collect it as soon as possible to avoid delays.</p>
-                            <table role="presentation" cellspacing="0" cellpadding="0" style="margin:24px 0;">
-                                <tr>
-                                    <td style="border-radius:6px;background:#e75596;">
-                                        <a href="{{ $actionUrl }}" style="display:inline-block;padding:14px 28px;font-size:15px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.5px;">View Parcel</a>
-                                    </td>
-                                </tr>
-                            </table>
+                        
                             <p style="margin:24px 0 0 0;font-size:13px;color:#666;">If you have already collected the parcel, you can ignore this email.</p>
                         </td>
                     </tr>
