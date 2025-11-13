@@ -96,7 +96,7 @@
                             </table>
 
                             <p style="font-size: 16px; color: #4b5563; margin: 30px 0 10px 0;">
-                                Best regards,<br>
+                                Regards,<br>
                                 UMPSA Parcel Centre
                             </p>
                         </td>
