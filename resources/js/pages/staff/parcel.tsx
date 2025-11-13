@@ -1526,9 +1526,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <p className="mb-1 text-sm text-gray-600">
                             Are you sure you want to delete parcel <span className="font-medium text-red-600">{selectedTrackingNo}</span>?
                         </p>
-                        <p className="mb-9 px-4 text-left text-xs text-gray-500">
-                            This action cannot be undone and will permanently remove all parcel data and history.
-                        </p>
+                        <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
+                                <p className="text-sm text-red-800 dark:text-red-400">
+This action cannot be undone and will permanently remove all parcel data and history.                                </p>
+                            </div>
 
                         <div className="flex justify-center gap-3">
                             <button

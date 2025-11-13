@@ -402,9 +402,11 @@ export default function StaffAnnouncements(props: {
                             )}
                             ?
                         </p>
-                        <p className="mb-6 px-4 text-left text-xs text-gray-500 dark:text-muted-foreground">
-                            This action cannot be undone and will permanently remove this announcement.
-                        </p>
+                        <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
+                                <p className="text-sm text-left text-red-800 dark:text-red-400">
+                            This action cannot be undone and will permanently remove this FAQ.
+                                </p>
+                            </div>
                         <div className="flex justify-center gap-3">
                             <button
                                 onClick={handleDeleteCancel}

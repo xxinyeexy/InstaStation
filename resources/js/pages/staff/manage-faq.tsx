@@ -262,7 +262,7 @@ export default function ManageFaq({
                                 <input
                                     value={editQuestion}
                                     onChange={(e) => setEditQuestion(e.target.value)}
-                                    className="w-full rounded-md border px-3 py-2 text-sm"
+                                    className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                 />
                             </div>
                             <div>
@@ -270,7 +270,7 @@ export default function ManageFaq({
                                 <textarea
                                     value={editAnswer}
                                     onChange={(e) => setEditAnswer(e.target.value)}
-                                    className="h-28 w-full rounded-md border px-3 py-2 text-sm"
+                                    className="h-28 w-full rounded-md border border-border px-3 py-2 text-sm"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -279,7 +279,7 @@ export default function ManageFaq({
                                     <select
                                         value={editCategory}
                                         onChange={(e) => setEditCategory(e.target.value)}
-                                        className="w-full rounded-md border px-3 py-2 text-sm"
+                                        className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                     >
                                         <option value="">General</option>
                                         {categories
@@ -297,7 +297,7 @@ export default function ManageFaq({
                                     <select
                                         value={editStatus}
                                         onChange={(e) => setEditStatus(e.target.value as 'Active' | 'Inactive')}
-                                        className="w-full rounded-md border px-3 py-2 text-sm"
+                                        className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                     >
                                         <option value="Inactive">Draft</option>
                                         <option value="Active">Published</option>
@@ -305,7 +305,7 @@ export default function ManageFaq({
                                 </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 pt-2">
-                                <button className="rounded-md border px-3 py-2 text-sm" onClick={() => setEditing(null)}>
+                                <button className="rounded-md borderborder-border px-3 py-2 text-sm" onClick={() => setEditing(null)}>
                                     Cancel
                                 </button>
                                 <button
@@ -358,7 +358,7 @@ export default function ManageFaq({
                             <Trash2 className="h-6 w-6 text-red-600" />
                         </div>
                         <h2 className="mb-2 text-lg font-semibold text-gray-900">Delete FAQ</h2>
-                        <p className="mb-1 text-sm text-gray-600">
+                        <p className="mb-1 text-left text-sm text-gray-600">
                             Are you sure you want to delete
                             {selectedDeleteLabel ? (
                                 <>
@@ -370,9 +370,12 @@ export default function ManageFaq({
                             )}
                             ?
                         </p>
-                        <p className="mb-6 px-4 text-left text-xs text-gray-500">
+                         <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
+                                <p className="text-sm text-left text-red-800 dark:text-red-400">
                             This action cannot be undone and will permanently remove this FAQ.
-                        </p>
+                                </p>
+                            </div>
+                      
                         <div className="flex justify-center gap-3">
                             <button
                                 onClick={handleDeleteCancel}
