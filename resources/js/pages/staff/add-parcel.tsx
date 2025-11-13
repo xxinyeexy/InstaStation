@@ -374,8 +374,13 @@ const ParcelRegistrationForm = () => {
         };
     }, []);
 
+    const breadcrumbs = [
+        { title: 'Parcel', href: '/staff/parcel' },
+        { title: 'Add Parcel', href: '/staff/add-parcel' },
+    ];
+
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             {showRegisterToast && <Toast type="success" message=" Parcel registered successfully!" />}
             {errorToast.show && <Toast type="error" message={errorToast.message} />}
 

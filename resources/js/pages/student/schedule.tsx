@@ -323,8 +323,13 @@ const SchedulePickup = ({ parcel }: Props) => {
 
     const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
+    const breadcrumbs = [
+        { title: 'My Parcel', href: '/student/parcel' },
+        { title: 'Schedule Pickup', href: `/student/schedule/${parcel.id}` },
+    ];
+
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             {/* Success Toast Notification */}
             {showSuccessToast && (
                 <div className="fixed top-4 right-4 z-50 duration-300 animate-in fade-in slide-in-from-top-4">
@@ -374,9 +379,8 @@ const SchedulePickup = ({ parcel }: Props) => {
                 </div>
             )}
 
-            <div className="fixed inset-0 overflow-y-auto bg-gray-50">
+            <div className="min-h-screen bg-gray-50">
                 {/* Header */}
-                <div className="border-b bg-white shadow-sm">
                     <div className="mx-auto max-w-6xl px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div>
@@ -385,7 +389,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                             </div>
                         </div>
                     </div>
-                </div>
+             
 
                 <div className="mx-auto max-w-6xl px-6 py-8">
                     {/* Parcel Status Section */}
