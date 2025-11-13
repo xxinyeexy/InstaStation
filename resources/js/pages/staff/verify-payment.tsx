@@ -26,6 +26,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
     const [detail, setDetail] = useState<Row | null>(null);
     const [list, setList] = useState<Row[]>(rows);
     const [processingPayments, setProcessingPayments] = useState<Set<number>>(new Set());
+    const [rejectModalPaymentId, setRejectModalPaymentId] = useState<number | null>(null);
     const searchInputRef = useRef<HTMLInputElement | null>(null);
     const typingTimerRef = useRef<number | null>(null);
 
@@ -96,6 +97,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                         if (detail && detail.payment_id === paymentId) {
                             setDetail(null);
                         }
+                        setRejectModalPaymentId(null); // Close modal
                     },
                     onError: (errors) => {
                         console.error('Reject payment error:', errors);
@@ -110,6 +112,18 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                 newSet.delete(paymentId);
                 return newSet;
             });
+        }
+    };
+
+    // Open reject confirmation modal
+    const openRejectModal = (paymentId: number) => {
+        setRejectModalPaymentId(paymentId);
+    };
+
+    // Confirm rejection
+    const confirmReject = () => {
+        if (rejectModalPaymentId !== null) {
+            handleRejectPayment(rejectModalPaymentId);
         }
     };
 
@@ -261,7 +275,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                             <CircleCheck className="h-4 w-4" />
                                         </button>
                                         <button
-                                            onClick={() => handleRejectPayment(r.payment_id)}
+                                            onClick={() => openRejectModal(r.payment_id)}
                                             disabled={processingPayments.has(r.payment_id)}
                                             className={`text-red-500 hover:text-red-600 ${
                                                 processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : ''
@@ -336,6 +350,46 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                         <div className="p-6 text-center text-sm text-gray-500 dark:text-muted-foreground">No proof uploaded.</div>
                                     )}
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Reject Confirmation Modal */}
+                {rejectModalPaymentId !== null && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                        <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-card">
+                            <div className="mb-4 flex items-center gap-3">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-500/20">
+                                    <CircleX className="h-6 w-6 text-red-600 dark:text-red-400" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">Reject Payment</h3>
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground">Are you sure you want to reject this payment?</p>
+                                </div>
+                            </div>
+
+                            <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
+                                <p className="text-sm text-red-800 dark:text-red-400">
+                                    This action cannot be undone. The payment will be permanently rejected and removed from the verification queue.
+                                </p>
+                            </div>
+
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    onClick={() => setRejectModalPaymentId(null)}
+                                    disabled={processingPayments.has(rejectModalPaymentId)}
+                                    className="rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={confirmReject}
+                                    disabled={processingPayments.has(rejectModalPaymentId)}
+                                    className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {processingPayments.has(rejectModalPaymentId) ? 'Rejecting...' : 'Reject Payment'}
+                                </button>
                             </div>
                         </div>
                     </div>
