@@ -70,6 +70,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/staff/parcel', [ParcelController::class, 'index'])
         ->name('staff.parcel');
+    // Bulk export of parcels with filters
+    Route::get('/staff/parcels/export/bulk', [ParcelController::class, 'exportBulk'])
+        ->name('staff.parcels.export.bulk');
     // Send reminders to students for uncollected parcels (AJAX)
     Route::post('/staff/parcels/remind', [ParcelController::class, 'remind'])->name('staff.parcels.remind');
     Route::patch('/staff/parcel/{id}/collect', [ParcelController::class, 'markAsCollected'])->name('staff.parcel.collect');

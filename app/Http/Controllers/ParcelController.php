@@ -599,4 +599,232 @@ class ParcelController extends Controller
 
         return $pdf->download('parcel_report_' . ($parcel->parcel_code ?? $parcel->tracking_no ?? $parcel->parcel_id) . '.pdf');
     }
+
+    /**
+     * Bulk export parcels with optional filters and selectable fields (staff only).
+     * Query params:
+     * - start_date (YYYY-MM-DD)
+     * - end_date (YYYY-MM-DD)
+     * - status[] (array of statuses)
+     * - size (e.g., Small, Medium, Large)
+     * - sender (partial match)
+     * - payment (verified|unverified)
+     * - fields[] (array of fields to include)
+     * - format (csv|json|pdf) default csv
+     * - filename (base filename without extension)
+     * - preview (bool) if true returns a small JSON preview regardless of format
+     * - limit (int) preview max rows, default 20
+     */
+    public function exportBulk(\Illuminate\Http\Request $request)
+    {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user || strtolower($user->type ?? '') !== 'staff') {
+            abort(403);
+        }
+
+        $allowedFields = [
+            'parcel_code', 'tracking_no', 'parcel_status', 'sender', 'size', 'location',
+            'created_at', 'schedule', 'time_slot', 'fee', 'student_name', 'student_matric', 'payment_status',
+        ];
+
+        $fields = $request->query('fields', ['parcel_code', 'tracking_no', 'parcel_status', 'sender', 'size', 'created_at']);
+        if (!is_array($fields)) {
+            $fields = [$fields];
+        }
+        $fields = array_values(array_intersect($fields, $allowedFields));
+        if (empty($fields)) {
+            $fields = ['parcel_code', 'tracking_no', 'parcel_status', 'sender', 'size', 'created_at'];
+        }
+
+        $labels = [
+            'parcel_code' => 'Parcel Code',
+            'tracking_no' => 'Tracking No',
+            'parcel_status' => 'Status',
+            'sender' => 'Sender',
+            'size' => 'Size',
+            'location' => 'Location',
+            'created_at' => 'Arrival Date',
+            'schedule' => 'Schedule',
+            'time_slot' => 'Time Slot',
+            'fee' => 'Fee (RM)',
+            'student_name' => 'Student Name',
+            'student_matric' => 'Matric',
+            'payment_status' => 'Payment Status',
+        ];
+
+        $start = $request->query('start_date');
+        $end = $request->query('end_date');
+        $statuses = $request->query('status');
+        $size = $request->query('size');
+        $sender = $request->query('sender');
+        $payment = $request->query('payment'); // verified | unverified
+        $format = strtolower($request->query('format', 'csv'));
+        if (!in_array($format, ['csv', 'json', 'pdf'], true)) {
+            $format = 'csv';
+        }
+        $preview = filter_var($request->query('preview', false), FILTER_VALIDATE_BOOLEAN);
+        $limit = (int) $request->query('limit', 20);
+        if ($limit <= 0) $limit = 20;
+
+        $query = Parcel::query()->with(['studentUser', 'payment']);
+
+        if ($start) {
+            $query->whereDate('created_at', '>=', $start);
+        }
+        if ($end) {
+            $query->whereDate('created_at', '<=', $end);
+        }
+        if ($statuses) {
+            if (!is_array($statuses)) {
+                $statuses = explode(',', (string) $statuses);
+            }
+            $statuses = array_map('strtolower', $statuses);
+            $query->whereRaw('LOWER(parcel_status) IN (' . implode(',', array_fill(0, count($statuses), '?')) . ')', $statuses);
+        }
+        if ($size) {
+            $query->where('size', $size);
+        }
+        if ($sender) {
+            $query->where('sender', 'like', '%' . $sender . '%');
+        }
+        if ($payment === 'verified') {
+            $query->whereHas('payment', function ($q) {
+                $q->whereNotNull('verified_by');
+            });
+        } elseif ($payment === 'unverified') {
+            $query->whereDoesntHave('payment', function ($q) {
+                $q->whereNotNull('verified_by');
+            });
+        }
+
+        // Helper mapper for a single parcel row
+        $mapRow = function ($p, $fields) {
+            $row = [];
+            foreach ($fields as $f) {
+                switch ($f) {
+                    case 'student_name':
+                        $row[$f] = optional($p->studentUser)->name;
+                        break;
+                    case 'student_matric':
+                        $row[$f] = optional($p->studentUser)->matric;
+                        break;
+                    case 'payment_status':
+                        $row[$f] = ($p->payment && !empty($p->payment->verified_by)) ? 'Verified' : 'Pending/Unverified';
+                        break;
+                    case 'fee':
+                        $row[$f] = number_format($p->fee ?? 1.00, 2);
+                        break;
+                    case 'created_at':
+                        $row[$f] = optional($p->created_at)->toDateString();
+                        break;
+                    case 'schedule':
+                        $row[$f] = optional($p->schedule)->toDateString();
+                        break;
+                    default:
+                        $row[$f] = $p->{$f} ?? '';
+                        break;
+                }
+            }
+            return $row;
+        };
+
+        // If preview requested, always return a small JSON payload
+        if ($preview) {
+            $rows = $query->orderByDesc('created_at')->limit($limit)->get()->map(function ($p) use ($fields, $mapRow) {
+                return $mapRow($p, $fields);
+            });
+            return response()->json([
+                'columns' => array_map(fn ($f) => ['key' => $f, 'label' => $labels[$f] ?? $f], $fields),
+                'rows' => $rows,
+                'meta' => [
+                    'limit' => $limit,
+                    'count' => $rows->count(),
+                ],
+            ]);
+        }
+
+        // File name handling
+        $filenameBase = trim((string) $request->query('filename', 'parcels_export_' . now()->format('Ymd_His')));
+        // sanitize filename: allow alphanum, dash, underscore
+        $filenameBase = preg_replace('/[^A-Za-z0-9_\-]+/', '_', $filenameBase) ?: 'parcels_export_' . now()->format('Ymd_His');
+
+        if ($format === 'json') {
+            // Stream as JSON file
+            $filename = $filenameBase . '.json';
+            $response = response()->streamDownload(function () use ($query, $fields, $mapRow) {
+                $out = fopen('php://output', 'w');
+                // Write JSON array manually to avoid loading everything into memory
+                fwrite($out, '[');
+                $first = true;
+                $query->orderByDesc('created_at')->chunk(1000, function ($parcels) use (&$first, $out, $fields, $mapRow) {
+                    foreach ($parcels as $p) {
+                        $row = $mapRow($p, $fields);
+                        if (!$first) {
+                            fwrite($out, ',');
+                        }
+                        fwrite($out, json_encode($row));
+                        $first = false;
+                    }
+                });
+                fwrite($out, ']');
+                fclose($out);
+            }, $filename, ['Content-Type' => 'application/json']);
+            return $response;
+        }
+
+        if ($format === 'pdf') {
+            // Render a simple table PDF
+            $rows = $query->orderByDesc('created_at')->limit(5000)->get()->map(function ($p) use ($fields, $mapRow) {
+                return $mapRow($p, $fields);
+            });
+            $pdf = Pdf::loadView('exports.parcels_bulk', [
+                'columns' => array_map(fn ($f) => ['key' => $f, 'label' => $labels[$f] ?? $f], $fields),
+                'rows' => $rows,
+                'generatedAt' => now(),
+            ])->setPaper('a4', 'landscape');
+            return $pdf->download($filenameBase . '.pdf');
+        }
+
+        // Default: CSV
+        $filename = $filenameBase . '.csv';
+        return response()->streamDownload(function () use ($query, $fields, $labels) {
+            $out = fopen('php://output', 'w');
+            // Header row with friendly labels
+            fputcsv($out, array_map(fn ($f) => $labels[$f] ?? $f, $fields));
+            $query->orderByDesc('created_at')->chunk(1000, function ($parcels) use ($out, $fields) {
+                foreach ($parcels as $p) {
+                    $row = [];
+                    foreach ($fields as $f) {
+                        switch ($f) {
+                            case 'student_name':
+                                $row[] = optional($p->studentUser)->name;
+                                break;
+                            case 'student_matric':
+                                $row[] = optional($p->studentUser)->matric;
+                                break;
+                            case 'payment_status':
+                                $row[] = ($p->payment && !empty($p->payment->verified_by)) ? 'Verified' : 'Pending/Unverified';
+                                break;
+                            case 'fee':
+                                $row[] = number_format($p->fee ?? 1.00, 2);
+                                break;
+                            case 'created_at':
+                                $row[] = optional($p->created_at)->toDateString();
+                                break;
+                            case 'schedule':
+                                $row[] = optional($p->schedule)->toDateString();
+                                break;
+                            default:
+                                $row[] = $p->{$f} ?? '';
+                                break;
+                        }
+                    }
+                    fputcsv($out, $row);
+                }
+            });
+            fclose($out);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
 }

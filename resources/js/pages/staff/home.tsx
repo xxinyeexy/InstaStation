@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { AlertCircle, CheckCircle, Clock, Download, Package, TrendingDown, TrendingUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { AlertCircle, CheckCircle, Clock, Download, Package, TrendingDown, TrendingUp, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Area,
     AreaChart,
@@ -135,10 +135,214 @@ const AnimatedChart = ({ children, delay = 0 }: { children: React.ReactNode; del
 export default function StaffHome() {
     const data = usePage().props as unknown as DashboardProps;
     const [activeTab, setActiveTab] = useState('arrivals');
+    const [showExport, setShowExport] = useState(false);
+    const [startDate, setStartDate] = useState<string>('');
+    const [endDate, setEndDate] = useState<string>('');
+    const [format, setFormat] = useState<'csv' | 'pdf' | 'json'>('csv');
+    const defaultFilename = useMemo(() => {
+        const d = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `parcels_export_${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+    }, []);
+    const [fileName, setFileName] = useState<string>(defaultFilename);
+    const [selectedFields, setSelectedFields] = useState<string[]>([
+        'parcel_code',
+        'tracking_no',
+        'parcel_status',
+        'sender',
+        'size',
+        'created_at',
+    ]);
+    const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+    const [sizeFilter, setSizeFilter] = useState<string>('');
+    const [senderFilter, setSenderFilter] = useState<string>('');
+    const [paymentFilter, setPaymentFilter] = useState<string>(''); // '', 'verified', 'unverified'
+    const [fieldSearch, setFieldSearch] = useState<string>('');
+    const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+    const [previewError, setPreviewError] = useState<string>('');
+    const [previewColumns, setPreviewColumns] = useState<Array<{ key: string; label: string }>>([]);
+    const [previewRows, setPreviewRows] = useState<Array<Record<string, string>>> ([]);
+    const [presets, setPresets] = useState<Array<{ name: string; data: any }>>([]);
+
+    // Grouped fields for organization
+    const fieldOptions = [
+        { value: 'parcel_code', label: 'Parcel Code' },
+        { value: 'tracking_no', label: 'Tracking No' },
+        { value: 'parcel_status', label: 'Status' },
+        { value: 'sender', label: 'Sender' },
+        { value: 'size', label: 'Size' },
+        { value: 'location', label: 'Location' },
+        { value: 'created_at', label: 'Arrival Date' },
+        { value: 'schedule', label: 'Schedule' },
+        { value: 'time_slot', label: 'Time Slot' },
+        { value: 'fee', label: 'Fee (RM)' },
+        { value: 'student_name', label: 'Student Name' },
+        { value: 'student_matric', label: 'Matric' },
+        { value: 'payment_status', label: 'Payment Status' },
+    ];
+
+    const groupedFields = useMemo(() => {
+        const byKey = (keys: string[]) => fieldOptions.filter((f) => keys.includes(f.value));
+        return [
+            { key: 'parcel', title: 'Parcel Details', items: byKey(['parcel_code', 'tracking_no', 'parcel_status', 'sender', 'size', 'location']) },
+            { key: 'timeline', title: 'Timeline', items: byKey(['created_at', 'schedule', 'time_slot']) },
+            { key: 'student', title: 'Student', items: byKey(['student_name', 'student_matric']) },
+            { key: 'financial', title: 'Financial', items: byKey(['fee', 'payment_status']) },
+        ];
+    }, []);
+
+    const statusOptions = ['Pending Payment', 'Approved', 'Ready for Collection', 'Collected', 'Unclaimed'];
+
+    const toggleField = (val: string) => {
+        setSelectedFields((prev) => (prev.includes(val) ? prev.filter((f) => f !== val) : [...prev, val]));
+    };
+
+    const toggleStatus = (val: string) => {
+        setSelectedStatuses((prev) => (prev.includes(val) ? prev.filter((s) => s !== val) : [...prev, val]));
+    };
+
+    const applyDatePreset = (preset: 'today' | 'thisWeek' | 'thisMonth' | 'last30') => {
+        const d = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const fmt = (dt: Date) => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+        if (preset === 'today') {
+            const s = fmt(d);
+            setStartDate(s);
+            setEndDate(s);
+            return;
+        }
+        if (preset === 'thisWeek') {
+            const day = d.getDay();
+            const diffToMonday = (day + 6) % 7; // Monday=0
+            const start = new Date(d);
+            start.setDate(d.getDate() - diffToMonday);
+            const end = new Date(start);
+            end.setDate(start.getDate() + 6);
+            setStartDate(fmt(start));
+            setEndDate(fmt(end));
+            return;
+        }
+        if (preset === 'thisMonth') {
+            const start = new Date(d.getFullYear(), d.getMonth(), 1);
+            const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+            setStartDate(fmt(start));
+            setEndDate(fmt(end));
+            return;
+        }
+        if (preset === 'last30') {
+            const start = new Date(d);
+            start.setDate(d.getDate() - 30);
+            setStartDate(fmt(start));
+            setEndDate(fmt(d));
+        }
+    };
+
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem('exportPresets');
+            if (saved) {
+                setPresets(JSON.parse(saved));
+            }
+        } catch {}
+    }, []);
+
+    const savePresetsToStorage = (list: Array<{ name: string; data: any }>) => {
+        setPresets(list);
+        try {
+            localStorage.setItem('exportPresets', JSON.stringify(list));
+        } catch {}
+    };
+
+    const currentConfig = useMemo(() => ({
+        startDate,
+        endDate,
+        format,
+        fileName,
+        selectedFields,
+        selectedStatuses,
+        sizeFilter,
+        senderFilter,
+        paymentFilter,
+    }), [startDate, endDate, format, fileName, selectedFields, selectedStatuses, sizeFilter, senderFilter, paymentFilter]);
+
+    const savePreset = () => {
+        const name = prompt('Preset name');
+        if (!name) return;
+        const next = presets.filter((p) => p.name !== name).concat({ name, data: currentConfig });
+        savePresetsToStorage(next);
+    };
+
+    const applyPreset = (name: string) => {
+        const p = presets.find((x) => x.name === name);
+        if (!p) return;
+        const cfg = p.data || {};
+        setStartDate(cfg.startDate || '');
+        setEndDate(cfg.endDate || '');
+        setFormat(cfg.format || 'csv');
+        setFileName(cfg.fileName || defaultFilename);
+        setSelectedFields(Array.isArray(cfg.selectedFields) ? cfg.selectedFields : selectedFields);
+        setSelectedStatuses(Array.isArray(cfg.selectedStatuses) ? cfg.selectedStatuses : []);
+        setSizeFilter(cfg.sizeFilter || '');
+        setSenderFilter(cfg.senderFilter || '');
+        setPaymentFilter(cfg.paymentFilter || '');
+    };
+
+    const deletePreset = (name: string) => {
+        if (!confirm(`Delete preset "${name}"?`)) return;
+        const next = presets.filter((p) => p.name !== name);
+        savePresetsToStorage(next);
+    };
+
+    const selectAllFields = () => setSelectedFields(fieldOptions.map((f) => f.value));
+    const clearAllFields = () => setSelectedFields([]);
+    const selectGroup = (keys: string[]) => setSelectedFields((prev) => Array.from(new Set([...prev, ...keys])));
+    const clearGroup = (keys: string[]) => setSelectedFields((prev) => prev.filter((f) => !keys.includes(f)));
 
     const handleExport = () => {
-        // Implement export functionality
-        console.log('Exporting dashboard data...');
+        const params = new URLSearchParams();
+        if (startDate) params.append('start_date', startDate);
+        if (endDate) params.append('end_date', endDate);
+        selectedStatuses.forEach((s) => params.append('status[]', s));
+        if (sizeFilter) params.append('size', sizeFilter);
+        if (senderFilter) params.append('sender', senderFilter);
+        if (paymentFilter) params.append('payment', paymentFilter);
+        selectedFields.forEach((f) => params.append('fields[]', f));
+        if (format) params.append('format', format);
+        if (fileName) params.append('filename', fileName);
+
+        // Open CSV download in new tab
+        const url = `/staff/parcels/export/bulk?${params.toString()}`;
+        window.open(url, '_blank');
+        setShowExport(false);
+    };
+
+    const handlePreview = async () => {
+        setPreviewLoading(true);
+        setPreviewError('');
+        setPreviewRows([]);
+        setPreviewColumns([]);
+        try {
+            const params = new URLSearchParams();
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            selectedStatuses.forEach((s) => params.append('status[]', s));
+            if (sizeFilter) params.append('size', sizeFilter);
+            if (senderFilter) params.append('sender', senderFilter);
+            if (paymentFilter) params.append('payment', paymentFilter);
+            selectedFields.forEach((f) => params.append('fields[]', f));
+            params.append('preview', '1');
+            params.append('limit', '20');
+            params.append('format', 'json');
+            const res = await fetch(`/staff/parcels/export/bulk?${params.toString()}`, { method: 'GET' });
+            if (!res.ok) throw new Error(`Preview failed (${res.status})`);
+            const json = await res.json();
+            setPreviewColumns(json.columns || []);
+            setPreviewRows(json.rows || []);
+        } catch (e: any) {
+            setPreviewError(e?.message || 'Failed to load preview');
+        } finally {
+            setPreviewLoading(false);
+        }
     };
 
     return (
@@ -150,11 +354,221 @@ export default function StaffHome() {
                         <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
                         <p className="text-muted-foreground">Welcome back! Here's what's happening with your parcels today.</p>
                     </div>
-                    <Button onClick={handleExport} className="flex items-center gap-2">
+                    <Button onClick={() => setShowExport(true)} className="flex items-center gap-2">
                         <Download className="h-4 w-4" />
                         Export
                     </Button>
                 </div>
+
+                {showExport && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                        <div className="w-full max-w-5xl rounded-lg border bg-card p-6 shadow-xl max-h-[85vh] overflow-y-auto">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h3 className="text-lg font-semibold">Export Parcels</h3>
+                                <button onClick={() => setShowExport(false)} className="rounded p-1 hover:bg-muted">
+                                    <X className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <div className="grid gap-6 md:grid-cols-2">
+                                {/* Date Range */}
+                                <div>
+                                    <div className="mb-2 text-sm font-medium">Select Date Range</div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="mb-1 block text-xs text-muted-foreground">Start</label>
+                                            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full rounded-md border px-2 py-2" />
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-xs text-muted-foreground">End</label>
+                                            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full rounded-md border px-2 py-2" />
+                                        </div>
+                                    </div>
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        <span className="text-xs text-muted-foreground">Quick presets:</span>
+                                        <button onClick={() => applyDatePreset('today')} className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80">Today</button>
+                                        <button onClick={() => applyDatePreset('thisWeek')} className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80">This Week</button>
+                                        <button onClick={() => applyDatePreset('thisMonth')} className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80">This Month</button>
+                                        <button onClick={() => applyDatePreset('last30')} className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80">Last 30 Days</button>
+                                    </div>
+                                </div>
+
+                                {/* Filters */}
+                                <div>
+                                    <div className="mb-2 text-sm font-medium">Filters</div>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="mb-1 block text-xs text-muted-foreground">Status</label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {statusOptions.map((s) => (
+                                                    <label key={s} className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm ${selectedStatuses.includes(s) ? 'bg-secondary' : ''}`}>
+                                                        <input type="checkbox" className="hidden" checked={selectedStatuses.includes(s)} onChange={() => toggleStatus(s)} />
+                                                        <span>{s}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="mb-1 block text-xs text-muted-foreground">Size</label>
+                                                <select value={sizeFilter} onChange={(e) => setSizeFilter(e.target.value)} className="w-full rounded-md border px-2 py-2">
+                                                    <option value="">All</option>
+                                                    <option value="Small">Small</option>
+                                                    <option value="Medium">Medium</option>
+                                                    <option value="Large">Large</option>
+                                                    <option value="Extra Large">Extra Large</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="mb-1 block text-xs text-muted-foreground">Payment</label>
+                                                <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} className="w-full rounded-md border px-2 py-2">
+                                                    <option value="">All</option>
+                                                    <option value="verified">Verified</option>
+                                                    <option value="unverified">Unverified</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-xs text-muted-foreground">Sender (contains)</label>
+                                            <input value={senderFilter} onChange={(e) => setSenderFilter(e.target.value)} className="w-full rounded-md border px-2 py-2" placeholder="e.g. SHOPEE" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Format + Filename */}
+                                <div>
+                                    <div className="mb-2 text-sm font-medium">Format & File</div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="mb-1 block text-xs text-muted-foreground">Format</label>
+                                            <select value={format} onChange={(e) => setFormat(e.target.value as any)} className="w-full rounded-md border px-2 py-2">
+                                                <option value="csv">CSV</option>
+                                                <option value="pdf">PDF</option>
+                                                <option value="json">JSON</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="mb-1 block text-xs text-muted-foreground">File name</label>
+                                            <input value={fileName} onChange={(e) => setFileName(e.target.value)} className="w-full rounded-md border px-2 py-2" placeholder="parcels_export_YYYYMMDD" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Fields */}
+                                <div className="md:col-span-2">
+                                    <div className="mb-2 text-sm font-medium">Choose Fields</div>
+                                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                                        <input value={fieldSearch} onChange={(e) => setFieldSearch(e.target.value)} className="w-full max-w-xs rounded-md border px-2 py-2" placeholder="Search fields..." />
+                                        <div className="ml-auto flex gap-2">
+                                            <button onClick={selectAllFields} className="rounded-md border px-2 py-1 text-xs hover:bg-muted">Select All</button>
+                                            <button onClick={clearAllFields} className="rounded-md border px-2 py-1 text-xs hover:bg-muted">Deselect All</button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                                        {groupedFields.map((grp) => {
+                                            const keys = grp.items.map((i) => i.value);
+                                            const filtered = grp.items.filter((i) => i.label.toLowerCase().includes(fieldSearch.toLowerCase()));
+                                            return (
+                                                <div key={grp.key} className="rounded-md border p-2">
+                                                    <div className="mb-2 flex items-center justify-between">
+                                                        <div className="text-xs font-semibold uppercase text-muted-foreground">{grp.title}</div>
+                                                        <div className="flex gap-1">
+                                                            <button onClick={() => selectGroup(keys)} className="rounded bg-muted px-2 py-0.5 text-[10px] hover:bg-muted/80">All</button>
+                                                            <button onClick={() => clearGroup(keys)} className="rounded bg-muted px-2 py-0.5 text-[10px] hover:bg-muted/80">None</button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        {filtered.map((f) => (
+                                                            <label key={f.value} className={`flex items-center gap-2 rounded p-1 ${selectedFields.includes(f.value) ? 'bg-muted' : ''}`}>
+                                                                <input type="checkbox" checked={selectedFields.includes(f.value)} onChange={() => toggleField(f.value)} />
+                                                                <span className="text-sm">{f.label}</span>
+                                                            </label>
+                                                        ))}
+                                                        {filtered.length === 0 && (
+                                                            <div className="text-xs text-muted-foreground">No fields</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Presets & Actions */}
+                            <div className="mt-6 flex flex-wrap items-center gap-2">
+                                <div className="mr-auto flex items-center gap-2">
+                                    <div className="text-sm font-medium">Presets</div>
+                                    <select className="rounded-md border px-2 py-2" onChange={(e) => e.target.value && applyPreset(e.target.value)} value="">
+                                        <option value="" disabled>
+                                            Apply preset...
+                                        </option>
+                                        {presets.map((p) => (
+                                            <option key={p.name} value={p.name}>
+                                                {p.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {presets.length > 0 && (
+                                        <button
+                                            className="rounded-md border px-2 py-2 text-xs hover:bg-muted"
+                                            onClick={() => {
+                                                const name = prompt('Delete which preset?', presets[0]?.name || '');
+                                                if (name) deletePreset(name);
+                                            }}
+                                        >
+                                            Delete preset
+                                        </button>
+                                    )}
+                                    <button className="rounded-md border px-2 py-2 text-xs hover:bg-muted" onClick={savePreset}>
+                                        Save current as preset
+                                    </button>
+                                </div>
+                                <button className="rounded-md border px-4 py-2 hover:bg-muted" onClick={() => setShowExport(false)}>
+                                    Cancel
+                                </button>
+                                <button onClick={handlePreview} className="rounded-md border px-4 py-2 hover:bg-muted">
+                                    Preview
+                                </button>
+                                <Button onClick={handleExport} className="flex items-center gap-2">
+                                    <Download className="h-4 w-4" /> Export {format.toUpperCase()}
+                                </Button>
+                            </div>
+
+                            {/* Preview Table */}
+                            {(previewLoading || previewError || previewRows.length > 0) && (
+                                <div className="mt-4 max-h-80 overflow-auto rounded-md border">
+                                    {previewLoading && <div className="p-4 text-sm text-muted-foreground">Loading preview…</div>}
+                                    {previewError && <div className="p-4 text-sm text-red-500">{previewError}</div>}
+                                    {!previewLoading && !previewError && previewRows.length > 0 && (
+                                        <table className="w-full text-sm">
+                                            <thead className="sticky top-0 bg-muted">
+                                                <tr>
+                                                    {previewColumns.map((c) => (
+                                                        <th key={c.key} className="px-3 py-2 text-left font-medium">
+                                                            {c.label}
+                                                        </th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {previewRows.map((row, i) => (
+                                                    <tr key={i} className="border-t">
+                                                        {previewColumns.map((c) => (
+                                                            <td key={c.key} className="px-3 py-1">
+                                                                {row[c.key] ?? ''}
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* Overview Cards */}
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
