@@ -28,26 +28,26 @@ export default function Welcome() {
     }, []);
 
     // Format date consistently
-  const formatDate = (dateStr?: string | null) => {
-    if (!dateStr) return '';
-    try {
-        const date = new Date(dateStr);
-        if (isNaN(date.getTime())) return '';
+    const formatDate = (dateStr?: string | null) => {
+        if (!dateStr) return '';
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return '';
 
-        const day = date.getDate().toString().padStart(2, '0');
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const year = date.getFullYear();
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
 
-        let hours = date.getHours();
-        const minutes = date.getMinutes().toString().padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
 
-        return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
-    } catch {
-        return '';
-    }
-};
+            return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+        } catch {
+            return '';
+        }
+    };
 
     // Always reflect the latest announcements first
     const announcementsSorted = [...announcements].sort((a, b) => {

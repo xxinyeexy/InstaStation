@@ -68,9 +68,7 @@ class UserFactory extends Factory
             'profile_pic' => null,
             'status' => $this->faker->randomElement(['Active', 'Inactive']),
             'department' => fake()->randomElement([
-                'Information Technology',
-                'Human Resources',
-                'Finance',
+               
                 'Operations - General',
                 'Operations - Admin'
             ]),
