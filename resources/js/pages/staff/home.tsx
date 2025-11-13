@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
+import { type BreadcrumbItem } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { AlertCircle, CheckCircle, Clock, Download, Package, TrendingDown, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -56,6 +57,12 @@ interface DashboardProps {
         count: number;
     }>;
 }
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/staff/home',
+    },
+];
 
 const OverviewCard = ({
     title,
@@ -135,7 +142,7 @@ export default function StaffHome() {
     };
 
     return (
-        <AppSidebarLayout>
+        <AppSidebarLayout breadcrumbs={breadcrumbs}>
             <div className="space-y-6 p-6 duration-500 animate-in fade-in-0">
                 {/* Header */}
                 <div className="flex items-center justify-between">
@@ -269,7 +276,6 @@ export default function StaffHome() {
                                                     fill="url(#colorThisYear)"
                                                     name="This year"
                                                 />
-                                                <Line type="monotone" dataKey="lastYear" stroke="#9CA3AF" strokeDasharray="5 5" name="Last year" />
                                             </AreaChart>
                                         );
                                     })()}

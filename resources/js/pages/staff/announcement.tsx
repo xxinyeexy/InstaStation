@@ -1,6 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { Edit2, Eye, Plus, Search, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+
 
 type AnnouncementRow = {
     announcement_id: number;
@@ -213,9 +215,16 @@ export default function StaffAnnouncements(props: {
         if (key.includes('pay')) return 'bg-emerald-100 text-emerald-700';
         return 'bg-gray-100 text-gray-700';
     };
+    const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Announcements',
+        href: '/student/announcements',
+    },
+];
+
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="space-y-6 p-6">
                 <div>
                     <h1 className="text-2xl font-bold text-foreground">Announcements</h1>

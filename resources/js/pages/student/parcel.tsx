@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Parcel',
+        title: 'My Parcel',
         href: '/student/parcel',
     },
 ];
@@ -824,7 +824,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
 
             {/* Notification Bell - Positioned at top right */}
             <div className="fixed top-4 right-6 z-50">

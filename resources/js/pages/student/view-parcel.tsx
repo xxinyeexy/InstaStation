@@ -1,6 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { router } from '@inertiajs/react';
 import { AlarmClock, ArrowLeft, CheckCircle, CircleAlert, CreditCard, Package, User } from 'lucide-react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 
 // TypeScript interfaces
 interface ParcelData {
@@ -54,6 +55,10 @@ interface Props {
 }
 
 const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) => {
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'My Parcel', href: '/student/parcel' },
+        { title: 'View Parcel Details', href: `/student/parcel/${parcel.id}` },
+    ];
     // Function to render icon based on icon name and color
     const renderIcon = (iconName: string, color: string) => {
         const getIconClass = (color: string) => {
@@ -117,7 +122,7 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="min-h-screen bg-white p-6">
                 {/* Header */}
                 <div className="mb-8 flex items-center gap-3">

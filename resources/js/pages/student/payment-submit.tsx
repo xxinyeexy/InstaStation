@@ -1,6 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 
 type Parcel = {
     parcel_id: number;
@@ -10,6 +11,7 @@ type Parcel = {
     arrival: string;
     fee: number;
 };
+   
 
 export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
     const { data, setData, post, processing, errors } = useForm<{ proof: File | null }>({ proof: null });
@@ -41,8 +43,13 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
         });
     };
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Payment', href: '/student/payment' },
+        { title: 'Submit Payment', href: `/student/payment/submit/${parcel.parcel_id}` },
+    ];
+
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Payment for ${parcel.parcel_code}`} />
             <div className="p-6">
                 <div className="mx-auto max-w-xl rounded-2xl border bg-white p-6 shadow-sm">

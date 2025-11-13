@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { type SharedData } from '@/types';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, Calendar, FileText, Search, SlidersHorizontal, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -32,6 +32,13 @@ interface Notification {
     created_at: string;
     read_at?: string | null;
 }
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'History',
+        href: '/student/history',
+    },
+];
 
 export default function History({ total_collections, collections_this_year, total_fees, parcels }: HistoryProps) {
     const pageProps: any = usePage<SharedData>().props;
@@ -138,8 +145,7 @@ export default function History({ total_collections, collections_this_year, tota
         });
 
     return (
-        <AppLayout>
-            <Head title="History" />
+        <AppLayout breadcrumbs={breadcrumbs}>
 
             {/* Notification Bell - Positioned at top right (same as parcel page) */}
             <div className="fixed top-4 right-6 z-50">

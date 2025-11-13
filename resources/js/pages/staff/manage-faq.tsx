@@ -1,4 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
 import { Edit2, Plus, Search, Trash2, X } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 
@@ -12,6 +13,13 @@ type FaqRow = {
     created_at?: string;
     updated_at?: string;
 };
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'FAQs',
+        href: '/student/manage-faq',
+    },
+];
 
 export default function ManageFaq({
     rows,
@@ -114,7 +122,7 @@ export default function ManageFaq({
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="space-y-6 p-6">
                 <div>
                     <h1 className="text-2xl font-bold">FAQs</h1>

@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import { CircleCheck, CircleX, Clock, DollarSign, Download, Eye, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 
 type Summary = {
     pending: number;
@@ -134,9 +135,15 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
         link.click();
         link.remove();
     };
+    const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Payment',
+        href: '/student/verify-payment',
+    },
+];
+
     return (
-        <AppLayout>
-            <Head title="Payments" />
+        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="space-y-6 p-6">
                 <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground">Payment Verification</h1>
                 <p className="text-sm text-gray-600 dark:text-muted-foreground">Review and verify student payment submissions</p>

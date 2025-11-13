@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { type SharedData } from '@/types';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -44,6 +44,13 @@ interface Notification {
     read_at?: string | null;
     is_read: boolean;
 }
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Payment',
+        href: '/student/payment',
+    },
+];
 
 export default function Payment({ summary, rows, payments }: { summary: Summary; rows: Row[]; payments: PaymentRow[] }) {
     const badge = (state: Row['payment_state']) => {
@@ -212,7 +219,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
     };
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Payment Centre" />
 
             {/* Notification Bell - Positioned at top right (same as parcel page) */}

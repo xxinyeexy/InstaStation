@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { type SharedData } from '@/types';
+import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, ChevronRight, Clock, HelpCircle, Mail, MapPin, Phone, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -13,6 +13,9 @@ type FaqItem = {
     updated_at?: string;
 };
 
+    const breadcrumbs = [
+        { title: 'FAQs', href: '/student/faq' },
+    ];
 // Notification interface
 interface Notification {
     id: string;
@@ -150,8 +153,7 @@ export default function StudentFaq({
     };
 
     return (
-        <AppLayout>
-            <Head title="FAQ" />
+        <AppLayout breadcrumbs={breadcrumbs}>
 
             {/* Notification Bell - Positioned at top right (same as parcel page) */}
             <div className="fixed top-4 right-6 z-50">

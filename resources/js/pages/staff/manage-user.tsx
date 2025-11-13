@@ -2,6 +2,8 @@ import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import { DollarSign, Download, Search, UsersRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+
 
 type Summary = {
     total: number;
@@ -23,6 +25,14 @@ type Row = {
     last_activity?: string | null;
 };
 
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Users',
+        href: '/student/manage-user',
+    },
+];
+
+
 export default function ManageUser({ summary, rows, filters }: { summary: Summary; rows: Row[]; filters?: { q?: string; status?: string } }) {
     const [list, setList] = useState<Row[]>(rows);
     const searchRef = useRef<HTMLInputElement | null>(null);
@@ -38,8 +48,7 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
     };
 
     return (
-        <AppLayout>
-            <Head title="User Management" />
+        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="space-y-6 p-6">
                 <div>
                     <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground">User Management</h1>

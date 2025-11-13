@@ -40,8 +40,13 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
         router.visit('/student/history');
     };
 
+    const breadcrumbs = [
+        { title: 'History', href: '/student/history' },
+        { title: 'Parcel Report', href: `/parcels/${parcelId}/export` },
+    ];
+
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="p-6">
                 <div className="mx-auto max-w-3xl rounded-xl border bg-white shadow-sm">
                     <div className="flex items-start justify-between border-b p-5">
