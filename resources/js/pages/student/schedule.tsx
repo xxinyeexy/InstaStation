@@ -552,10 +552,10 @@ const SchedulePickup = ({ parcel }: Props) => {
                                 {timeSlots.map((slot) => {
                                     const state = slotAvailability[slot.label];
                                     const currentCount = typeof state?.count === 'number' ? state.count : 0;
-                                    const maxCapacity = 20;
+                                    const maxCapacity = 10;
                                     const isFull = state?.full === true || currentCount >= maxCapacity;
-                                    // Show recommended for slots with less than 10 students (50% capacity)
-                                    const isRecommended = !isFull && currentCount < 10;
+                                    // Show recommended for slots with less than 5 students (50% capacity)
+                                    const isRecommended = !isFull && currentCount < 5;
                                     const hasPassed = isTimeSlotPassed(slot.id, selectedDate);
                                     const isAvailable = !isFull && !hasPassed;
                                     const isSelectedSlot = selectedTimeSlot === slot.id;
@@ -578,7 +578,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                                                 <span className={isAvailable ? 'text-gray-900' : 'text-gray-500'}>{slot.label}</span>
                                                 <span 
                                                     className={`ml-2 text-xs font-medium ${
-                                                        isFull ? 'text-red-600' : currentCount >= 15 ? 'text-orange-600' : 'text-gray-500'
+                                                        isFull ? 'text-red-600' : currentCount >= 8 ? 'text-orange-600' : 'text-gray-500'
                                                     }`}
                                                     title={`${currentCount} students scheduled out of ${maxCapacity} maximum capacity`}
                                                 >
