@@ -40,30 +40,23 @@ class StaffController extends Controller
 
         for ($i = 0; $i < 7; $i++) {
             $date = now()->startOfWeek()->addDays($i);
-            $lastYearDate = $date->copy()->subYear();
 
             // Arrivals = parcels created on that date
-            $thisYearArrivals = Parcel::whereDate('created_at', $date)->count();
-            $lastYearArrivals = Parcel::whereDate('created_at', $lastYearDate)->count();
+            $arrivals = Parcel::whereDate('created_at', $date)->count();
 
             // Collected = parcels with status 'Collected' updated on that date
-            $thisYearCollected = Parcel::whereDate('updated_at', $date)
-                ->whereRaw("lower(parcel_status) = 'collected'")
-                ->count();
-            $lastYearCollected = Parcel::whereDate('updated_at', $lastYearDate)
+            $collected = Parcel::whereDate('updated_at', $date)
                 ->whereRaw("lower(parcel_status) = 'collected'")
                 ->count();
 
             $dailyArrivals[] = [
                 'day' => $days[$i],
-                'thisYear' => $thisYearArrivals,
-                'lastYear' => $lastYearArrivals,
+                'count' => $arrivals,
             ];
 
             $dailyCollected[] = [
                 'day' => $days[$i],
-                'thisYear' => $thisYearCollected,
-                'lastYear' => $lastYearCollected,
+                'count' => $collected,
             ];
         }
 

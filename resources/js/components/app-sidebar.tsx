@@ -9,14 +9,26 @@ import { BookOpen, ContactRound, Folder, LayoutGrid, Megaphone, MessageCircleQue
 import { useEffect } from 'react';
 import AppLogo from './app-logo';
 
-type AuthUser = { type?: string };
+type AuthUser = { type?: string; department?: string };
 type AuthProps = { user?: AuthUser };
 
 export function AppSidebar() {
     const { auth } = usePage<{ auth?: AuthProps }>().props;
     const isStaff = auth?.user?.type === 'staff';
     const userRole: 'student' | 'staff' = isStaff ? 'staff' : 'student';
+    const staffDepartment = auth?.user?.department;
     const { updateRole } = useAppearance();
+
+    // Debug logging
+    console.log('Sidebar Debug:', {
+        isStaff,
+        staffDepartment,
+        staffDepartmentTrimmed: staffDepartment?.trim(),
+        isGeneral: staffDepartment?.trim() === 'Operations - General' || staffDepartment?.trim() === 'General',
+        isAdmin: staffDepartment?.trim() === 'Operations - Admin' || staffDepartment?.trim() === 'Admin',
+        userType: auth?.user?.type,
+        fullUser: auth?.user
+    });
 
     // Ensure the HTML data-role reflects the authenticated user's role
     useEffect(() => {
@@ -30,16 +42,39 @@ export function AppSidebar() {
         { title: 'FAQs', href: '/student/faq', icon: MessageCircleQuestion },
     ];
 
-    const staffNavItems: NavItem[] = [
+    // Operations - General staff: Dashboard, Parcel, Payment
+    const staffGeneralNavItems: NavItem[] = [
         { title: 'Dashboard', href: '/staff/dashboard', icon: LayoutGrid },
         { title: 'Parcel', href: '/staff/parcel', icon: PackageOpen },
         { title: 'Payment', href: '/staff/payments', icon: WalletCards },
-        { title: 'Users', href: '/staff/manage-user', icon: ContactRound },
-        { title: 'FAQs', href: '/staff/manage-faq', icon: MessageCircleQuestion },
-        { title: 'Announcements', href: '/staff/announcements', icon: Megaphone },
     ];
 
-    const roleBasedNavItems = isStaff ? staffNavItems : mainNavItems;
+    // Operations - Admin staff: Dashboard, Users, Announcements, FAQs
+    const staffAdminNavItems: NavItem[] = [
+        { title: 'Dashboard', href: '/staff/dashboard', icon: LayoutGrid },
+        { title: 'Users', href: '/staff/manage-user', icon: ContactRound },
+        { title: 'Announcements', href: '/staff/announcements', icon: Megaphone },
+        { title: 'FAQs', href: '/staff/manage-faq', icon: MessageCircleQuestion },
+    ];
+
+    // Determine which nav items to show based on role and department
+    let roleBasedNavItems: NavItem[];
+    if (isStaff) {
+        // Trim and compare department to handle any whitespace issues
+        const department = staffDepartment?.trim();
+        
+        // Check for both "General" and "Operations - General" formats
+        if (department === 'Operations - General' || department === 'General') {
+            roleBasedNavItems = staffGeneralNavItems;
+        } else if (department === 'Operations - Admin' || department === 'Admin') {
+            roleBasedNavItems = staffAdminNavItems;
+        } else {
+            // For other departments or undefined, default to General operations
+            roleBasedNavItems = staffGeneralNavItems;
+        }
+    } else {
+        roleBasedNavItems = mainNavItems;
+    }
 
     const footerNavItems: NavItem[] = [
         { title: 'Repository', href: 'https://github.com/laravel/react-starter-kit', icon: Folder },

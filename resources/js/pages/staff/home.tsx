@@ -16,13 +16,11 @@ interface DashboardProps {
     };
     dailyArrivals: Array<{
         day: string;
-        thisYear: number;
-        lastYear: number;
+        count: number;
     }>;
     dailyCollected: Array<{
         day: string;
-        thisYear: number;
-        lastYear: number;
+        count: number;
     }>;
     parcelSenders: Array<{
         name: string;
@@ -698,8 +696,8 @@ export default function StaffHome() {
                                 <ResponsiveContainer width="100%" height={300}>
                                     {(() => {
                                         const chartData = activeTab === 'arrivals' ? data.dailyArrivals : data.dailyCollected;
-                                        // compute dynamic max across both series (thisYear and lastYear)
-                                        const rawMax = Math.max(1, ...chartData.flatMap((d) => [Number(d.thisYear || 0), Number(d.lastYear || 0)]));
+                                        // compute dynamic max from count values
+                                        const rawMax = Math.max(1, ...chartData.map((d) => Number(d.count || 0)));
                                         // add 10% padding and round up to nearest 10 for nicer ticks
                                         const padded = Math.ceil(rawMax * 1.1);
                                         let roundedMax = Math.max(10, Math.ceil(padded / 10) * 10);
@@ -727,14 +725,12 @@ export default function StaffHome() {
                                                         borderRadius: '8px',
                                                     }}
                                                 />
-                                                <Legend />
                                                 <Area
                                                     type="monotone"
-                                                    dataKey="thisYear"
+                                                    dataKey="count"
                                                     stroke="#374151"
                                                     fillOpacity={1}
                                                     fill="url(#colorThisYear)"
-                                                    name="This year"
                                                 />
                                             </AreaChart>
                                         );
