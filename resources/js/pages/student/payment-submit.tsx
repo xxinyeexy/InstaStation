@@ -33,8 +33,8 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
         post(`/student/payment/submit/${parcel.parcel_id}`, {
             forceFormData: true,
             onSuccess: () => {
-                // Navigate back to payment page with fresh data and success indicator
-                router.visit(`/student/payment?payment_submitted=true&cleared_parcel=${parcel.parcel_id}`, {
+                // Navigate back to payment page with success indicator
+                router.visit('/student/payment?payment_submitted=true', {
                     only: ['summary', 'rows', 'payments', 'notifications'],
                     preserveState: false,
                     preserveScroll: false,

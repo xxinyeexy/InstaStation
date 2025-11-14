@@ -185,7 +185,8 @@ class PaymentController extends Controller
             ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
             ->delete();
 
-        return redirect()->route('student.payment')->with('success', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
+        // Return success - let the frontend decide where to navigate
+        return back();
     }
 
     public function staffIndex(Request $request): Response

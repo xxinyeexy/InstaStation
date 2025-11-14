@@ -663,10 +663,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {
                 forceFormData: true,
                 onSuccess: () => {
-                    addToastNotification('success', 'Payment Uploaded', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
+                    // Close modal and show success notification
                     setShowPayModal(false);
                     setPayParcelId(null);
-                    router.reload({ only: ['parcels'] });
+                    addToastNotification('success', 'Payment Uploaded', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
+                    
+                    // Reload only parcels and notifications data
+                    router.reload({
+                        only: ['parcels', 'notifications'],
+                    });
                 },
                 onError: (errors) => {
                     const firstError = typeof errors === 'object' ? Object.values(errors)[0] : null;
@@ -676,7 +681,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     setIsUploadingProof(false);
                     if (proofInputRef.current) proofInputRef.current.value = '';
                 },
-                preserveScroll: true,
             },
         );
     };
