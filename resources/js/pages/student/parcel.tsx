@@ -1,7 +1,7 @@
 import QRCodeModal from '@/components/qr-code-modal';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, CheckCircle, MapPin, Package, Sparkles, Upload, X, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -824,7 +824,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-
             {/* Notification Bell - Positioned at top right */}
             <div className="fixed top-4 right-6 z-50">
                 <div className="relative">

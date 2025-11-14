@@ -623,8 +623,19 @@ class ParcelController extends Controller
         }
 
         $allowedFields = [
-            'parcel_code', 'tracking_no', 'parcel_status', 'sender', 'size', 'location',
-            'created_at', 'schedule', 'time_slot', 'fee', 'student_name', 'student_matric', 'payment_status',
+            'parcel_code',
+            'tracking_no',
+            'parcel_status',
+            'sender',
+            'size',
+            'location',
+            'created_at',
+            'schedule',
+            'time_slot',
+            'fee',
+            'student_name',
+            'student_matric',
+            'payment_status',
         ];
 
         $fields = $request->query('fields', ['parcel_code', 'tracking_no', 'parcel_status', 'sender', 'size', 'created_at']);
@@ -734,7 +745,7 @@ class ParcelController extends Controller
                 return $mapRow($p, $fields);
             });
             return response()->json([
-                'columns' => array_map(fn ($f) => ['key' => $f, 'label' => $labels[$f] ?? $f], $fields),
+                'columns' => array_map(fn($f) => ['key' => $f, 'label' => $labels[$f] ?? $f], $fields),
                 'rows' => $rows,
                 'meta' => [
                     'limit' => $limit,
@@ -778,7 +789,7 @@ class ParcelController extends Controller
                 return $mapRow($p, $fields);
             });
             $pdf = Pdf::loadView('exports.parcels_bulk', [
-                'columns' => array_map(fn ($f) => ['key' => $f, 'label' => $labels[$f] ?? $f], $fields),
+                'columns' => array_map(fn($f) => ['key' => $f, 'label' => $labels[$f] ?? $f], $fields),
                 'rows' => $rows,
                 'generatedAt' => now(),
             ])->setPaper('a4', 'landscape');
@@ -790,7 +801,7 @@ class ParcelController extends Controller
         return response()->streamDownload(function () use ($query, $fields, $labels) {
             $out = fopen('php://output', 'w');
             // Header row with friendly labels
-            fputcsv($out, array_map(fn ($f) => $labels[$f] ?? $f, $fields));
+            fputcsv($out, array_map(fn($f) => $labels[$f] ?? $f, $fields));
             $query->orderByDesc('created_at')->chunk(1000, function ($parcels) use ($out, $fields) {
                 foreach ($parcels as $p) {
                     $row = [];

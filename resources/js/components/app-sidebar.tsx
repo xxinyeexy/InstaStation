@@ -27,7 +27,7 @@ export function AppSidebar() {
         isGeneral: staffDepartment?.trim() === 'Operations - General',
         isAdmin: staffDepartment?.trim() === 'Operations - Admin',
         userType: auth?.user?.type,
-        fullUser: auth?.user
+        fullUser: auth?.user,
     });
 
     // Ensure the HTML data-role reflects the authenticated user's role
@@ -62,7 +62,7 @@ export function AppSidebar() {
     if (isStaff) {
         // Trim and compare department to handle any whitespace issues
         const department = staffDepartment?.trim();
-        
+
         // Check for both "General" and "Operations - General" formats
         if (department === 'Operations - General' || department === 'General') {
             roleBasedNavItems = staffGeneralNavItems;

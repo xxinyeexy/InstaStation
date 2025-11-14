@@ -59,10 +59,13 @@
                             </p>
                             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
                             <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">
-                                If you're having trouble clicking the "Verify Email Address" button, copy and paste the URL below into your web browser:
+                                If you're having trouble clicking the "Verify Email Address" button, copy and paste the
+                                URL below into your web browser:
                             </p>
-                            <p style="margin: 10px 0 0 0; word-break: break-all; color: #6b7280; font-size: 12px; text-align: center;">
-                                <a href="{{ $verificationUrl }}" style="color: #FF13A0; text-decoration: none;">{{ $verificationUrl }}</a>
+                            <p
+                                style="margin: 10px 0 0 0; word-break: break-all; color: #6b7280; font-size: 12px; text-align: center;">
+                                <a href="{{ $verificationUrl }}"
+                                    style="color: #FF13A0; text-decoration: none;">{{ $verificationUrl }}</a>
                             </p>
                         </td>
                     </tr>

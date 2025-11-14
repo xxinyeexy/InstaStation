@@ -7,9 +7,7 @@ export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: 
     const getInitials = useInitials();
     const isStaff = (user as any)?.type === 'staff';
     const roleLabel = isStaff ? 'Staff' : 'Student';
-    const roleClasses = isStaff
-        ? 'border-pink-200 bg-pink-50 text-pink-500'
-        : 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    const roleClasses = isStaff ? 'border-pink-200 bg-pink-50 text-pink-500' : 'border-emerald-200 bg-emerald-50 text-emerald-700';
 
     return (
         <>
@@ -20,18 +18,14 @@ export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: 
                 </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium flex items-center gap-2">
+                <span className="flex items-center gap-2 truncate font-medium">
                     <span className="truncate">{user.name}</span>
                     <span
                         className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${roleClasses}`}
                         title={`${roleLabel} account`}
                         aria-label={`Role: ${roleLabel}`}
                     >
-                        {isStaff ? (
-                            <ShieldCheck className="h-3 w-3" aria-hidden="true" />
-                        ) : (
-                            <GraduationCap className="h-3 w-3" aria-hidden="true" />
-                        )}
+                        {isStaff ? <ShieldCheck className="h-3 w-3" aria-hidden="true" /> : <GraduationCap className="h-3 w-3" aria-hidden="true" />}
                         <span>{roleLabel}</span>
                     </span>
                 </span>

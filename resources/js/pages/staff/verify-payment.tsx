@@ -1,8 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router } from '@inertiajs/react';
+import { type BreadcrumbItem } from '@/types';
+import { router } from '@inertiajs/react';
 import { CircleCheck, CircleX, Clock, DollarSign, Download, Eye, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { type BreadcrumbItem, type SharedData } from '@/types';
 
 type Summary = {
     pending: number;
@@ -150,11 +150,11 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
         link.remove();
     };
     const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Payment',
-        href: '/student/verify-payment',
-    },
-];
+        {
+            title: 'Payment',
+            href: '/student/verify-payment',
+        },
+    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -260,28 +260,40 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                 </span>
                             </div>
                             <div className="col-span-1 ml-auto flex items-center justify-end gap-4 text-muted-foreground">
-                                <button onClick={() => setDetail(r as any)} className="hover:text-foreground">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setDetail(r as any);
+                                    }}
+                                    className="rounded p-1 hover:bg-gray-100 hover:text-foreground dark:hover:bg-accent"
+                                >
                                     <Eye className="h-4 w-4" />
                                 </button>
                                 {r.status !== 'verified' && (
                                     <>
                                         <button
-                                            onClick={() => handleApprovePayment(r.payment_id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleApprovePayment(r.payment_id);
+                                            }}
                                             disabled={processingPayments.has(r.payment_id)}
-                                            className={`text-emerald-600 hover:text-emerald-700 ${
+                                            className={`rounded p-1 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-500/20 ${
                                                 processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : ''
                                             }`}
                                         >
                                             <CircleCheck className="h-4 w-4" />
                                         </button>
                                         <button
-                                            onClick={() => openRejectModal(r.payment_id)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openRejectModal(r.payment_id);
+                                            }}
                                             disabled={processingPayments.has(r.payment_id)}
-                                            className={`text-red-500 hover:text-red-600 ${
-                                                processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : ''
+                                            className={`rounded-md p-2 text-red-500 transition-all hover:scale-110 hover:bg-red-50 hover:text-red-600 active:scale-95 dark:hover:bg-red-500/20 ${
+                                                processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                                             }`}
                                         >
-                                            <CircleX className="h-4 w-4" />
+                                            <CircleX className="h-5 w-5" />
                                         </button>
                                     </>
                                 )}

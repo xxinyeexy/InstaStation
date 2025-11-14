@@ -341,7 +341,7 @@ export default function StaffHome() {
 
                 {showExport && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                        <div className="max-h-[85vh] w-full max-w-5xl overflow-hidden rounded-lg border bg-card shadow-xl flex flex-col">
+                        <div className="flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border bg-card shadow-xl">
                             {/* Modal Header (sticky) */}
                             <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card px-6 py-4">
                                 <h3 className="text-lg font-semibold">Export Parcels</h3>
@@ -355,218 +355,218 @@ export default function StaffHome() {
                                 <div className="grid gap-6 md:grid-cols-2">
                                     {/* Date Range */}
                                     <div className="rounded-lg border p-4">
-                                    <div className="mb-2 text-sm font-medium">Select Date Range</div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className="mb-1 block text-xs text-muted-foreground">Start</label>
-                                            <input
-                                                type="date"
-                                                value={startDate}
-                                                onChange={(e) => setStartDate(e.target.value)}
-                                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="mb-1 block text-xs text-muted-foreground">End</label>
-                                            <input
-                                                type="date"
-                                                value={endDate}
-                                                onChange={(e) => setEndDate(e.target.value)}
-                                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                        <span className="text-xs text-muted-foreground">Quick presets:</span>
-                                        <button
-                                            onClick={() => applyDatePreset('today')}
-                                            className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
-                                        >
-                                            Today
-                                        </button>
-                                        <button
-                                            onClick={() => applyDatePreset('thisWeek')}
-                                            className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
-                                        >
-                                            This Week
-                                        </button>
-                                        <button
-                                            onClick={() => applyDatePreset('thisMonth')}
-                                            className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
-                                        >
-                                            This Month
-                                        </button>
-                                        <button
-                                            onClick={() => applyDatePreset('last30')}
-                                            className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
-                                        >
-                                            Last 30 Days
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Filters */}
-                                <div className="rounded-lg border p-4">
-                                    <div className="mb-2 text-sm font-medium">Filters</div>
-                                    <div className="space-y-3">
-                                        <div>
-                                            <label className="mb-1 block text-xs text-muted-foreground">Status</label>
-                                            <div className="flex flex-wrap gap-2">
-                                                {statusOptions.map((s) => (
-                                                    <label
-                                                        key={s}
-                                                        className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors ${
-                                                            selectedStatuses.includes(s)
-                                                                ? 'border-[#FF029A] bg-[#FF029A]/10 text-[#FF029A]'
-                                                                : 'border-muted-foreground/30 text-muted-foreground hover:border-[#FF029A] hover:text-[#FF029A]'
-                                                        }`}
-                                                    >
-                                                        <input
-                                                            type="checkbox"
-                                                            className="hidden"
-                                                            checked={selectedStatuses.includes(s)}
-                                                            onChange={() => toggleStatus(s)}
-                                                        />
-                                                        <span>{s}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
+                                        <div className="mb-2 text-sm font-medium">Select Date Range</div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <label className="mb-1 block text-xs text-muted-foreground">Size</label>
+                                                <label className="mb-1 block text-xs text-muted-foreground">Start</label>
+                                                <input
+                                                    type="date"
+                                                    value={startDate}
+                                                    onChange={(e) => setStartDate(e.target.value)}
+                                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="mb-1 block text-xs text-muted-foreground">End</label>
+                                                <input
+                                                    type="date"
+                                                    value={endDate}
+                                                    onChange={(e) => setEndDate(e.target.value)}
+                                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            <span className="text-xs text-muted-foreground">Quick presets:</span>
+                                            <button
+                                                onClick={() => applyDatePreset('today')}
+                                                className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
+                                            >
+                                                Today
+                                            </button>
+                                            <button
+                                                onClick={() => applyDatePreset('thisWeek')}
+                                                className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
+                                            >
+                                                This Week
+                                            </button>
+                                            <button
+                                                onClick={() => applyDatePreset('thisMonth')}
+                                                className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
+                                            >
+                                                This Month
+                                            </button>
+                                            <button
+                                                onClick={() => applyDatePreset('last30')}
+                                                className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
+                                            >
+                                                Last 30 Days
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Filters */}
+                                    <div className="rounded-lg border p-4">
+                                        <div className="mb-2 text-sm font-medium">Filters</div>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className="mb-1 block text-xs text-muted-foreground">Status</label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {statusOptions.map((s) => (
+                                                        <label
+                                                            key={s}
+                                                            className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors ${
+                                                                selectedStatuses.includes(s)
+                                                                    ? 'border-[#FF029A] bg-[#FF029A]/10 text-[#FF029A]'
+                                                                    : 'border-muted-foreground/30 text-muted-foreground hover:border-[#FF029A] hover:text-[#FF029A]'
+                                                            }`}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                className="hidden"
+                                                                checked={selectedStatuses.includes(s)}
+                                                                onChange={() => toggleStatus(s)}
+                                                            />
+                                                            <span>{s}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="mb-1 block text-xs text-muted-foreground">Size</label>
+                                                    <select
+                                                        value={sizeFilter}
+                                                        onChange={(e) => setSizeFilter(e.target.value)}
+                                                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                                    >
+                                                        <option value="">All</option>
+                                                        <option value="Small">Small</option>
+                                                        <option value="Medium">Medium</option>
+                                                        <option value="Large">Large</option>
+                                                        <option value="Extra Large">Extra Large</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="mb-1 block text-xs text-muted-foreground">Payment</label>
+                                                    <select
+                                                        value={paymentFilter}
+                                                        onChange={(e) => setPaymentFilter(e.target.value)}
+                                                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                                    >
+                                                        <option value="">All</option>
+                                                        <option value="verified">Verified</option>
+                                                        <option value="unverified">Unverified</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="mb-1 block text-xs text-muted-foreground">Sender (contains)</label>
+                                                <input
+                                                    value={senderFilter}
+                                                    onChange={(e) => setSenderFilter(e.target.value)}
+                                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                                    placeholder="e.g. SHOPEE"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Format + Filename */}
+                                    <div className="rounded-lg border p-4">
+                                        <div className="mb-2 text-sm font-medium">Format & File</div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="mb-1 block text-xs text-muted-foreground">Format</label>
                                                 <select
-                                                    value={sizeFilter}
-                                                    onChange={(e) => setSizeFilter(e.target.value)}
-                                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                                    value={format}
+                                                    onChange={(e) => setFormat(e.target.value as any)}
+                                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                                 >
-                                                    <option value="">All</option>
-                                                    <option value="Small">Small</option>
-                                                    <option value="Medium">Medium</option>
-                                                    <option value="Large">Large</option>
-                                                    <option value="Extra Large">Extra Large</option>
+                                                    <option value="csv">CSV</option>
+                                                    <option value="pdf">PDF</option>
+                                                    <option value="json">JSON</option>
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="mb-1 block text-xs text-muted-foreground">Payment</label>
-                                                <select
-                                                    value={paymentFilter}
-                                                    onChange={(e) => setPaymentFilter(e.target.value)}
-                                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                                >
-                                                    <option value="">All</option>
-                                                    <option value="verified">Verified</option>
-                                                    <option value="unverified">Unverified</option>
-                                                </select>
+                                                <label className="mb-1 block text-xs text-muted-foreground">File name</label>
+                                                <input
+                                                    value={fileName}
+                                                    onChange={(e) => setFileName(e.target.value)}
+                                                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                                    placeholder="parcels_export_YYYYMMDD"
+                                                />
                                             </div>
                                         </div>
-                                        <div>
-                                            <label className="mb-1 block text-xs text-muted-foreground">Sender (contains)</label>
-                                            <input
-                                                value={senderFilter}
-                                                onChange={(e) => setSenderFilter(e.target.value)}
-                                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                                placeholder="e.g. SHOPEE"
-                                            />
-                                        </div>
                                     </div>
-                                </div>
 
-                                {/* Format + Filename */}
-                                <div className="rounded-lg border p-4">
-                                    <div className="mb-2 text-sm font-medium">Format & File</div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className="mb-1 block text-xs text-muted-foreground">Format</label>
-                                            <select
-                                                value={format}
-                                                onChange={(e) => setFormat(e.target.value as any)}
-                                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                            >
-                                                <option value="csv">CSV</option>
-                                                <option value="pdf">PDF</option>
-                                                <option value="json">JSON</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="mb-1 block text-xs text-muted-foreground">File name</label>
+                                    {/* Fields */}
+                                    <div className="rounded-lg border p-4 md:col-span-2">
+                                        <div className="mb-2 text-sm font-medium">Choose Fields</div>
+                                        <div className="mb-2 flex flex-wrap items-center gap-2">
                                             <input
-                                                value={fileName}
-                                                onChange={(e) => setFileName(e.target.value)}
-                                                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                                placeholder="parcels_export_YYYYMMDD"
+                                                value={fieldSearch}
+                                                onChange={(e) => setFieldSearch(e.target.value)}
+                                                className="w-full max-w-xs rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                                placeholder="Search fields..."
                                             />
+                                            <div className="ml-auto flex gap-2">
+                                                <button onClick={selectAllFields} className="rounded-md border px-2 py-1 text-xs hover:bg-muted">
+                                                    Select All
+                                                </button>
+                                                <button onClick={clearAllFields} className="rounded-md border px-2 py-1 text-xs hover:bg-muted">
+                                                    Deselect All
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                {/* Fields */}
-                                <div className="md:col-span-2 rounded-lg border p-4">
-                                    <div className="mb-2 text-sm font-medium">Choose Fields</div>
-                                    <div className="mb-2 flex flex-wrap items-center gap-2">
-                                        <input
-                                            value={fieldSearch}
-                                            onChange={(e) => setFieldSearch(e.target.value)}
-                                            className="w-full max-w-xs rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                            placeholder="Search fields..."
-                                        />
-                                        <div className="ml-auto flex gap-2">
-                                            <button onClick={selectAllFields} className="rounded-md border px-2 py-1 text-xs hover:bg-muted">
-                                                Select All
-                                            </button>
-                                            <button onClick={clearAllFields} className="rounded-md border px-2 py-1 text-xs hover:bg-muted">
-                                                Deselect All
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-                                        {groupedFields.map((grp) => {
-                                            const keys = grp.items.map((i) => i.value);
-                                            const filtered = grp.items.filter((i) => i.label.toLowerCase().includes(fieldSearch.toLowerCase()));
-                                            return (
-                                                <div key={grp.key} className="rounded-md border p-2">
-                                                    <div className="mb-2 flex items-center justify-between">
-                                                        <div className="text-xs font-semibold text-muted-foreground uppercase">{grp.title}</div>
-                                                        <div className="flex gap-1">
-                                                            <button
-                                                                onClick={() => selectGroup(keys)}
-                                                                className="rounded bg-muted px-2 py-0.5 text-[10px] hover:bg-muted/80"
-                                                            >
-                                                                All
-                                                            </button>
-                                                            <button
-                                                                onClick={() => clearGroup(keys)}
-                                                                className="rounded bg-muted px-2 py-0.5 text-[10px] hover:bg-muted/80"
-                                                            >
-                                                                None
-                                                            </button>
+                                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+                                            {groupedFields.map((grp) => {
+                                                const keys = grp.items.map((i) => i.value);
+                                                const filtered = grp.items.filter((i) => i.label.toLowerCase().includes(fieldSearch.toLowerCase()));
+                                                return (
+                                                    <div key={grp.key} className="rounded-md border p-2">
+                                                        <div className="mb-2 flex items-center justify-between">
+                                                            <div className="text-xs font-semibold text-muted-foreground uppercase">{grp.title}</div>
+                                                            <div className="flex gap-1">
+                                                                <button
+                                                                    onClick={() => selectGroup(keys)}
+                                                                    className="rounded bg-muted px-2 py-0.5 text-[10px] hover:bg-muted/80"
+                                                                >
+                                                                    All
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => clearGroup(keys)}
+                                                                    className="rounded bg-muted px-2 py-0.5 text-[10px] hover:bg-muted/80"
+                                                                >
+                                                                    None
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            {filtered.map((f) => (
+                                                                <label
+                                                                    key={f.value}
+                                                                    className={`flex items-center gap-2 rounded p-1 ${selectedFields.includes(f.value) ? 'bg-muted' : ''}`}
+                                                                >
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={selectedFields.includes(f.value)}
+                                                                        onChange={() => toggleField(f.value)}
+                                                                    />
+                                                                    <span className="text-sm">{f.label}</span>
+                                                                </label>
+                                                            ))}
+                                                            {filtered.length === 0 && <div className="text-xs text-muted-foreground">No fields</div>}
                                                         </div>
                                                     </div>
-                                                    <div className="space-y-1">
-                                                        {filtered.map((f) => (
-                                                            <label
-                                                                key={f.value}
-                                                                className={`flex items-center gap-2 rounded p-1 ${selectedFields.includes(f.value) ? 'bg-muted' : ''}`}
-                                                            >
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={selectedFields.includes(f.value)}
-                                                                    onChange={() => toggleField(f.value)}
-                                                                />
-                                                                <span className="text-sm">{f.label}</span>
-                                                            </label>
-                                                        ))}
-                                                        {filtered.length === 0 && <div className="text-xs text-muted-foreground">No fields</div>}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Preview Table */}
-                            {(previewLoading || previewError || previewRows.length > 0) && (
+                                {/* Preview Table */}
+                                {(previewLoading || previewError || previewRows.length > 0) && (
                                     <div className="mt-4 max-h-80 overflow-auto rounded-md border">
                                         {previewLoading && <div className="p-4 text-sm text-muted-foreground">Loading preview…</div>}
                                         {previewError && <div className="p-4 text-sm text-red-500">{previewError}</div>}
@@ -725,13 +725,7 @@ export default function StaffHome() {
                                                         borderRadius: '8px',
                                                     }}
                                                 />
-                                                <Area
-                                                    type="monotone"
-                                                    dataKey="count"
-                                                    stroke="#374151"
-                                                    fillOpacity={1}
-                                                    fill="url(#colorThisYear)"
-                                                />
+                                                <Area type="monotone" dataKey="count" stroke="#374151" fillOpacity={1} fill="url(#colorThisYear)" />
                                             </AreaChart>
                                         );
                                     })()}

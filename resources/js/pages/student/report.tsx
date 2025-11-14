@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { CalendarDays, FileText, IdCard, MapPin, Package, UserRound, ArrowLeft } from 'lucide-react';
 import { router } from '@inertiajs/react';
+import { ArrowLeft, CalendarDays, FileText, IdCard, MapPin, Package, UserRound } from 'lucide-react';
 
 type Student = {
     id?: number;
@@ -30,7 +30,7 @@ type Parcel = {
 
 export default function Report({ parcel, student, payment }: { parcel: Parcel; student?: Student; payment?: Payment }) {
     const parcelId = parcel.parcel_id;
-    
+
     const download = () => {
         window.location.href = `/parcels/${parcelId}/export/download`;
     };
@@ -53,7 +53,7 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={goBack}
-                                className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
                             >
                                 <ArrowLeft size={16} />
                                 Back
@@ -148,7 +148,10 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
 
                         <div className="flex items-center justify-between text-xs text-gray-500">
                             <div>Report generated on {new Date().toLocaleString()}</div>
-                            <button onClick={download} className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white hover:bg-gray-800 transition-colors">
+                            <button
+                                onClick={download}
+                                className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white transition-colors hover:bg-gray-800"
+                            >
                                 <FileText size={16} /> Download Report
                             </button>
                         </div>

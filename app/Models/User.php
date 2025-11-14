@@ -28,10 +28,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     ];
     public function staff()
-{
-    return $this->hasOne(Staff::class, 'user_id');
-}
-public function parcels()
+    {
+        return $this->hasOne(Staff::class, 'user_id');
+    }
+    public function parcels()
     {
         return $this->hasMany(Parcel::class, 'student_id');
     }

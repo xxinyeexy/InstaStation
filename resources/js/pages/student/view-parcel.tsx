@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
+import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/react';
 import { AlarmClock, ArrowLeft, CheckCircle, CircleAlert, CreditCard, Package, User } from 'lucide-react';
-import { type BreadcrumbItem, type SharedData } from '@/types';
 
 // TypeScript interfaces
 interface ParcelData {

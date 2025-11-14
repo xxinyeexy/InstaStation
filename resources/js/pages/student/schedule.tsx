@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 interface ParcelData {
     id: number;
-    parcel_code:string;
+    parcel_code: string;
     tracking_no: string;
     status: string;
     collection_code: string;
@@ -381,15 +381,14 @@ const SchedulePickup = ({ parcel }: Props) => {
 
             <div className="min-h-screen bg-gray-50">
                 {/* Header */}
-                    <div className="mx-auto max-w-6xl px-6 py-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900">Schedule Pickup - {parcel.parcel_code}</h1>
-                                <p className="mt-1 text-gray-600">Choose your preferred date and time for parcel collection</p>
-                            </div>
+                <div className="mx-auto max-w-6xl px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">Schedule Pickup - {parcel.parcel_code}</h1>
+                            <p className="mt-1 text-gray-600">Choose your preferred date and time for parcel collection</p>
                         </div>
                     </div>
-             
+                </div>
 
                 <div className="mx-auto max-w-6xl px-6 py-8">
                     {/* Parcel Status Section */}

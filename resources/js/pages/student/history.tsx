@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, Calendar, FileText, Search, SlidersHorizontal, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -110,7 +110,7 @@ export default function History({ total_collections, collections_this_year, tota
             }
         }
 
-    // Handle different notification types (sticky rejection stays unread & visible)
+        // Handle different notification types (sticky rejection stays unread & visible)
         const title = notification.title?.toLowerCase() || '';
         const message = notification.message?.toLowerCase() || '';
 
@@ -146,7 +146,6 @@ export default function History({ total_collections, collections_this_year, tota
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-
             {/* Notification Bell - Positioned at top right (same as parcel page) */}
             <div className="fixed top-4 right-6 z-50">
                 <div className="relative">
