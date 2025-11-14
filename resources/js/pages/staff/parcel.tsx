@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Html5Qrcode, Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { BellRing, CheckCircle, Edit, Eye, Trash2, X, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -606,105 +606,52 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
-    // Updated handleMarkAsCollected function - uses backend response
+    // Optimized handleMarkAsCollected - instant UI update with optimistic rendering
     const handleMarkAsCollected = async (parcelId: number) => {
         // Prevent multiple simultaneous requests for the same parcel
         if (collectingParcels.has(parcelId)) {
             return;
         }
 
-        // Add parcel to collecting set
-        setCollectingParcels((prev) => new Set(prev).add(parcelId));
-
-        // Optimistically update the UI immediately
+        // Instant UI feedback - update local state immediately (optimistic update)
         setParcelList((prev) =>
-            prev.map((parcel) =>
-                parcel.parcel_id === parcelId
-                    ? {
-                          ...parcel,
-                          parcel_status: 'Collected',
-                          updated_at: new Date().toISOString(),
-                      }
-                    : parcel,
-            ),
+            prev.map((p) =>
+                p.parcel_id === parcelId ? { ...p, parcel_status: 'Collected' } : p
+            )
         );
-
-        // Automatically switch to Collected tab to show the updated parcel
+        
+        // Switch to Collected tab immediately for smooth UX
         setActiveTab('Collected');
-
+        
         // Show success notification immediately
         addNotification('success', 'Success!', 'Parcel marked as collected successfully!');
 
-        try {
-            const response = await fetch(`/staff/parcel/${parcelId}/collect`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        // Add parcel to collecting set
+        setCollectingParcels((prev) => new Set(prev).add(parcelId));
+
+        // Background sync with server
+        router.patch(
+            `/staff/parcel/${parcelId}/collect`,
+            {},
+            {
+                preserveScroll: true,
+                preserveState: false,
+                onError: () => {
+                    // Revert optimistic update on error
+                    router.reload({ only: ['parcels'] });
+                    addNotification('error', 'Error!', 'Failed to mark parcel as collected. Please try again.');
                 },
-                credentials: 'same-origin',
-            });
-
-            if (response.ok) {
-                const result = await response.json();
-
-                // Update with actual server data
-                setParcelList((prev) =>
-                    prev.map((parcel) =>
-                        parcel.parcel_id === parcelId
-                            ? {
-                                  ...parcel,
-                                  parcel_status: 'Collected',
-                                  updated_at: result.parcel.updated_at,
-                                  last_edited_by: result.parcel.last_edited_by,
-                              }
-                            : parcel,
-                    ),
-                );
-            } else {
-                // Revert the optimistic update on error
-                setParcelList((prev) =>
-                    prev.map((parcel) =>
-                        parcel.parcel_id === parcelId
-                            ? {
-                                  ...parcel,
-                                  parcel_status: 'Ready For Collection',
-                              }
-                            : parcel,
-                    ),
-                );
-
-                // Show error notification
-                addNotification('error', 'Error!', 'Failed to mark parcel as collected. Please try again.');
+                onFinish: () => {
+                    // Remove parcel from collecting set
+                    setCollectingParcels((prev) => {
+                        const newSet = new Set(prev);
+                        newSet.delete(parcelId);
+                        return newSet;
+                    });
+                }
             }
-        } catch (error) {
-            console.error('Failed to mark as collected:', error);
-
-            // Revert the optimistic update on error
-            setParcelList((prev) =>
-                prev.map((parcel) =>
-                    parcel.parcel_id === parcelId
-                        ? {
-                              ...parcel,
-                              parcel_status: 'Ready For Collection',
-                          }
-                        : parcel,
-                ),
-            );
-
-            // Show error notification
-            addNotification('error', 'Error!', 'Failed to mark parcel as collected. Please try again.');
-        } finally {
-            // Remove parcel from collecting set
-            setCollectingParcels((prev) => {
-                const newSet = new Set(prev);
-                newSet.delete(parcelId);
-                return newSet;
-            });
-        }
-    };
-
-    // Format date for display
+        );
+    };    // Format date for display
     const formatDate = (dateString: string) => {
         if (!dateString) return 'N/A';
         try {
@@ -2033,7 +1980,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                     >
                                                         <Trash2 className="h-5 w-5" />
                                                     </button>
-                                                    {parcel.parcel_status?.toLowerCase() == 'ready for collection' && (
+                                                    {parcel.parcel_status?.toLowerCase() === 'ready for collection' && (
                                                         <button
                                                             onClick={() => handleMarkAsCollected(parcel.parcel_id)}
                                                             disabled={collectingParcels.has(parcel.parcel_id)}

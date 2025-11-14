@@ -177,15 +177,12 @@ const SchedulePickup = ({ parcel }: Props) => {
             // Show success toast notification
             setShowSuccessToast(true);
 
-            // Refresh availability for instant feedback
-            if (selectedDate) {
-                await fetchAvailability(selectedDate);
-            }
-
-            // Redirect quickly for a smoother experience
-            setTimeout(() => {
-                router.visit('/student/parcel');
-            }, 600);
+            // Navigate immediately with Inertia for smooth transition
+            router.visit('/student/parcel', {
+                only: ['parcels', 'notifications'],
+                preserveState: false,
+                preserveScroll: false,
+            });
         } catch (error) {
             console.error('Scheduling error:', error);
             if (error instanceof Error) {

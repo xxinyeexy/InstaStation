@@ -199,16 +199,9 @@ class ParcelController extends Controller
                 ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Parcel marked as collected successfully',
-                'parcel' => $parcel->load(['createdBy', 'lastEditedBy'])
-            ]);
+            return back();
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to mark parcel as collected'
-            ], 500);
+            return back();
         }
     }
     /**
