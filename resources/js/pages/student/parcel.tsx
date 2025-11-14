@@ -822,6 +822,19 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setShowDeleteModal(true);
     };
 
+    // Prevent body scroll when any modal is open
+    useEffect(() => {
+        if (showPayModal || showDetailsModal || showDeleteModal || showQRModal || showLocations) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [showPayModal, showDetailsModal, showDeleteModal, showQRModal, showLocations]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             {/* Notification Bell - Positioned at top right */}
@@ -921,7 +934,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                 {/* Quick Pay Modal */}
                 {showPayModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
                         <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl dark:bg-card">
                             <div className="flex items-center justify-between border-b border-gray-200 p-6">
                                 <div>
@@ -957,7 +970,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                 {/* Parcel Details Modal */}
                 {showDetailsModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
                         <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-card">
                             {/* Modal Header */}
                             <div className="flex items-center justify-between border-b border-gray-200 p-6">
@@ -1080,7 +1093,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                         {/* Locations Modal */}
                         {showLocations && (
-                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+                            <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
                                 <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-card">
                                     <div className="mb-4 flex items-center justify-between border-b pb-4">
                                         <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-card-foreground">
@@ -1387,6 +1400,81 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     )}
                 </div>
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && selectedParcelId !== null && (
+                <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
+                    <div className="w-full max-w-md rounded-lg bg-white p-4 shadow-lg dark:bg-card">
+                        <div className="flex flex-col gap-4">
+                            <div className="text-center">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">Confirm Deletion</h3>
+                                <p className="mt-1 text-sm text-gray-600 dark:text-muted-foreground">
+                                    Are you sure you want to delete this parcel? This action cannot be undone.
+                                </p>
+                            </div>
+
+                            {/* Parcel details for confirmation */}
+                            <div className="rounded-md bg-gray-50 p-3 text-sm text-gray-700 dark:bg-muted">
+                                <div className="flex justify-between">
+                                    <span className="font-medium">Parcel Code:</span>
+                                    <span>{selectedParcelCode}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="font-medium">Status:</span>
+                                    <span className={getStatusStyles('Pending Payment')}>Pending Payment</span>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => setShowDeleteModal(false)}
+                                    className="flex-1 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        if (selectedParcelId === null) return;
+                                        setIsDeleting(true);
+                                        try {
+                                            const response = await fetch(`/staff/parcel/${selectedParcelId}`, {
+                                                method: 'DELETE',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                                                },
+                                            });
+
+                                            if (!response.ok) {
+                                                throw new Error('Failed to delete parcel. Please try again.');
+                                            }
+
+                                            // Remove from local state
+                                            setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== selectedParcelId));
+
+                                            addToastNotification('success', 'Parcel Deleted', 'The parcel has been successfully deleted.');
+                                            setShowDeleteModal(false);
+                                        } catch (error) {
+                                            console.error('Delete parcel error:', error);
+                                            addToastNotification('error', 'Deletion Failed', 'Failed to delete parcel. Please try again.');
+                                        } finally {
+                                            setIsDeleting(false);
+                                        }
+                                    }}
+                                    className="flex-1 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                                >
+                                    {isDeleting ? (
+                                        <div className="flex items-center justify-center">
+                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-white"></div>
+                                        </div>
+                                    ) : (
+                                        'Delete Parcel'
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AppLayout>
     );
 }
