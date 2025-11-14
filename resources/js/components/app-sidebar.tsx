@@ -24,8 +24,8 @@ export function AppSidebar() {
         isStaff,
         staffDepartment,
         staffDepartmentTrimmed: staffDepartment?.trim(),
-        isGeneral: staffDepartment?.trim() === 'Operations - General' || staffDepartment?.trim() === 'General',
-        isAdmin: staffDepartment?.trim() === 'Operations - Admin' || staffDepartment?.trim() === 'Admin',
+        isGeneral: staffDepartment?.trim() === 'Operations - General',
+        isAdmin: staffDepartment?.trim() === 'Operations - Admin',
         userType: auth?.user?.type,
         fullUser: auth?.user
     });
