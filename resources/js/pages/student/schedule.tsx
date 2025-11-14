@@ -229,6 +229,11 @@ const SchedulePickup = ({ parcel }: Props) => {
         return day === 0 || day === 6; // Sunday or Saturday
     };
 
+    const isWeekday = (date: Date) => {
+        const day = date.getDay();
+        return day >= 1 && day <= 5; // Monday to Friday
+    };
+
     const isToday = (date: Date) => {
         const today = new Date();
         return date.toDateString() === today.toDateString();
@@ -271,8 +276,9 @@ const SchedulePickup = ({ parcel }: Props) => {
     };
 
     const handleDateClick = (date: Date) => {
-        if (!isWeekend(date) && !isPastDate(date)) {
+        if (!isPastDate(date)) {
             setSelectedDate(date);
+            setSelectedTimeSlot(''); // Reset time slot when date changes
             fetchAvailability(date);
         }
     };
@@ -287,14 +293,48 @@ const SchedulePickup = ({ parcel }: Props) => {
         setCurrentMonth(newMonth);
     };
 
-    const timeSlots = [
-        { id: '9:00-10:00', label: '9:00 AM - 10:00 AM', available: true },
-        { id: '10:00-11:00', label: '10:00 AM - 11:00 AM', available: true },
-        { id: '11:00-12:00', label: '11:00 AM - 12:00 PM', available: false },
-        { id: '14:00-15:00', label: '2:00 PM - 3:00 PM', available: true },
-        { id: '15:00-16:00', label: '3:00 PM - 4:00 PM', available: true },
-        { id: '16:00-17:00', label: '4:00 PM - 5:00 PM', available: true },
-    ];
+    // Get time slots based on selected date (weekday vs weekend)
+    const getTimeSlots = () => {
+        if (!selectedDate) {
+            // Default to weekday slots if no date selected
+            return [
+                { id: '13:00-14:00', label: '1:00 PM - 2:00 PM', available: true },
+                { id: '14:00-15:00', label: '2:00 PM - 3:00 PM', available: true },
+                { id: '15:00-16:00', label: '3:00 PM - 4:00 PM', available: true },
+                { id: '16:00-17:00', label: '4:00 PM - 5:00 PM', available: true },
+                { id: '17:00-18:00', label: '5:00 PM - 6:00 PM', available: true },
+                { id: '21:00-22:00', label: '9:00 PM - 10:00 PM', available: true },
+                { id: '22:00-23:00', label: '10:00 PM - 11:00 PM', available: true },
+            ];
+        }
+
+        const isWeekendDate = isWeekend(selectedDate);
+        
+        if (isWeekendDate) {
+            // Saturday & Sunday slots
+            return [
+                { id: '10:00-11:00', label: '10:00 AM - 11:00 AM', available: true },
+                { id: '11:00-12:00', label: '11:00 AM - 12:00 PM', available: true },
+                { id: '12:00-13:00', label: '12:00 PM - 1:00 PM', available: true },
+                { id: '14:00-15:00', label: '2:00 PM - 3:00 PM', available: true },
+                { id: '15:00-16:00', label: '3:00 PM - 4:00 PM', available: true },
+                { id: '16:00-17:00', label: '4:00 PM - 5:00 PM', available: true },
+            ];
+        } else {
+            // Monday - Friday slots
+            return [
+                { id: '13:00-14:00', label: '1:00 PM - 2:00 PM', available: true },
+                { id: '14:00-15:00', label: '2:00 PM - 3:00 PM', available: true },
+                { id: '15:00-16:00', label: '3:00 PM - 4:00 PM', available: true },
+                { id: '16:00-17:00', label: '4:00 PM - 5:00 PM', available: true },
+                { id: '17:00-18:00', label: '5:00 PM - 6:00 PM', available: true },
+                { id: '21:00-22:00', label: '9:00 PM - 10:00 PM', available: true },
+                { id: '22:00-23:00', label: '10:00 PM - 11:00 PM', available: true },
+            ];
+        }
+    };
+
+    const timeSlots = getTimeSlots();
 
     // Check if a time slot has passed for today
     const isTimeSlotPassed = (slotId: string, date: Date | null) => {
@@ -422,7 +462,11 @@ const SchedulePickup = ({ parcel }: Props) => {
                         <div className="space-y-2">
                             <h3 className="font-semibold text-gray-900">University Parcel Center</h3>
                             <p className="text-gray-600">Ground Floor, Student Services Building</p>
-                            <p className="text-gray-600">Operating Hours: Monday - Friday, 9:00 AM - 5:00 PM</p>
+                            <div className="text-gray-600">
+                                <p className="font-medium">Operating Hours:</p>
+                                <p>Monday - Friday: 1:00 PM - 6:00 PM, 9:00 PM - 11:00 PM</p>
+                                <p>Saturday & Sunday: 10:00 AM - 1:00 PM, 2:00 PM - 5:00 PM</p>
+                            </div>
                         </div>
                     </div>
 
@@ -465,15 +509,17 @@ const SchedulePickup = ({ parcel }: Props) => {
                                         {date ? (
                                             <button
                                                 onClick={() => handleDateClick(date)}
-                                                disabled={isWeekend(date) || isPastDate(date)}
+                                                disabled={isPastDate(date)}
                                                 className={`h-10 w-10 rounded-full text-sm font-medium transition-colors ${
                                                     isSelected(date)
                                                         ? 'bg-blue-500 text-white'
                                                         : isToday(date)
                                                           ? 'bg-blue-100 text-blue-700'
-                                                          : isWeekend(date) || isPastDate(date)
+                                                          : isPastDate(date)
                                                             ? 'cursor-not-allowed text-gray-300'
-                                                            : 'text-gray-700 hover:bg-gray-100'
+                                                            : isWeekend(date)
+                                                              ? 'text-purple-600 hover:bg-purple-50'
+                                                              : 'text-gray-700 hover:bg-gray-100'
                                                 } `}
                                             >
                                                 {date.getDate()}
@@ -487,8 +533,9 @@ const SchedulePickup = ({ parcel }: Props) => {
 
                             {/* Calendar Notes */}
                             <div className="space-y-1 text-sm text-gray-600">
-                                <p>• Weekends are not available</p>
-                                <p>• Collection available Monday - Friday only</p>
+                                <p className="font-semibold">Operating Hours:</p>
+                                <p>• Monday - Friday: 1 PM - 6 PM, 9 PM - 11 PM</p>
+                                <p>• Saturday & Sunday: 10 AM - 1 PM, 2 PM - 5 PM</p>
                             </div>
                         </div>
 
@@ -504,8 +551,11 @@ const SchedulePickup = ({ parcel }: Props) => {
                             <div className="mb-6 space-y-3">
                                 {timeSlots.map((slot) => {
                                     const state = slotAvailability[slot.label];
-                                    const isFull = state?.full === true;
-                                    const isRecommended = state?.recommended === true;
+                                    const currentCount = typeof state?.count === 'number' ? state.count : 0;
+                                    const maxCapacity = 20;
+                                    const isFull = state?.full === true || currentCount >= maxCapacity;
+                                    // Show recommended for slots with less than 10 students (50% capacity)
+                                    const isRecommended = !isFull && currentCount < 10;
                                     const hasPassed = isTimeSlotPassed(slot.id, selectedDate);
                                     const isAvailable = !isFull && !hasPassed;
                                     const isSelectedSlot = selectedTimeSlot === slot.id;
@@ -526,10 +576,15 @@ const SchedulePickup = ({ parcel }: Props) => {
                                             <div className="flex items-center gap-3">
                                                 <Clock className="h-4 w-4 text-gray-500" />
                                                 <span className={isAvailable ? 'text-gray-900' : 'text-gray-500'}>{slot.label}</span>
-                                                {typeof state?.count === 'number' && (
-                                                    <span className="ml-2 text-xs text-gray-500">{state.count}/20</span>
-                                                )}
-                                                {isRecommended && !isFull && !hasPassed && (
+                                                <span 
+                                                    className={`ml-2 text-xs font-medium ${
+                                                        isFull ? 'text-red-600' : currentCount >= 15 ? 'text-orange-600' : 'text-gray-500'
+                                                    }`}
+                                                    title={`${currentCount} students scheduled out of ${maxCapacity} maximum capacity`}
+                                                >
+                                                    {currentCount}/{maxCapacity} slots
+                                                </span>
+                                                {isRecommended && !hasPassed && (
                                                     <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
                                                         Recommended
                                                     </span>
@@ -546,7 +601,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                             <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
                                 <h4 className="mb-1 font-semibold text-yellow-900">Note:</h4>
                                 <p className="text-sm text-yellow-800">
-                                    Please arrive within your selected time slot. Bring your QR code and collection code.
+                                    Please arrive within your selected time slot. Bring your QR code or collection code.
                                 </p>
                             </div>
                         </div>
