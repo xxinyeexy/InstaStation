@@ -41,71 +41,15 @@
                                 Please show this QR Code to the staff upon collection.
                             </h3>
 
-                            @if (!empty($embeddedQrCodeUrl))
-                                <!-- QR Code Section: Embedded attachment (best email client compatibility) -->
-                                <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
-                                    <tr>
-                                        <td align="center"
-                                            style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
-                                            <div style="display: inline-block; background: #fef3c7; padding: 20px;">
-                                                <img src="{{ $embeddedQrCodeUrl }}" alt="QR Code: {{ $parcelCode }}"
-                                                    width="300" height="300"
-                                                    style="display: block; width: 300px; height: 300px; max-width: 300px; border: 0;" />
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </table>
-                            @elseif (!empty($qrCodeBinary) && isset($message))
-                                <!-- Fallback: Try embedData in view if build() method didn't work -->
-                                @php
-                                    $embeddedImage = null;
-                                    try {
-                                        $embeddedImage = $message->embedData(
-                                            $qrCodeBinary,
-                                            'qrcode.png',
-                                            $qrCodeMime ?? 'image/png',
-                                        );
-                                    } catch (\Exception $e) {
-                                        $embeddedImage = null;
-                                    }
-                                @endphp
-                                @if (!empty($embeddedImage))
-                                    <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
-                                        <tr>
-                                            <td align="center"
-                                                style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
-                                                <div style="display: inline-block; background: #fef3c7; padding: 20px;">
-                                                    <img src="{{ $embeddedImage }}" alt="QR Code: {{ $parcelCode }}"
-                                                        width="300" height="300"
-                                                        style="display: block; width: 300px; height: 300px; max-width: 300px; border: 0;" />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                @elseif (!empty($qrCodeBase64))
-                                    <!-- Fallback to base64 if embedData fails -->
-                                    <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
-                                        <tr>
-                                            <td align="center"
-                                                style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
-                                                <div style="display: inline-block; background: #fef3c7; padding: 20px;">
-                                                    <img src="data:{{ $qrCodeMime ?? 'image/png' }};base64,{{ $qrCodeBase64 }}"
-                                                        alt="QR Code: {{ $parcelCode }}" width="300" height="300"
-                                                        style="display: block; width: 300px; height: 300px; max-width: 300px; border: 0;" />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                @endif
-                            @elseif (!empty($qrCodeBase64))
-                                <!-- Fallback: Inline base64 image (if binary not available) -->
+                            @if (!empty($qrCodeBase64))
+                                <!-- QR Code Section: Inline base64 image (no attachment, works in most email clients) -->
                                 <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                                     <tr>
                                         <td align="center"
                                             style="padding: 20px; background-color: #fef3c7; border-radius: 8px;">
                                             <div style="display: inline-block; background: #fef3c7; padding: 20px;">
                                                 <img src="data:{{ $qrCodeMime ?? 'image/png' }};base64,{{ $qrCodeBase64 }}"
-                                                    alt="QR Code: {{ $collectionCode }}" width="300" height="300"
+                                                    alt="QR Code: {{ $parcelCode }}" width="300" height="300"
                                                     style="display: block; width: 300px; height: 300px; max-width: 300px; border: 0;" />
                                             </div>
                                         </td>

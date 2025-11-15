@@ -64,66 +64,90 @@ class ParcelScheduledMail extends Mailable
         $this->qrCodeCid = 'qrcode-' . $parcel->parcel_id . '-' . time();
 
         try {
-            // Try to use existing QR code file if it exists
-            if ($parcel->qr_code && Storage::disk('public')->exists($parcel->qr_code)) {
-                $this->qrCodePath = Storage::disk('public')->path($parcel->qr_code);
-                $this->qrCodeMime = File::mimeType($this->qrCodePath) ?: 'image/png';
+            // Always generate QR code fresh to ensure it contains the parcel code
+            // Generate QR code on the fly as PNG (best email compatibility)
+            try {
+                $this->qrCodeBinary = QrCode::format('png')
+                    ->size(400)
+                    ->margin(1)
+                    ->errorCorrection('H')
+                    ->generate($qrCodeData);
 
-                // Read QR code binary data for embedded attachment
-                $this->qrCodeBinary = Storage::disk('public')->get($parcel->qr_code);
-
-                // Also keep base64 for fallback
+                $this->qrCodeMime = 'image/png';
+                // Encode to base64 - ensure clean string without line breaks for email compatibility
                 $this->qrCodeBase64 = base64_encode($this->qrCodeBinary);
 
-                // Public absolute URL for email clients (preferred for Gmail)
+                // Create a temporary file for embedding (required for $message->embed())
+                $tempDir = sys_get_temp_dir();
+                $tempFile = $tempDir . '/qrcode_' . $parcel->parcel_id . '_' . time() . '.png';
+
+                if (file_put_contents($tempFile, $this->qrCodeBinary) !== false) {
+                    $this->qrCodePath = $tempFile;
+                    Log::info('QR code temp file created for email', [
+                        'parcel_id' => $parcel->parcel_id,
+                        'parcel_code' => $this->parcelCode,
+                        'temp_file' => $tempFile
+                    ]);
+                } else {
+                    Log::warning('Failed to create temp file for QR code', [
+                        'parcel_id' => $parcel->parcel_id
+                    ]);
+                    $this->qrCodePath = null;
+                }
+
+                // Public absolute URL for email clients (fallback)
                 try {
-                    $relativeUrl = Storage::url($parcel->qr_code);
-                    $this->qrCodeUrl = URL::to($relativeUrl);
+                    if ($parcel->qr_code && Storage::disk('public')->exists($parcel->qr_code)) {
+                        $relativeUrl = Storage::url($parcel->qr_code);
+                        $this->qrCodeUrl = URL::to($relativeUrl);
+                    } else {
+                        $this->qrCodeUrl = null;
+                    }
                 } catch (\Exception $e) {
                     $this->qrCodeUrl = null;
                 }
-            } else {
-                // Generate QR code on the fly as PNG (best email compatibility)
+
+                Log::info('QR code generated on-the-fly for email', [
+                    'parcel_id' => $parcel->parcel_id,
+                    'parcel_code' => $this->parcelCode,
+                    'qr_data' => $qrCodeData
+                ]);
+            } catch (\Exception $e) {
+                // Fallback to SVG if PNG fails
                 try {
-                    $this->qrCodeBinary = QrCode::format('png')
+                    $this->qrCodeBinary = QrCode::format('svg')
                         ->size(400)
                         ->margin(1)
                         ->errorCorrection('H')
                         ->generate($qrCodeData);
 
-                    $this->qrCodeMime = 'image/png';
+                    $this->qrCodeMime = 'image/svg+xml';
+                    // Encode to base64 - ensure clean string without line breaks for email compatibility
                     $this->qrCodeBase64 = base64_encode($this->qrCodeBinary);
-                    $this->qrCodeUrl = null; // No URL for on-the-fly generated QR
 
-                    Log::info('QR code generated on-the-fly for email', [
-                        'parcel_id' => $parcel->parcel_id,
-                        'collection_code' => $parcel->collection_code
-                    ]);
-                } catch (\Exception $e) {
-                    // Fallback to SVG if PNG fails
-                    try {
-                        $this->qrCodeBinary = QrCode::format('svg')
-                            ->size(400)
-                            ->margin(1)
-                            ->errorCorrection('H')
-                            ->generate($qrCodeData);
+                    $tempDir = sys_get_temp_dir();
+                    $tempFile = $tempDir . '/qrcode_' . $parcel->parcel_id . '_' . time() . '.svg';
 
-                        $this->qrCodeMime = 'image/svg+xml';
-                        $this->qrCodeBase64 = base64_encode($this->qrCodeBinary);
-                        $this->qrCodeUrl = null;
-
-                        Log::info('QR code generated as SVG for email', [
-                            'parcel_id' => $parcel->parcel_id
-                        ]);
-                    } catch (\Exception $e2) {
-                        Log::error('Failed to generate QR code for email', [
-                            'parcel_id' => $parcel->parcel_id,
-                            'error' => $e2->getMessage()
-                        ]);
-                        $this->qrCodeBinary = null;
-                        $this->qrCodeBase64 = null;
-                        $this->qrCodeUrl = null;
+                    if (file_put_contents($tempFile, $this->qrCodeBinary) !== false) {
+                        $this->qrCodePath = $tempFile;
+                    } else {
+                        $this->qrCodePath = null;
                     }
+
+                    $this->qrCodeUrl = null;
+
+                    Log::info('QR code generated as SVG for email', [
+                        'parcel_id' => $parcel->parcel_id
+                    ]);
+                } catch (\Exception $e2) {
+                    Log::error('Failed to generate QR code for email', [
+                        'parcel_id' => $parcel->parcel_id,
+                        'error' => $e2->getMessage()
+                    ]);
+                    $this->qrCodeBinary = null;
+                    $this->qrCodeBase64 = null;
+                    $this->qrCodePath = null;
+                    $this->qrCodeUrl = null;
                 }
             }
         } catch (\Exception $e) {
@@ -133,77 +157,21 @@ class ParcelScheduledMail extends Mailable
             ]);
             $this->qrCodeBinary = null;
             $this->qrCodeBase64 = null;
+            $this->qrCodePath = null;
             $this->qrCodeUrl = null;
         }
     }
 
     /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: 'New Parcel ' . $this->parcelCode . ' Available!',
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        $content = new Content(
-            view: 'emails.parcel-scheduled-mail',
-        );
-
-        return $content->with([
-            'embeddedQrCodeUrl' => $this->embeddedQrCodeUrl,
-        ]);
-    }
-
-    /**
-     * Build the message and embed the QR code.
-     * This method is called by Laravel when sending the email.
+     * Build the message using the old-style approach for better compatibility.
+     * No attachments - QR code is embedded inline using base64.
      */
     public function build()
     {
-        // Embed QR code as inline attachment if binary data is available
-        if (!empty($this->qrCodeBinary)) {
-            try {
-                // Use embedData to create a CID attachment
-                // This creates a Content-ID that can be referenced in the email HTML
-                $this->embeddedQrCodeUrl = $this->embedData(
-                    $this->qrCodeBinary,
-                    'qrcode.png',
-                    $this->qrCodeMime ?? 'image/png'
-                );
+        // Set subject
+        $this->subject('New Parcel ' . $this->parcelCode . ' Available!');
 
-                Log::info('QR code embedded in email', [
-                    'parcel_id' => $this->parcel->parcel_id,
-                    'parcel_code' => $this->parcelCode,
-                    'embedded_url' => substr($this->embeddedQrCodeUrl, 0, 50) . '...'
-                ]);
-            } catch (\Exception $e) {
-                Log::error('Failed to embed QR code in email', [
-                    'parcel_id' => $this->parcel->parcel_id,
-                    'error' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString()
-                ]);
-                $this->embeddedQrCodeUrl = null;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        // No attachments - QR code will be embedded inline using embedData() in the view
-        return [];
+        // Return view - QR code will be displayed using base64 (no attachments)
+        return $this->view('emails.parcel-scheduled-mail');
     }
 }

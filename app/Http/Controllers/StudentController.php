@@ -33,12 +33,18 @@ class StudentController extends Controller
      * @var array<string, array{0: string, 1: string}>
      */
     private array $timeSlotRanges = [
-        '9:00 AM - 10:00 AM' => ['09:00:00', '10:00:00'],
-        '10:00 AM - 11:00 AM' => ['10:00:00', '11:00:00'],
-        '11:00 AM - 12:00 PM' => ['11:00:00', '12:00:00'],
+        // Weekday slots: Monday - Friday: 1 PM - 6 PM, 9 PM - 11 PM
+        '1:00 PM - 2:00 PM' => ['13:00:00', '14:00:00'],
         '2:00 PM - 3:00 PM' => ['14:00:00', '15:00:00'],
         '3:00 PM - 4:00 PM' => ['15:00:00', '16:00:00'],
         '4:00 PM - 5:00 PM' => ['16:00:00', '17:00:00'],
+        '5:00 PM - 6:00 PM' => ['17:00:00', '18:00:00'],
+        '9:00 PM - 10:00 PM' => ['21:00:00', '22:00:00'],
+        '10:00 PM - 11:00 PM' => ['22:00:00', '23:00:00'],
+        // Weekend slots: Saturday & Sunday: 10 AM - 1 PM, 2 PM - 5 PM
+        '10:00 AM - 11:00 AM' => ['10:00:00', '11:00:00'],
+        '11:00 AM - 12:00 PM' => ['11:00:00', '12:00:00'],
+        '12:00 PM - 1:00 PM' => ['12:00:00', '13:00:00'],
     ];
 
     private function allowedTimeSlots(): array
