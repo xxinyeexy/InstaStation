@@ -2072,9 +2072,9 @@ This action cannot be undone and will permanently remove all parcel data and his
                                 </button>
 
                                 {/* Cleanup Old Records Button - Only for Operations/Admin */}
-                                {(currentUser?.department?.trim() === 'Operations' || 
-                                  currentUser?.department?.trim() === 'Operations - Admin' || 
-                                  currentUser?.department?.trim() === 'Admin' ||
+                                {((currentUser?.department as string)?.trim() === 'Operations' || 
+                                  (currentUser?.department as string)?.trim() === 'Operations - Admin' || 
+                                  (currentUser?.department as string)?.trim() === 'Admin' ||
                                   currentUser?.type === 'admin') && (
                                     <button
                                         onClick={() => {
