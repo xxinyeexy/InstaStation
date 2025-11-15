@@ -295,38 +295,35 @@ const SchedulePickup = ({ parcel }: Props) => {
         if (!selectedDate) {
             // Default to weekday slots if no date selected
             return [
-                { id: '13:00-14:00', label: '1:00 PM - 2:00 PM', available: true },
+                { id: '09:00-10:00', label: '9:00 AM - 10:00 AM', available: true },
+                { id: '10:00-11:00', label: '10:00 AM - 11:00 AM', available: true },
+                { id: '11:00-12:00', label: '11:00 AM - 12:00 PM', available: true },
                 { id: '14:00-15:00', label: '2:00 PM - 3:00 PM', available: true },
                 { id: '15:00-16:00', label: '3:00 PM - 4:00 PM', available: true },
                 { id: '16:00-17:00', label: '4:00 PM - 5:00 PM', available: true },
-                { id: '17:00-18:00', label: '5:00 PM - 6:00 PM', available: true },
-                { id: '21:00-22:00', label: '9:00 PM - 10:00 PM', available: true },
-                { id: '22:00-23:00', label: '10:00 PM - 11:00 PM', available: true },
             ];
         }
 
         const isWeekendDate = isWeekend(selectedDate);
         
         if (isWeekendDate) {
-            // Saturday & Sunday slots
+            // Saturday & Sunday slots - must match backend exactly
             return [
                 { id: '10:00-11:00', label: '10:00 AM - 11:00 AM', available: true },
                 { id: '11:00-12:00', label: '11:00 AM - 12:00 PM', available: true },
-                { id: '12:00-13:00', label: '12:00 PM - 1:00 PM', available: true },
                 { id: '14:00-15:00', label: '2:00 PM - 3:00 PM', available: true },
                 { id: '15:00-16:00', label: '3:00 PM - 4:00 PM', available: true },
                 { id: '16:00-17:00', label: '4:00 PM - 5:00 PM', available: true },
             ];
         } else {
-            // Monday - Friday slots
+            // Monday - Friday slots - must match backend exactly
             return [
-                { id: '13:00-14:00', label: '1:00 PM - 2:00 PM', available: true },
+                { id: '09:00-10:00', label: '9:00 AM - 10:00 AM', available: true },
+                { id: '10:00-11:00', label: '10:00 AM - 11:00 AM', available: true },
+                { id: '11:00-12:00', label: '11:00 AM - 12:00 PM', available: true },
                 { id: '14:00-15:00', label: '2:00 PM - 3:00 PM', available: true },
                 { id: '15:00-16:00', label: '3:00 PM - 4:00 PM', available: true },
                 { id: '16:00-17:00', label: '4:00 PM - 5:00 PM', available: true },
-                { id: '17:00-18:00', label: '5:00 PM - 6:00 PM', available: true },
-                { id: '21:00-22:00', label: '9:00 PM - 10:00 PM', available: true },
-                { id: '22:00-23:00', label: '10:00 PM - 11:00 PM', available: true },
             ];
         }
     };
