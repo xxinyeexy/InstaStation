@@ -63,6 +63,12 @@ class PaymentController extends Controller
         $verified = collect($parcels)->where('payment_state', 'Verified')->count();
         $totalPaid = $verified * 1.00; // RM1 each
 
+        // Filter rows to only show parcels requiring payment (exclude Verified)
+        $rowsRequiringPayment = collect($parcels)
+            ->whereIn('payment_state', ['Pending', 'Overdue'])
+            ->values()
+            ->toArray();
+
         // Payment history for this student (with proof image)
         $payments = Payment::query()
             ->whereHas('parcel', function ($q) use ($user) {
@@ -92,7 +98,7 @@ class PaymentController extends Controller
                 'verified' => $verified,
                 'total_paid' => $totalPaid,
             ],
-            'rows' => $parcels,
+            'rows' => $rowsRequiringPayment,
             'payments' => $payments,
         ]);
     }

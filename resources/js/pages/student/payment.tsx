@@ -79,9 +79,25 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
     const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(new Set());
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
+    const [paymentFilter, setPaymentFilter] = useState<'all' | 'verified' | 'pending'>('all');
+    const [paymentSort, setPaymentSort] = useState<'newest' | 'oldest'>('newest');
 
     // Get flash messages from the page props
     const { flash } = usePage().props as any;
+
+    // Filter and sort payment history
+    const filteredPayments = payments
+        .filter((p) => {
+            if (paymentFilter === 'all') return true;
+            if (paymentFilter === 'verified') return p.status === 'Verified';
+            if (paymentFilter === 'pending') return p.status === 'Pending';
+            return true;
+        })
+        .sort((a, b) => {
+            const dateA = new Date(a.submitted_at || '').getTime();
+            const dateB = new Date(b.submitted_at || '').getTime();
+            return paymentSort === 'newest' ? dateB - dateA : dateA - dateB;
+        });
 
     // Update notification list when props change, filtering out dismissed ones
     useEffect(() => {
@@ -430,12 +446,35 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                             <h2 className="text-lg font-semibold text-card-foreground">Payment History</h2>
                             <p className="text-sm text-muted-foreground">View and manage your payment submissions</p>
                         </div>
+                        <div className="flex items-center gap-2">
+                            {/* Filter Dropdown */}
+                            <select
+                                value={paymentFilter}
+                                onChange={(e) => setPaymentFilter(e.target.value as 'all' | 'verified' | 'pending')}
+                                className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            >
+                                <option value="all">All Status</option>
+                                <option value="verified">Verified</option>
+                                <option value="pending">Pending</option>
+                            </select>
+                            {/* Sort Dropdown */}
+                            <select
+                                value={paymentSort}
+                                onChange={(e) => setPaymentSort(e.target.value as 'newest' | 'oldest')}
+                                className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                            >
+                                <option value="newest">Most Recent</option>
+                                <option value="oldest">Oldest First</option>
+                            </select>
+                        </div>
                     </div>
-                    {payments.length === 0 ? (
-                        <div className="p-8 text-center text-sm text-muted-foreground">No payments submitted yet.</div>
+                    {filteredPayments.length === 0 ? (
+                        <div className="p-8 text-center text-sm text-muted-foreground">
+                            {paymentFilter === 'all' ? 'No payments submitted yet.' : `No ${paymentFilter} payments found.`}
+                        </div>
                     ) : (
                         <ul className="divide-y divide-border">
-                            {payments.map((p) => (
+                            {filteredPayments.map((p) => (
                                 <li key={p.payment_id} className="flex items-center justify-between gap-4 p-4">
                                     {/* Left: code + status */}
                                     <div className="flex items-center gap-2">
