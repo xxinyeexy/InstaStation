@@ -1505,147 +1505,153 @@ This action cannot be undone and will permanently remove all parcel data and his
                 </div>
             )}
 
-            {/* Background color matching the image */}
-            <div className="min-h-screen bg-white p-6">
-                {/* Top Stats Grid - Using actual database data */}
-                <div className="mb-6 grid grid-cols-3 gap-6">
-                    {/* Newly Arrived */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-pink-50 to-pink-200 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-pink-300 opacity-20"></div>
+            {/* Background with gradient */}
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 p-6">
+                {/* Top Stats Grid - Enhanced with better gradients and shadows */}
+                <div className="mb-8 grid grid-cols-3 gap-6">
+                    {/* Newly Arrived - Enhanced design */}
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-pink-100 bg-gradient-to-br from-pink-50 via-white to-pink-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-pink-200 hover:shadow-2xl">
+                        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-pink-200 to-pink-300 opacity-40 blur-2xl"></div>
+                        <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-pink-100 to-pink-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
                             <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500">
+                                <div className="mb-3 flex items-center gap-2">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-pink-400 to-pink-600 shadow-lg">
                                         <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                strokeWidth={2}
+                                                strokeWidth={2.5}
                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-700">Newly Arrived</p>
+                                    <p className="text-sm font-bold text-gray-700">Newly Arrived</p>
                                 </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.newlyArrived}</p>
+                                <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-pink-800">{stats.newlyArrived}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Pending Payments */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-orange-50 to-orange-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-orange-200 opacity-20"></div>
+                    {/* Pending Payments - Enhanced design */}
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-orange-100 bg-gradient-to-br from-orange-50 via-white to-orange-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-orange-200 hover:shadow-2xl">
+                        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-orange-200 to-orange-300 opacity-40 blur-2xl"></div>
+                        <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-orange-100 to-orange-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
                             <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
+                                <div className="mb-3 flex items-center gap-2">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 shadow-lg">
                                         <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                strokeWidth={2}
+                                                strokeWidth={2.5}
                                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-700">Pending Payment</p>
+                                    <p className="text-sm font-bold text-gray-700">Pending Payment</p>
                                 </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.pendingPayments}</p>
+                                <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-800">{stats.pendingPayments}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Ready for Collection */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-purple-200 opacity-20"></div>
+                    {/* Ready for Collection - Enhanced design */}
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-purple-100 bg-gradient-to-br from-purple-50 via-white to-purple-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-purple-200 hover:shadow-2xl">
+                        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-40 blur-2xl"></div>
+                        <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-purple-100 to-purple-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
                             <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-600">
+                                <div className="mb-3 flex items-center gap-2">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-700 shadow-lg">
                                         <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                strokeWidth={2}
+                                                strokeWidth={2.5}
                                                 d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-700">Ready For Collection</p>
+                                    <p className="text-sm font-bold text-gray-700">Ready For Collection</p>
                                 </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.readyForCollection}</p>
+                                <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-800">{stats.readyForCollection}</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Second Row Stats - Using actual database data */}
-                <div className="mb-6 grid grid-cols-3 gap-6">
-                    {/* Total Collection */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-green-200 opacity-20"></div>
+                {/* Second Row Stats - Enhanced design */}
+                <div className="mb-8 grid grid-cols-3 gap-6">
+                    {/* Total Collection - Enhanced design */}
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-green-100 bg-gradient-to-br from-green-50 via-white to-green-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-green-200 hover:shadow-2xl">
+                        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-green-200 to-green-300 opacity-40 blur-2xl"></div>
+                        <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-green-100 to-green-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
                             <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-400">
+                                <div className="mb-3 flex items-center gap-2">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-green-400 to-green-600 shadow-lg">
                                         <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                strokeWidth={2}
+                                                strokeWidth={2.5}
                                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-700">Today Collection</p>
+                                    <p className="text-sm font-bold text-gray-700">Today Collection</p>
                                 </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.todayCollection}</p>
+                                <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-800">{stats.todayCollection}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Total Revenue */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-yellow-200 opacity-20"></div>
+                    {/* Total Revenue - Enhanced design */}
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-yellow-100 bg-gradient-to-br from-yellow-50 via-white to-yellow-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-yellow-200 hover:shadow-2xl">
+                        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-yellow-200 to-yellow-300 opacity-40 blur-2xl"></div>
+                        <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-yellow-100 to-yellow-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
                             <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-400">
+                                <div className="mb-3 flex items-center gap-2">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg">
                                         <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                strokeWidth={2}
+                                                strokeWidth={2.5}
                                                 d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-700">Total Revenue</p>
+                                    <p className="text-sm font-bold text-gray-700">Total Revenue</p>
                                 </div>
-                                <p className="text-4xl font-bold text-gray-900">RM{stats.totalRevenue}</p>
+                                <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-yellow-800">RM{stats.totalRevenue}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Payment Verified */}
-                    <div className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
-                        <div className="absolute top-0 right-0 h-20 w-20 rounded-full bg-indigo-200 opacity-20"></div>
+                    {/* Payment Verified - Enhanced design */}
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-indigo-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-indigo-200 hover:shadow-2xl">
+                        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-40 blur-2xl"></div>
+                        <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-indigo-100 to-indigo-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
                             <div>
-                                <div className="mb-2 flex items-center gap-2">
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500">
+                                <div className="mb-3 flex items-center gap-2">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-lg">
                                         <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                strokeWidth={2}
+                                                strokeWidth={2.5}
                                                 d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-semibold text-gray-700">Payment Verified</p>
+                                    <p className="text-sm font-bold text-gray-700">Payment Verified</p>
                                 </div>
-                                <p className="text-4xl font-bold text-gray-900">{stats.paymentVerified}</p>
+                                <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-800">{stats.paymentVerified}</p>
                             </div>
                         </div>
                     </div>
@@ -2005,116 +2011,194 @@ This action cannot be undone and will permanently remove all parcel data and his
 
                     {/* Right Sidebar - 1 column */}
                     <div className="col-span-1 space-y-6">
-                        {/* Quick Actions */}
-                        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
-                            <div className="mb-6 flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,_#f2a6a6,_#f4d88e,_#a4d4ae,_#80c7d9,_#a39ddb)]">
+                        {/* Quick Actions - Enhanced */}
+                        <div className="relative overflow-hidden rounded-3xl border-2 border-gradient-to-br from-pink-100 to-purple-100 bg-white p-6 shadow-xl">
+                            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 opacity-20 blur-3xl"></div>
+                            <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-gradient-to-tr from-blue-200 to-cyan-200 opacity-20 blur-2xl"></div>
+                            
+                            <div className="relative mb-6 flex items-center gap-3">
+                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 shadow-lg">
                                     <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900">Quick Actions</h3>
+                                <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600">Quick Actions</h3>
                             </div>
-                            <div className="space-y-4">
+                            
+                            <div className="relative space-y-4">
                                 <Link
                                     href="/staff/add-parcel"
-                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-pink-200 hover:bg-gradient-to-r hover:from-pink-50 hover:to-pink-100 hover:shadow-md"
+                                    className="group flex w-full items-center gap-4 rounded-2xl border-2 border-pink-100 bg-gradient-to-r from-pink-50 via-white to-pink-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-pink-300 hover:shadow-xl hover:from-pink-100 hover:to-pink-50"
                                 >
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-50 to-pink-500 transition-all group-hover:scale-110">
-                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 to-pink-600 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+                                        <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                         </svg>
                                     </div>
-                                    <div>
-                                        <span className="text-sm font-semibold text-gray-900">Register New Parcel</span>
-                                        <p className="text-xs text-gray-500">Add a new parcel to the system</p>
+                                    <div className="flex-1">
+                                        <span className="block text-base font-bold text-gray-900 group-hover:text-pink-700">Register New Parcel</span>
+                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-pink-600">Add a new parcel to the system</p>
                                     </div>
-                                    <span className="ml-auto text-gray-400 transition-colors group-hover:text-pink-500">→</span>
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-100 text-pink-600 transition-all duration-300 group-hover:bg-pink-600 group-hover:text-white">
+                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
                                 </Link>
 
                                 <button
                                     onClick={openScanModal}
-                                    className="group flex w-full items-center gap-4 rounded-xl border border-gray-100 p-4 text-left transition-all hover:border-orange-200 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:shadow-md"
+                                    className="group flex w-full items-center gap-4 rounded-2xl border-2 border-purple-100 bg-gradient-to-r from-purple-50 via-white to-purple-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-purple-300 hover:shadow-xl hover:from-purple-100 hover:to-purple-50"
                                 >
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br bg-[linear-gradient(135deg,#f5d0c8,#f5f2f9,#d3b9a6,#fbe5cf,#d4dcfa)] transition-all group-hover:scale-110">
-                                        <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+                                        <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                strokeWidth={2}
+                                                strokeWidth={2.5}
                                                 d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zm12 0h2a1 1 0 001-1V6a1 1 0 00-1-1h-2a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
                                             />
                                         </svg>
                                     </div>
-                                    <div>
-                                        <span className="text-sm font-semibold text-gray-900">Scan QR Code</span>
-                                        <p className="text-xs text-gray-500">Quick parcel identification</p>
+                                    <div className="flex-1">
+                                        <span className="block text-base font-bold text-gray-900 group-hover:text-purple-700">Scan QR Code</span>
+                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-purple-600">Quick parcel identification</p>
                                     </div>
-                                    <span className="ml-auto text-gray-400 transition-colors group-hover:text-orange-500">→</span>
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-purple-600 transition-all duration-300 group-hover:bg-purple-600 group-hover:text-white">
+                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </div>
                                 </button>
+
+                                {/* Cleanup Old Records Button - Only for Operations/Admin */}
+                                {(currentUser?.department?.trim() === 'Operations' || 
+                                  currentUser?.department?.trim() === 'Operations - Admin' || 
+                                  currentUser?.department?.trim() === 'Admin' ||
+                                  currentUser?.type === 'admin') && (
+                                    <button
+                                        onClick={() => {
+                                            if (window.confirm('Are you sure you want to delete all student collection history (parcels) older than 10 days? This action cannot be undone.')) {
+                                                router.post('/staff/parcels/cleanup-old', {}, {
+                                                    preserveScroll: true,
+                                                    onSuccess: () => {
+                                                        router.reload();
+                                                    },
+                                                });
+                                            }
+                                        }}
+                                        className="group flex w-full items-center gap-4 rounded-2xl border-2 border-red-100 bg-gradient-to-r from-red-50 via-white to-red-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-red-300 hover:shadow-xl hover:from-red-100 hover:to-red-50"
+                                    >
+                                        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+                                            <Trash2 className="h-7 w-7 text-white" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <span className="block text-base font-bold text-gray-900 group-hover:text-red-700">Cleanup Old Records</span>
+                                            <p className="mt-1 text-xs text-gray-500 group-hover:text-red-600">Remove parcels older than 10 days</p>
+                                        </div>
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-600 transition-all duration-300 group-hover:bg-red-600 group-hover:text-white">
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </div>
+                                    </button>
+                                )}
                             </div>
                         </div>
 
-                        {/* Today's Collections */}
-                        <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-lg">
-                            <div className="mb-6 flex items-center justify-between">
+                        {/* Today's Collections - Enhanced */}
+                        <div className="relative overflow-hidden rounded-3xl border-2 border-gradient-to-br from-blue-100 to-cyan-100 bg-white p-6 shadow-xl">
+                            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-blue-200 to-cyan-200 opacity-20 blur-3xl"></div>
+                            <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-gradient-to-tr from-purple-200 to-pink-200 opacity-20 blur-2xl"></div>
+                            
+                            <div className="relative mb-6 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[linear-gradient(135deg,_#e7a6b2,_#f1bca1,_#d7c8a7,_#b4d6c3,_#c8b5e6)]">
+                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 via-cyan-400 to-teal-400 shadow-lg">
                                         <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M15 17h5l-5 5v-5zM4.19 4.19A2 2 0 006 3h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V5a2 2 0 012-2z"
+                                                strokeWidth={2.5}
+                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                                             />
                                         </svg>
                                     </div>
-                                    <div className="flex items-baseline gap-3">
-                                        <h3 className="text-xl font-bold text-gray-900">{formatScheduledDate(selectedDate)} Collection</h3>
-                                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
-                                            {todaysCollections.length}
-                                        </span>
-                                        <input
-                                            type="date"
-                                            value={selectedDate}
-                                            onChange={(e) => setSelectedDate(e.target.value)}
-                                            className="ml-4 rounded-md border px-2 py-1 text-sm"
-                                            aria-label="Select date"
-                                        />
+                                    <div>
+                                        <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600">Collections</h3>
+                                        <p className="text-xs text-gray-500">{formatScheduledDate(selectedDate)}</p>
                                     </div>
+                                    <span className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1 text-sm font-bold text-blue-700 shadow-sm">
+                                        {todaysCollections.length}
+                                    </span>
                                 </div>
                             </div>
-                            <div className="space-y-3">
+                            
+                            <div className="relative mb-4">
+                                <input
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(e) => setSelectedDate(e.target.value)}
+                                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    aria-label="Select date"
+                                />
+                            </div>
+                            
+                            <div className="relative max-h-[600px] space-y-3 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                 {todaysCollections.length === 0 ? (
-                                    <div className="rounded-xl p-4 text-sm text-gray-500">No collections scheduled for today.</div>
+                                    <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+                                        <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200">
+                                            <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <p className="text-sm font-medium text-gray-600">No collections scheduled</p>
+                                        <p className="mt-1 text-xs text-gray-400">for this date</p>
+                                    </div>
                                 ) : (
                                     todaysCollections.map((g) => (
-                                        <div key={g.key} className="rounded-xl border border-gray-100 p-4">
+                                        <div key={g.key} className="group rounded-2xl border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50 p-4 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-lg">
                                             <div className="flex items-start gap-4">
-                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 font-semibold text-purple-600">
-                                                    <span className="text-sm">{g.time_slot ? g.time_slot.split(' - ')[0] : ''}</span>
+                                                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 shadow-sm transition-all group-hover:scale-105 group-hover:from-purple-200 group-hover:to-purple-300">
+                                                    <span className="text-sm font-bold text-purple-700">{g.time_slot ? g.time_slot.split(' - ')[0].replace(/\s?(AM|PM)/, '') : ''}</span>
                                                 </div>
                                                 <div className="flex-1">
                                                     <div className="flex flex-col">
                                                         <div className="flex items-center gap-2">
-                                                            <p className="text-sm font-semibold text-gray-900">{g.student_name}</p>
-                                                            {g.student_matric && <p className="text-xs text-gray-500">({g.student_matric})</p>}
+                                                            <p className="text-sm font-bold text-gray-900">{g.student_name}</p>
+                                                            {g.student_matric && (
+                                                                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+                                                                    {g.student_matric}
+                                                                </span>
+                                                            )}
                                                         </div>
-                                                        <div className="mt-1 text-xs text-gray-700">
-                                                            <span className="font-medium">Parcel ID:</span>
-                                                            <div className="mt-1 flex flex-wrap gap-1">
+                                                        <div className="mt-2 text-xs text-gray-700">
+                                                            <span className="font-semibold text-gray-500">Parcels:</span>
+                                                            <div className="mt-1.5 flex flex-wrap gap-1.5">
                                                                 {g.parcels.map((pp) => (
                                                                     <span
                                                                         key={pp.parcel_code}
-                                                                        className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-[11px] text-gray-800"
+                                                                        className="inline-flex items-center rounded-lg border-2 border-pink-200 bg-gradient-to-r from-pink-50 to-pink-100 px-2.5 py-1 font-mono text-[11px] font-bold text-pink-700 shadow-sm transition-all hover:scale-105 hover:shadow-md"
                                                                     >
                                                                         {pp.parcel_code}
                                                                     </span>
                                                                 ))}
                                                             </div>
                                                         </div>
-                                                        <div className="mt-1 text-xs text-gray-500">
-                                                            Timeslot: {g.time_slot || formatScheduledDate(g.schedule || '')}
+                                                        <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-500">
+                                                            <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={2}
+                                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                                />
+                                                            </svg>
+                                                            <span className="font-medium">{g.time_slot || formatScheduledDate(g.schedule || '')}</span>
                                                         </div>
                                                     </div>
                                                 </div>
