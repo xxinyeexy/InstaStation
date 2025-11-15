@@ -54,5 +54,9 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    type?: 'student' | 'staff' | 'admin';
+    profile_pic?: string | null;
+    phone_no?: string | null;
+    room_no?: string | null;
     [key: string]: unknown; // This allows for additional properties...
 }

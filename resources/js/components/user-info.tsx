@@ -5,15 +5,16 @@ import { GraduationCap, ShieldCheck } from 'lucide-react';
 
 export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: boolean }) {
     const getInitials = useInitials();
-    const isStaff = (user as any)?.type === 'staff';
+    const isStaff = user.type === 'staff';
     const roleLabel = isStaff ? 'Staff' : 'Student';
     const roleClasses = isStaff ? 'border-pink-200 bg-pink-50 text-pink-500' : 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    const profilePicUrl = user.profile_pic ? `/storage/${user.profile_pic}` : null;
 
     return (
         <>
-            <Avatar className="h-8 w-8 overflow-hidden rounded-full">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+            <Avatar className="h-8 w-8 rounded-full">
+                <AvatarImage src={profilePicUrl || user.avatar} alt={user.name} className="object-cover" />
+                <AvatarFallback className="rounded-full bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                     {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>
