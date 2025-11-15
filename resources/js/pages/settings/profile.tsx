@@ -1,7 +1,8 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
-import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
+import { FormEventHandler, useState } from 'react';
+import { Upload, X } from 'lucide-react';
 
 import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
@@ -22,21 +23,48 @@ const breadcrumbs: BreadcrumbItem[] = [
 type ProfileForm = {
     name: string;
     email: string;
+    phone_no: string;
+    room_no: string;
+    profile_pic: File | null;
 };
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
     const { auth } = usePage<SharedData>().props;
+    const [previewUrl, setPreviewUrl] = useState<string | null>(
+        auth.user.profile_pic ? `/storage/${auth.user.profile_pic}` : null
+    );
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
+    const { data, setData, post, errors, processing, recentlySuccessful } = useForm<ProfileForm>({
         name: auth.user.name,
         email: auth.user.email,
+        phone_no: auth.user.phone_no || '',
+        room_no: auth.user.room_no || '',
+        profile_pic: null,
     });
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('profile_pic', file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeProfilePic = () => {
+        setData('profile_pic', null);
+        setPreviewUrl(auth.user.profile_pic ? `/storage/${auth.user.profile_pic}` : null);
+    };
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        patch(route('profile.update'), {
+        post(route('profile.update'), {
             preserveScroll: true,
+            forceFormData: true,
         });
     };
 
@@ -49,6 +77,52 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     <HeadingSmall title="Profile information" description="Update your name and email address" />
 
                     <form onSubmit={submit} className="space-y-6">
+                        {/* Profile Picture Upload */}
+                        <div className="grid gap-2">
+                            <Label>Profile Picture</Label>
+                            <div className="flex items-center gap-4">
+                                {previewUrl ? (
+                                    <div className="relative">
+                                        <img
+                                            src={previewUrl}
+                                            alt="Profile"
+                                            className="h-24 w-24 rounded-full object-cover border-2 border-gray-200"
+                                        />
+                                        {data.profile_pic && (
+                                            <button
+                                                type="button"
+                                                onClick={removeProfilePic}
+                                                className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="h-24 w-24 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <Upload className="h-8 w-8 text-gray-400" />
+                                    </div>
+                                )}
+                                <div>
+                                    <Input
+                                        id="profile_pic"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                    <Label
+                                        htmlFor="profile_pic"
+                                        className="cursor-pointer inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150"
+                                    >
+                                        Choose Photo
+                                    </Label>
+                                    <p className="mt-2 text-xs text-gray-500">JPG, PNG or GIF (MAX. 2MB)</p>
+                                </div>
+                            </div>
+                            <InputError className="mt-2" message={errors.profile_pic} />
+                        </div>
+
                         <div className="grid gap-2">
                             <Label htmlFor="name">Name</Label>
 
@@ -81,6 +155,38 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                             <InputError className="mt-2" message={errors.email} />
                         </div>
+
+                        <div className="grid gap-2">
+                            <Label htmlFor="phone_no">Phone Number</Label>
+
+                            <Input
+                                id="phone_no"
+                                type="tel"
+                                className="mt-1 block w-full"
+                                value={data.phone_no}
+                                onChange={(e) => setData('phone_no', e.target.value)}
+                                autoComplete="tel"
+                                placeholder="e.g., 0123456789"
+                            />
+
+                            <InputError className="mt-2" message={errors.phone_no} />
+                        </div>
+
+                        {auth.user.type === 'student' && (
+                            <div className="grid gap-2">
+                                <Label htmlFor="room_no">Room Number</Label>
+
+                                <Input
+                                    id="room_no"
+                                    className="mt-1 block w-full"
+                                    value={data.room_no}
+                                    onChange={(e) => setData('room_no', e.target.value)}
+                                    placeholder="e.g., A-101"
+                                />
+
+                                <InputError className="mt-2" message={errors.room_no} />
+                            </div>
+                        )}
 
                         {mustVerifyEmail && auth.user.email_verified_at === null && (
                             <div>

@@ -25,7 +25,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'type',
         'matric',
         'department',
-
+        'phone_no',
+        'room_no',
+        'profile_pic',
     ];
     public function staff()
     {
