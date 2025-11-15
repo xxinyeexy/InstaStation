@@ -831,4 +831,43 @@ class ParcelController extends Controller
             'Content-Type' => 'text/csv',
         ]);
     }
+
+    /**
+     * Cleanup old collection records (parcels older than 3 months)
+     * Only accessible by Operations/Admin staff
+     */
+    public function cleanupOldRecords(Request $request)
+    {
+        $user = Auth::user();
+        
+        // Check if user has permission (Operations or Admin)
+        $allowedDepartments = ['Operations', 'Operations - Admin', 'Admin'];
+        if ($user->type !== 'admin' && !in_array(trim($user->department ?? ''), $allowedDepartments)) {
+            return back()->with('error', 'You do not have permission to perform this action');
+        }
+
+        // Delete parcels that are collected and older than 10 days
+        // Using the schedule date (collection date) as the reference
+        $tenDaysAgo = now()->subDays(10)->startOfDay();
+        
+        $deletedCount = Parcel::where('parcel_status', 'Collected')
+            ->where(function($query) use ($tenDaysAgo) {
+                // Use schedule date if available, otherwise fall back to updated_at
+                $query->where('schedule', '<', $tenDaysAgo)
+                      ->orWhere(function($q) use ($tenDaysAgo) {
+                          $q->whereNull('schedule')
+                            ->where('updated_at', '<', $tenDaysAgo);
+                      });
+            })
+            ->delete();
+
+        Log::info('Cleanup old records executed', [
+            'user_id' => $user->id,
+            'deleted_count' => $deletedCount,
+            'threshold_date' => $tenDaysAgo
+        ]);
+
+        return back()->with('success', "Successfully deleted {$deletedCount} old collection record(s)");
+    }
 }
+

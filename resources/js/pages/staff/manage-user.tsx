@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router } from '@inertiajs/react';
-import { DollarSign, Download, Search, UsersRound } from 'lucide-react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { DollarSign, Download, Search, Trash2, UsersRound, AlertTriangle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 
@@ -34,7 +34,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 
 export default function ManageUser({ summary, rows, filters }: { summary: Summary; rows: Row[]; filters?: { q?: string; status?: string } }) {
+    const pageProps = usePage().props as any;
+    const currentUser = pageProps.auth?.user;
     const [list, setList] = useState<Row[]>(rows);
+    const [showCleanupModal, setShowCleanupModal] = useState(false);
     const searchRef = useRef<HTMLInputElement | null>(null);
     const typingTimerRef = useRef<number | null>(null);
     useEffect(() => setList(rows), [rows]);
@@ -184,6 +187,20 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                             >
                                 <Download className="h-4 w-4" /> Export Report
                             </button>
+
+                            {/* Cleanup Old Records Button - Only for Operations/Admin */}
+                            {(currentUser?.department?.trim() === 'Operations' || 
+                              currentUser?.department?.trim() === 'Operations - Admin' || 
+                              currentUser?.department?.trim() === 'Admin' ||
+                              currentUser?.type === 'admin') && (
+                                <button
+                                    onClick={() => setShowCleanupModal(true)}
+                                    className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-700 hover:to-red-800 hover:shadow-lg active:scale-95"
+                                >
+                                    <Trash2 className="h-4 w-4" /> 
+                                    <span>Cleanup Old Records</span>
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -225,6 +242,60 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                     ))}
                 </div>
             </div>
+
+            {/* Cleanup Confirmation Modal */}
+            {showCleanupModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="relative mx-4 w-full max-w-md animate-in fade-in zoom-in duration-200">
+                        <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-2xl dark:border-red-900/50 dark:bg-gray-900">
+                            {/* Icon */}
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+                                <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-500" />
+                            </div>
+
+                            {/* Content */}
+                            <div className="mt-4 text-center">
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                                    Delete Old Records?
+                                </h3>
+                                <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                                    Are you sure you want to delete all student collection history (parcels) older than{' '}
+                                    <span className="font-semibold text-red-600 dark:text-red-500">10 days</span>?
+                                    <br />
+                                    <span className="mt-2 inline-block font-medium text-red-700 dark:text-red-400">
+                                        This action cannot be undone.
+                                    </span>
+                                </p>
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="mt-6 flex gap-3">
+                                <button
+                                    onClick={() => setShowCleanupModal(false)}
+                                    className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 active:scale-95 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowCleanupModal(false);
+                                        router.post('/staff/parcels/cleanup-old', {}, {
+                                            preserveScroll: true,
+                                            onSuccess: () => {
+                                                router.reload();
+                                            },
+                                        });
+                                    }}
+                                    className="flex-1 rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-700 hover:to-red-800 hover:shadow-lg active:scale-95"
+                                >
+                                    Delete Records
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AppLayout>
     );
 }
+

@@ -75,6 +75,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('staff.parcels.export.bulk');
     // Send reminders to students for uncollected parcels (AJAX)
     Route::post('/staff/parcels/remind', [ParcelController::class, 'remind'])->name('staff.parcels.remind');
+    // Cleanup old collection records (3+ months)
+    Route::post('/staff/parcels/cleanup-old', [ParcelController::class, 'cleanupOldRecords'])->name('staff.parcels.cleanup-old');
     Route::patch('/staff/parcel/{id}/collect', [ParcelController::class, 'markAsCollected'])->name('staff.parcel.collect');
     Route::delete('/staff/parcel/{id}', [ParcelController::class, 'destroy']);
     Route::get('/staff/parcel/{id}/details', [ParcelController::class, 'getParcelDetails'])->name('staff.parcel.details');
