@@ -155,6 +155,7 @@ class PaymentController extends Controller
         ]);
 
         $path = $request->file('proof')->store('payment_proofs', 'public');
+        $originalFileName = $request->file('proof')->getClientOriginalName();
 
         // If a payment record already exists for this parcel, update it and replace the file
         $existing = Payment::where('parcel_id', $parcel->parcel_id)->orderByDesc('created_at')->first();
@@ -165,6 +166,7 @@ class PaymentController extends Controller
                 } catch (\Throwable $e) {
                 }
             }
+            $existing->payment = $originalFileName;
             $existing->file_path = $path;
             $existing->payment_date = now()->toDateString();
             $existing->verified_by = null; // reset verification on resubmission
@@ -172,6 +174,7 @@ class PaymentController extends Controller
         } else {
             $payment = new Payment();
             $payment->parcel_id = $parcel->parcel_id;
+            $payment->payment = $originalFileName;
             $payment->file_path = $path;
             $payment->payment_date = now()->toDateString();
             // verified_by stays null until staff verifies
