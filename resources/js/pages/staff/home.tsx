@@ -856,7 +856,7 @@ export default function StaffHome() {
                                 <CardTitle>Collection Time Distribution</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <ResponsiveContainer width="100%" height={250}>
+                                <ResponsiveContainer width="100%" height={350}>
                                     {(() => {
                                         const rawMax = Math.max(1, ...data.collectionTime.map((d) => Number(d.count || 0)));
                                         const padded = Math.ceil(rawMax * 1.1);
@@ -866,47 +866,25 @@ export default function StaffHome() {
                                         const ticks = [0, step, step * 2, step * 3, step * 4];
 
                                         return (
-                                            <BarChart data={data.collectionTime}>
+                                            <BarChart data={data.collectionTime} margin={{ top: 5, right: 20, bottom: 80, left: 0 }}>
                                                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                                                 {/**
                                                  Custom multi-line tick so long timeslot labels like
                                                  "9:00 AM - 10:00 AM" show fully across two lines.
                                                  interval=0 forces all ticks to render.
+                                                 angle=-45 for better readability with many slots.
                                                 */}
                                                 <XAxis
                                                     dataKey="time"
-                                                    height={60}
+                                                    height={80}
                                                     interval={0}
-                                                    tick={({ x, y, payload }) => {
-                                                        const parts = String(payload.value).split(' - ');
-                                                        return (
-                                                            <text x={x} y={y + 18} textAnchor="middle" fill="#6B7280" style={{ fontSize: 12 }}>
-                                                                {parts.length === 2 ? (
-                                                                    <>
-                                                                        <tspan x={x} dy={0}>
-                                                                            {parts[0]}
-                                                                        </tspan>
-                                                                        <tspan x={x} dy={16}>
-                                                                            -
-                                                                        </tspan>
-                                                                        <tspan x={x} dy={16}>
-                                                                            {parts[1]}
-                                                                        </tspan>
-                                                                    </>
-                                                                ) : (
-                                                                    parts.map((part, i) => (
-                                                                        <tspan key={i} x={x} dy={i === 0 ? 0 : 16}>
-                                                                            {part}
-                                                                        </tspan>
-                                                                    ))
-                                                                )}
-                                                            </text>
-                                                        );
-                                                    }}
+                                                    angle={-45}
+                                                    textAnchor="end"
+                                                    tick={{ fontSize: 10, fill: '#6B7280' }}
                                                 />
                                                 <YAxis domain={[0, roundedMax]} ticks={ticks} />
                                                 <Tooltip
-                                                    formatter={(value) => [`${Number(value).toLocaleString()}`, 'Count']}
+                                                    formatter={(value) => [`${Number(value).toLocaleString()}`, 'Collections']}
                                                     contentStyle={{
                                                         backgroundColor: 'hsl(var(--card))',
                                                         border: '1px solid hsl(var(--border))',

@@ -142,13 +142,18 @@ class StaffController extends Controller
         // Count parcels that were scheduled in each timeslot. We consider a
         // parcel scheduled in a slot if either `time_slot` equals the label or
         // the `schedule` time falls within the slot's start/end times.
+        // Complete list of all available time slots (weekday + weekend combined)
         $timeSlotRanges = [
-            '9:00 AM - 10:00 AM' => ['09:00:00', '10:00:00'],
             '10:00 AM - 11:00 AM' => ['10:00:00', '11:00:00'],
             '11:00 AM - 12:00 PM' => ['11:00:00', '12:00:00'],
+            '12:00 PM - 1:00 PM' => ['12:00:00', '13:00:00'],
+            '1:00 PM - 2:00 PM' => ['13:00:00', '14:00:00'],
             '2:00 PM - 3:00 PM' => ['14:00:00', '15:00:00'],
             '3:00 PM - 4:00 PM' => ['15:00:00', '16:00:00'],
             '4:00 PM - 5:00 PM' => ['16:00:00', '17:00:00'],
+            '5:00 PM - 6:00 PM' => ['17:00:00', '18:00:00'],
+            '9:00 PM - 10:00 PM' => ['21:00:00', '22:00:00'],
+            '10:00 PM - 11:00 PM' => ['22:00:00', '23:00:00'],
         ];
 
         $collectionTimeData = [];
