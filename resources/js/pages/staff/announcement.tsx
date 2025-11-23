@@ -247,6 +247,7 @@ export default function StaffAnnouncements(props: {
                             <svg className="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                             </svg>
+                            <span className="text-sm font-medium text-red-800">{validationError}</span>
                         </div>
                     </div>
                 </div>
@@ -811,33 +812,36 @@ export default function StaffAnnouncements(props: {
                                     aria-busy={creating}
                                     onClick={async () => {
                                         if (creating) return;
-                                        
                                         // Validation
                                         if (!title.trim()) {
-                                            showValidationError('Please enter a title');
+                                            showValidationError('Title is required.');
                                             return;
                                         }
                                         if (title.trim().length < 5) {
-                                            showValidationError('Title must be at least 5 characters long');
+                                            showValidationError('Title must be at least 5 characters long.');
                                             return;
                                         }
                                         if (!content.trim()) {
-                                            showValidationError('Please enter content');
+                                            showValidationError('Content is required.');
                                             return;
                                         }
                                         if (content.trim().length < 20) {
-                                            showValidationError('Content must be at least 20 characters long');
+                                            showValidationError('Content must be at least 20 characters long.');
                                             return;
                                         }
-                                        if (!annType) {
-                                            showValidationError('Please select a type');
+                                        if (!annType.trim()) {
+                                            showValidationError('Type is required.');
+                                            return;
+                                        }
+                                        if (!publishDate.trim()) {
+                                            showValidationError('Publish date is required.');
                                             return;
                                         }
                                         if (expiryDate && publishDate) {
                                             const publishDateTime = new Date(publishDate);
                                             const expiryDateTime = new Date(expiryDate);
                                             if (expiryDateTime <= publishDateTime) {
-                                                showValidationError('Expiry date must be after publish date');
+                                                showValidationError('Expiry date must be after publish date.');
                                                 return;
                                             }
                                         }
@@ -856,14 +860,12 @@ export default function StaffAnnouncements(props: {
                                                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
                                                 body: form,
                                             });
-                                            
                                             if (!res.ok) {
                                                 const errorText = await res.text();
                                                 console.error('Create announcement failed:', res.status, errorText);
                                                 showValidationError(`Failed to create announcement: ${res.statusText}`);
                                                 return;
                                             }
-                                            
                                             const json = await res.json();
                                             if (json?.success && json.announcement) {
                                                 setList((prev) => [json.announcement, ...prev]);

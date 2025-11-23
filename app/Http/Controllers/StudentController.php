@@ -233,7 +233,7 @@ class StudentController extends Controller
             'timestamp' => $createdTime?->format('n/j/Y, g:i:s A') ?? '',
             'hasAttribution' => true,
             'icon' => 'package',
-            'iconColor' => 'blue',
+            'iconColor' => 'purple',
         ];
 
         // 2) Student Matched — use the student's account creation time when available

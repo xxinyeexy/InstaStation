@@ -76,6 +76,8 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                     return 'h-5 w-5 text-pink-500';
                 case 'yellow':
                     return 'h-5 w-5 text-yellow-500';
+                case 'purple':
+                    return 'h-5 w-5 text-purple-500';
                 default:
                     return 'h-5 w-5 text-gray-500';
             }
@@ -333,9 +335,11 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                                                           ? 'bg-pink-50'
                                                           : event.iconColor === 'yellow'
                                                             ? 'bg-yellow-50'
-                                                            : event.iconColor === 'red'
-                                                              ? 'bg-gray-100'
-                                                              : 'bg-white'
+                                                            : event.iconColor === 'purple'
+                                                              ? 'bg-purple-50'
+                                                              : event.iconColor === 'red'
+                                                                ? 'bg-gray-100'
+                                                                : 'bg-white'
                                             }`}
                                         >
                                             {renderIcon(event.icon, event.iconColor)}
