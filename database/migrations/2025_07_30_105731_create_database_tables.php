@@ -77,7 +77,7 @@ return new class extends Migration
         Schema::create('parcels', function (Blueprint $table) {
             $table->id('parcel_id');
             $table->string('parcel_code', 20)->unique();
-            $table->foreignId('student_id')->nullable()->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('student_id')->nullable()->constrained('users', 'id')->onDelete('set null');
             $table->string('tracking_no', 50)->unique();
             $table->enum('parcel_status', ['Pending Payment', 'Approved', 'Ready For Collection', 'Collected', 'Unclaimed'])->default('Pending Payment');
             $table->integer('days')->nullable();
@@ -88,8 +88,8 @@ return new class extends Migration
             $table->string('collection_code', 10)->nullable();
             $table->date('schedule')->nullable();
             $table->string('time_slot', 50)->nullable(); // Store the time slot range (e.g., "2:00 PM - 3:00 PM")
-            $table->foreignId('created_by')->constrained('users', 'id')->onDelete('cascade');
-            $table->foreignId('last_edited_by')->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('set null');
+            $table->foreignId('last_edited_by')->nullable()->constrained('users', 'id')->onDelete('set null');
             $table->timestamp('report_at')->useCurrent();
             $table->timestamps();
         });
@@ -100,7 +100,7 @@ return new class extends Migration
             $table->foreignId('parcel_id')->constrained('parcels', 'parcel_id')->onDelete('cascade');
             $table->text('payment')->nullable();
             $table->string('file_path', 255);
-            $table->foreignId('verified_by')->nullable()->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('verified_by')->nullable()->constrained('users', 'id')->onDelete('set null');
             $table->date('payment_date')->nullable();
             $table->timestamps();
         });
@@ -109,7 +109,7 @@ return new class extends Migration
         Schema::create('reports', function (Blueprint $table) {
             $table->id('report_id');
             $table->foreignId('parcel_id')->constrained('parcels', 'parcel_id')->onDelete('cascade');
-            $table->foreignId('student_id')->constrained('users', 'id')->onDelete('cascade');
+            $table->foreignId('student_id')->nullable()->constrained('users', 'id')->onDelete('set null');
             $table->timestamps();
         });
 

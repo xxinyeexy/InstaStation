@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Edit2, Eye, Plus, Search, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { type BreadcrumbItem, type SharedData } from '@/types';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 
 type AnnouncementRow = {
@@ -29,6 +30,7 @@ export default function StaffAnnouncements(props: {
     categories?: string[];
     filters?: { q?: string; category?: string };
 }) {
+    const { t } = useLanguage();
     const { rows = [], summary: _summary = {}, categories = [], filters = {} } = props;
     const [list, setList] = useState<AnnouncementRow[]>(rows);
     const [q, setQ] = useState(filters?.q || '');
@@ -36,6 +38,17 @@ export default function StaffAnnouncements(props: {
     const searchRef = useRef<HTMLInputElement | null>(null);
     const [editing, setEditing] = useState<AnnouncementRow | null>(null);
     const [viewing, setViewing] = useState<any | null>(null);
+    const [validationError, setValidationError] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    
+    const showValidationError = (message: string) => {
+        setValidationError(message);
+        setTimeout(() => setValidationError(''), 3000);
+    };
+    const showSuccessMessage = (message: string) => {
+        setSuccessMessage(message);
+        setTimeout(() => setSuccessMessage(''), 3000);
+    };
     const [editTitle, setEditTitle] = useState('');
     const [editContent, setEditContent] = useState('');
     const [editType, setEditType] = useState('');
@@ -194,6 +207,7 @@ export default function StaffAnnouncements(props: {
         setIsDeleting(true);
         try {
             await remove(selectedDeleteId);
+            showSuccessMessage('Announcement deleted successfully!');
         } finally {
             setIsDeleting(false);
             setShowDeleteModal(false);
@@ -211,13 +225,14 @@ export default function StaffAnnouncements(props: {
         const key = (cat || 'General').toLowerCase();
         // General: purple; Collection: blue; Payment: green
         if (key.includes('general')) return 'bg-purple-100 text-purple-700';
-        if (key.includes('collect')) return 'bg-blue-100 text-blue-700';
-        if (key.includes('pay')) return 'bg-emerald-100 text-emerald-700';
+        if (key.includes('holiday')) return 'bg-blue-100 text-blue-700';
+        if (key.includes('maintenance')) return 'bg-orange-100 text-orange-700';
+        if (key.includes('policy')) return 'bg-yellow-100 text-yellow-700';
         return 'bg-gray-100 text-gray-700';
     };
     const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Announcements',
+        title: t('announcements'),
         href: '/student/announcements',
     },
 ];
@@ -225,25 +240,48 @@ export default function StaffAnnouncements(props: {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            {validationError && (
+                <div className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 shadow-lg">
+                        <div className="flex items-center gap-3">
+                            <svg className="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {successMessage && (
+                <div className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
+                    <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 shadow-lg">
+                        <div className="flex items-center gap-3">
+                            <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-sm font-medium text-green-800">{successMessage}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="space-y-6 p-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Announcements</h1>
-                    <p className="text-sm text-gray-500 dark:text-muted-foreground">Manage announcements and notifications for students</p>
+                    <h1 className="text-2xl font-bold text-foreground">{t('announcements')}</h1>
+                    <p className="text-sm text-gray-500 dark:text-muted-foreground">{t('manageAnnouncements')}</p>
                 </div>
 
                 {/* Summary cards */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="rounded-xl border border-border bg-card p-4">
-                        <div className="text-sm text-gray-600 dark:text-muted-foreground">Total Announcements</div>
+                        <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('totalAnnouncements')}</div>
                         <div className="text-2xl font-bold text-foreground">{list.length}</div>
-                        <div className="text-xs text-gray-500 dark:text-muted-foreground">All announcements</div>
+                        <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('allAnnouncements')}</div>
                     </div>
                     <div className="rounded-xl border border-border bg-card p-4">
-                        <div className="text-sm text-gray-600 dark:text-muted-foreground">Published</div>
+                        <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('published')}</div>
                         <div className="text-2xl font-bold text-foreground">
                             {list.filter((r) => (r as any).announcement_status === 'Published' || r.faq_status === 'Active').length}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-muted-foreground">Visible to students</div>
+                        <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('visibleToStudents')}</div>
                     </div>
                 </div>
 
@@ -255,7 +293,7 @@ export default function StaffAnnouncements(props: {
                             ref={searchRef}
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
-                            placeholder="Search announcements..."
+                            placeholder={t('searchAnnouncements')}
                             className="w-full rounded-md border border-border bg-background px-7 py-2 text-sm text-foreground placeholder:text-muted-foreground"
                             onKeyDown={(e) => e.key === 'Enter' && refreshFromServer()}
                         />
@@ -265,15 +303,11 @@ export default function StaffAnnouncements(props: {
                         onChange={(e) => setCategory(e.target.value)}
                         className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                     >
-                        <option value="">All Categories</option>
-                        {categories
-                            .filter((c, index, arr) => arr.indexOf(c) === index)
-                            .filter((c) => c && c.trim() !== '')
-                            .map((c) => (
-                                <option key={c} value={c}>
-                                    {c}
-                                </option>
-                            ))}
+                        <option value="">{t('allCategories')}</option>
+                        <option value="General">{t('general')}</option>
+                        <option value="Holiday">{t('holiday')}</option>
+                        <option value="Maintenance">{t('maintenance')}</option>
+                        <option value="Policy">{t('policy')}</option>
                     </select>
                     <button
                         onClick={() => {
@@ -286,7 +320,7 @@ export default function StaffAnnouncements(props: {
                         }}
                         className="inline-flex items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white dark:bg-gray-700"
                     >
-                        <Plus size={16} /> New Announcement
+                        <Plus size={16} /> {t('newAnnouncement')}
                     </button>
                 </div>
 
@@ -297,15 +331,11 @@ export default function StaffAnnouncements(props: {
                             <div className="flex items-start justify-between p-4">
                                 <div className="pr-4">
                                     <div className="mb-2 flex items-center gap-2 text-xs">
-                                        <span
-                                            className={`rounded-full px-2 py-0.5 text-xs ${categoryClasses((f as any).announcement_type || f.category)}`}
-                                        >
-                                            {(f as any).announcement_type || f.category || 'General'}
-                                        </span>
+                                        <span className={`rounded-full px-2 py-0.5 text-xs ${categoryClasses((f as any).announcement_type || f.category)}`}>{t(((f as any).announcement_type || f.category || 'General').toLowerCase() as any)}</span>
                                         {((f as any).announcement_status || (f as any).faq_status) &&
                                             ((f as any).announcement_status === 'Draft' || (f as any).faq_status === 'Inactive') && (
                                                 <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 dark:bg-muted dark:text-muted-foreground">
-                                                    Draft
+                                                    {t('draft')}
                                                 </span>
                                             )}
                                     </div>
@@ -316,7 +346,7 @@ export default function StaffAnnouncements(props: {
                                         {(f as any).announcement_content || (f as any).faq_answer}
                                     </div>
                                     <div className="mt-3 text-xs text-gray-400 dark:text-muted-foreground">
-                                        Publish: {formatDateTime((f as any).publish_date as string | undefined)}
+                                        {t('publishLabel')}: {formatDateTime((f as any).publish_date as string | undefined)}
                                     </div>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-3">
@@ -332,14 +362,14 @@ export default function StaffAnnouncements(props: {
                                             onClick={() => publish(((f as any).announcement_id || f.faq_id) as number, 'unpublish')}
                                             className="text-sm text-foreground hover:bg-pink-50 hover:text-pink-600 hover:shadow-lg focus-visible:outline-none active:bg-gray-200"
                                         >
-                                            Unpublish
+                                            {t('unpublish')}
                                         </button>
                                     ) : (
                                         <button
                                             onClick={() => publish(((f as any).announcement_id || f.faq_id) as number, 'publish')}
                                             className="rounded-full border border-border bg-muted px-3 py-1 text-xs text-muted-foreground opacity-80 hover:opacity-100"
                                         >
-                                            Publish
+                                            {t('publish')}
                                         </button>
                                     )}
                                     <button
@@ -389,22 +419,22 @@ export default function StaffAnnouncements(props: {
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                             <Trash2 className="h-6 w-6 text-red-600" />
                         </div>
-                        <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-foreground">Delete Announcement</h2>
+                        <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-foreground">{t('deleteAnnouncement')}</h2>
                         <p className="mb-1 text-sm text-gray-600 dark:text-muted-foreground">
-                            Are you sure you want to delete
+                            {t('areYouSureDeleteAnnouncement')}
                             {selectedDeleteLabel ? (
                                 <>
                                     {' '}
                                     <span className="font-medium text-red-600">{selectedDeleteLabel}</span>
                                 </>
                             ) : (
-                                ' this announcement'
+                                ` ${t('thisAnnouncement')}`
                             )}
                             ?
                         </p>
                         <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
                                 <p className="text-sm text-left text-red-800 dark:text-red-400">
-                            This action cannot be undone and will permanently remove this FAQ.
+                            {t('cannotBeUndone')}
                                 </p>
                             </div>
                         <div className="flex justify-center gap-3">
@@ -413,14 +443,14 @@ export default function StaffAnnouncements(props: {
                                 disabled={isDeleting}
                                 className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-card dark:text-muted-foreground"
                             >
-                                Cancel
+                                {t('cancel')}
                             </button>
                             <button
                                 onClick={handleDeleteConfirm}
                                 disabled={isDeleting}
                                 className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {isDeleting ? 'Deleting...' : 'Delete'}
+                                {isDeleting ? t('deleting') : t('delete')}
                             </button>
                         </div>
                     </div>
@@ -433,8 +463,8 @@ export default function StaffAnnouncements(props: {
                     <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-xl dark:bg-card">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold">Edit Announcement</div>
-                                <div className="text-xs text-gray-500 dark:text-muted-foreground">Update the announcement information</div>
+                                <div className="text-lg font-semibold">{t('editAnnouncement')}</div>
+                                <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('updateAnnouncementDesc')}</div>
                             </div>
                             <button
                                 className="text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
@@ -445,7 +475,7 @@ export default function StaffAnnouncements(props: {
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">Title</div>
+                                <div className="mb-1 text-sm font-medium text-foreground">{t('title')}</div>
                                 <input
                                     value={editTitle}
                                     onChange={(e) => setEditTitle(e.target.value)}
@@ -453,7 +483,7 @@ export default function StaffAnnouncements(props: {
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">Content</div>
+                                <div className="mb-1 text-sm font-medium text-foreground">{t('content')}</div>
                                 <textarea
                                     value={editContent}
                                     onChange={(e) => setEditContent(e.target.value)}
@@ -462,43 +492,38 @@ export default function StaffAnnouncements(props: {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">Type</div>
+                                    <div className="mb-1 text-sm font-medium text-foreground">{t('type')}</div>
                                     <select
                                         value={editType}
                                         onChange={(e) => setEditType(e.target.value)}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                                     >
-                                        <option value="">General</option>
-                                        {categories
-                                            .filter((c, index, arr) => arr.indexOf(c) === index)
-                                            .filter((c) => c && c.trim() !== '')
-                                            .map((c) => (
-                                                <option key={c} value={c}>
-                                                    {c}
-                                                </option>
-                                            ))}
+                                        <option value="General">{t('general')}</option>
+                                        <option value="Holiday">{t('holiday')}</option>
+                                        <option value="Maintenance">{t('maintenance')}</option>
+                                        <option value="Policy">{t('policy')}</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">Status</div>
+                                    <div className="mb-1 text-sm font-medium text-foreground">{t('status')}</div>
                                     <select
                                         value={editStatus}
-                                        onChange={(e) => setEditStatus(e.target.value as 'Active' | 'Inactive')}
+                                        onChange={(e) => setEditStatus(e.target.value as any)}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                                     >
-                                        <option value="Inactive">Draft</option>
-                                        <option value="Active">Published</option>
+                                        <option value="Inactive">{t('draft')}</option>
+                                        <option value="Active">{t('published')}</option>
                                     </select>
                                 </div>
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">Image</div>
+                                <div className="mb-1 text-sm font-medium text-foreground">{t('image')}</div>
                                 <div className="flex items-center gap-3">
                                     <div className="relative h-20 w-32 overflow-hidden rounded-md border bg-gray-50">
                                         {editImagePreview ? (
                                             <img src={editImagePreview} alt="preview" className="h-full w-full object-cover" />
                                         ) : (
-                                            <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">No image</div>
+                                            <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">{t('noImage')}</div>
                                         )}
                                     </div>
                                     <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm">
@@ -512,13 +537,13 @@ export default function StaffAnnouncements(props: {
                                             }}
                                             className="hidden"
                                         />
-                                        Change image
+                                        {t('changeImage')}
                                     </label>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">Publish Date</div>
+                                    <div className="mb-1 text-sm font-medium text-foreground">{t('publishDate')}</div>
                                     <input
                                         type="datetime-local"
                                         value={editPublishDate}
@@ -528,7 +553,7 @@ export default function StaffAnnouncements(props: {
                                     />
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">Expiry Date</div>
+                                    <div className="mb-1 text-sm font-medium text-foreground">{t('expiryDate')}</div>
                                     <input
                                         type="datetime-local"
                                         value={editExpiryDate}
@@ -539,13 +564,43 @@ export default function StaffAnnouncements(props: {
                                 </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 pt-2">
-                                <button className="rounded-md border px-3 py-2 text-sm" onClick={() => setEditing(null)}>
-                                    Cancel
+                                <button className="rounded-md border border-border px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800" onClick={() => setEditing(null)}>
+                                    {t('cancel')}
                                 </button>
                                 <button
-                                    className="rounded-md bg-gray-900 px-3 py-2 text-sm text-white dark:bg-gray-700"
+                                    className="rounded-md bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600"
                                     onClick={async () => {
                                         if (!editing) return;
+                                        
+                                        // Validation
+                                        if (!editTitle.trim()) {
+                                            showValidationError('Please enter a title');
+                                            return;
+                                        }
+                                        if (editTitle.trim().length < 5) {
+                                            showValidationError('Title must be at least 5 characters long');
+                                            return;
+                                        }
+                                        if (!editContent.trim()) {
+                                            showValidationError('Please enter content');
+                                            return;
+                                        }
+                                        if (editContent.trim().length < 20) {
+                                            showValidationError('Content must be at least 20 characters long');
+                                            return;
+                                        }
+                                        if (!editType) {
+                                            showValidationError('Please select a type');
+                                            return;
+                                        }
+                                        if (editExpiryDate && editPublishDate) {
+                                            const publishDateTime = new Date(editPublishDate);
+                                            const expiryDateTime = new Date(editExpiryDate);
+                                            if (expiryDateTime <= publishDateTime) {
+                                                showValidationError('Expiry date must be after publish date');
+                                                return;
+                                            }
+                                        }
                                         const id = ((editing as any).announcement_id || (editing as any).faq_id) as number;
                                         const form = new FormData();
                                         form.append('title', editTitle);
@@ -576,7 +631,6 @@ export default function StaffAnnouncements(props: {
                                                           publish_date: editPublishDate
                                                               ? toIsoStringFromLocal(editPublishDate)
                                                               : (r as any).publish_date,
-
                                                           expiry_date: editExpiryDate ? toIsoStringFromLocal(editExpiryDate) : (r as any).expiry_date,
                                                           category: editType,
                                                           updated_at: new Date().toISOString(),
@@ -585,9 +639,10 @@ export default function StaffAnnouncements(props: {
                                             ),
                                         );
                                         setEditing(null);
+                                        showSuccessMessage('Announcement updated successfully!');
                                     }}
                                 >
-                                    Update Announcement
+                                    {t('updateAnnouncement')}
                                 </button>
                             </div>
                         </div>
@@ -606,7 +661,7 @@ export default function StaffAnnouncements(props: {
                                     <span
                                         className={`rounded-full px-2 py-0.5 ${categoryClasses((viewing as any).announcement_type || (viewing as any).category)}`}
                                     >
-                                        {(viewing as any).announcement_type || (viewing as any).category || 'General'}
+                                        {t(((viewing as any).announcement_type || (viewing as any).category || 'General').toLowerCase() as any)}
                                     </span>
                                 </div>
                             </div>
@@ -655,8 +710,8 @@ export default function StaffAnnouncements(props: {
                     <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-xl dark:bg-card">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold">Create Announcement</div>
-                                <div className="text-xs text-gray-500 dark:text-muted-foreground">Create a new announcement for students</div>
+                                <div className="text-lg font-semibold">{t('createAnnouncement')}</div>
+                                <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('createAnnouncementDesc')}</div>
                             </div>
                             <button
                                 className="text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
@@ -667,25 +722,25 @@ export default function StaffAnnouncements(props: {
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">Title</div>
+                                <div className="mb-1 text-sm font-medium text-foreground">{t('title')}</div>
                                 <input
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-                                    placeholder="Enter announcement title..."
+                                    placeholder={t('enterAnnouncementTitle')}
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">Content</div>
+                                <div className="mb-1 text-sm font-medium text-foreground">{t('content')}</div>
                                 <textarea
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
                                     className="h-28 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-                                    placeholder="Enter announcement content..."
+                                    placeholder={t('enterAnnouncementContent')}
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium">Image </div>
+                                <div className="mb-1 text-sm font-medium">{t('image')} </div>
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -700,33 +755,33 @@ export default function StaffAnnouncements(props: {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">Type</div>
+                                    <div className="mb-1 text-sm font-medium text-foreground">{t('type')}</div>
                                     <select
                                         value={annType}
                                         onChange={(e) => setAnnType(e.target.value)}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                                     >
-                                        <option value="General">General</option>
-                                        <option value="Holiday">Holiday</option>
-                                        <option value="Maintenance">Maintenance</option>
-                                        <option value="Policy">Policy</option>
+                                        <option value="General">{t('general')}</option>
+                                        <option value="Holiday">{t('holiday')}</option>
+                                        <option value="Maintenance">{t('maintenance')}</option>
+                                        <option value="Policy">{t('policy')}</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">Status</div>
+                                    <div className="mb-1 text-sm font-medium text-foreground">{t('status')}</div>
                                     <select
                                         value={annStatus}
                                         onChange={(e) => setAnnStatus(e.target.value as 'Active' | 'Inactive')}
                                         className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                                     >
-                                        <option value="Inactive">Draft</option>
-                                        <option value="Active">Published</option>
+                                        <option value="Inactive">{t('draft')}</option>
+                                        <option value="Active">{t('published')}</option>
                                     </select>
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">Publish Date</div>
+                                    <div className="mb-1 text-sm font-medium text-foreground">{t('publishDate')}</div>
                                     <input
                                         type="datetime-local"
                                         value={toDateTimeLocalValue(publishDate)}
@@ -736,7 +791,7 @@ export default function StaffAnnouncements(props: {
                                     />
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">Expiry Date</div>
+                                    <div className="mb-1 text-sm font-medium text-foreground">{t('expiryDate')}</div>
                                     <input
                                         type="datetime-local"
                                         value={toDateTimeLocalValue(expiryDate)}
@@ -747,26 +802,44 @@ export default function StaffAnnouncements(props: {
                                 </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 pt-2">
-                                <button className="rounded-md border px-3 py-2 text-sm" onClick={() => setAdding(false)}>
-                                    Cancel
+                                <button className="rounded-md border border-border px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800" onClick={() => setAdding(false)}>
+                                    {t('cancel')}
                                 </button>
                                 <button
-                                    className="rounded-md bg-gray-900 px-3 py-2 text-sm text-white disabled:opacity-50 dark:bg-gray-700"
-                                    disabled={creating || !title.trim() || !content.trim()}
+                                    className="rounded-md bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600 disabled:opacity-50"
+                                    disabled={creating}
                                     aria-busy={creating}
                                     onClick={async () => {
                                         if (creating) return;
-                                        if (!title.trim() || !content.trim()) return;
-                                        // Prevent creating duplicate announcements with same title and content
-                                        const exists = list.some(
-                                            (r) =>
-                                                ((r as any).announcement_title || (r as any).faq_question || '').trim().toLowerCase() ===
-                                                    title.trim().toLowerCase() &&
-                                                ((r as any).announcement_content || (r as any).faq_answer || '').trim() === content.trim(),
-                                        );
-                                        if (exists) {
-                                            alert('An announcement with the same title and content already exists.');
+                                        
+                                        // Validation
+                                        if (!title.trim()) {
+                                            showValidationError('Please enter a title');
                                             return;
+                                        }
+                                        if (title.trim().length < 5) {
+                                            showValidationError('Title must be at least 5 characters long');
+                                            return;
+                                        }
+                                        if (!content.trim()) {
+                                            showValidationError('Please enter content');
+                                            return;
+                                        }
+                                        if (content.trim().length < 20) {
+                                            showValidationError('Content must be at least 20 characters long');
+                                            return;
+                                        }
+                                        if (!annType) {
+                                            showValidationError('Please select a type');
+                                            return;
+                                        }
+                                        if (expiryDate && publishDate) {
+                                            const publishDateTime = new Date(publishDate);
+                                            const expiryDateTime = new Date(expiryDate);
+                                            if (expiryDateTime <= publishDateTime) {
+                                                showValidationError('Expiry date must be after publish date');
+                                                return;
+                                            }
                                         }
                                         setCreating(true);
                                         try {
@@ -783,25 +856,40 @@ export default function StaffAnnouncements(props: {
                                                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
                                                 body: form,
                                             });
+                                            
+                                            if (!res.ok) {
+                                                const errorText = await res.text();
+                                                console.error('Create announcement failed:', res.status, errorText);
+                                                showValidationError(`Failed to create announcement: ${res.statusText}`);
+                                                return;
+                                            }
+                                            
                                             const json = await res.json();
                                             if (json?.success && json.announcement) {
                                                 setList((prev) => [json.announcement, ...prev]);
+                                                setAdding(false);
+                                                setTitle('');
+                                                setContent('');
+                                                setAnnType('General');
+                                                setAnnStatus('Inactive');
+                                                setPublishDate('');
+                                                setExpiryDate('');
+                                                setImageFile(null);
+                                                setImagePreview(null);
+                                                showSuccessMessage('Announcement created successfully!');
+                                            } else {
+                                                console.error('Unexpected response:', json);
+                                                showValidationError('Failed to create announcement');
                                             }
-                                            setAdding(false);
-                                            setTitle('');
-                                            setContent('');
-                                            setAnnType('General');
-                                            setAnnStatus('Inactive');
-                                            setPublishDate('');
-                                            setExpiryDate('');
-                                            setImageFile(null);
-                                            setImagePreview(null);
+                                        } catch (error) {
+                                            console.error('Error creating announcement:', error);
+                                            showValidationError('An error occurred while creating the announcement');
                                         } finally {
                                             setCreating(false);
                                         }
                                     }}
                                 >
-                                    {creating ? 'Creating…' : 'Create Announcement'}
+                                    {creating ? 'Creating…' : t('createAnnouncement')}
                                 </button>
                             </div>
                         </div>

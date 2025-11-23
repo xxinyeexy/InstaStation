@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { router } from '@inertiajs/react';
-import { AlertCircle, Calendar, CheckCircle, Clock, MapPin, X } from 'lucide-react';
+import { AlertCircle, Calendar, CircleCheck, Clock, MapPin, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface ParcelData {
@@ -176,6 +176,7 @@ const SchedulePickup = ({ parcel }: Props) => {
 
             // Show success toast notification
             setShowSuccessToast(true);
+            setTimeout(() => setShowSuccessToast(false), 7000);
 
             // Navigate immediately with Inertia for smooth transition
             router.visit('/student/parcel', {
@@ -373,7 +374,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                     <div className="max-w-96 min-w-80 rounded-lg border border-emerald-200 bg-emerald-50/95 p-4 text-emerald-800 shadow-lg backdrop-blur-sm">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex-shrink-0">
-                                <CheckCircle className="h-5 w-5 text-emerald-600" />
+                                <CircleCheck className="h-5 w-5 text-emerald-600" />
                             </div>
                             <div className="flex-1">
                                 <h4 className="text-sm font-semibold">Collection Scheduled Successfully!</h4>
@@ -431,7 +432,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                     {/* Parcel Status Section */}
                     <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-6">
                         <div className="mb-4 flex items-center gap-2">
-                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            <CircleCheck className="h-5 w-5 text-green-600" />
                             <span className="text-lg font-semibold text-green-800">Approved</span>
                         </div>
                         <div className="grid grid-cols-2 gap-6">

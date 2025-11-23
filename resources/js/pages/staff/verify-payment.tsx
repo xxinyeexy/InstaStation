@@ -1,7 +1,9 @@
+import { useLanguage } from '@/contexts/LanguageContext';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/react';
 import { CircleCheck, CircleX, Clock, DollarSign, Download, Eye, Search, X } from 'lucide-react';
+import { usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
 type Summary = {
@@ -23,10 +25,40 @@ type Row = {
 };
 
 export default function VerifyPayment({ summary, rows, filters }: { summary: Summary; rows: Row[]; filters?: { q?: string; status?: string } }) {
+    const { t } = useLanguage();
+    const { props } = usePage();
+    const flashSuccessFromServer = (props as any).flash?.success ?? null;
     const [detail, setDetail] = useState<Row | null>(null);
     const [list, setList] = useState<Row[]>(rows);
     const [processingPayments, setProcessingPayments] = useState<Set<number>>(new Set());
     const [rejectModalPaymentId, setRejectModalPaymentId] = useState<number | null>(null);
+    // Toast state for approve/reject success notifications
+    const [showSuccessToast, setShowSuccessToast] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
+    const toastTimerRef = useRef<number | null>(null);
+    const triggerSuccessToast = (message: string) => {
+        // Deduplicate same message while it's already showing
+        if (showSuccessToast.show && showSuccessToast.message === message) return;
+
+        setShowSuccessToast({ show: true, message });
+
+        if (toastTimerRef.current) {
+            window.clearTimeout(toastTimerRef.current);
+        }
+
+        toastTimerRef.current = window.setTimeout(() => {
+            setShowSuccessToast({ show: false, message: '' });
+            toastTimerRef.current = null;
+        }, 3000);
+    };
+
+    // Clear timer on unmount
+    useEffect(() => {
+        return () => {
+            if (toastTimerRef.current) {
+                window.clearTimeout(toastTimerRef.current);
+            }
+        };
+    }, []);
     const searchInputRef = useRef<HTMLInputElement | null>(null);
     const typingTimerRef = useRef<number | null>(null);
 
@@ -53,6 +85,9 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                 `/staff/payments/${paymentId}/approve`,
                 {},
                 {
+                    onSuccess: () => {
+                        // Do not show local toast; rely on server flash for success notification
+                    },
                     onError: (errors) => {
                         console.error('Approve payment error:', errors);
                         // Revert optimistic update on error
@@ -98,6 +133,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                             setDetail(null);
                         }
                         setRejectModalPaymentId(null); // Close modal
+                        // Do not show local toast; rely on server flash for success notification
                     },
                     onError: (errors) => {
                         console.error('Reject payment error:', errors);
@@ -127,6 +163,18 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
         }
     };
 
+    // Function to translate status values
+    const getTranslatedStatus = (status: string): string => {
+        switch (status.toLowerCase()) {
+            case 'pending':
+                return t('pending');
+            case 'verified':
+                return t('verified');
+            default:
+                return status;
+        }
+    };
+
     // Trigger search using current input value
     const performSearch = () => {
         const value = searchInputRef.current?.value ?? '';
@@ -151,35 +199,43 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
     };
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Payment',
+            title: t('payment'),
             href: '/student/verify-payment',
         },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            {/* Toast for approve/reject success */}
+            {showSuccessToast.show && (
+                <div className="fixed top-6 left-1/2 z-[100] -translate-x-1/2 animate-fade-in rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 shadow-lg flex items-center gap-2">
+                    <CircleCheck className="h-5 w-5 text-emerald-600" />
+                    <span className="text-sm font-semibold">{showSuccessToast.message}</span>
+                </div>
+            )}
+
             <div className="space-y-6 p-6">
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground">Payment Verification</h1>
-                <p className="text-sm text-gray-600 dark:text-muted-foreground">Review and verify student payment submissions</p>
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground">{t('paymentVerification')}</h1>
+                <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('reviewVerifyPayments')}</p>
 
                 <div className="grid grid-cols-3 gap-4">
                     <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Pending Payments</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('pendingPayments')}</div>
                             <Clock className="h-4 w-4 text-orange-400" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-foreground">{summary.pending}</div>
                     </div>
                     <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Verified Today</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('verifiedToday')}</div>
                             <CircleCheck className="h-4 w-4 text-emerald-500" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-foreground">{summary.verified_today}</div>
                     </div>
                     <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Total Revenue</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('totalRevenue')}</div>
                             <DollarSign className="h-4 w-4 text-yellow-400" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-foreground">RM{summary.total_revenue.toFixed(2)}</div>
@@ -193,7 +249,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                             <input
                                 ref={searchInputRef}
                                 className="w-full rounded-md border border-border bg-background py-2 pr-3 pl-9 text-sm text-foreground placeholder:text-muted-foreground"
-                                placeholder="Search parcels..."
+                                placeholder={t('searchParcels')}
                                 defaultValue={filters?.q || ''}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
@@ -229,18 +285,18 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                 router.get(`/staff/payments?${params.toString()}`);
                             }}
                         >
-                            <option value="">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="verified">Verified</option>
+                            <option value="">{t('allStatus')}</option>
+                            <option value="pending">{t('pending')}</option>
+                            <option value="verified">{t('verified')}</option>
                         </select>
                     </div>
 
                     <div className="grid grid-cols-12 gap-2 bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
-                        <div className="col-span-3">Tracking Number</div>
-                        <div className="col-span-4">Student</div>
-                        <div className="col-span-2">Amount</div>
-                        <div className="col-span-2">Status</div>
-                        <div className="col-span-1 text-right">Actions</div>
+                        <div className="col-span-3">{t('parcelID')}</div>
+                        <div className="col-span-4">{t('student')}</div>
+                        <div className="col-span-2">{t('amount')}</div>
+                        <div className="col-span-2">{t('status')}</div>
+                        <div className="col-span-1 text-right">{t('actions')}</div>
                     </div>
 
                     {list.map((r) => (
@@ -256,7 +312,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                     className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${r.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-500/20 dark:text-green-400 dark:ring-green-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
                                 >
                                     {r.status === 'verified' ? <CircleCheck className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                                    {r.status}
+                                    {getTranslatedStatus(r.status)}
                                 </span>
                             </div>
                             <div className="col-span-1 ml-auto flex items-center justify-end gap-4 text-muted-foreground">
@@ -288,12 +344,14 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                                 e.stopPropagation();
                                                 openRejectModal(r.payment_id);
                                             }}
+                                            title={t('rejectPaymentButton')}
+                                            aria-label={t('rejectPaymentButton')}
                                             disabled={processingPayments.has(r.payment_id)}
-                                            className={`rounded-md p-2 text-red-500 transition-all hover:scale-110 hover:bg-red-50 hover:text-red-600 active:scale-95 dark:hover:bg-red-500/20 ${
+                                            className={`rounded p-1 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-500/10 ${
                                                 processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                                             }`}
                                         >
-                                            <CircleX className="h-5 w-5" />
+                                            <CircleX className="h-4 w-4" />
                                         </button>
                                     </>
                                 )}
@@ -304,10 +362,10 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                 {detail && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
                         <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-card">
-                            <div className="mb-4 flex items-center justify-between">
+                            <div className="mb-4 flex items-start justify-between">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">Payment Details</h2>
-                                    <p className="text-sm text-gray-600 dark:text-muted-foreground">Review payment information and proof</p>
+                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('paymentInformation')}</h2>
+                                    <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('reviewVerifyPayments')}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     {(detail as any)?.proof_url && (
@@ -315,7 +373,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                             onClick={handleDownloadImage}
                                             className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent"
                                         >
-                                            <Download className="h-4 w-4" /> Download
+                                            <Download className="h-4 w-4" /> {t('download')}
                                         </button>
                                     )}
                                     <button
@@ -328,24 +386,24 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                             </div>
                             <div className="grid grid-cols-2 gap-6 text-sm">
                                 <div>
-                                    <div className="text-gray-500 dark:text-muted-foreground">Tracking Number</div>
+                                    <div className="text-gray-500 dark:text-muted-foreground">{t('trackingNumber')}</div>
                                     <div className="font-medium text-foreground">{detail.tracking_no}</div>
-                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">Amount</div>
+                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">{t('amount')}</div>
                                     <div className="font-medium text-foreground">RM{detail.amount.toFixed(2)}</div>
-                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">Status</div>
+                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">{t('status')}</div>
                                     <span
                                         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${detail.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-500/20 dark:text-green-400 dark:ring-green-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
                                     >
                                         {detail.status === 'verified' ? <CircleCheck className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                                        {detail.status}
+                                        {getTranslatedStatus(detail.status)}
                                     </span>
                                 </div>
                                 <div>
-                                    <div className="text-gray-500 dark:text-muted-foreground">Name</div>
+                                    <div className="text-gray-500 dark:text-muted-foreground">{t('name')}</div>
                                     <div className="font-medium text-foreground">{detail.student ?? '—'}</div>
-                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">Student ID</div>
+                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">{t('studentID')}</div>
                                     <div className="font-medium text-foreground">{detail.student_matric ?? '—'}</div>
-                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">Submitted</div>
+                                    <div className="mt-2 text-gray-500 dark:text-muted-foreground">{t('submitted')}</div>
                                     <div className="font-medium text-foreground">
                                         {(detail as any).created_at
                                             ? new Date((detail as any).created_at).toLocaleString()
@@ -354,12 +412,12 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                 </div>
                             </div>
                             <div className="mt-6">
-                                <div className="text-sm font-medium text-gray-900 dark:text-card-foreground">Payment Proof</div>
+                                <div className="text-sm font-medium text-gray-900 dark:text-card-foreground">{t('paymentProof')}</div>
                                 <div className="mt-2 overflow-hidden rounded-lg ring-1 ring-gray-200">
                                     {(detail as any).proof_url ? (
                                         <img src={(detail as any).proof_url} className="max-h-[60vh] w-full object-contain" />
                                     ) : (
-                                        <div className="p-6 text-center text-sm text-gray-500 dark:text-muted-foreground">No proof uploaded.</div>
+                                        <div className="p-6 text-center text-sm text-gray-500 dark:text-muted-foreground">{t('noProofUploaded')}</div>
                                     )}
                                 </div>
                             </div>

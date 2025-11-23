@@ -2,6 +2,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Edit2, Plus, Search, Trash2, X } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type FaqRow = {
     faq_id: number;
@@ -16,7 +17,7 @@ type FaqRow = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'FAQs',
+        title: 'faqs',
         href: '/student/manage-faq',
     },
 ];
@@ -32,11 +33,18 @@ export default function ManageFaq({
     categories: string[];
     filters?: { q?: string; category?: string };
 }) {
+    const { t } = useLanguage();
     const [list, setList] = useState<FaqRow[]>(rows);
     const [q, setQ] = useState(filters?.q || '');
     const [category, setCategory] = useState(filters?.category || '');
     const searchRef = useRef<HTMLInputElement | null>(null);
     const [editing, setEditing] = useState<FaqRow | null>(null);
+    const [validationError, setValidationError] = useState<string>('');
+    
+    const showValidationError = (message: string) => {
+        setValidationError(message);
+        setTimeout(() => setValidationError(''), 3000);
+    };
     const [editQuestion, setEditQuestion] = useState('');
     const [editAnswer, setEditAnswer] = useState('');
     const [editCategory, setEditCategory] = useState('');
@@ -48,6 +56,12 @@ export default function ManageFaq({
     const [addAnswer, setAddAnswer] = useState('');
     const [addCategory, setAddCategory] = useState('');
     const [addStatus, setAddStatus] = useState<'Active' | 'Inactive'>('Active');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    
+    const showSuccessMessage = (message: string) => {
+        setSuccessMessage(message);
+        setTimeout(() => setSuccessMessage(''), 3000);
+    };
 
     // Delete confirmation modal state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -98,6 +112,7 @@ export default function ManageFaq({
         setIsDeleting(true);
         try {
             await remove(selectedDeleteId);
+            showSuccessMessage('FAQ deleted successfully!');
         } finally {
             setIsDeleting(false);
             setShowDeleteModal(false);
@@ -123,23 +138,47 @@ export default function ManageFaq({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            {validationError && (
+                <div className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 shadow-lg">
+                        <div className="flex items-center gap-3">
+                            <svg className="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-sm font-medium text-red-800">{validationError}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {successMessage && (
+                <div className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
+                    <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 shadow-lg">
+                        <div className="flex items-center gap-3">
+                            <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-sm font-medium text-green-800">{successMessage}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="space-y-6 p-6">
                 <div>
-                    <h1 className="text-2xl font-bold">FAQs</h1>
-                    <p className="text-sm text-gray-500">Manage frequently asked questions for students</p>
+                    <h1 className="text-2xl font-bold">{t('faqs')}</h1>
+                    <p className="text-sm text-gray-500">{t('manageFaqs')}</p>
                 </div>
 
                 {/* Summary cards */}
                 <div className="grid grid-cols-2 gap-4">
                     <div className="rounded-xl border border-border bg-white p-4">
-                        <div className="text-sm text-gray-600">Total FAQs</div>
+                        <div className="text-sm text-gray-600">{t('totalFAQs')}</div>
                         <div className="text-2xl font-bold">{list.length}</div>
-                        <div className="text-xs text-gray-500">All questions</div>
+                        <div className="text-xs text-gray-500">{t('allQuestions')}</div>
                     </div>
                     <div className="rounded-xl border border-border bg-white p-4">
-                        <div className="text-sm text-gray-600">Published</div>
+                        <div className="text-sm text-gray-600">{t('published')}</div>
                         <div className="text-2xl font-bold">{list.filter((r) => r.faq_status === 'Active').length}</div>
-                        <div className="text-xs text-gray-500">Visible to students</div>
+                        <div className="text-xs text-gray-500">{t('visibleToStudents')}</div>
                     </div>
                 </div>
 
@@ -151,7 +190,7 @@ export default function ManageFaq({
                             ref={searchRef}
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
-                            placeholder="Search FAQs..."
+                            placeholder={t('searchFAQs')}
                             className="w-full rounded-md border border-border bg-background px-7 py-2 text-sm text-foreground placeholder:text-muted-foreground"
                             onKeyDown={(e) => e.key === 'Enter' && refreshFromServer()}
                         />
@@ -161,13 +200,13 @@ export default function ManageFaq({
                         onChange={(e) => setCategory(e.target.value)}
                         className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
                     >
-                        <option value="">All Categories</option>
+                        <option value="">{t('allCategories')}</option>
                         {categories
                             .filter((c, index, arr) => arr.indexOf(c) === index)
                             .filter((c) => c && c.trim() !== '')
                             .map((c) => (
                                 <option key={c} value={c}>
-                                    {c}
+                                    {t(c.toLowerCase() as any) || c}
                                 </option>
                             ))}
                     </select>
@@ -175,7 +214,7 @@ export default function ManageFaq({
                         onClick={() => setAdding(true)}
                         className="inline-flex items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white"
                     >
-                        <Plus size={16} /> Add FAQ
+                        <Plus size={16} /> {t('addFAQ')}
                     </button>
                 </div>
 
@@ -186,9 +225,9 @@ export default function ManageFaq({
                             <div className="flex items-start justify-between p-4">
                                 <div className="pr-4">
                                     <div className="mb-2 flex items-center gap-2 text-xs">
-                                        <span className={`rounded-full px-2 py-0.5 ${categoryClasses(f.category)}`}>{f.category || 'General'}</span>
+                                        <span className={`rounded-full px-2 py-0.5 ${categoryClasses(f.category)}`}>{t((f.category || 'General').toLowerCase() as any)}</span>
                                         {f.faq_status === 'Inactive' && (
-                                            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">Draft</span>
+                                            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">{t('draft')}</span>
                                         )}
                                     </div>
                                     <div className="text-lg font-semibold">{f.faq_question}</div>
@@ -203,14 +242,14 @@ export default function ManageFaq({
                                             onClick={() => publish(f.faq_id, 'unpublish')}
                                             className="text-sm text-black hover:bg-pink-50 hover:text-pink-600 hover:shadow-lg focus-visible:outline-none active:bg-gray-200"
                                         >
-                                            Unpublish
+                                            {t('unpublish')}
                                         </button>
                                     ) : (
                                         <button
                                             onClick={() => publish(f.faq_id, 'publish')}
                                             className="rounded-full border bg-gray-100 px-3 py-1 text-xs text-gray-600 opacity-80 hover:opacity-100"
                                         >
-                                            Publish
+                                            {t('publish')}
                                         </button>
                                     )}
                                     <button
@@ -248,9 +287,9 @@ export default function ManageFaq({
                     <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-xl">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold">Edit FAQ</div>
+                                <div className="text-lg font-semibold">{t('editFAQ')}</div>
 
-                                <div className="text-xs text-gray-500">Update the FAQ information</div>
+                                <div className="text-xs text-gray-500">{t('updateFAQInfo')}</div>
                             </div>
                             <button className="text-gray-500 hover:text-gray-700" onClick={() => setEditing(null)}>
                                 <X size={18} />
@@ -258,7 +297,7 @@ export default function ManageFaq({
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <div className="mb-1 text-sm font-medium">Question</div>
+                                <div className="mb-1 text-sm font-medium">{t('question')}</div>
                                 <input
                                     value={editQuestion}
                                     onChange={(e) => setEditQuestion(e.target.value)}
@@ -266,7 +305,7 @@ export default function ManageFaq({
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium">Answer</div>
+                                <div className="mb-1 text-sm font-medium">{t('answer')}</div>
                                 <textarea
                                     value={editAnswer}
                                     onChange={(e) => setEditAnswer(e.target.value)}
@@ -275,43 +314,66 @@ export default function ManageFaq({
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium">Category</div>
+                                    <div className="mb-1 text-sm font-medium">{t('category')}</div>
                                     <select
                                         value={editCategory}
                                         onChange={(e) => setEditCategory(e.target.value)}
                                         className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                     >
-                                        <option value="">General</option>
+                                        <option value="">{t('general')}</option>
                                         {categories
                                             .filter((c, index, arr) => arr.indexOf(c) === index)
                                             .filter((c) => c && c.trim() !== '')
                                             .map((c) => (
                                                 <option key={c} value={c}>
-                                                    {c}
+                                                    {t(c.toLowerCase() as any) || c}
                                                 </option>
                                             ))}
                                     </select>
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium">Status</div>
+                                    <div className="mb-1 text-sm font-medium">{t('status')}</div>
                                     <select
                                         value={editStatus}
                                         onChange={(e) => setEditStatus(e.target.value as 'Active' | 'Inactive')}
                                         className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                     >
-                                        <option value="Inactive">Draft</option>
-                                        <option value="Active">Published</option>
+                                        <option value="Inactive">{t('draft')}</option>
+                                        <option value="Active">{t('published')}</option>
                                     </select>
                                 </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 pt-2">
-                                <button className="rounded-md borderborder-border px-3 py-2 text-sm" onClick={() => setEditing(null)}>
-                                    Cancel
+                                <button className="rounded-md border border-border px-3 py-2 text-sm hover:bg-gray-100" onClick={() => setEditing(null)}>
+                                    {t('cancel')}
                                 </button>
                                 <button
-                                    className="rounded-md bg-gray-900 px-3 py-2 text-sm text-white"
+                                    className="rounded-md bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600"
                                     onClick={async () => {
                                         if (!editing) return;
+                                        
+                                        // Validation
+                                        if (!editQuestion.trim()) {
+                                            showValidationError('Please enter a question');
+                                            return;
+                                        }
+                                        if (editQuestion.trim().length < 10) {
+                                            showValidationError('Question must be at least 10 characters long');
+                                            return;
+                                        }
+                                        if (!editAnswer.trim()) {
+                                            showValidationError('Please enter an answer');
+                                            return;
+                                        }
+                                        if (editAnswer.trim().length < 20) {
+                                            showValidationError('Answer must be at least 20 characters long');
+                                            return;
+                                        }
+                                        if (!editCategory) {
+                                            showValidationError('Please select a category');
+                                            return;
+                                        }
+                                        
                                         await fetch(`/staff/faq/${editing.faq_id}`, {
                                             method: 'PUT',
                                             headers: {
@@ -340,9 +402,10 @@ export default function ManageFaq({
                                             ),
                                         );
                                         setEditing(null);
+                                        showSuccessMessage('FAQ updated successfully!');
                                     }}
                                 >
-                                    Update FAQ
+                                    {t('updateFAQ')}
                                 </button>
                             </div>
                         </div>
@@ -357,22 +420,22 @@ export default function ManageFaq({
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
                             <Trash2 className="h-6 w-6 text-red-600" />
                         </div>
-                        <h2 className="mb-2 text-lg font-semibold text-gray-900">Delete FAQ</h2>
+                        <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('deleteFAQ')}</h2>
                         <p className="mb-1 text-left text-sm text-gray-600">
-                            Are you sure you want to delete
+                            {t('areYouSureDeleteFAQ')}
                             {selectedDeleteLabel ? (
                                 <>
                                     {' '}
                                     <span className="font-medium text-red-600">{selectedDeleteLabel}</span>
                                 </>
                             ) : (
-                                ' this FAQ'
+                                ` ${t('thisFAQ')}`
                             )}
                             ?
                         </p>
                          <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
                                 <p className="text-sm text-left text-red-800 dark:text-red-400">
-                            This action cannot be undone and will permanently remove this FAQ.
+                            {t('cannotBeUndoneFAQ')}
                                 </p>
                             </div>
                       
@@ -382,14 +445,14 @@ export default function ManageFaq({
                                 disabled={isDeleting}
                                 className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Cancel
+                                {t('cancel')}
                             </button>
                             <button
                                 onClick={handleDeleteConfirm}
                                 disabled={isDeleting}
                                 className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {isDeleting ? 'Deleting...' : 'Delete'}
+                                {isDeleting ? t('deleting') : t('delete')}
                             </button>
                         </div>
                     </div>
@@ -402,8 +465,8 @@ export default function ManageFaq({
                     <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-xl">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold">Add New FAQ</div>
-                                <div className="text-xs text-gray-500">Create a new frequently asked question</div>
+                                <div className="text-lg font-semibold">{t('addNewFAQ')}</div>
+                                <div className="text-xs text-gray-500">{t('createNewFAQ')}</div>
                             </div>
                             <button className="text-gray-500 hover:text-gray-700" onClick={() => setAdding(false)}>
                                 <X size={18} />
@@ -411,90 +474,134 @@ export default function ManageFaq({
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <div className="mb-1 text-sm font-medium">Question</div>
+                                <div className="mb-1 text-sm font-medium">{t('question')}</div>
                                 <input
                                     value={addQuestion}
                                     onChange={(e) => setAddQuestion(e.target.value)}
                                     className="w-full rounded-md border border-border px-3 py-2 text-sm"
-                                    placeholder="Enter the question..."
+                                    placeholder={t('enterQuestion')}
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium">Answer</div>
+                                <div className="mb-1 text-sm font-medium">{t('answer')}</div>
                                 <textarea
                                     value={addAnswer}
                                     onChange={(e) => setAddAnswer(e.target.value)}
                                     className="h-28 w-full rounded-md border border-border px-3 py-2 text-sm"
-                                    placeholder="Enter the answer..."
+                                    placeholder={t('enterAnswer')}
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium">Category</div>
+                                    <div className="mb-1 text-sm font-medium">{t('category')}</div>
                                     <select
                                         value={addCategory}
                                         onChange={(e) => setAddCategory(e.target.value)}
                                         className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                     >
-                                        <option value="">Choose category</option>
+                                        <option value="">{t('chooseCategory')}</option>
                                         {categories
                                             .filter((c, index, arr) => arr.indexOf(c) === index)
                                             .filter((c) => c && c.trim() !== '')
                                             .map((c) => (
                                                 <option key={c} value={c}>
-                                                    {c}
+                                                    {t(c.toLowerCase() as any) || c}
                                                 </option>
                                             ))}
                                     </select>
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium">Status</div>
+                                    <div className="mb-1 text-sm font-medium">{t('status')}</div>
                                     <select
                                         value={addStatus}
                                         onChange={(e) => setAddStatus(e.target.value as 'Active' | 'Inactive')}
                                         className="w-full rounded-md border border-border px-3 py-2 text-sm"
                                     >
-                                        <option value="Active">Published</option>
-                                        <option value="Inactive">Draft</option>
+                                        <option value="Active">{t('published')}</option>
+                                        <option value="Inactive">{t('draft')}</option>
                                     </select>
                                 </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 pt-2">
-                                <button className="rounded-md border px-3 py-2 text-sm" onClick={() => setAdding(false)}>
-                                    Cancel
+                                <button className="rounded-md border border-border px-3 py-2 text-sm hover:bg-gray-100" onClick={() => setAdding(false)}>
+                                    {t('cancel')}
                                 </button>
                                 <button
-                                    className="rounded-md bg-pink-500 px-3 py-2 text-sm text-white disabled:opacity-50"
+                                    className="rounded-md bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600 disabled:opacity-50"
                                     onClick={async () => {
-                                        if (!addQuestion.trim() || !addAnswer.trim()) return;
-                                        const res = await fetch('/staff/faq', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-Requested-With': 'XMLHttpRequest',
-                                                'X-CSRF-TOKEN': csrf,
-                                            },
-                                            body: JSON.stringify({
-                                                faq_question: addQuestion,
-                                                faq_answer: addAnswer,
-                                                category: addCategory,
-                                                faq_status: addStatus,
-                                            }),
-                                        });
-                                        const json = await res.json();
-                                        if (json.success) {
-                                            setList((prev) => [json.faq, ...prev]);
-                                            setAdding(false);
-                                            setAddQuestion('');
-                                            setAddAnswer('');
-                                            setAddCategory('');
-                                            setAddStatus('Active');
-                                        } else {
-                                            alert('Failed to add FAQ. Please ensure all fields are valid.');
+                                        // Validation
+                                        if (!addQuestion.trim()) {
+                                            showValidationError('Please enter a question');
+                                            return;
+                                        }
+                                        if (addQuestion.trim().length < 10) {
+                                            showValidationError('Question must be at least 10 characters long');
+                                            return;
+                                        }
+                                        if (!addAnswer.trim()) {
+                                            showValidationError('Please enter an answer');
+                                            return;
+                                        }
+                                        if (addAnswer.trim().length < 20) {
+                                            showValidationError('Answer must be at least 20 characters long');
+                                            return;
+                                        }
+                                        if (!addCategory) {
+                                            showValidationError('Please select a category');
+                                            return;
+                                        }
+                                        
+                                        try {
+                                            const res = await fetch('/staff/faq', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-Requested-With': 'XMLHttpRequest',
+                                                    'X-CSRF-TOKEN': csrf,
+                                                },
+                                                body: JSON.stringify({
+                                                    faq_question: addQuestion,
+                                                    faq_answer: addAnswer,
+                                                    category: addCategory,
+                                                    faq_status: addStatus,
+                                                }),
+                                            });
+                                            
+                                            if (!res.ok) {
+                                                const errorData = await res.json();
+                                                console.error('Server error:', errorData);
+                                                showValidationError('Failed to add FAQ. Please ensure all fields are valid.');
+                                                return;
+                                            }
+                                            
+                                            const json = await res.json();
+                                            if (json.success) {
+                                                const newFaq = {
+                                                    faq_id: json.faq.faq_id,
+                                                    faq_question: json.faq.faq_question,
+                                                    faq_answer: json.faq.faq_answer,
+                                                    category: json.faq.category,
+                                                    faq_status: json.faq.faq_status,
+                                                    created_at: json.faq.created_at,
+                                                    updated_at: json.faq.updated_at,
+                                                };
+                                                setList((prev) => [newFaq, ...prev]);
+                                                setAdding(false);
+                                                setAddQuestion('');
+                                                setAddAnswer('');
+                                                setAddCategory('');
+                                                setAddStatus('Active');
+                                                showSuccessMessage('FAQ added successfully!');
+                                            } else {
+                                                showValidationError('Failed to add FAQ. Please try again.');
+                                            }
+                                        } catch (error) {
+                                            console.error('Error adding FAQ:', error);
+                                            showValidationError('An error occurred. Please try again.');
                                         }
                                     }}
                                 >
-                                    Add FAQ
+                                    {t('addFAQ')}
                                 </button>
                             </div>
                         </div>

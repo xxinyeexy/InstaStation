@@ -2,12 +2,13 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Html5Qrcode, Html5QrcodeScanner, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { BellRing, CheckCircle, Edit, Eye, Trash2, X, XCircle } from 'lucide-react';
+import { BellRing, CircleCheck, Edit, Eye, Trash2, X, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Parcel',
+        title: 'parcels',
         href: '/staff/parcel',
     },
 ];
@@ -95,6 +96,7 @@ interface EditParcelForm {
 }
 
 export default function Dashboard({ parcels = [] }: DashboardProps) {
+    const { t } = useLanguage();
     const { auth } = usePage<SharedData>().props;
     const currentUser = auth.user;
 
@@ -129,6 +131,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         description: '',
     });
     const [isUpdating, setIsUpdating] = useState(false);
+    const [editValidationError, setEditValidationError] = useState<string>('');
+    
+    const showEditValidationError = (message: string) => {
+        setEditValidationError(message);
+        setTimeout(() => setEditValidationError(''), 3000);
+    };
 
     // Notification state
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -175,19 +183,19 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 credentials: 'same-origin',
             });
             if (!resp.ok) {
-                addNotification('error', 'Scan Failed', `Parcel not found for code ${code}`);
+                addNotification('error', t('scanFailed'), `${t('parcelNotFound')} ${code}`);
                 return;
             }
             const data = await resp.json();
             if (!data?.success || !data?.parcel) {
-                addNotification('error', 'Scan Failed', 'No parcel data returned');
+                addNotification('error', t('scanFailed'), t('noParcelData'));
                 return;
             }
             setParcelDetails(data.parcel as ParcelDetails);
             setShowDetailsModal(true);
             await closeScanModal();
         } catch {
-            addNotification('error', 'Scan Error', 'Could not process QR scan');
+            addNotification('error', t('scanError'), t('couldNotProcessQR'));
         }
     }, []);
 
@@ -288,7 +296,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             setParcelDetails(parcel as ParcelDetails);
             setShowDetailsModal(true);
         } else {
-            addNotification('error', 'Error!', 'Parcel not found in local data.');
+            addNotification('error', t('error'), t('parcelNotFoundLocal'));
         }
     };
 
@@ -345,7 +353,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             setShowEditModal(true);
         } catch (error) {
             console.error('Failed to fetch parcel details:', error);
-            addNotification('error', 'Error!', 'Failed to load parcel details. Please try again.');
+            addNotification('error', t('error'), t('failedToLoadDetails'));
         }
     };
 
@@ -360,6 +368,42 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Handle form submission
     const handleUpdateParcel = async () => {
         if (!editingParcel) return;
+
+        // Comprehensive validation
+        if (!editForm.tracking_no.trim()) {
+            showEditValidationError('Please enter a tracking number');
+            return;
+        }
+        
+        if (editForm.tracking_no.trim().length < 5) {
+            showEditValidationError('Tracking number must be at least 5 characters long');
+            return;
+        }
+
+        if (!editForm.parcel_status) {
+            showEditValidationError('Please select a parcel status');
+            return;
+        }
+
+        if (!editForm.sender_name.trim()) {
+            showEditValidationError('Please enter sender information');
+            return;
+        }
+        
+        if (editForm.sender_name.trim().length < 3) {
+            showEditValidationError('Sender name must be at least 3 characters long');
+            return;
+        }
+
+        if (!editForm.dimensions.trim()) {
+            showEditValidationError('Please enter parcel dimensions/size');
+            return;
+        }
+
+        if (!editingParcel.location || !editingParcel.location.trim()) {
+            showEditValidationError('Please enter storage location');
+            return;
+        }
 
         setIsUpdating(true);
         try {
@@ -606,6 +650,44 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
+    // Function to translate tab names
+    const getTranslatedTabName = (tab: TabType): string => {
+        switch (tab) {
+            case 'All Parcels':
+                return t('allParcels');
+            case 'Pending Payment':
+                return t('pendingPayment');
+            case 'Ready For Collection':
+                return t('readyForCollection');
+            case 'Collected':
+                return t('collected');
+            case 'Unclaimed':
+                return t('unclaimed');
+            default:
+                return tab;
+        }
+    };
+
+    // Function to translate status values
+    const getTranslatedStatus = (status: string): string => {
+        const normalizedStatus = status?.toLowerCase();
+        switch (normalizedStatus) {
+            case 'pending payment':
+                return t('pendingPayment');
+            case 'ready for collection':
+            case 'ready to collect':
+                return t('readyForCollection');
+            case 'collected':
+                return t('collected');
+            case 'unclaimed':
+                return t('unclaimed');
+            case 'approved':
+                return t('approved');
+            default:
+                return status;
+        }
+    };
+
     // Optimized handleMarkAsCollected - instant UI update with optimistic rendering
     const handleMarkAsCollected = async (parcelId: number) => {
         // Prevent multiple simultaneous requests for the same parcel
@@ -624,7 +706,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setActiveTab('Collected');
         
         // Show success notification immediately
-        addNotification('success', 'Success!', 'Parcel marked as collected successfully!');
+        addNotification('success', t('success'), t('parcelCollectedSuccess'));
 
         // Add parcel to collecting set
         setCollectingParcels((prev) => new Set(prev).add(parcelId));
@@ -639,7 +721,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 onError: () => {
                     // Revert optimistic update on error
                     router.reload({ only: ['parcels'] });
-                    addNotification('error', 'Error!', 'Failed to mark parcel as collected. Please try again.');
+                    addNotification('error', t('error'), t('failedToMarkCollected'));
                 },
                 onFinish: () => {
                     // Remove parcel from collecting set
@@ -745,12 +827,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             setSelectedTrackingNo(null);
 
             // Show success notification
-            addNotification('success', 'Parcel Deleted', `Parcel ${selectedTrackingNo} has been successfully deleted.`);
+            addNotification('success', t('parcelDeleted'), `${t('parcel')} ${selectedTrackingNo} ${t('parcelDeletedSuccess').toLowerCase()}`);
         } catch (error) {
             console.error('Failed to delete parcel:', error);
 
             // Show error notification
-            addNotification('error', 'Delete Failed', `Failed to delete parcel ${selectedTrackingNo}. Please try again.`);
+            addNotification('error', t('deleteFailed'), `${t('failedToDelete').replace('. Please try again.', '')} ${selectedTrackingNo}.`);
         } finally {
             setIsDeleting(false);
         }
@@ -810,13 +892,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 let message = `Queued: ${queued}`;
                 if (skipped_no_contact) message += ` • Skipped (no contact): ${skipped_no_contact}`;
                 if (skipped_recently) message += ` • Skipped (already reminded today): ${skipped_recently}`;
-                addNotification('success', 'Reminder Processed', message);
+                addNotification('success', t('reminderProcessed'), message);
             } else {
-                addNotification('error', 'Reminder Failed', data.message || 'Failed to queue reminder');
+                addNotification('error', t('reminderFailed'), data.message || t('failedToQueueReminder'));
             }
         } catch (error: any) {
             console.error('Failed to send reminder:', error);
-            addNotification('error', 'Error', error?.message || 'Failed to send reminder');
+            addNotification('error', t('error'), error?.message || t('failedToSendReminder'));
         }
     };
 
@@ -900,7 +982,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex-shrink-0">
                                 {notification.type === 'success' ? (
-                                    <CheckCircle className="h-5 w-5 text-emerald-600" />
+                                    <CircleCheck className="h-5 w-5 text-emerald-600" />
                                 ) : (
                                     <XCircle className="h-5 w-5 text-red-600" />
                                 )}
@@ -994,9 +1076,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         {/* Modal Header */}
                         <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-border">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-card-foreground">Parcel Details</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-card-foreground">{t('parcelDetails')}</h2>
 
-                                <p className="text-sm text-gray-600 dark:text-muted-foreground">Complete information about the parcel</p>
+                                <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('completeInformation')}</p>
                             </div>
                             <button
                                 onClick={handleCloseDetailsModal}
@@ -1014,12 +1096,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <div className="grid grid-cols-2 gap-6">
                                         <div>
                                             <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
-                                                Tracking Information
+                                                {t('trackingInformation')}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
-                                                        Tracking Number
+                                                        {t('trackingNumber')}
                                                     </label>
                                                     <p className="font-['Consolas'] text-lg font-bold text-gray-900 dark:text-card-foreground">
                                                         {parcelDetails.tracking_no}
@@ -1027,12 +1109,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
-                                                        Status
+                                                        {t('status')}
                                                     </label>
                                                     <span
                                                         className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ${getStatusStyles(parcelDetails.parcel_status)}`}
                                                     >
-                                                        {parcelDetails.parcel_status}
+                                                        {getTranslatedStatus(parcelDetails.parcel_status)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -1040,25 +1122,25 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                         <div>
                                             <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
-                                                Recipient Information
+                                                {t('recipientInformation')}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
-                                                        Student ID
+                                                        {t('studentID')}
                                                     </label>
                                                     <p className="text-gray-900 dark:text-card-foreground">
                                                         {parcelDetails.student_user?.matric || parcelDetails.student_id}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Name</label>
+                                                    <label className="block text-sm font-medium text-gray-600">{t('name')}</label>
                                                     <p className="text-gray-900 dark:text-card-foreground">
                                                         {parcelDetails.student_user?.name || 'N/A'}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Email</label>
+                                                    <label className="block text-sm font-medium text-gray-600">{t('email')}</label>
                                                     <p className="text-gray-900 dark:text-card-foreground">
                                                         {parcelDetails.student_user?.email || 'N/A'}
                                                     </p>
@@ -1069,10 +1151,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Sender Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">Sender Information</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('senderInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Sender</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('sender')}</label>
                                                 <p className="text-gray-900 dark:text-card-foreground">{parcelDetails.sender || 'N/A'}</p>
                                             </div>
                                         </div>
@@ -1080,14 +1162,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Parcel Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Parcel Information</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('parcelInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Dimensions</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('dimensions')}</label>
                                                 <p className="text-gray-900">{parcelDetails.dimensions || parcelDetails.size || 'N/A'}</p>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Fee</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('fee')}</label>
                                                 <p className="text-gray-900">RM{parcelDetails.fee || '1.00'}</p>
                                             </div>
                                         </div>
@@ -1095,15 +1177,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Additional Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Additional Information</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('additionalInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Location</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('location')}</label>
                                                 <p className="text-gray-900">{parcelDetails.location || 'N/A'}</p>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Days in Storage</label>
-                                                <p className="text-gray-900">{parcelDetails.days || 0} days</p>
+                                                <label className="block text-sm font-medium text-gray-600">{t('daysInStorage')}</label>
+                                                <p className="text-gray-900">{parcelDetails.days || 0} {t('days')}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1113,23 +1195,23 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         parcelDetails.parcel_status?.toLowerCase() === 'ready to collect') &&
                                         (parcelDetails.schedule || parcelDetails.time_slot) && (
                                             <div>
-                                                <h3 className="mb-3 text-lg font-semibold text-gray-900">Scheduled </h3>
+                                                <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('scheduledPickupInfo')}</h3>
                                                 <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div>
-                                                            <label className="block text-sm font-medium text-purple-700">Scheduled Date</label>
+                                                            <label className="block text-sm font-medium text-purple-700">{t('scheduledDate')}</label>
                                                             <p className="font-medium text-purple-900">
-                                                                {formatScheduledDate(parcelDetails.schedule) || 'Not set'}
+                                                                {formatScheduledDate(parcelDetails.schedule) || t('notSet')}
                                                             </p>
                                                         </div>
                                                         <div>
-                                                            <label className="block text-sm font-medium text-purple-700">Time Slot</label>
-                                                            <p className="font-medium text-purple-900">{parcelDetails.time_slot || 'Not set'}</p>
+                                                            <label className="block text-sm font-medium text-purple-700">{t('timeSlot')}</label>
+                                                            <p className="font-medium text-purple-900">{parcelDetails.time_slot || t('notSet')}</p>
                                                         </div>
                                                     </div>
                                                     {formatScheduledDate(parcelDetails.schedule) && parcelDetails.time_slot && (
                                                         <div className="mt-3 border-t border-purple-200 pt-3">
-                                                            <label className="block text-sm font-medium text-purple-700">Full Schedule</label>
+                                                            <label className="block text-sm font-medium text-purple-700">{t('fullSchedule')}</label>
                                                             <p className="font-semibold text-purple-900">
                                                                 {formatScheduledDate(parcelDetails.schedule)} • {parcelDetails.time_slot}
                                                             </p>
@@ -1141,14 +1223,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Timestamps */}
                                     <div className="border-t border-gray-200 pt-4">
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Timestamps</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('timestamps')}</h3>
                                         <div className="grid grid-cols-2 gap-4 text-sm">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Created At</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('createdAt')}</label>
                                                 <p className="text-gray-900">{formatDateTime(parcelDetails.created_at)}</p>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Last Updated</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('lastUpdated')}</label>
                                                 <p className="text-gray-900">{formatDateTime(parcelDetails.updated_at)}</p>
                                             </div>
                                         </div>
@@ -1156,7 +1238,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 </div>
                             ) : (
                                 <div className="py-12 text-center">
-                                    <p className="text-gray-500">Failed to load parcel details.</p>
+                                    <p className="text-gray-500">{t('failedToLoadParcelDetails')}</p>
                                 </div>
                             )}
                         </div>
@@ -1168,7 +1250,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     onClick={handleCloseDetailsModal}
                                     className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
                                 >
-                                    Close
+                                    {t('close')}
                                 </button>
                                 {parcelDetails.parcel_status?.toLowerCase() === 'ready for collection' && (
                                     <button
@@ -1183,8 +1265,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 : 'bg-green-600 hover:scale-105 hover:bg-green-700 active:scale-95'
                                         }`}
                                     >
-                                        <CheckCircle className="h-4 w-4" />
-                                        <span>Mark as Collected</span>
+                                        <CircleCheck className="h-4 w-4" />
+                                        <span>{t('markAsCollected')}</span>
                                     </button>
                                 )}
                             </div>
@@ -1267,11 +1349,24 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {showEditModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                     <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-card">
+                        {/* Validation Error Toast */}
+                        {editValidationError && (
+                            <div className="absolute top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
+                                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 shadow-lg">
+                                    <div className="flex items-center gap-3">
+                                        <svg className="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                        </svg>
+                                        <span className="text-sm font-medium text-red-800">{editValidationError}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         {/* Modal Header */}
                         <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-border">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900">Edit Parcel</h2>
-                                <p className="text-sm text-gray-600">Update parcel information</p>
+                                <h2 className="text-2xl font-bold text-gray-900">{t('editParcel')}</h2>
+                                <p className="text-sm text-gray-600">{t('updateParcelInfo')}</p>
                             </div>
                             <button
                                 onClick={handleCloseEditModal}
@@ -1295,12 +1390,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <div className="grid grid-cols-2 gap-6">
                                         <div>
                                             <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
-                                                Tracking Information
+                                                {t('trackingInformation')}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
-                                                        Tracking Number
+                                                        {t('trackingNumber')}
                                                     </label>
                                                     <input
                                                         type="text"
@@ -1311,17 +1406,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
-                                                        Status
+                                                        {t('status')}
                                                     </label>
                                                     <select
                                                         value={editForm.parcel_status}
                                                         onChange={(e) => handleEditFormChange('parcel_status', e.target.value)}
                                                         className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
                                                     >
-                                                        <option value="Pending Payment">Pending Payment</option>
-                                                        <option value="Ready For Collection">Ready For Collection</option>
-                                                        <option value="Collected">Collected</option>
-                                                        <option value="Unclaimed">Unclaimed</option>
+                                                        <option value="Pending Payment">{t('pendingPayment')}</option>
+                                                        <option value="Ready For Collection">{t('readyForCollection')}</option>
+                                                        <option value="Collected">{t('collected')}</option>
+                                                        <option value="Unclaimed">{t('unclaimed')}</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -1329,12 +1424,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                         <div>
                                             <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
-                                                Recipient Information
+                                                {t('recipientInformation')}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
-                                                        Student ID
+                                                        {t('studentID')}
                                                     </label>
                                                     <input
                                                         type="text"
@@ -1344,7 +1439,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Name</label>
+                                                    <label className="block text-sm font-medium text-gray-600">{t('name')}</label>
                                                     <input
                                                         type="text"
                                                         value={editForm.recipient_name}
@@ -1353,7 +1448,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">Email</label>
+                                                    <label className="block text-sm font-medium text-gray-600">{t('email')}</label>
                                                     <input
                                                         type="email"
                                                         value={editForm.email}
@@ -1367,10 +1462,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Sender Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">Sender Information</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('senderInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Sender</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('sender')}</label>
                                                 <input
                                                     type="text"
                                                     value={editForm.sender_name}
@@ -1383,10 +1478,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Parcel Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Parcel Information</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('parcelInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Dimensions</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('dimensions')}</label>
                                                 <input
                                                     type="text"
                                                     value={editForm.dimensions}
@@ -1395,7 +1490,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Fee (RM)</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('fee')} (RM)</label>
                                                 <input
                                                     type="number"
                                                     step="0.01"
@@ -1409,10 +1504,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Additional Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">Additional Information</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('additionalInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">Location</label>
+                                                <label className="block text-sm font-medium text-gray-600">{t('location')}</label>
                                                 <input
                                                     type="text"
                                                     value={editingParcel.location || ''}
@@ -1433,7 +1528,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             onClick={handleCloseEditModal}
                                             className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
                                         >
-                                            Cancel
+                                            {t('cancel')}
                                         </button>
                                         <button
                                             type="submit"
@@ -1443,17 +1538,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             {isUpdating ? (
                                                 <>
                                                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                                    Updating...
+                                                    {t('updating')}
                                                 </>
                                             ) : (
-                                                'Update Parcel'
+                                                t('updateParcel')
                                             )}
                                         </button>
                                     </div>
                                 </form>
                             ) : (
                                 <div className="py-12 text-center">
-                                    <p className="text-gray-500">Failed to load parcel for editing.</p>
+                                    <p className="text-gray-500">{t('failedToLoadParcelForEditing')}</p>
                                 </div>
                             )}
                         </div>
@@ -1469,13 +1564,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             <Trash2 className="h-6 w-6 text-red-600" />
                         </div>
 
-                        <h2 className="mb-2 text-lg font-semibold text-gray-900">Delete Parcel</h2>
+                        <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('deleteParcel')}</h2>
                         <p className="mb-1 text-sm text-gray-600">
-                            Are you sure you want to delete parcel <span className="font-medium text-red-600">{selectedTrackingNo}</span>?
+                            {t('areYouSureDeleteParcel')} <span className="font-medium text-red-600">{selectedTrackingNo}</span>?
                         </p>
                         <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
                                 <p className="text-sm text-red-800 dark:text-red-400">
-This action cannot be undone and will permanently remove all parcel data and history.                                </p>
+{t('cannotBeUndoneParcel')}                                </p>
                             </div>
 
                         <div className="flex justify-center gap-3">
@@ -1484,7 +1579,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                 disabled={isDeleting}
                                 className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Cancel
+                                {t('cancel')}
                             </button>
                             <button
                                 onClick={handleDeleteConfirm}
@@ -1494,10 +1589,10 @@ This action cannot be undone and will permanently remove all parcel data and his
                                 {isDeleting ? (
                                     <>
                                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                        Deleting...
+                                        {t('deleting')}
                                     </>
                                 ) : (
-                                    'Delete Parcel'
+                                    t('deleteParcel')
                                 )}
                             </button>
                         </div>
@@ -1526,7 +1621,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">Newly Arrived</p>
+                                    <p className="text-sm font-bold text-gray-700">{t('newlyArrived')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-pink-800">{stats.newlyArrived}</p>
                             </div>
@@ -1550,7 +1645,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">Pending Payment</p>
+                                    <p className="text-sm font-bold text-gray-700">{t('pendingPayment')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-800">{stats.pendingPayments}</p>
                             </div>
@@ -1574,7 +1669,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">Ready For Collection</p>
+                                    <p className="text-sm font-bold text-gray-700">{t('readyForCollection')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-800">{stats.readyForCollection}</p>
                             </div>
@@ -1601,7 +1696,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">Today Collection</p>
+                                    <p className="text-sm font-bold text-gray-700">{t('todayCollection')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-800">{stats.todayCollection}</p>
                             </div>
@@ -1625,7 +1720,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">Total Revenue</p>
+                                    <p className="text-sm font-bold text-gray-700">{t('totalRevenue')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-yellow-800">RM{stats.totalRevenue}</p>
                             </div>
@@ -1649,7 +1744,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">Payment Verified</p>
+                                    <p className="text-sm font-bold text-gray-700">{t('paymentVerified')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-800">{stats.paymentVerified}</p>
                             </div>
@@ -1667,7 +1762,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                 <div className="relative">
                                     <input
                                         type="text"
-                                        placeholder="Search parcels..."
+                                        placeholder={t('searchParcels')}
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-pink-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
@@ -1694,7 +1789,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                         style={{ boxShadow: '0px 3px 4px rgba(0, 0, 0, 0.25)' }}
                                         className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${getTabStyles(tab)}`}
                                     >
-                                        {tab} <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${getBadgeStyles(tab)}`}>{counts[tab]}</span>
+                                        {getTranslatedTabName(tab)} <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${getBadgeStyles(tab)}`}>{counts[tab]}</span>
                                     </button>
                                 ))}
                             </div>
@@ -1760,7 +1855,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                             <span
                                                                 className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
                                                             >
-                                                                {parcel.parcel_status}
+                                                                {getTranslatedStatus(parcel.parcel_status)}
                                                             </span>
                                                         </div>
 
@@ -1768,10 +1863,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                         {parcel.collection_code && (
                                                             <div className="mt-1">
                                                                 <span className="text-xs text-gray-500">
-                                                                    Collection Code:{' '}
-                                                                    <span className="font-['Consolas'] font-medium text-gray-900">
-                                                                        {parcel.collection_code}
-                                                                    </span>
+                                                                    {t('collectionCode')}: <span className="font-['Consolas'] font-medium text-gray-900">{parcel.collection_code}</span>
                                                                 </span>
                                                             </div>
                                                         )}
@@ -1828,7 +1920,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                                         />
                                                                     </svg>
                                                                     <span>
-                                                                        <span className="font-medium">Location:</span> {parcel.location || 'N/A'}
+                                                                        <span className="font-medium">{t('location')}:</span> {parcel.location || 'N/A'}
                                                                     </span>
                                                                 </div>
 
@@ -1847,7 +1939,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                                         />
                                                                     </svg>
                                                                     <span>
-                                                                        <span className="font-medium">Days:</span> {parcel.days || 0} days
+                                                                        <span className="font-medium">{t('days')}:</span> {parcel.days || 0} {t('days')}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -1870,13 +1962,13 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                                             />
                                                                         </svg>
                                                                         <div className="flex flex-col text-left leading-tight">
-                                                                            <span className="text-sm font-semibold text-purple-900">Scheduled</span>
+                                                                            <span className="text-sm font-semibold text-purple-900">{t('scheduled')}</span>
                                                                             <span className="text-xs text-purple-700">
                                                                                 {formatScheduledDate(parcel.schedule) && parcel.time_slot
                                                                                     ? `${formatScheduledDate(parcel.schedule)} • ${parcel.time_slot}`
                                                                                     : parcel.time_slot ||
                                                                                       formatScheduledDate(parcel.schedule) ||
-                                                                                      'No schedule set'}
+                                                                                      t('noScheduleSet')}
                                                                             </span>
                                                                         </div>
                                                                     </div>
@@ -1894,7 +1986,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                                         />
                                                                     </svg>
                                                                     <span>
-                                                                        Created by:{' '}
+                                                                        {t('createdBy')}:{' '}
                                                                         <span className="font-medium text-gray-700">
                                                                             {typeof parcel.created_by === 'object' && parcel.created_by?.name
                                                                                 ? parcel.created_by.name
@@ -1913,7 +2005,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                                         />
                                                                     </svg>
                                                                     <span>
-                                                                        Last edited by:{' '}
+                                                                        {t('lastEditedBy')}:{' '}
                                                                         <span className="font-medium text-gray-700">
                                                                             {typeof parcel.last_edited_by === 'object' && parcel.last_edited_by?.name
                                                                                 ? parcel.last_edited_by.name
@@ -1931,7 +2023,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                                                                         />
                                                                     </svg>
-                                                                    <span>Added: {formatDateTime(parcel.created_at)}</span>
+                                                                    <span>{t('added')}: {formatDateTime(parcel.created_at)}</span>
                                                                 </div>
 
                                                                 {parcel.updated_at !== parcel.created_at && (
@@ -1949,7 +2041,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                                                                             />
                                                                         </svg>
-                                                                        <span>Updated: {formatDateTime(parcel.updated_at)}</span>
+                                                                        <span>{t('updated')}: {formatDateTime(parcel.updated_at)}</span>
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -1996,8 +2088,8 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                                     : 'bg-green-600 hover:scale-105 hover:bg-green-700 hover:shadow-xl active:scale-95'
                                                             }`}
                                                         >
-                                                            <CheckCircle className="h-4 w-4" />
-                                                            <span>Mark as Collected</span>
+                                                            <CircleCheck className="h-4 w-4" />
+                                                            <span>{t('markAsCollected')}</span>
                                                         </button>
                                                     )}
                                                 </div>
@@ -2022,7 +2114,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600">Quick Actions</h3>
+                                <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600">{t('quickActions')}</h3>
                             </div>
                             
                             <div className="relative space-y-4">
@@ -2036,8 +2128,8 @@ This action cannot be undone and will permanently remove all parcel data and his
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <span className="block text-base font-bold text-gray-900 group-hover:text-pink-700">Register New Parcel</span>
-                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-pink-600">Add a new parcel to the system</p>
+                                        <span className="block text-base font-bold text-gray-900 group-hover:text-pink-700">{t('registerNewParcel')}</span>
+                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-pink-600">{t('addNewParcelSystem')}</p>
                                     </div>
                                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-100 text-pink-600 transition-all duration-300 group-hover:bg-pink-600 group-hover:text-white">
                                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2061,8 +2153,8 @@ This action cannot be undone and will permanently remove all parcel data and his
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <span className="block text-base font-bold text-gray-900 group-hover:text-purple-700">Scan QR Code</span>
-                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-purple-600">Quick parcel identification</p>
+                                        <span className="block text-base font-bold text-gray-900 group-hover:text-purple-700">{t('scanQRCode')}</span>
+                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-purple-600">{t('quickParcelIdentification')}</p>
                                     </div>
                                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-purple-600 transition-all duration-300 group-hover:bg-purple-600 group-hover:text-white">
                                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2124,7 +2216,7 @@ This action cannot be undone and will permanently remove all parcel data and his
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600">Collections</h3>
+                                        <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600">{t('collections')}</h3>
                                         <p className="text-xs text-gray-500">{formatScheduledDate(selectedDate)}</p>
                                     </div>
                                     <span className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1 text-sm font-bold text-blue-700 shadow-sm">
@@ -2156,8 +2248,8 @@ This action cannot be undone and will permanently remove all parcel data and his
                                                 />
                                             </svg>
                                         </div>
-                                        <p className="text-sm font-medium text-gray-600">No collections scheduled</p>
-                                        <p className="mt-1 text-xs text-gray-400">for this date</p>
+                                        <p className="text-sm font-medium text-gray-600">{t('noCollectionsScheduled')}</p>
+                                        <p className="mt-1 text-xs text-gray-400">{t('forThisDate')}</p>
                                     </div>
                                 ) : (
                                     todaysCollections.map((g) => (

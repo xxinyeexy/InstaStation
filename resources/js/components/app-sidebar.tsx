@@ -7,11 +7,13 @@ import { Link, usePage } from '@inertiajs/react';
 import { ContactRound, LayoutGrid, Megaphone, MessageCircleQuestion, PackageOpen, WalletCards } from 'lucide-react';
 import { useEffect } from 'react';
 import AppLogo from './app-logo';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type AuthUser = { type?: string; department?: string };
 type AuthProps = { user?: AuthUser };
 
 export function AppSidebar() {
+    const { t } = useLanguage();
     const { auth } = usePage<{ auth?: AuthProps }>().props;
     const isStaff = auth?.user?.type === 'staff';
     const userRole: 'student' | 'staff' = isStaff ? 'staff' : 'student';
@@ -35,25 +37,25 @@ export function AppSidebar() {
     }, [userRole, updateRole]);
 
     const mainNavItems: NavItem[] = [
-        { title: 'My Parcel', href: '/student/parcel', icon: PackageOpen },
-        { title: 'Payment', href: '/student/payment', icon: WalletCards },
-        { title: 'History', href: '/student/history', icon: ContactRound },
-        { title: 'FAQs', href: '/student/faq', icon: MessageCircleQuestion },
+        { title: t('myParcels'), href: '/student/parcel', icon: PackageOpen },
+        { title: t('payment'), href: '/student/payment', icon: WalletCards },
+        { title: t('history'), href: '/student/history', icon: ContactRound },
+        { title: t('faqs'), href: '/student/faq', icon: MessageCircleQuestion },
     ];
 
     // Operations - General staff: Dashboard, Parcel, Payment
     const staffGeneralNavItems: NavItem[] = [
-        { title: 'Dashboard', href: '/staff/dashboard', icon: LayoutGrid },
-        { title: 'Parcel', href: '/staff/parcel', icon: PackageOpen },
-        { title: 'Payment', href: '/staff/payments', icon: WalletCards },
+        { title: t('dashboard'), href: '/staff/dashboard', icon: LayoutGrid },
+        { title: t('parcels'), href: '/staff/parcel', icon: PackageOpen },
+        { title: t('payment'), href: '/staff/payments', icon: WalletCards },
     ];
 
     // Operations - Admin staff: Dashboard, Users, Announcements, FAQs
     const staffAdminNavItems: NavItem[] = [
-        { title: 'Dashboard', href: '/staff/dashboard', icon: LayoutGrid },
-        { title: 'Users', href: '/staff/manage-user', icon: ContactRound },
-        { title: 'Announcements', href: '/staff/announcements', icon: Megaphone },
-        { title: 'FAQs', href: '/staff/manage-faq', icon: MessageCircleQuestion },
+        { title: t('dashboard'), href: '/staff/dashboard', icon: LayoutGrid },
+        { title: t('users'), href: '/staff/manage-user', icon: ContactRound },
+        { title: t('announcements'), href: '/staff/announcements', icon: Megaphone },
+        { title: t('faqs'), href: '/staff/manage-faq', icon: MessageCircleQuestion },
     ];
 
     // Determine which nav items to show based on role and department

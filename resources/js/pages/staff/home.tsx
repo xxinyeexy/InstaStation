@@ -6,6 +6,7 @@ import { usePage } from '@inertiajs/react';
 import { AlertCircle, CheckCircle, Clock, Download, Package, TrendingDown, TrendingUp, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DashboardProps {
     overview: {
@@ -42,7 +43,7 @@ interface DashboardProps {
 }
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: 'dashboard',
         href: '/staff/home',
     },
 ];
@@ -116,6 +117,7 @@ const AnimatedChart = ({ children, delay = 0 }: { children: React.ReactNode; del
 };
 
 export default function StaffHome() {
+    const { t } = useLanguage();
     const data = usePage().props as unknown as DashboardProps;
     const [activeTab, setActiveTab] = useState('arrivals');
     const [showExport, setShowExport] = useState(false);
@@ -330,12 +332,12 @@ export default function StaffHome() {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
-                        <p className="text-muted-foreground">Welcome back! Here's what's happening with your parcels today.</p>
+                        <h1 className="text-3xl font-bold tracking-tight">{t('overview')}</h1>
+                        <p className="text-muted-foreground">{t('welcomeBack')}</p>
                     </div>
                     <Button onClick={() => setShowExport(true)} className="flex items-center gap-2">
                         <Download className="h-4 w-4" />
-                        Export
+                        {t('export')}
                     </Button>
                 </div>
 
@@ -344,7 +346,7 @@ export default function StaffHome() {
                         <div className="flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border bg-card shadow-xl">
                             {/* Modal Header (sticky) */}
                             <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card px-6 py-4">
-                                <h3 className="text-lg font-semibold">Export Parcels</h3>
+                                <h3 className="text-lg font-semibold">{t('exportParcels')}</h3>
                                 <button onClick={() => setShowExport(false)} className="rounded p-1 hover:bg-muted">
                                     <X className="h-5 w-5" />
                                 </button>
@@ -355,10 +357,10 @@ export default function StaffHome() {
                                 <div className="grid gap-6 md:grid-cols-2">
                                     {/* Date Range */}
                                     <div className="rounded-lg border p-4">
-                                        <div className="mb-2 text-sm font-medium">Select Date Range</div>
+                                        <div className="mb-2 text-sm font-medium">{t('selectDateRange')}</div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <label className="mb-1 block text-xs text-muted-foreground">Start</label>
+                                                <label className="mb-1 block text-xs text-muted-foreground">{t('start')}</label>
                                                 <input
                                                     type="date"
                                                     value={startDate}
@@ -367,7 +369,7 @@ export default function StaffHome() {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="mb-1 block text-xs text-muted-foreground">End</label>
+                                                <label className="mb-1 block text-xs text-muted-foreground">{t('end')}</label>
                                                 <input
                                                     type="date"
                                                     value={endDate}
@@ -377,40 +379,40 @@ export default function StaffHome() {
                                             </div>
                                         </div>
                                         <div className="mt-3 flex flex-wrap gap-2">
-                                            <span className="text-xs text-muted-foreground">Quick presets:</span>
+                                            <span className="text-xs text-muted-foreground">{t('quickPresets')}</span>
                                             <button
                                                 onClick={() => applyDatePreset('today')}
                                                 className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
                                             >
-                                                Today
+                                                {t('today')}
                                             </button>
                                             <button
                                                 onClick={() => applyDatePreset('thisWeek')}
                                                 className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
                                             >
-                                                This Week
+                                                {t('thisWeek')}
                                             </button>
                                             <button
                                                 onClick={() => applyDatePreset('thisMonth')}
                                                 className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
                                             >
-                                                This Month
+                                                {t('thisMonth')}
                                             </button>
                                             <button
                                                 onClick={() => applyDatePreset('last30')}
                                                 className="rounded-md bg-muted px-2 py-1 text-xs hover:bg-muted/80"
                                             >
-                                                Last 30 Days
+                                                {t('last30Days')}
                                             </button>
                                         </div>
                                     </div>
 
                                     {/* Filters */}
                                     <div className="rounded-lg border p-4">
-                                        <div className="mb-2 text-sm font-medium">Filters</div>
+                                        <div className="mb-2 text-sm font-medium">{t('filters')}</div>
                                         <div className="space-y-3">
                                             <div>
-                                                <label className="mb-1 block text-xs text-muted-foreground">Status</label>
+                                                <label className="mb-1 block text-xs text-muted-foreground">{t('status')}</label>
                                                 <div className="flex flex-wrap gap-2">
                                                     {statusOptions.map((s) => (
                                                         <label
@@ -434,34 +436,34 @@ export default function StaffHome() {
                                             </div>
                                             <div className="grid grid-cols-2 gap-2">
                                                 <div>
-                                                    <label className="mb-1 block text-xs text-muted-foreground">Size</label>
+                                                    <label className="mb-1 block text-xs text-muted-foreground">{t('size')}</label>
                                                     <select
                                                         value={sizeFilter}
                                                         onChange={(e) => setSizeFilter(e.target.value)}
                                                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                                     >
-                                                        <option value="">All</option>
-                                                        <option value="Small">Small</option>
-                                                        <option value="Medium">Medium</option>
-                                                        <option value="Large">Large</option>
-                                                        <option value="Extra Large">Extra Large</option>
+                                                        <option value="">{t('all')}</option>
+                                                        <option value="Small">{t('small')}</option>
+                                                        <option value="Medium">{t('medium')}</option>
+                                                        <option value="Large">{t('large')}</option>
+                                                        <option value="Extra Large">{t('extraLarge')}</option>
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label className="mb-1 block text-xs text-muted-foreground">Payment</label>
+                                                    <label className="mb-1 block text-xs text-muted-foreground">{t('payment')}</label>
                                                     <select
                                                         value={paymentFilter}
                                                         onChange={(e) => setPaymentFilter(e.target.value)}
                                                         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                                     >
-                                                        <option value="">All</option>
-                                                        <option value="verified">Verified</option>
-                                                        <option value="unverified">Unverified</option>
+                                                        <option value="">{t('all')}</option>
+                                                        <option value="verified">{t('verified')}</option>
+                                                        <option value="unverified">{t('unverified')}</option>
                                                     </select>
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="mb-1 block text-xs text-muted-foreground">Sender (contains)</label>
+                                                <label className="mb-1 block text-xs text-muted-foreground">{t('senderContains')}</label>
                                                 <input
                                                     value={senderFilter}
                                                     onChange={(e) => setSenderFilter(e.target.value)}
@@ -474,10 +476,10 @@ export default function StaffHome() {
 
                                     {/* Format + Filename */}
                                     <div className="rounded-lg border p-4">
-                                        <div className="mb-2 text-sm font-medium">Format & File</div>
+                                        <div className="mb-2 text-sm font-medium">{t('formatFile')}</div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <div>
-                                                <label className="mb-1 block text-xs text-muted-foreground">Format</label>
+                                                <label className="mb-1 block text-xs text-muted-foreground">{t('format')}</label>
                                                 <select
                                                     value={format}
                                                     onChange={(e) => setFormat(e.target.value as any)}
@@ -489,7 +491,7 @@ export default function StaffHome() {
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="mb-1 block text-xs text-muted-foreground">File name</label>
+                                                <label className="mb-1 block text-xs text-muted-foreground">{t('fileName')}</label>
                                                 <input
                                                     value={fileName}
                                                     onChange={(e) => setFileName(e.target.value)}
@@ -502,20 +504,20 @@ export default function StaffHome() {
 
                                     {/* Fields */}
                                     <div className="rounded-lg border p-4 md:col-span-2">
-                                        <div className="mb-2 text-sm font-medium">Choose Fields</div>
+                                        <div className="mb-2 text-sm font-medium">{t('chooseFields')}</div>
                                         <div className="mb-2 flex flex-wrap items-center gap-2">
                                             <input
                                                 value={fieldSearch}
                                                 onChange={(e) => setFieldSearch(e.target.value)}
                                                 className="w-full max-w-xs rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                                                placeholder="Search fields..."
+                                                placeholder={t('searchFields')}
                                             />
                                             <div className="ml-auto flex gap-2">
                                                 <button onClick={selectAllFields} className="rounded-md border px-2 py-1 text-xs hover:bg-muted">
-                                                    Select All
+                                                    {t('selectAll')}
                                                 </button>
                                                 <button onClick={clearAllFields} className="rounded-md border px-2 py-1 text-xs hover:bg-muted">
-                                                    Deselect All
+                                                    {t('deselectAll')}
                                                 </button>
                                             </div>
                                         </div>
@@ -532,13 +534,13 @@ export default function StaffHome() {
                                                                     onClick={() => selectGroup(keys)}
                                                                     className="rounded bg-muted px-2 py-0.5 text-[10px] hover:bg-muted/80"
                                                                 >
-                                                                    All
+                                                                    {t('all')}
                                                                 </button>
                                                                 <button
                                                                     onClick={() => clearGroup(keys)}
                                                                     className="rounded bg-muted px-2 py-0.5 text-[10px] hover:bg-muted/80"
                                                                 >
-                                                                    None
+                                                                    {t('none')}
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -601,13 +603,13 @@ export default function StaffHome() {
                             {/* Modal Footer (sticky) */}
                             <div className="sticky bottom-0 z-10 flex justify-end gap-3 border-t bg-card px-6 py-4">
                                 <button className="rounded-md border px-4 py-2 hover:bg-muted" onClick={() => setShowExport(false)}>
-                                    Cancel
+                                    {t('cancel')}
                                 </button>
                                 <button onClick={handlePreview} className="rounded-md border px-4 py-2 hover:bg-muted">
-                                    Preview
+                                    {t('preview')}
                                 </button>
                                 <Button onClick={handleExport} className="flex items-center gap-2">
-                                    <Download className="h-4 w-4" /> Export {format.toUpperCase()}
+                                    <Download className="h-4 w-4" /> {t('exportCSV')}
                                 </Button>
                             </div>
                         </div>
@@ -618,7 +620,7 @@ export default function StaffHome() {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <AnimatedChart delay={100}>
                         <OverviewCard
-                            title="Total Parcels"
+                            title={t('totalParcels')}
                             value={data.overview.totalParcels}
                             icon={Package}
                             bgColor="bg-blue-100 dark:bg-blue-500/20"
@@ -629,7 +631,7 @@ export default function StaffHome() {
                     </AnimatedChart>
                     <AnimatedChart delay={200}>
                         <OverviewCard
-                            title="Newly Arrived"
+                            title={t('newlyArrived')}
                             value={data.overview.newlyArrived}
                             icon={Clock}
                             bgColor="bg-yellow-100 dark:bg-yellow-500/20"
@@ -640,7 +642,7 @@ export default function StaffHome() {
                     </AnimatedChart>
                     <AnimatedChart delay={300}>
                         <OverviewCard
-                            title="Ready for Collection"
+                            title={t('readyToCollect')}
                             value={data.overview.readyForCollection}
                             icon={CheckCircle}
                             bgColor="bg-green-100 dark:bg-green-500/20"
@@ -651,7 +653,7 @@ export default function StaffHome() {
                     </AnimatedChart>
                     <AnimatedChart delay={400}>
                         <OverviewCard
-                            title="Unclaimed"
+                            title={t('unclaimedParcels')}
                             value={data.overview.unclaimed}
                             icon={AlertCircle}
                             bgColor="bg-red-100 dark:bg-red-500/20"
@@ -668,7 +670,7 @@ export default function StaffHome() {
                     <AnimatedChart delay={500}>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Daily Operations Overview</CardTitle>
+                                <CardTitle>{t('dailyOperations')}</CardTitle>
                                 <div className="mt-4 flex gap-2">
                                     <button
                                         onClick={() => setActiveTab('arrivals')}
@@ -678,7 +680,7 @@ export default function StaffHome() {
                                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
-                                        Daily Parcels Arrivals This Week
+                                        {t('dailyArrivalsThisWeek')}
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('collected')}
@@ -688,7 +690,7 @@ export default function StaffHome() {
                                                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
                                         }`}
                                     >
-                                        Daily Parcels Collected
+                                        {t('dailyCollected')}
                                     </button>
                                 </div>
                             </CardHeader>
@@ -738,7 +740,7 @@ export default function StaffHome() {
                     <AnimatedChart delay={600}>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Parcel Senders Distribution</CardTitle>
+                                <CardTitle>{t('parcelSenders')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-4">
@@ -774,7 +776,7 @@ export default function StaffHome() {
                     <AnimatedChart delay={700}>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Parcel Size</CardTitle>
+                                <CardTitle>{t('parcelSize')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={250}>
@@ -814,7 +816,7 @@ export default function StaffHome() {
                     <AnimatedChart delay={800}>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Parcel Status Distribution</CardTitle>
+                                <CardTitle>{t('parcelStatusDistribution')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={250}>
@@ -853,7 +855,7 @@ export default function StaffHome() {
                     <AnimatedChart delay={900}>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Collection Time Distribution</CardTitle>
+                                <CardTitle>{t('collectionTime')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <ResponsiveContainer width="100%" height={350}>

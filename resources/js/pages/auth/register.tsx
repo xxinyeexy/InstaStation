@@ -35,7 +35,7 @@ export default function Register() {
         e.preventDefault();
         let newKey = warningKey + 1;
         setWarningKey(newKey);
-        
+
         // Manual validation for required fields
         if (!formData.name) {
             setWarning({ msg: 'Please fill out the full name field.', key: newKey });
@@ -57,18 +57,41 @@ export default function Register() {
             setWarning({ msg: 'Please fill out the password field.', key: newKey });
             return;
         }
+
+        // Validate password requirements
+        if (formData.password.length < 8) {
+            setWarning({ msg: 'Password must be at least 8 characters long.', key: newKey });
+            return;
+        }
+        if (!/[A-Z]/.test(formData.password)) {
+            setWarning({ msg: 'Password must contain at least one uppercase letter.', key: newKey });
+            return;
+        }
+        if (!/[a-z]/.test(formData.password)) {
+            setWarning({ msg: 'Password must contain at least one lowercase letter.', key: newKey });
+            return;
+        }
+        if (!/[0-9]/.test(formData.password)) {
+            setWarning({ msg: 'Password must contain at least one digit.', key: newKey });
+            return;
+        }
+        if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password)) {
+            setWarning({ msg: 'Password must contain at least one symbol (!@#$%^&* etc.).', key: newKey });
+            return;
+        }
+
         if (!formData.password_confirmation) {
             setWarning({ msg: 'Please fill out the confirm password field.', key: newKey });
             return;
         }
-        
+
         setWarning(null);
         setProcessing(true);
-        
+
         try {
             const endpoint = '/register';
             const type = formData.userType === 'Student' ? 'student' : 'staff';
-            
+
             const payload: any = {
                 name: formData.name,
                 email: formData.email,
@@ -76,16 +99,16 @@ export default function Register() {
                 password_confirmation: formData.password_confirmation,
                 type,
             };
-            
+
             if (type === 'student') {
                 payload.matric = formData.matric;
             } else {
                 payload.department = formData.department;
             }
-            
+
             await axios.post(endpoint, payload);
             setSuccess('You may proceed to login now.');
-            
+
             setTimeout(() => {
                 window.location.href = '/login';
             }, 1500);
@@ -107,17 +130,17 @@ export default function Register() {
         <>
             {/* Floating toast for warning */}
             {warning && <Alert key={warning.key} type="warning" message={warning.msg} />}
-            
+
             {/* Floating toast for each error */}
             {Object.values(errors)
                 .flat()
                 .map((msg, i) => (
                     <Alert key={`${errorKey}-${i}`} type="error" message={msg as string} />
                 ))}
-            
+
             {/* Floating toast for success */}
             {success && <Alert type="success" message={success} />}
-            
+
             <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4 py-8 dark:bg-gray-900">
                 <Link
                     href="/"
@@ -134,11 +157,11 @@ export default function Register() {
                     <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm dark:border-border dark:bg-card">
                         {/* Logo and Title */}
                         <div className="mb-8 text-center">
-                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-500/20">
-                                <User className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-pink-100 dark:bg-pink-500/20">
+                                <User className="h-6 w-6 text-pink-600 dark:text-pink-400" />
                             </div>
-                            <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-card-foreground">Create an Account</h2>
-                            <p className="text-sm text-gray-600 dark:text-muted-foreground">Join InstaStation to manage your university parcels</p>
+                            <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-card-foreground">Create Account</h2>
+                            <p className="text-sm text-gray-600 dark:text-muted-foreground">Join InstaStation today!</p>
                         </div>
 
                         {/* User Type Toggle */}
@@ -251,9 +274,9 @@ export default function Register() {
                                             <option value="" disabled>
                                                 Select Department
                                             </option>
-                                        
-                                            <option value="General">Operations - General</option>
-                                            <option value="Admin">Operations - Admin</option>
+
+                                            <option value="General">Operations (General)</option>
+                                            <option value="Admin">Operations (Admin)</option>
                                         </select>
                                         <svg
                                             className="pointer-events-none absolute top-3.5 right-3 h-4 w-4 text-gray-400 dark:text-muted-foreground"

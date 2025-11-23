@@ -1,6 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { router } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, FileText, IdCard, MapPin, Package, UserRound } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type Student = {
     id?: number;
@@ -29,6 +30,7 @@ type Parcel = {
 };
 
 export default function Report({ parcel, student, payment }: { parcel: Parcel; student?: Student; payment?: Payment }) {
+    const { t } = useLanguage();
     const parcelId = parcel.parcel_id;
 
     const download = () => {
@@ -41,8 +43,8 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
     };
 
     const breadcrumbs = [
-        { title: 'History', href: '/student/history' },
-        { title: 'Parcel Report', href: `/parcels/${parcelId}/export` },
+        { title: t('history'), href: '/student/history' },
+        { title: t('parcelReport'), href: `/parcels/${parcelId}/export` },
     ];
 
     return (
@@ -56,103 +58,103 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
                                 className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-50"
                             >
                                 <ArrowLeft size={16} />
-                                Back
+                                {t('back')}
                             </button>
                             <div>
-                                <div className="font-semibold">Parcel Report - {parcel.parcel_code || parcel.parcel_id}</div>
-                                <div className="text-xs text-gray-500">Detailed report for parcel {parcel.parcel_code || parcel.parcel_id}</div>
+                                <div className="font-semibold">{t('parcelReport')} - {parcel.parcel_code || parcel.parcel_id}</div>
+                                <div className="text-xs text-gray-500">{t('detailedReportFor')} {parcel.parcel_code || parcel.parcel_id}</div>
                             </div>
                         </div>
                     </div>
 
                     <div className="space-y-4 p-5">
                         <div className="rounded-lg border p-4">
-                            <div className="mb-3 font-semibold">Parcel Information</div>
+                            <div className="mb-3 font-semibold">{t('parcelInformation')}</div>
                             <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                                 <div className="flex items-center gap-2">
                                     <Package size={16} className="text-gray-600" />
-                                    <span className="text-gray-600">Parcel ID:</span>
+                                    <span className="text-gray-600">{t('parcelID')}:</span>
                                     <span className="ml-1 font-medium">{parcel.parcel_code || parcel.parcel_id}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <UserRound size={16} className="text-gray-600" />
-                                    <span className="text-gray-600">Recipient:</span>
+                                    <span className="text-gray-600">{t('recipient')}:</span>
                                     <span className="ml-1 font-medium">{student?.name || '-'}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <IdCard size={16} className="text-gray-600" />
-                                    <span className="text-gray-600">Tracking ID:</span>
+                                    <span className="text-gray-600">{t('trackingID')}:</span>
                                     <span className="ml-1 font-medium">{parcel.tracking_no || '-'}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <IdCard size={16} className="text-gray-600" />
-                                    <span className="text-gray-600">Matric ID:</span>
+                                    <span className="text-gray-600">{t('matricID')}:</span>
                                     <span className="ml-1 font-medium">{student?.matric || '-'}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <CalendarDays size={16} className="text-gray-600" />
-                                    <span className="text-gray-600">Arrival Date:</span>
+                                    <span className="text-gray-600">{t('arrivalDate')}:</span>
                                     <span className="ml-1 font-medium">
                                         {parcel.created_at ? new Date(parcel.created_at).toISOString().slice(0, 10) : '-'}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <MapPin size={16} className="text-gray-600" />
-                                    <span className="text-gray-600">Location:</span>
+                                    <span className="text-gray-600">{t('location')}:</span>
                                     <span className="ml-1 font-medium">{parcel.location || '-'}</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="rounded-lg border p-4">
-                            <div className="mb-3 font-semibold">Package Details</div>
+                            <div className="mb-3 font-semibold">{t('packageDetails')}</div>
                             <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                                 <div>
-                                    <div className="text-gray-600">Sender:</div>
+                                    <div className="text-gray-600">{t('sender')}:</div>
                                     <div className="font-medium">{parcel.sender || '-'}</div>
                                 </div>
                                 <div>
-                                    <div className="text-gray-600">Size:</div>
+                                    <div className="text-gray-600">{t('size')}:</div>
                                     <div className="font-medium">{parcel.size || '-'}</div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="rounded-lg border p-4">
-                            <div className="mb-3 font-semibold">Payment Information</div>
+                            <div className="mb-3 font-semibold">{t('paymentInformation')}</div>
                             <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                                 <div>
-                                    <div className="text-gray-600">Payment Status:</div>
-                                    <div className="font-medium">{payment && payment.verified_by ? 'Approved' : 'Pending/Unverified'}</div>
+                                    <div className="text-gray-600">{t('paymentStatus')}:</div>
+                                    <div className="font-medium">{payment && payment.verified_by ? t('approved') : t('pendingUnverified')}</div>
                                 </div>
                                 <div>
-                                    <div className="text-gray-600">Amount:</div>
+                                    <div className="text-gray-600">{t('amount')}:</div>
                                     <div className="font-medium">RM{(parcel.fee ?? 1).toFixed(2)}</div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="rounded-lg border p-4">
-                            <div className="mb-3 font-semibold">Collection Information</div>
+                            <div className="mb-3 font-semibold">{t('collectionInformation')}</div>
                             <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                                 <div>
-                                    <div className="text-gray-600">Collection Date:</div>
+                                    <div className="text-gray-600">{t('collectionDate')}:</div>
                                     <div className="font-medium">{parcel.schedule ? new Date(parcel.schedule).toISOString().slice(0, 10) : '-'}</div>
                                 </div>
                                 <div>
-                                    <div className="text-gray-600">Collection Status:</div>
-                                    <div className="font-medium">{parcel.parcel_status || 'Collected'}</div>
+                                    <div className="text-gray-600">{t('collectionStatus')}:</div>
+                                    <div className="font-medium">{parcel.parcel_status || t('collected')}</div>
                                 </div>
                             </div>
                         </div>
 
                         <div className="flex items-center justify-between text-xs text-gray-500">
-                            <div>Report generated on {new Date().toLocaleString()}</div>
+                            <div>{t('reportGeneratedOn')} {new Date().toLocaleString()}</div>
                             <button
                                 onClick={download}
                                 className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-3 py-2 text-sm text-white transition-colors hover:bg-gray-800"
                             >
-                                <FileText size={16} /> Download Report
+                                <FileText size={16} /> {t('downloadReport')}
                             </button>
                         </div>
                     </div>

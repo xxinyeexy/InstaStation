@@ -3,8 +3,10 @@ import { router } from '@inertiajs/react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { AlertTriangle, ArrowLeft, Camera, CircleCheck, QrCode, Search, X, XCircle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const ParcelRegistrationForm = () => {
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({
         trackingNumber: '',
         sender: '',
@@ -160,16 +162,43 @@ const ParcelRegistrationForm = () => {
         // Prevent double submission
         if (isSubmitting) return;
 
-        // Basic validation
+        // Comprehensive validation
         if (!formData.trackingNumber.trim()) {
-            alert('❌ Please enter a tracking number');
+            showErrorToast('Please enter a tracking number');
+            return;
+        }
+        
+        if (formData.trackingNumber.trim().length < 5) {
+            showErrorToast('Tracking number must be at least 5 characters long');
             return;
         }
 
         if (!formData.sender.trim()) {
-            alert('❌ Please enter sender information');
+            showErrorToast('Please enter sender information');
             return;
         }
+        
+        if (formData.sender.trim().length < 3) {
+            showErrorToast('Sender name must be at least 3 characters long');
+            return;
+        }
+        
+        if (!formData.size) {
+            showErrorToast('Please select a parcel size');
+            return;
+        }
+        
+        if (!formData.location.trim()) {
+            showErrorToast('Please enter storage location');
+            return;
+        }
+        
+        // Validate student information if provided
+        // if (formData.studentName.trim() && !formData.matricId.trim()) {
+        //     showErrorToast('Please select a valid student from the search results');
+        //     return;
+        // }
+        
         // student info is optional; if not provided, backend will mark as Unclaimed
 
         setIsSubmitting(true);
@@ -235,22 +264,29 @@ const ParcelRegistrationForm = () => {
                     console.log('Error response:', errorData);
 
                     if (errorData.message) {
-                        errorMessage = errorData.message;
+                        showErrorToast(errorData.message);
+                        return; // Exit early, don't throw
                     } else if (errorData.errors) {
-                        // Handle validation errors
-                        const validationErrors = Object.entries(errorData.errors)
-                            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-                            .join('\n');
-                        errorMessage = `Validation errors:\n${validationErrors}`;
+                        // Handle validation errors - show each error as a toast
+                        const errors = errorData.errors;
+                        Object.entries(errors).forEach(([field, messages], index) => {
+                            const errorMsg = Array.isArray(messages) ? messages[0] : messages;
+                            setTimeout(() => {
+                                showErrorToast(errorMsg as string);
+                            }, index * 500); // Stagger the toasts
+                        });
+                        return; // Exit early, don't throw
                     }
                 } catch (parseError) {
                     console.log('Could not parse error response as JSON');
                     const errorText = await response.text();
                     console.log('Error response text:', errorText);
-                    errorMessage += `\n\nResponse: ${errorText}`;
+                    showErrorToast(`HTTP ${response.status}: ${response.statusText}`);
+                    return; // Exit early
                 }
 
-                throw new Error(errorMessage);
+                showErrorToast(errorMessage);
+                return; // Exit early
             }
 
             const result = await response.json();
@@ -265,9 +301,9 @@ const ParcelRegistrationForm = () => {
         } catch (err) {
             console.error('Registration error:', err);
             if (err instanceof Error) {
-                alert('🚨 Registration failed: ' + err.message);
+                showErrorToast('Registration failed: ' + err.message);
             } else {
-                alert('🚨 An unexpected error occurred.');
+                showErrorToast('An unexpected error occurred.');
             }
         } finally {
             setIsSubmitting(false);
@@ -375,8 +411,8 @@ const ParcelRegistrationForm = () => {
     }, []);
 
     const breadcrumbs = [
-        { title: 'Parcel', href: '/staff/parcel' },
-        { title: 'Add Parcel', href: '/staff/add-parcel' },
+        { title: t('parcels'), href: '/staff/parcel' },
+        { title: t('addParcel'), href: '/staff/add-parcel' },
     ];
 
     return (
@@ -390,6 +426,14 @@ const ParcelRegistrationForm = () => {
                         0% { transform: translateY(-100px); }
                         100% { transform: translateY(100px); }
                     }
+                    @keyframes indeterminate-bar {
+                        0% { margin-left: 0%; width: 40%; }
+                        50% { margin-left: 60%; width: 40%; }
+                        100% { margin-left: 0%; width: 40%; }
+                    }
+                    .animate-indeterminate-bar {
+                        animation: indeterminate-bar 1.5s infinite cubic-bezier(0.4,0,0.2,1);
+                    }
                 `}</style>
                 <div className="mx-auto max-w-2xl rounded-lg border border-border bg-white shadow-sm dark:bg-card">
                     {/* Header */}
@@ -399,20 +443,20 @@ const ParcelRegistrationForm = () => {
                             className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-800 dark:text-muted-foreground dark:hover:text-foreground"
                         >
                             <ArrowLeft className="h-4 w-4" />
-                            <span className="text-sm">Back</span>
+                            <span className="text-sm">{t('back')}</span>
                         </button>
                     </div>
 
                     {/* Title */}
                     <div className="px-6 py-4">
-                        <h1 className="mb-2 text-xl font-semibold text-gray-900 dark:text-card-foreground">📦 Register New Parcel</h1>
-                        <p className="text-sm text-gray-600 dark:text-muted-foreground">Scan the parcel's QR code to auto-fill the details</p>
+                        <h1 className="mb-2 text-xl font-semibold text-gray-900 dark:text-card-foreground">📦 {t('registerNewParcel')}</h1>
+                        <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('scanQRToAutoFill')}</p>
                     </div>
 
                     {/* QR Scanner Area */}
                     <div className="mb-6 px-6">
                         {/* Toast Notification */}
-                        {showToast && <Toast type="success" message="Tracking number filled from QR code!" />}
+                        {showToast && <Toast type="success" message={t('trackingNumberFilled')} />}
 
                         {/* Pink Modern QR Scanner Section */}
                         <div className="flex justify-center">
@@ -458,27 +502,18 @@ const ParcelRegistrationForm = () => {
                                     {isScanning && <div id="qr-reader" className="absolute inset-0 z-10 h-full w-full overflow-hidden rounded-3xl" />}
                                     {/* Indeterminate Progress Bar */}
                                     {isScanning && (
-                                        <div className="absolute right-0 bottom-0 left-0 z-30 px-8 pb-8">
-                                            <div className="h-3 overflow-hidden rounded-full bg-pink-200/40 dark:bg-pink-500/40">
-                                                <div
-                                                    className="animate-indeterminate-bar h-full bg-pink-400 dark:bg-pink-300"
-                                                    style={{ width: '40%' }}
-                                                ></div>
+                                        <>
+                                            <div className="absolute right-0 bottom-0 left-0 z-30 px-8 pb-8">
+                                                <div className="h-3 overflow-hidden rounded-full bg-pink-200/40 dark:bg-pink-500/40">
+                                                    <div
+                                                        className="animate-indeterminate-bar h-full bg-pink-400 dark:bg-pink-300"
+                                                        style={{ width: '40%' }}
+                                                    /></div>
+                                                <div className="mt-2 text-center text-lg font-semibold tracking-wide text-pink-500 dark:text-pink-400">
+                                                    {t('scanning')}
+                                                </div>
                                             </div>
-                                            <div className="mt-2 text-center text-lg font-semibold tracking-wide text-pink-500 dark:text-pink-400">
-                                                Scanning...
-                                            </div>
-                                            <style>{`
-                                                @keyframes indeterminate-bar {
-                                                    0% { margin-left: 0%; width: 40%; }
-                                                    50% { margin-left: 60%; width: 40%; }
-                                                    100% { margin-left: 0%; width: 40%; }
-                                                }
-                                                .animate-indeterminate-bar {
-                                                    animation: indeterminate-bar 1.5s infinite cubic-bezier(0.4,0,0.2,1);
-                                                }
-                                            `}</style>
-                                        </div>
+                                        </>
                                     )}
                                     {/* Tap to Scan State */}
                                     {!isScanning && (
@@ -488,13 +523,13 @@ const ParcelRegistrationForm = () => {
                                                     <QrCode className="h-20 w-20 text-pink-500 dark:text-pink-400" />
                                                 </div>
                                             </div>
-                                            <h3 className="mb-2 text-3xl font-extrabold text-pink-600 dark:text-pink-400">Tap to Scan QR Code</h3>
+                                            <h3 className="mb-2 text-3xl font-extrabold text-pink-600 dark:text-pink-400">{t('tapToScanQRCode')}</h3>
                                             <p className="mb-4 text-lg text-pink-400 dark:text-pink-300">
-                                                Point camera at parcel QR code for instant recognition
+                                                {t('pointCameraAtParcel')}
                                             </p>
                                             <div className="flex items-center gap-2 text-base font-medium text-pink-400 dark:text-pink-300">
                                                 <Camera className="h-5 w-5" />
-                                                <span>AI-Powered Detection</span>
+                                                <span>{t('aiPoweredDetection')}</span>
                                             </div>
                                         </div>
                                     )}
@@ -523,13 +558,13 @@ const ParcelRegistrationForm = () => {
 
                     {/* Parcel Information */}
                     <div className="mb-6 px-6">
-                        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-card-foreground">Parcel Information</h2>
+                        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-card-foreground">{t('parcelInformation')}</h2>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Tracking Number *</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">{t('trackingNumber')} *</label>
                                 <input
                                     type="text"
-                                    placeholder="Enter tracking number"
+                                    placeholder={t('enterTrackingNumber')}
                                     value={formData.trackingNumber}
                                     onChange={(e) => handleInputChange('trackingNumber', e.target.value)}
                                     className={`w-full rounded-md border border-border bg-background px-3 py-2 text-foreground transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightTracking ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300 dark:border-border'}`}
@@ -538,24 +573,24 @@ const ParcelRegistrationForm = () => {
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Size</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">{t('size')}</label>
                                 <select
                                     value={formData.size}
                                     onChange={(e) => handleInputChange('size', e.target.value)}
                                     className="w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
                                 >
-                                    <option value="">Select size</option>
-                                    <option value="Small">Small</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Large">Large</option>
-                                    <option value="Extra Large">Extra Large</option>
+                                    <option value="">{t('selectSize')}</option>
+                                    <option value="Small">{t('small')}</option>
+                                    <option value="Medium">{t('medium')}</option>
+                                    <option value="Large">{t('large')}</option>
+                                    <option value="Extra Large">{t('extraLarge')}</option>
                                 </select>
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Sender *</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">{t('sender')} *</label>
                                 <input
                                     type="text"
-                                    placeholder="Sender name"
+                                    placeholder={t('senderName')}
                                     value={formData.sender}
                                     onChange={(e) => handleInputChange('sender', e.target.value)}
                                     className="w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
@@ -563,10 +598,10 @@ const ParcelRegistrationForm = () => {
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Location</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">{t('location')}</label>
                                 <input
                                     type="text"
-                                    placeholder="Storage location"
+                                    placeholder={t('storageLocation')}
                                     value={formData.location}
                                     onChange={(e) => handleInputChange('location', e.target.value)}
                                     className="w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
@@ -577,15 +612,15 @@ const ParcelRegistrationForm = () => {
 
                     {/* Student Information */}
                     <div className="mb-6 px-6">
-                        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-card-foreground">Student Information</h2>
-                        <p className="mb-3 text-sm text-gray-600 dark:text-muted-foreground">Search for the recipient in the student database</p>
+                        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-card-foreground">{t('studentInformation')}</h2>
+                        <p className="mb-3 text-sm text-gray-600 dark:text-muted-foreground">{t('searchRecipientDatabase')}</p>
 
                         <div className="mb-4">
-                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Student Name</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">{t('studentName')}</label>
                             <div className="flex gap-2" ref={searchContainerRef}>
                                 <input
                                     type="text"
-                                    placeholder="Enter recipient full name"
+                                    placeholder={t('enterRecipientFullName')}
                                     value={formData.studentName}
                                     onChange={(e) => handleInputChange('studentName', e.target.value)}
                                     className="flex-1 rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
@@ -600,7 +635,7 @@ const ParcelRegistrationForm = () => {
                                     ) : (
                                         <Search className="h-4 w-4" />
                                     )}
-                                    {isSearching ? 'Searching...' : 'Search'}
+                                    {isSearching ? t('searching') : t('search')}
                                 </button>
                             </div>
 
@@ -624,14 +659,14 @@ const ParcelRegistrationForm = () => {
                                                         <span className="text-sm text-gray-500 dark:text-muted-foreground">{student.email}</span>
                                                     </div>
                                                     <span className="text-sm font-medium text-pink-600 dark:text-pink-400">
-                                                        {student.matric_id || 'No Matric ID'}
+                                                        {student.matric_id || t('noMatricID')}
                                                     </span>
                                                 </li>
                                             ))}
                                         </ul>
                                     ) : (
                                         <div className="px-4 py-3 text-center text-gray-500 dark:text-muted-foreground">
-                                            {isSearching ? 'Searching...' : searchError || 'No students found'}
+                                            {isSearching ? t('searching') : searchError || t('noStudentsFound')}
                                         </div>
                                     )}
                                 </div>
@@ -639,10 +674,10 @@ const ParcelRegistrationForm = () => {
                         </div>
 
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">Matric ID</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">{t('matricID')}</label>
                             <input
                                 type="text"
-                                placeholder="ID number"
+                                placeholder={t('idNumber')}
                                 value={formData.matricId}
                                 onChange={(e) => handleInputChange('matricId', e.target.value)}
                                 className={`w-full rounded-md border border-border bg-background px-3 py-2 text-foreground transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightMatric ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300 dark:border-border'}`}
@@ -658,7 +693,7 @@ const ParcelRegistrationForm = () => {
                                 className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
                                 disabled={isSubmitting}
                             >
-                                Cancel
+                                {t('cancel')}
                             </button>
 
                             <button
@@ -667,7 +702,7 @@ const ParcelRegistrationForm = () => {
                                 className="flex items-center gap-2 rounded-md bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-700"
                             >
                                 {isSubmitting && <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>}
-                                {isSubmitting ? 'Registering...' : 'Register Parcel'}
+                                {isSubmitting ? t('registering') : t('registerParcel')}
                             </button>
                         </div>
                     </div>

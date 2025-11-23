@@ -3,6 +3,7 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, Calendar, FileText, Search, SlidersHorizontal, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Types for props from backend
 interface Parcel {
@@ -33,14 +34,15 @@ interface Notification {
     read_at?: string | null;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'History',
-        href: '/student/history',
-    },
-];
-
 export default function History({ total_collections, collections_this_year, total_fees, parcels }: HistoryProps) {
+    const { t } = useLanguage();
+    
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('collectionHistory'),
+            href: '/student/history',
+        },
+    ];
     const pageProps: any = usePage<SharedData>().props;
     const serverNotifications: Notification[] = pageProps.notifications || [];
 
@@ -204,27 +206,27 @@ export default function History({ total_collections, collections_this_year, tota
             <div className="space-y-6 p-6">
                 <div>
                     <h1 className="flex items-center gap-2 text-2xl font-bold">
-                        <span>Collected Parcels</span>
+                        <span>{t('collectedParcels')}</span>
                     </h1>
-                    <p className="mt-1 text-gray-500">History of all collected parcels</p>
+                    <p className="mt-1 text-gray-500">{t('historyCollectedParcels')}</p>
                 </div>
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1 rounded-xl border border-gray-200 bg-gradient-to-br from-green-50 to-white p-5 shadow-sm">
-                        <div className="text-sm font-medium text-gray-600">Total Collections</div>
+                        <div className="text-sm font-medium text-gray-600">{t('totalCollections')}</div>
                         <div className="text-3xl font-bold text-gray-900">{total_collections}</div>
-                        <div className="text-xs text-gray-500">All time</div>
+                        <div className="text-xs text-gray-500">{t('allTime')}</div>
                     </div>
                     <div className="flex flex-col gap-1 rounded-xl border border-gray-200 bg-gradient-to-br from-green-50 to-white p-5 shadow-sm">
-                        <div className="text-sm font-medium text-gray-600">This Year</div>
+                        <div className="text-sm font-medium text-gray-600">{t('thisYear')}</div>
                         <div className="text-3xl font-bold text-gray-900">{collections_this_year}</div>
-                        <div className="text-xs text-gray-500">2025 collections</div>
+                        <div className="text-xs text-gray-500">{t('yearCollections')}</div>
                     </div>
                     <div className="flex flex-col gap-1 rounded-xl border border-gray-200 bg-gradient-to-br from-green-50 to-white p-5 shadow-sm">
-                        <div className="text-sm font-medium text-gray-600">Total Fees</div>
+                        <div className="text-sm font-medium text-gray-600">{t('totalFees')}</div>
                         <div className="text-3xl font-bold text-green-600">RM{total_fees.toFixed(2)}</div>
-                        <div className="text-xs text-gray-500">All collections</div>
+                        <div className="text-xs text-gray-500">{t('allCollections')}</div>
                     </div>
                 </div>
 
@@ -238,7 +240,7 @@ export default function History({ total_collections, collections_this_year, tota
                             <input
                                 type="text"
                                 className="w-full rounded-xl border-2 border-gray-200 bg-white py-3.5 pr-4 pl-12 text-sm font-medium transition placeholder:text-gray-400 hover:border-gray-300 focus:border-green-500 focus:ring-4 focus:ring-green-500/10 focus:outline-none"
-                                placeholder="Search by parcel code or collection date..."
+                                placeholder={t('searchByParcelCode')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />
@@ -252,7 +254,7 @@ export default function History({ total_collections, collections_this_year, tota
                             }`}
                         >
                             <SlidersHorizontal size={18} />
-                            <span className="text-sm">Filters</span>
+                            <span className="text-sm">{t('filters')}</span>
                         </button>
                     </div>
 
@@ -308,8 +310,8 @@ export default function History({ total_collections, collections_this_year, tota
                 {/* Collection History */}
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
                     <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-4">
-                        <h2 className="text-lg font-semibold text-gray-900">Collection History</h2>
-                        <p className="text-sm text-gray-500">View and export your parcel collection records</p>
+                        <h2 className="text-lg font-semibold text-gray-900">{t('collectionHistory')}</h2>
+                        <p className="text-sm text-gray-500">{t('viewExportRecords')}</p>
                     </div>
                     <div className="max-h-[480px] overflow-y-auto">
                         {filteredParcels.length === 0 && (
@@ -327,12 +329,12 @@ export default function History({ total_collections, collections_this_year, tota
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <span className="font-semibold text-gray-900">Package</span>
+                                                <span className="font-semibold text-gray-900">{t('package')}</span>
                                                 <span className="rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                                                     {parcel.parcel_code}
                                                 </span>
                                             </div>
-                                            <div className="mt-1 text-sm text-gray-500">Collected on {parcel.collected_at}</div>
+                                            <div className="mt-1 text-sm text-gray-500">{t('collectedOn')} {parcel.collected_at}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
@@ -343,10 +345,10 @@ export default function History({ total_collections, collections_this_year, tota
                                             }}
                                         >
                                             <FileText size={16} />
-                                            Export
+                                            {t('export')}
                                         </button>
                                         <span className="rounded-full bg-green-100 px-3 py-1.5 text-xs font-semibold text-green-700">
-                                            {parcel.status}
+                                            {t('completed')}
                                         </span>
                                     </div>
                                 </div>

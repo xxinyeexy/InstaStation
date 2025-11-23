@@ -3,6 +3,7 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, ChevronRight, Clock, HelpCircle, Mail, MapPin, Phone, Search } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type FaqItem = {
     faq_id: number;
@@ -13,9 +14,6 @@ type FaqItem = {
     updated_at?: string;
 };
 
-    const breadcrumbs = [
-        { title: 'FAQs', href: '/student/faq' },
-    ];
 // Notification interface
 interface Notification {
     id: string;
@@ -37,6 +35,11 @@ export default function StudentFaq({
     categories: string[];
     filters?: { q?: string; category?: string };
 }) {
+    const { t } = useLanguage();
+    
+    const breadcrumbs = [
+        { title: t('faqs'), href: '/student/faq' },
+    ];
     const pageProps: any = usePage<SharedData>().props;
     const serverNotifications: Notification[] = pageProps.notifications || [];
 
@@ -145,6 +148,15 @@ export default function StudentFaq({
         return 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400';
     };
 
+    // Function to translate FAQ categories
+    const getCategoryTranslation = (category: string): string => {
+        const normalized = category?.toLowerCase();
+        if (normalized.includes('general')) return t('general');
+        if (normalized.includes('collect')) return t('collection');
+        if (normalized.includes('pay')) return t('payment');
+        return category; // Return original if no match
+    };
+
     const handleSearch = () => {
         const params = new URLSearchParams();
         if (searchQuery) params.set('q', searchQuery);
@@ -214,8 +226,8 @@ export default function StudentFaq({
                 <div className="mx-auto max-w-4xl px-4 py-8">
                     {/* Header */}
                     <div className="mb-8 text-center">
-                        <h1 className="mb-2 text-4xl font-bold text-gray-900 dark:text-foreground">Frequently Asked Questions</h1>
-                        <p className="text-lg text-gray-600 dark:text-muted-foreground">Find answers to common questions about parcel collection</p>
+                        <h1 className="mb-2 text-4xl font-bold text-gray-900 dark:text-foreground">{t('frequentlyAskedQuestions')}</h1>
+                        <p className="text-lg text-gray-600 dark:text-muted-foreground">{t('findAnswersQuestions')}</p>
                     </div>
 
                     {/* Search Bar */}
@@ -230,7 +242,7 @@ export default function StudentFaq({
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                placeholder="Search FAQs..."
+                                placeholder={t('searchFAQs')}
                                 className="w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 text-gray-900 placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-border dark:bg-background dark:text-foreground dark:placeholder-muted-foreground"
                             />
                         </div>
@@ -247,7 +259,7 @@ export default function StudentFaq({
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-muted dark:text-muted-foreground dark:hover:bg-accent'
                                 }`}
                             >
-                                All Categories
+                                {t('allCategories')}
                             </button>
 
                             {categories.map((category) => {
@@ -266,7 +278,7 @@ export default function StudentFaq({
                                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-muted dark:text-muted-foreground dark:hover:bg-accent'
                                         }`}
                                     >
-                                        {category}
+                                        {getCategoryTranslation(category)}
                                     </button>
                                 );
                             })}
@@ -286,7 +298,7 @@ export default function StudentFaq({
                                         <div className="flex-1">
                                             <div className="mb-3 flex items-center gap-3">
                                                 <span className={`rounded-full px-3 py-1 text-xs font-medium ${categoryClasses(faq.category)}`}>
-                                                    {faq.category || 'General'}
+                                                    {faq.category ? getCategoryTranslation(faq.category) : t('general')}
                                                 </span>
                                             </div>
                                             <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-card-foreground">{faq.faq_question}</h3>
@@ -304,11 +316,11 @@ export default function StudentFaq({
                         ) : (
                             <div className="py-16 text-center">
                                 <HelpCircle className="mx-auto mb-4 text-gray-400 dark:text-muted-foreground" size={64} />
-                                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-foreground">No FAQs found</h3>
+                                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-foreground">{t('noFAQsFound')}</h3>
                                 <p className="text-gray-500 dark:text-muted-foreground">
                                     {searchQuery || selectedCategory
-                                        ? 'No FAQs found matching your search criteria.'
-                                        : 'No FAQs are available at the moment.'}
+                                        ? t('noFAQsMatchingCriteria')
+                                        : t('noFAQsAvailable')}
                                 </p>
                             </div>
                         )}
@@ -316,9 +328,9 @@ export default function StudentFaq({
 
                     {/* Support Section */}
                     <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm dark:border-border dark:bg-card">
-                        <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-card-foreground">Still need help?</h2>
+                        <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-card-foreground">{t('stillNeedHelp')}</h2>
                         <p className="mb-8 text-gray-600 dark:text-muted-foreground">
-                            If you couldn't find the answer you're looking for, contact our support team.
+                            {t('supportTeamContact')}
                         </p>
 
                         <div className="grid gap-8 md:grid-cols-2">
@@ -326,15 +338,15 @@ export default function StudentFaq({
                                 <div className="flex items-center gap-3">
                                     <Mail className="text-blue-600 dark:text-blue-400" size={20} />
                                     <div>
-                                        <div className="font-semibold text-gray-900 dark:text-card-foreground">Email Support</div>
+                                        <div className="font-semibold text-gray-900 dark:text-card-foreground">{t('emailSupport')}</div>
                                         <div className="text-gray-600 dark:text-muted-foreground">parcel-support@university.edu</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Clock className="text-blue-600 dark:text-blue-400" size={20} />
                                     <div>
-                                        <div className="font-semibold text-gray-900 dark:text-card-foreground">Office Hours</div>
-                                        <div className="text-gray-600 dark:text-muted-foreground">Monday - Friday: 9:00 AM - 5:00 PM</div>
+                                        <div className="font-semibold text-gray-900 dark:text-card-foreground">{t('officeHours')}</div>
+                                        <div className="text-gray-600 dark:text-muted-foreground">{t('mondayFriday')}</div>
                                     </div>
                                 </div>
                             </div>
@@ -343,15 +355,15 @@ export default function StudentFaq({
                                 <div className="flex items-center gap-3">
                                     <Phone className="text-blue-600 dark:text-blue-400" size={20} />
                                     <div>
-                                        <div className="font-semibold text-gray-900 dark:text-card-foreground">Phone Support</div>
+                                        <div className="font-semibold text-gray-900 dark:text-card-foreground">{t('phoneSupport')}</div>
                                         <div className="text-gray-600 dark:text-muted-foreground">+1 (555) 123-4567</div>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <MapPin className="text-blue-600 dark:text-blue-400" size={20} />
                                     <div>
-                                        <div className="font-semibold text-gray-900 dark:text-card-foreground">Location</div>
-                                        <div className="text-gray-600 dark:text-muted-foreground">Student Services Building, Room 101</div>
+                                        <div className="font-semibold text-gray-900 dark:text-card-foreground">{t('location')}</div>
+                                        <div className="text-gray-600 dark:text-muted-foreground">{t('studentServicesBuilding')}</div>
                                     </div>
                                 </div>
                             </div>

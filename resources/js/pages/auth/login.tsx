@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Eye, EyeOff, LoaderCircle, Lock, Mail, User } from 'lucide-react';
 import { FormEventHandler, useEffect, useState } from 'react';
+import AppLogoIcon from '@/components/app-logo-icon';
 
 interface LoginProps {
     status?: string | null;
@@ -33,12 +34,25 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     const [errorKey, setErrorKey] = useState(0);
     const [success, setSuccess] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [registrationMessage, setRegistrationMessage] = useState<string | null>(null);
+    const [loginMessage, setLoginMessage] = useState<string | null>(null);
 
     useEffect(() => {
         if (Object.keys(errors).length > 0) {
             setErrorKey((k) => k + 1);
         }
     }, [errors]);
+
+    useEffect(() => {
+        // Check for login message in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const loginMsg = urlParams.get('loginMessage');
+        if (loginMsg) {
+            setLoginMessage(decodeURIComponent(loginMsg));
+            // Clean up URL without reloading
+            window.history.replaceState({}, '', '/login');
+        }
+    }, []);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
@@ -82,6 +96,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             {/* Floating toast for success */}
             {success && <Alert type="success" message={success} />}
             {status && !success && <Alert type="success" message={status} />}
+            {loginMessage && !success && <Alert type="success" message={loginMessage} />}
 
             <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4 dark:bg-gray-900">
                 <Link
@@ -97,19 +112,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md dark:bg-card">
                     <div className="mb-6 text-center">
                         <div className="mb-2 flex justify-center">
-                            <div className="rounded-full bg-blue-100 p-3 dark:bg-blue-500/20">
-                                <svg
-                                    className="h-6 w-6 text-blue-500 dark:text-blue-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M3 7l9-4 9 4-9 4-9-4z" />
-                                    <path d="M3 17l9 4 9-4" />
-                                    <path d="M3 12l9 4 9-4" />
-                                </svg>
-                            </div>
+                                         <AppLogoIcon className="h-30 w-30 object-contain" />
+
                         </div>
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-card-foreground">Welcome to InstaStation</h2>
                         <p className="text-sm text-gray-500 dark:text-muted-foreground">Instant Parcel Tracking Dashboard</p>

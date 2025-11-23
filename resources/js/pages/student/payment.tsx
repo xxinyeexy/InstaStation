@@ -3,6 +3,7 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 type Summary = {
     overdue: number;
@@ -45,14 +46,15 @@ interface Notification {
     is_read: boolean;
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Payment',
-        href: '/student/payment',
-    },
-];
-
 export default function Payment({ summary, rows, payments }: { summary: Summary; rows: Row[]; payments: PaymentRow[] }) {
+    const { t } = useLanguage();
+    
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('paymentCentre'),
+            href: '/student/payment',
+        },
+    ];
     const badge = (state: Row['payment_state']) => {
         if (state === 'Overdue') return 'text-destructive bg-destructive/10 border-destructive/20';
         if (state === 'Verified')
@@ -98,6 +100,15 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
             const dateB = new Date(b.submitted_at || '').getTime();
             return paymentSort === 'newest' ? dateB - dateA : dateA - dateB;
         });
+
+    // Function to translate payment states
+    const getPaymentStateTranslation = (state: string): string => {
+        const normalized = state?.toLowerCase();
+        if (normalized === 'verified') return t('verified');
+        if (normalized === 'pending') return t('pending');
+        if (normalized === 'overdue') return t('overdue');
+        return state;
+    };
 
     // Update notification list when props change, filtering out dismissed ones
     useEffect(() => {
@@ -236,7 +247,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Payment Centre" />
+            <Head title={t('paymentCentre')} />
 
             {/* Notification Bell - Positioned at top right (same as parcel page) */}
             <div className="fixed top-4 right-6 z-50">
@@ -257,11 +268,11 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                     {showNotificationDropdown && (
                         <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
                             <div className="border-b border-border p-4">
-                                <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
+                                <h3 className="text-lg font-semibold text-popover-foreground">{t('notifications')}</h3>
                             </div>
                             <div className="max-h-96 overflow-y-auto">
                                 {notificationList.length === 0 ? (
-                                    <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
+                                    <div className="p-8 text-center text-sm text-muted-foreground">{t('noNotifications')}</div>
                                 ) : (
                                     notificationList.map((notification) => (
                                         <div
@@ -315,17 +326,17 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
 
             <div className="space-y-6 p-6">
                 <div>
-                    <h1 className="text-xl font-semibold text-foreground">Payment Centre</h1>
-                    <p className="text-sm text-muted-foreground">Manage your parcel payments</p>
+                    <h1 className="text-xl font-semibold text-foreground">{t('paymentCentre')}</h1>
+                    <p className="text-sm text-muted-foreground">{t('manageParcelPayments')}</p>
                 </div>
 
                 {/* Tiles */}
                 <div className="grid grid-cols-4 gap-4">
                     <div className="flex items-start justify-between rounded-xl border border-border bg-card p-4">
                         <div>
-                            <div className="text-sm text-muted-foreground">Overdue</div>
+                            <div className="text-sm text-muted-foreground">{t('overdue')}</div>
                             <div className="mt-2 text-2xl font-bold text-card-foreground">{summary.overdue}</div>
-                            <div className="mt-1 text-xs text-muted-foreground">Delay payments</div>
+                            <div className="mt-1 text-xs text-muted-foreground">{t('delayPayments')}</div>
                         </div>
                         <div className="rounded-full bg-destructive/10 p-2 text-destructive">
                             <CircleAlert className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleAlert>
@@ -333,9 +344,9 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                     </div>
                     <div className="flex items-start justify-between rounded-xl border border-border bg-card p-4">
                         <div>
-                            <div className="text-sm text-muted-foreground">Pending Items</div>
+                            <div className="text-sm text-muted-foreground">{t('pendingItems')}</div>
                             <div className="mt-2 text-2xl font-bold text-card-foreground">{summary.pending}</div>
-                            <div className="mt-1 text-xs text-muted-foreground">Awaiting payments</div>
+                            <div className="mt-1 text-xs text-muted-foreground">{t('awaitingPayments')}</div>
                         </div>
                         <div className="rounded-full bg-yellow-500/10 p-2 text-yellow-600 dark:text-yellow-400">
                             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -345,9 +356,9 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                     </div>
                     <div className="flex items-start justify-between rounded-xl border border-border bg-card p-4">
                         <div>
-                            <div className="text-sm text-muted-foreground">Verified</div>
+                            <div className="text-sm text-muted-foreground">{t('verified')}</div>
                             <div className="mt-2 text-2xl font-bold text-card-foreground">{summary.verified}</div>
-                            <div className="mt-1 text-xs text-muted-foreground">Successfully verified</div>
+                            <div className="mt-1 text-xs text-muted-foreground">{t('successfullyVerified')}</div>
                         </div>
                         <div className="rounded-full bg-green-500/10 p-2 text-green-600 dark:text-green-400">
                             <CircleCheck className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleCheck>
@@ -355,9 +366,9 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                     </div>
                     <div className="flex items-start justify-between rounded-xl border border-border bg-card p-4">
                         <div>
-                            <div className="text-sm text-muted-foreground">Total Paid</div>
+                            <div className="text-sm text-muted-foreground">{t('totalPaid')}</div>
                             <div className="mt-2 text-2xl font-bold text-card-foreground">RM {summary.total_paid.toFixed(2)}</div>
-                            <div className="mt-1 text-xs text-muted-foreground">Received payments</div>
+                            <div className="mt-1 text-xs text-muted-foreground">{t('receivedPayments')}</div>
                         </div>
                         <div className="rounded-full bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400">
                             <WalletCards className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></WalletCards>
@@ -371,16 +382,16 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                         <span className="rounded-full bg-destructive/10 p-1 text-destructive">
                             <CircleAlert className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleAlert>
                         </span>
-                        Payments Required
+                        {t('paymentsRequired')}
                     </div>
                     <div className="divide-y divide-border">
                         <div className="grid grid-cols-6 gap-2 bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
-                            <div>Parcel ID</div>
-                            <div>Sender</div>
-                            <div>Amount</div>
-                            <div>Arrival Date</div>
-                            <div>Status</div>
-                            <div>Actions</div>
+                            <div>{t('parcelID')}</div>
+                            <div>{t('sender')}</div>
+                            <div>{t('amount')}</div>
+                            <div>{t('arrivalDate')}</div>
+                            <div>{t('status')}</div>
+                            <div>{t('actions')}</div>
                         </div>
                         {rows.map((r) => (
                             <div
@@ -418,7 +429,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                         {r.payment_state === 'Verified' && (
                                             <CircleCheck className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleCheck>
                                         )}
-                                        {r.payment_state}
+                                        {getPaymentStateTranslation(r.payment_state)}
                                     </span>
                                 </div>
                                 <div>
@@ -428,10 +439,10 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                             className="inline-flex items-center gap-1 rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
                                         >
                                             <CreditCard className="h-4 w-4" />
-                                            Pay Now
+                                            {t('payNow')}
                                         </Link>
                                     ) : (
-                                        <span className="text-xs text-muted-foreground">Paid</span>
+                                        <span className="text-xs text-muted-foreground">{t('paid')}</span>
                                     )}
                                 </div>
                             </div>
@@ -443,8 +454,8 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                 <div className="rounded-xl border border-border bg-card">
                     <div className="flex items-center justify-between border-b border-border p-4">
                         <div>
-                            <h2 className="text-lg font-semibold text-card-foreground">Payment History</h2>
-                            <p className="text-sm text-muted-foreground">View and manage your payment submissions</p>
+                            <h2 className="text-lg font-semibold text-card-foreground">{t('paymentHistory')}</h2>
+                            <p className="text-sm text-muted-foreground">{t('viewManageSubmissions')}</p>
                         </div>
                         <div className="flex items-center gap-2">
                             {/* Filter Dropdown */}
@@ -453,9 +464,9 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                 onChange={(e) => setPaymentFilter(e.target.value as 'all' | 'verified' | 'pending')}
                                 className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             >
-                                <option value="all">All Status</option>
-                                <option value="verified">Verified</option>
-                                <option value="pending">Pending</option>
+                                <option value="all">{t('allStatus')}</option>
+                                <option value="verified">{t('verified')}</option>
+                                <option value="pending">{t('pending')}</option>
                             </select>
                             {/* Sort Dropdown */}
                             <select
@@ -463,14 +474,14 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                 onChange={(e) => setPaymentSort(e.target.value as 'newest' | 'oldest')}
                                 className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             >
-                                <option value="newest">Most Recent</option>
-                                <option value="oldest">Oldest First</option>
+                                <option value="newest">{t('mostRecent')}</option>
+                                <option value="oldest">{t('oldestFirst')}</option>
                             </select>
                         </div>
                     </div>
                     {filteredPayments.length === 0 ? (
                         <div className="p-8 text-center text-sm text-muted-foreground">
-                            {paymentFilter === 'all' ? 'No payments submitted yet.' : `No ${paymentFilter} payments found.`}
+                            {paymentFilter === 'all' ? t('noPaymentsYet') : t('noPaymentsFound').replace('{filter}', paymentFilter)}
                         </div>
                     ) : (
                         <ul className="divide-y divide-border">
@@ -510,13 +521,13 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                                     />
                                                 </svg>
                                             )}
-                                            {p.status}
+                                            {getPaymentStateTranslation(p.status)}
                                         </span>
                                     </div>
                                     {/* Middle: dates */}
                                     <div className="ml-auto text-right text-xs text-muted-foreground">
-                                        <div>Submitted: {p.submitted_at ?? '—'}</div>
-                                        <div>Verified: {p.verified_at ?? '—'}</div>
+                                        <div>{t('submitted')}: {p.submitted_at ?? '—'}</div>
+                                        <div>{t('verified')}: {p.verified_at ?? '—'}</div>
                                     </div>
                                     {/* Right: proof thumbnail */}
                                     <div className="ml-4">

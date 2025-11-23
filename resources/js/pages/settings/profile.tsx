@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -29,6 +30,7 @@ type ProfileForm = {
 };
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
+    const { t } = useLanguage();
     const { auth } = usePage<SharedData>().props;
     const [previewUrl, setPreviewUrl] = useState<string | null>(
         auth.user.profile_pic ? `/storage/${auth.user.profile_pic}` : null
@@ -74,12 +76,11 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Profile information" description="Update your name and email address" />
+                    <HeadingSmall title={t('profileInformation')} description={t('updateProfile')} />
 
                     <form onSubmit={submit} className="space-y-6">
-                        {/* Profile Picture Upload */}
                         <div className="grid gap-2">
-                            <Label>Profile Picture</Label>
+                            <Label>{t('profilePicture')}</Label>
                             <div className="flex items-center gap-4">
                                 {previewUrl ? (
                                     <div className="relative">
@@ -115,7 +116,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         htmlFor="profile_pic"
                                         className="cursor-pointer inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150"
                                     >
-                                        Choose Photo
+                                        {t('choosePhoto')}
                                     </Label>
                                     <p className="mt-2 text-xs text-gray-500">JPG, PNG or GIF (MAX. 2MB)</p>
                                 </div>
@@ -124,7 +125,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="name">{t('name')}</Label>
 
                             <Input
                                 id="name"
@@ -140,7 +141,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="email">Email address</Label>
+                            <Label htmlFor="email">{t('emailAddress')}</Label>
 
                             <Input
                                 id="email"
@@ -157,7 +158,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="phone_no">Phone Number</Label>
+                            <Label htmlFor="phone_no">{t('phoneNumber')}</Label>
 
                             <Input
                                 id="phone_no"
@@ -174,7 +175,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                         {auth.user.type === 'student' && (
                             <div className="grid gap-2">
-                                <Label htmlFor="room_no">Room Number</Label>
+                                <Label htmlFor="room_no">{t('room')}</Label>
 
                                 <Input
                                     id="room_no"
@@ -211,7 +212,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         )}
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing}>Save</Button>
+                            <Button disabled={processing}>{t('save')}</Button>
 
                             <Transition
                                 show={recentlySuccessful}
@@ -220,7 +221,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 leave="transition ease-in-out"
                                 leaveTo="opacity-0"
                             >
-                                <p className="text-sm text-neutral-600">Saved</p>
+                                <p className="text-sm text-neutral-600">{t('save')}</p>
                             </Transition>
                         </div>
                     </form>

@@ -77,15 +77,28 @@ class FaqController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'faq_question' => 'required|string|max:150',
-            'faq_answer' => 'required|string|max:5000',
-            'category' => 'nullable|string|max:20',
-            'faq_status' => 'nullable|in:Active,Inactive',
-        ]);
-        $data['faq_status'] = $data['faq_status'] ?? 'Inactive';
-        $faq = Faq::create($data);
-        return response()->json(['success' => true, 'faq' => $faq]);
+        try {
+            $data = $request->validate([
+                'faq_question' => 'required|string|min:10|max:500',
+                'faq_answer' => 'required|string|min:20|max:5000',
+                'category' => 'required|string|max:50',
+                'faq_status' => 'nullable|in:Active,Inactive',
+            ]);
+            $data['faq_status'] = $data['faq_status'] ?? 'Inactive';
+            $faq = Faq::create($data);
+            return response()->json(['success' => true, 'faq' => $faq]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors' => $e->errors(),
+                'message' => 'Validation failed'
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

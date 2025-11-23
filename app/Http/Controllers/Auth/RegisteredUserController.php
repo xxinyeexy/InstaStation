@@ -28,7 +28,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -50,7 +50,15 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        // Redirect to login page after registration
-        return redirect()->route('login')->with('status', 'Account created successfully! Please verify your email address via the link we\'ve sent before signing in.');
+        // Return JSON response for axios requests
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Account created successfully! Please check your email to verify your account.',
+                'loginMessage' => 'You may proceed to login now!',
+            ], 201);
+        }
+
+        // Redirect to login page after registration for non-ajax requests
+        return redirect()->route('login')->with('status', 'You may proceed to login now!');
     }
 }

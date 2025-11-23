@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface QRCodeModalProps {
     isOpen: boolean;
@@ -13,6 +14,8 @@ interface QRCodeModalProps {
 }
 
 const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeModalProps) => {
+    const { t } = useLanguage();
+    
     if (!isOpen) return null;
 
     return (
@@ -21,8 +24,8 @@ const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeM
                 {/* Modal Header */}
                 <div className="flex items-center justify-between border-b border-border p-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-card-foreground">Collection QR Code</h2>
-                        <p className="mt-1 text-sm text-muted-foreground">Show this QR code to collect your parcel</p>
+                        <h2 className="text-2xl font-bold text-card-foreground">{t('collectionQRCode')}</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">{t('showThisQRCode')}</p>
                     </div>
                     <button
                         onClick={onClose}
@@ -66,7 +69,7 @@ const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeM
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-600">
-                                        Collection Code:{' '}
+                                        {t('collectionCode')}:{' '}
                                         <span className="font-['Consolas'] font-bold text-gray-900">{qrCodeData.collection_code}</span>
                                     </p>
                                 </div>
@@ -81,7 +84,7 @@ const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeM
                         onClick={onClose}
                         className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
                     >
-                        Close
+                        {t('close')}
                     </button>
                 </div>
             </div>

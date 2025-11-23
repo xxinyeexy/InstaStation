@@ -52,14 +52,16 @@ Route::post('/register', [RegisteredUserController::class, 'store']);
 
 
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
-});
-
 // Staff and Parcel routes - require authenticated and verified users
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Redirect /dashboard to appropriate page based on user type
+    Route::get('dashboard', function () {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if ($user && $user->type === 'staff') {
+            return redirect()->route('staff.dashboard');
+        }
+        return redirect()->route('student.parcel');
+    })->name('dashboard');
     // Export routes: preview (HTML) and download (PDF)
     Route::get('/parcels/{id}/export', [ParcelController::class, 'export'])->name('parcels.export');
     Route::get('/parcels/{id}/export/download', [ParcelController::class, 'exportDownload'])->name('parcels.export.download');

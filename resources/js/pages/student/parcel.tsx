@@ -4,13 +4,7 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, CheckCircle, MapPin, Package, Sparkles, Upload, X, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'My Parcel',
-        href: '/student/parcel',
-    },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Define the Parcel interface based on your database structure
 interface Parcel {
@@ -92,13 +86,13 @@ interface EditParcelForm {
     dimensions: string;
     description: string;
 }
-const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCount: number }) => {
+const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcelCount: number; t: any }) => {
     // Get current time for greeting
     const getCurrentGreeting = () => {
         const hour = new Date().getHours();
-        if (hour < 12) return 'Good Morning';
-        if (hour < 17) return 'Good Afternoon';
-        return 'Good Evening';
+        if (hour < 12) return t('goodMorning');
+        if (hour < 17) return t('goodAfternoon');
+        return t('goodEvening');
     };
 
     // Format user display name
@@ -112,12 +106,12 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
     // Get user identifier (matric for students, email for staff)
     const getUserIdentifier = () => {
         if (user?.matric) {
-            return `Matric ID: ${user.matric}`;
+            return `${t('matricID')}: ${user.matric}`;
         }
         if (user?.email) {
             return `Email: ${user.email}`;
         }
-        return `Matric ID: A12345678`;
+        return `${t('matricID')}: A12345678`;
     };
 
     return (
@@ -126,7 +120,7 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
                 <div>
                     <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-500/20 dark:text-green-400">
                         <Sparkles className="h-3 w-3" />
-                        Welcome Back
+                        {t('welcomeBackBadge')}
                     </div>
 
                     <div>
@@ -143,13 +137,22 @@ const WelcomeHeader = ({ user, activeParcelCount }: { user: any; activeParcelCou
                         <Package className="h-8 w-8 text-white" />
                     </div>
                     <div className="mt-2 text-2xl font-bold text-gray-900 dark:text-card-foreground">{activeParcelCount}</div>
-                    <div className="text-xs text-gray-500 dark:text-muted-foreground">Active</div>
+                    <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('active')}</div>
                 </div>
             </div>
         </div>
     );
 };
 export default function Dashboard({ parcels = [] }: DashboardProps) {
+    const { t } = useLanguage();
+    
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('myParcels'),
+            href: '/student/parcel',
+        },
+    ];
+    
     const { auth } = usePage<SharedData>().props;
     const currentUser = auth.user;
     const pageProps: any = usePage<SharedData>().props;
@@ -463,9 +466,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         } catch (error) {
             console.error('QR code generation error:', error);
             if (error instanceof Error) {
-                addToastNotification('error', 'QR Code Error', error.message);
+                addToastNotification('error', t('qrCodeError'), error.message);
             } else {
-                addToastNotification('error', 'QR Code Error', 'Failed to generate QR code');
+                addToastNotification('error', t('qrCodeError'), t('failedToGenerateQR'));
             }
             // Close modal on error
             setShowQRModal(false);
@@ -552,13 +555,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                 setShowEditModal(false);
                 setEditingParcel(null);
-                addToastNotification('success', 'Success!', 'Parcel updated successfully!');
+                addToastNotification('success', t('success'), t('parcelUpdatedSuccess'));
             } else {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
         } catch (error) {
             console.error('Failed to update parcel:', error);
-            addToastNotification('error', 'Error!', 'Failed to update parcel. Please try again.');
+            addToastNotification('error', t('error'), t('failedToUpdateParcel'));
         } finally {
             setIsUpdating(false);
         }
@@ -666,7 +669,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     // Close modal and show success notification
                     setShowPayModal(false);
                     setPayParcelId(null);
-                    addToastNotification('success', 'Payment Uploaded', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
+                    addToastNotification('success', t('paymentUploaded'), t('paymentProofUploaded'));
                     
                     // Reload only parcels and notifications data
                     router.reload({
@@ -675,7 +678,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 },
                 onError: (errors) => {
                     const firstError = typeof errors === 'object' ? Object.values(errors)[0] : null;
-                    addToastNotification('error', 'Upload Failed', (firstError as string) || 'Failed to upload proof');
+                    addToastNotification('error', t('uploadFailed'), (firstError as string) || t('failedToUploadProof'));
                 },
                 onFinish: () => {
                     setIsUploadingProof(false);
@@ -764,6 +767,26 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 default:
                     return 'bg-gray-100 text-white';
             }
+        }
+    };
+
+    // Function to translate status values
+    const getTranslatedStatus = (status: string): string => {
+        const normalizedStatus = status?.toLowerCase();
+        switch (normalizedStatus) {
+            case 'pending payment':
+                return t('pendingPayment');
+            case 'ready for collection':
+            case 'ready to collect':
+                return t('readyForCollection');
+            case 'collected':
+                return t('collected');
+            case 'approved':
+                return t('approved');
+            case 'unclaimed':
+                return t('unclaimed');
+            default:
+                return status;
         }
     };
 
@@ -931,7 +954,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     ))}
                 </div>
 
-                <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} />
+                <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} t={t} />
 
                 {/* QR Code Modal */}
                 <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} isLoading={loadingQRParcels.size > 0} />
@@ -942,9 +965,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl dark:bg-card">
                             <div className="flex items-center justify-between border-b border-gray-200 p-6">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">Payment QR Scanner</h2>
+                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('paymentQRScanner')}</h2>
                                     <p className="mt-1 text-xs text-gray-600 dark:text-muted-foreground">
-                                        Scan payment QR code and upload payment proof
+                                        {t('scanPaymentQRAndUpload')}
                                     </p>
                                 </div>
                                 <button
@@ -965,7 +988,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-60 dark:border-border dark:bg-muted dark:text-foreground dark:hover:bg-accent"
                                 >
                                     <Upload className="h-4 w-4" />
-                                    {isUploadingProof ? 'Uploading...' : 'Upload Payment Proof'}
+                                    {isUploadingProof ? t('uploading') : t('uploadPaymentProof')}
                                 </button>
                             </div>
                         </div>
@@ -996,12 +1019,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                 <div className="min-h-screen bg-white p-6 dark:bg-background">
                     {/* Header tiles matching screenshot */}
-                    <div className="mb-6 grid grid-cols-12 gap-x-4 gap-y-1">
+                    <div className="mb-6 grid grid-cols-12 gap-x-4 gap-y-3">
                         {/* My Parcels - Purple (icon on right) */}
                         <div className="col-span-3 h-30 rounded-xl border-3 border-violet-300 bg-violet-50 p-4 dark:border-violet-500/50 dark:bg-violet-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="text-xs text-gray-600 dark:text-violet-400">My Parcels</div>
+                                    <div className="text-xs text-gray-600 dark:text-violet-400">{t('myParcels')}</div>
                                     <div className="mt-1 text-3xl font-bold text-violet-700 dark:text-violet-300">{tileCounts.myParcels}</div>
                                 </div>
                                 <div className="flex h-13 w-13 items-center justify-center rounded-full bg-violet-100 text-violet-600 dark:bg-violet-500/30 dark:text-violet-300">
@@ -1021,7 +1044,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <div className="col-span-3 h-30 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-500/50 dark:bg-yellow-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="text-xs text-gray-600 dark:text-yellow-400">Pending Payment</div>
+                                    <div className="text-xs text-gray-600 dark:text-yellow-400">{t('pendingPayment')}</div>
                                     <div className="mt-1 text-3xl font-bold text-yellow-700 dark:text-yellow-300">{tileCounts.pendingPayment}</div>
                                 </div>
                                 <div className="flex h-13 w-13 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 dark:bg-yellow-500/30 dark:text-yellow-300">
@@ -1041,7 +1064,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <div className="col-span-3 h-30 rounded-xl border-3 border-amber-200 bg-amber-50 p-4 dark:border-amber-500/50 dark:bg-amber-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="text-xs text-gray-600 dark:text-amber-400">Approved</div>
+                                    <div className="text-xs text-gray-600 dark:text-amber-400">{t('approved')}</div>
                                     <div className="mt-1 text-3xl font-bold text-amber-700 dark:text-amber-300">{tileCounts.approved}</div>
                                 </div>
                                 <div className="flex h-13 w-13 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/30 dark:text-amber-300">
@@ -1059,11 +1082,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                         {/* Quick Actions */}
                         <div className="col-span-4 col-start-11 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm dark:border-border dark:bg-card">
-                            <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-card-foreground">Quick Actions</div>
-                            <button className="flex w-full items-center justify-between rounded-lg bg-purple-50 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-100 dark:bg-purple-500/20 dark:text-purple-300 dark:hover:bg-purple-500/30">
-                                <span>Generate Reports</span>
-                            </button>
-
+                            <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-card-foreground">{t('quickActions')}</div>
+                        
                             <button
                                 onClick={() => {
                                     setSelectedHub(hubs[0]);
@@ -1071,7 +1091,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 }}
                                 className="flex w-full items-center justify-between rounded-lg bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700 hover:bg-orange-100 dark:bg-orange-500/20 dark:text-orange-300 dark:hover:bg-orange-500/30"
                             >
-                                <span>Locations</span>
+                                <span>{t('locations')}</span>
                             </button>
                         </div>
 
@@ -1079,7 +1099,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <div className="col-span-3 h-30 rounded-xl border-3 border-green-200 bg-green-50 p-4 dark:border-green-500/50 dark:bg-green-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="text-xs text-gray-600 dark:text-green-400">Ready for Collection</div>
+                                    <div className="text-xs text-gray-600 dark:text-green-400">{t('readyForCollection')}</div>
                                     <div className="mt-1 text-3xl font-bold text-green-700 dark:text-green-300">{tileCounts.readyForCollection}</div>
                                 </div>
                                 <div className="flex h-13 w-13 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-500/30 dark:text-green-300">
@@ -1194,7 +1214,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <div className="col-span-3 h-30 rounded-xl border-3 border-blue-200 bg-blue-50 p-4 dark:border-blue-500/50 dark:bg-blue-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="text-xs text-gray-600 dark:text-blue-400">Collected</div>
+                                    <div className="text-xs text-gray-600 dark:text-blue-400">{t('collected')}</div>
                                     <div className="mt-1 text-3xl font-bold text-blue-700 dark:text-blue-300">{tileCounts.collected}</div>
                                 </div>
                                 <div className="flex h-13 w-13 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-500/30 dark:text-blue-300">
@@ -1223,7 +1243,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     {/* Parcel cards grid */}
                     {displayParcels.length === 0 ? (
                         <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center text-gray-500 dark:border-border dark:bg-card dark:text-muted-foreground">
-                            No parcels found
+                            {t('noParcelsFound')}
                         </div>
                     ) : (
                         <div className="grid grid-cols-3 gap-6">
@@ -1264,7 +1284,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             <span
                                                 className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
                                             >
-                                                {parcel.parcel_status}
+                                                {getTranslatedStatus(parcel.parcel_status)}
                                             </span>
                                         </div>
 
@@ -1282,18 +1302,18 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                                                 />
                                             </svg>
-                                            <span>Arrived: {formatDate(parcel.created_at)}</span>
+                                            <span>{t('arrived')}: {formatDate(parcel.created_at)}</span>
                                         </div>
 
                                         <div className="mb-4 text-sm">
-                                            <span className="mr-2 text-gray-600 dark:text-muted-foreground">Payment:</span>
+                                            <span className="mr-2 text-gray-600 dark:text-muted-foreground">{t('payment')}:</span>
                                             {parcel.payment_verified || isApproved || isReady ? (
                                                 <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
-                                                    Verified
+                                                    {t('verified')}
                                                 </span>
                                             ) : (
                                                 <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
-                                                    Pending
+                                                    {t('pending')}
                                                 </span>
                                             )}
                                         </div>
@@ -1304,7 +1324,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     onClick={() => handlePayNow(parcel.parcel_id)}
                                                     className="flex-1 rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-600"
                                                 >
-                                                    Pay Now
+                                                    {t('payNow')}
                                                 </button>
                                             )}
                                             {isApproved && (
@@ -1315,7 +1335,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                     </svg>
-                                                    Collect
+                                                    {t('collect')}
                                                 </button>
                                             )}
                                             {isReady && (
@@ -1346,7 +1366,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                             d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
                                                                         />
                                                                     </svg>
-                                                                    Show QR Code
+                                                                    {t('showQRCode')}
                                                                 </>
                                                             )}
                                                         </button>
@@ -1354,7 +1374,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                             onClick={() => handleViewParcel(parcel.parcel_id)}
                                                             className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
                                                         >
-                                                            View Details
+                                                            {t('viewDetails')}
                                                         </button>
                                                     </div>
 
@@ -1376,7 +1396,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                             </svg>
                                                             <div className="flex flex-col text-left leading-tight">
                                                                 <span className="text-sm font-semibold text-gray-900 dark:text-foreground">
-                                                                    Scheduled
+                                                                    {t('scheduled')}
                                                                 </span>
                                                                 <span className="text-xs text-gray-700 dark:text-muted-foreground">
                                                                     {scheduledDateStr && parcel.time_slot
@@ -1393,7 +1413,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     onClick={() => handleViewParcel(parcel.parcel_id)}
                                                     className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
                                                 >
-                                                    View Details
+                                                    {t('viewDetails')}
                                                 </button>
                                             )}
                                         </div>
@@ -1411,9 +1431,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     <div className="w-full max-w-md rounded-lg bg-white p-4 shadow-lg dark:bg-card">
                         <div className="flex flex-col gap-4">
                             <div className="text-center">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">Confirm Deletion</h3>
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('confirmDeletion')}</h3>
                                 <p className="mt-1 text-sm text-gray-600 dark:text-muted-foreground">
-                                    Are you sure you want to delete this parcel? This action cannot be undone.
+                                    {t('areYouSureDeleteParcel')}
                                 </p>
                             </div>
 
@@ -1455,11 +1475,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             // Remove from local state
                                             setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== selectedParcelId));
 
-                                            addToastNotification('success', 'Parcel Deleted', 'The parcel has been successfully deleted.');
+                                            addToastNotification('success', t('parcelDeleted'), t('parcelDeletedSuccess'));
                                             setShowDeleteModal(false);
                                         } catch (error) {
                                             console.error('Delete parcel error:', error);
-                                            addToastNotification('error', 'Deletion Failed', 'Failed to delete parcel. Please try again.');
+                                            addToastNotification('error', t('deletionFailed'), t('failedToDeleteParcel'));
                                         } finally {
                                             setIsDeleting(false);
                                         }

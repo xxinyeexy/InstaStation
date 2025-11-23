@@ -3,6 +3,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { DollarSign, Download, Search, Trash2, UsersRound, AlertTriangle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { type BreadcrumbItem, type SharedData } from '@/types';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 
 type Summary = {
@@ -27,13 +28,14 @@ type Row = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Users',
+        title: 'users',
         href: '/student/manage-user',
     },
 ];
 
 
 export default function ManageUser({ summary, rows, filters }: { summary: Summary; rows: Row[]; filters?: { q?: string; status?: string } }) {
+    const { t } = useLanguage();
     const pageProps = usePage().props as any;
     const currentUser = pageProps.auth?.user;
     const [list, setList] = useState<Row[]>(rows);
@@ -54,43 +56,43 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
         <AppLayout breadcrumbs={breadcrumbs}>
             <div className="space-y-6 p-6">
                 <div>
-                    <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground">User Management</h1>
-                    <p className="text-sm text-gray-600 dark:text-muted-foreground">Manage student accounts and generate reports</p>
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground">{t('userManagement')}</h1>
+                    <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('manageStudents')}</p>
                 </div>
 
                 {/* Summary cards */}
                 <div className="grid grid-cols-4 gap-4">
                     <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Total Students</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('totalStudents')}</div>
                             <UsersRound className="h-4 w-4 text-gray-400" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-foreground">{summary.total}</div>
-                        <div className="text-xs text-gray-500 dark:text-muted-foreground">Registered users</div>
+                        <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('registeredUsers')}</div>
                     </div>
                     <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Active Students</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('activeStudents')}</div>
                             <UsersRound className="h-4 w-4 text-emerald-500" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-foreground">{summary.active}</div>
-                        <div className="text-xs text-gray-500 dark:text-muted-foreground">Currently active</div>
+                        <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('currentlyActive')}</div>
                     </div>
                     <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Avg Parcels/Student</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('avgParcels')}</div>
                             <UsersRound className="h-4 w-4 text-indigo-500" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-foreground">{summary.avg_per_student}</div>
-                        <div className="text-xs text-gray-500 dark:text-muted-foreground">Per student</div>
+                        <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('perStudent')}</div>
                     </div>
                     <div className="rounded-xl border border-border bg-card p-4">
                         <div className="flex items-center justify-between">
-                            <div className="text-sm text-gray-600 dark:text-muted-foreground">Total Revenue</div>
+                            <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('totalRevenue')}</div>
                             <DollarSign className="h-4 w-4 text-yellow-500" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-foreground">RM{summary.total_revenue.toFixed(2)}</div>
-                        <div className="text-xs text-gray-500 dark:text-muted-foreground">From all students</div>
+                        <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('fromAllStudents')}</div>
                     </div>
                 </div>
 
@@ -101,7 +103,7 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                             <input
                                 ref={searchRef}
                                 className="w-full rounded-md border border-border bg-background py-2 pr-3 pl-9 text-sm text-foreground placeholder:text-muted-foreground"
-                                placeholder="Search by name, student ID, or email..."
+                                placeholder={t('searchPlaceholder')}
                                 defaultValue={filters?.q || ''}
                                 onKeyDown={(e) => e.key === 'Enter' && doSearch()}
                                 onChange={() => {
@@ -132,9 +134,9 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                                     router.get(`/staff/manage-user?${params.toString()}`);
                                 }}
                             >
-                                <option value="">All Status</option>
-                                <option value="active">active</option>
-                                <option value="inactive">inactive</option>
+                                <option value="">{t('allStatus')}</option>
+                                <option value="active">{t('active')}</option>
+                                <option value="inactive">{t('inactive')}</option>
                             </select>
                             <button
                                 className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
@@ -185,7 +187,7 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                                     URL.revokeObjectURL(url);
                                 }}
                             >
-                                <Download className="h-4 w-4" /> Export Report
+                                <Download className="h-4 w-4" /> {t('exportReport')}
                             </button>
 
                             {/* Cleanup Old Records Button - Only for Operations/Admin */}
@@ -198,7 +200,7 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                                     className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-700 hover:to-red-800 hover:shadow-lg active:scale-95"
                                 >
                                     <Trash2 className="h-4 w-4" /> 
-                                    <span>Cleanup Old Records</span>
+                                    <span>{t('cleanupOldRecords')}</span>
                                 </button>
                             )}
                         </div>
@@ -206,12 +208,12 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
 
                     {/* Table header */}
                     <div className="grid grid-cols-12 gap-2 bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
-                        <div className="col-span-3">Student</div>
-                        <div className="col-span-3">Contact</div>
-                        <div className="col-span-2">Parcels</div>
-                        <div className="col-span-1">Spent</div>
-                        <div className="col-span-1">Status</div>
-                        <div className="col-span-2">Last Activity</div>
+                        <div className="col-span-3">{t('student')}</div>
+                        <div className="col-span-3">{t('contact')}</div>
+                        <div className="col-span-2">{t('parcels')}</div>
+                        <div className="col-span-1">{t('spent')}</div>
+                        <div className="col-span-1">{t('status')}</div>
+                        <div className="col-span-2">{t('lastActivity')}</div>
                     </div>
 
                     {/* Rows */}
@@ -226,8 +228,8 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                                 {r.phone && <div className="text-xs text-gray-500 dark:text-muted-foreground">{r.phone}</div>}
                             </div>
                             <div className="col-span-2 text-sm">
-                                <div className="font-medium text-foreground">{r.parcels_total} total</div>
-                                <div className="text-xs text-orange-500 dark:text-orange-400">{r.parcels_pending} pending</div>
+                                <div className="font-medium text-foreground">{r.parcels_total} {t('total')}</div>
+                                <div className="text-xs text-orange-500 dark:text-orange-400">{r.parcels_pending} {t('pending')}</div>
                             </div>
                             <div className="col-span-1 font-medium text-foreground">RM{r.spent.toFixed(2)}</div>
                             <div className="col-span-1">
