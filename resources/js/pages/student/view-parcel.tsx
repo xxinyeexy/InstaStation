@@ -1,8 +1,8 @@
+import { useLanguage } from '@/contexts/LanguageContext';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { router } from '@inertiajs/react';
 import { AlarmClock, ArrowLeft, CheckCircle, CircleAlert, CreditCard, Package, User } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 // TypeScript interfaces
 interface ParcelData {
@@ -57,7 +57,7 @@ interface Props {
 
 const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) => {
     const { t } = useLanguage();
-    
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: t('myParcels'), href: '/student/parcel' },
         { title: t('viewDetails'), href: `/student/parcel/${parcel.id}` },
@@ -67,13 +67,15 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
         const getIconClass = (color: string) => {
             switch (color) {
                 case 'blue':
-                    return 'h-5 w-5 text-purple-500';
+                    return 'h-5 w-5 text-blue-500';
                 case 'orange':
                     return 'h-5 w-5 text-orange-500';
                 case 'green':
                     return 'h-5 w-5 text-green-500';
                 case 'pink':
                     return 'h-5 w-5 text-pink-500';
+                case 'yellow':
+                    return 'h-5 w-5 text-yellow-500';
                 default:
                     return 'h-5 w-5 text-gray-500';
             }
@@ -257,7 +259,9 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
 
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-gray-700">{t('daysInStorage')}</label>
-                                <span className="text-gray-600">{parcel.days} {t('days')}</span>
+                                <span className="text-gray-600">
+                                    {parcel.days} {t('days')}
+                                </span>
                             </div>
 
                             {/* Show payment proof image (if available) */}
@@ -304,7 +308,9 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                     <div className="space-y-6">
                         <div className="flex items-center gap-2">
                             <AlarmClock className="h-5 w-5 text-gray-600" />
-                            <h2 className="text-lg font-semibold text-gray-900">{t('trackingHistory')} - #{parcel.parcel_code}</h2>
+                            <h2 className="text-lg font-semibold text-gray-900">
+                                {t('trackingHistory')} - #{parcel.parcel_code}
+                            </h2>
                         </div>
 
                         <div className="relative">
@@ -317,11 +323,19 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                                         {/* Timeline dot */}
                                         <div
                                             className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-gray-200 ${
-                                                event.iconColor === 'blue' ? 'bg-purple-50' :
-                                                event.iconColor === 'orange' ? 'bg-yellow-50' :
-                                                event.iconColor === 'green' ? 'bg-green-50' :
-                                                event.iconColor === 'red' ? 'bg-gray-100' :
-                                                'bg-white'
+                                                event.iconColor === 'blue'
+                                                    ? 'bg-blue-50'
+                                                    : event.iconColor === 'orange'
+                                                      ? 'bg-orange-50'
+                                                      : event.iconColor === 'green'
+                                                        ? 'bg-green-50'
+                                                        : event.iconColor === 'pink'
+                                                          ? 'bg-pink-50'
+                                                          : event.iconColor === 'yellow'
+                                                            ? 'bg-yellow-50'
+                                                            : event.iconColor === 'red'
+                                                              ? 'bg-gray-100'
+                                                              : 'bg-white'
                                             }`}
                                         >
                                             {renderIcon(event.icon, event.iconColor)}

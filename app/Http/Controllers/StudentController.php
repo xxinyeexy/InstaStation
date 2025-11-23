@@ -246,7 +246,7 @@ class StudentController extends Controller
             'timestamp' => $matchedAt?->format('n/j/Y, g:i:s A') ?? '',
             'hasAttribution' => false,
             'icon' => 'clock',
-            'iconColor' => 'orange',
+            'iconColor' => 'pink',
         ];
 
         // Fetch latest payment record for real timestamps
@@ -264,7 +264,7 @@ class StudentController extends Controller
                 'timestamp' => optional($payment->created_at)?->format('n/j/Y, g:i:s A'),
                 'hasAttribution' => true,
                 'icon' => 'credit-card',
-                'iconColor' => 'green',
+                'iconColor' => 'yellow',
             ];
 
             // 4) Payment Verified (when verified_by is set → Payment.updated_at, attribution from staff user)
@@ -278,7 +278,7 @@ class StudentController extends Controller
                     'timestamp' => optional($payment->updated_at)?->format('n/j/Y, g:i:s A'),
                     'hasAttribution' => true,
                     'icon' => 'credit-card',
-                    'iconColor' => 'green',
+                    'iconColor' => 'orange',
                 ];
             }
         }
@@ -293,7 +293,7 @@ class StudentController extends Controller
                 'timestamp' => optional($updatedTime)?->format('n/j/Y, g:i:s A'),
                 'hasAttribution' => true,
                 'icon' => 'package',
-                'iconColor' => 'blue',
+                'iconColor' => 'green',
             ];
         }
 
@@ -307,7 +307,7 @@ class StudentController extends Controller
                 'timestamp' => $updatedTime?->format('n/j/Y, g:i:s A') ?? '',
                 'hasAttribution' => true,
                 'icon' => 'check-circle',
-                'iconColor' => 'green',
+                'iconColor' => 'blue',
             ];
         }
 
