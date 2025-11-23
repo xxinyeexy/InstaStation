@@ -516,6 +516,18 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         return matchesTab && matchesSearch;
     });
 
+    // Sort parcels for "Ready For Collection" tab by days (highest stored days first)
+    const sortedParcels = useMemo(() => {
+        if (activeTab === 'Ready For Collection') {
+            return [...filteredParcels].sort((a, b) => {
+                const daysA = Math.abs(a.days || 0);
+                const daysB = Math.abs(b.days || 0);
+                return daysB - daysA; // Descending order by absolute value (highest stored days first)
+            });
+        }
+        return filteredParcels;
+    }, [filteredParcels, activeTab]);
+
     // Get exact counts for each tab from actual database data - USE parcelList instead of parcels
     const getCounts = useCallback(() => {
         return {
@@ -1814,7 +1826,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         <p className="text-gray-500">Try adjusting your search or filters</p>
                                     </div>
                                 ) : (
-                                    filteredParcels.map((parcel) => (
+                                    sortedParcels.map((parcel) => (
                                         <div
                                             key={parcel.parcel_id}
                                             className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-xl"
