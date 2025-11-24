@@ -25,15 +25,14 @@ class ClaimController extends Controller
 
         $parcels = collect();
         if ($q !== '') {
+            $needle = mb_strtolower(trim($q));
             $parcels = Parcel::query()
                 ->with('studentUser')
                 ->whereRaw('lower(parcel_status) = ?', ['unclaimed'])
-                ->where(function ($qq) use ($q) {
-                    $qq->where('tracking_no', 'like', "%{$q}%")
-                        ->orWhere('sender', 'like', "%{$q}%")
-                        ->orWhere('location', 'like', "%{$q}%")
-                        ->orWhere('recipient_name', 'like', "%{$q}%")
-                        ->orWhere('recipient_matric', 'like', "%{$q}%");
+                ->where(function ($qq) use ($needle) {
+                    $qq->whereRaw('lower(tracking_no) = ?', [$needle])
+                        ->orWhereRaw('lower(recipient_name) = ?', [$needle])
+                        ->orWhereRaw('lower(recipient_matric) = ?', [$needle]);
                 })
                 ->orderBy('created_at', 'desc')
                 ->get();
