@@ -1,6 +1,6 @@
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, Bell, Calendar, CreditCard, MapPin, Package, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Bell, Calendar, CreditCard, MapPin, Package, Sparkles, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 type AnnouncementCard = {
@@ -57,6 +57,8 @@ export default function Welcome() {
     });
 
     const displayedAnnouncements = announcementsSorted.slice(0, visibleCount);
+    const featuredAnnouncement = displayedAnnouncements[0];
+    const secondaryAnnouncements = displayedAnnouncements.slice(1);
 
     /**
      * Intersection Observer animation hook
@@ -165,7 +167,7 @@ export default function Welcome() {
                     </header>
 
                     {/* Main Content */}
-                    <div className="mx-auto max-w-4xl text-center">
+                    <div id="about" className="mx-auto max-w-4xl text-center">
                         {/* Badge - Fade in and slide from top */}
                         <div
                             className="mb-8 inline-flex items-center gap-3 rounded-full border-2 border-pink-300/50 bg-white/90 px-6 py-3 shadow-2xl ring-2 ring-pink-100/50 backdrop-blur-md duration-700 animate-in fade-in slide-in-from-top-4"
@@ -332,7 +334,7 @@ export default function Welcome() {
                         </section>
 
                         {/* Interactive Demo Section */}
-                        <section className="my-20 duration-1000 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '800ms' }}>
+                        <section id="how-it-works" className="my-20 duration-1000 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '800ms' }}>
                             <div className="border-gradient-to-br relative overflow-hidden rounded-3xl border-2 bg-white from-pink-200 to-purple-200 p-12 shadow-2xl">
                                 {/* Animated background elements */}
                                 <div
@@ -581,6 +583,7 @@ export default function Welcome() {
 
                         {/* How It Works Section - Redesigned with Timeline */}
                         <div
+                            id="process-timeline"
                             className="relative mt-32 overflow-hidden rounded-3xl border-2 border-pink-200 bg-gradient-to-br from-white via-pink-50/30 to-purple-50/30 p-12 shadow-2xl duration-1000 animate-in fade-in zoom-in-95"
                             style={{ animationDelay: '100ms' }}
                         >
@@ -738,67 +741,120 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        {/* Newsletter Section - Slide from left */}
-                        <div className="mt-20 duration-700 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '100ms' }}>
-                            <div className="mb-8 flex items-center justify-between">
-                                <div>
-                                    <h2 className="mb-2 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-4xl font-extrabold text-transparent">
-                                        Newsletter
-                                    </h2>
-                                    <p className="text-sm text-gray-600">Stay updated with the latest announcements</p>
+                        {/* Newsletter Section - Curated Studio */}
+                        <div id="newsletter" className="relative mt-20 duration-700 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '100ms' }}>
+                            <div className="relative overflow-hidden rounded-[40px] border border-white/70 bg-white/80 p-10 shadow-[0_30px_120px_rgba(15,23,42,0.1)] backdrop-blur-xl">
+                                <div className="pointer-events-none absolute inset-0">
+                                    <div className="absolute -right-16 top-[-40px] h-64 w-64 rounded-full bg-gradient-to-br from-pink-200/40 via-purple-200/30 to-blue-200/40 blur-[120px]"></div>
+                                    <div className="absolute -left-12 bottom-[-50px] h-56 w-56 rounded-full bg-gradient-to-br from-emerald-200/40 via-cyan-200/30 to-pink-200/40 blur-[110px]"></div>
                                 </div>
-                                {announcementsSorted.length > displayedAnnouncements.length && (
-                                    <button
-                                        onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
-                                        className="rounded-2xl border-2 border-pink-200 bg-white/80 px-6 py-2.5 text-sm font-semibold text-gray-900 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-pink-400 hover:bg-white hover:shadow-lg"
-                                    >
-                                        View more
-                                    </button>
-                                )}
-                            </div>
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                                {displayedAnnouncements.map((a: AnnouncementCard, index: number) => {
-                                    return (
-                                        <div
-                                            key={a.announcement_id}
-                                            className="group cursor-pointer overflow-hidden rounded-3xl border-2 border-gray-200/50 bg-white/80 text-black shadow-xl backdrop-blur-sm transition-all duration-700 animate-in fade-in slide-in-from-bottom-4 hover:scale-105 hover:border-pink-300 hover:shadow-2xl"
-                                            style={{ animationDelay: `${(index + 2) * 100}ms` }}
-                                            onClick={() => setSelectedAnnouncement(a)}
+                                <div className="relative mb-10 flex flex-wrap items-center justify-between gap-4">
+                                    <div>
+                                        <p className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-rose-50 px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4">
+
+                                            <Sparkles className="h-3.5 w-3.5 text-rose-500" /> Curated
+                                        </p>
+                                        <h2 className="mt-4 text-4xl font-black text-slate-900">
+                                            Campus Dispatch 
+                                        </h2>
+                                        <p className="text-sm text-slate-500">Hand-picked announcements and service notices from our postal studio.</p>
+                                        
+                                    </div>
+                                    {announcementsSorted.length > displayedAnnouncements.length && (
+                                        <button
+                                            onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
+                                            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
                                         >
-                                            {a.announcement_image && (
-                                                <div className="relative h-48 w-full overflow-hidden">
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-                                                    <img
-                                                        src={`/storage/${a.announcement_image}`}
-                                                        alt="announcement"
-                                                        className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                    />
-                                                </div>
-                                            )}
-                                            <div className="p-6">
-                                                <div className="mb-3 flex items-center gap-2">
-                                                    <div className="rounded-lg bg-gradient-to-br from-pink-500 to-purple-600 p-1.5">
-                                                        <Package className="h-3.5 w-3.5 text-white" />
-                                                    </div>
-                                                    <span className="text-xs font-semibold text-gray-600">Postal Hub</span>
-                                                </div>
-                                                <div className="mb-3 line-clamp-2 text-left text-xl font-bold text-gray-900">
-                                                    {a.announcement_title}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                    <Calendar className="h-3.5 w-3.5" />
-                                                    <span>{formatDate(a.publish_date || a.created_at)}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                {announcements.length === 0 && (
-                                    <div className="col-span-full rounded-3xl border-2 border-gray-200/50 bg-white/80 p-12 text-center shadow-xl backdrop-blur-sm duration-700 animate-in fade-in">
+                                            View more <ArrowUpRight className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </div>
+
+                                {announcements.length === 0 ? (
+                                    <div className="rounded-[32px] border border-dashed border-rose-200/80 bg-white/90 p-12 text-center shadow-inner">
                                         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200">
                                             <Bell className="h-8 w-8 text-gray-400" />
                                         </div>
                                         <p className="text-lg font-semibold text-gray-500">No announcements yet.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-8 lg:grid-cols-[1.05fr,0.95fr]">
+                                        {featuredAnnouncement && (
+                                            <div
+                                                className="group relative overflow-hidden rounded-[34px] border border-white/70 bg-gradient-to-br from-[#ffe4f1] via-white to-[#e4fbff] p-1 shadow-[0_25px_90px_rgba(236,72,153,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_110px_rgba(236,72,153,0.4)]"
+                                                onClick={() => setSelectedAnnouncement(featuredAnnouncement)}
+                                            >
+                                                <div className="rounded-[30px] bg-white/80 p-8 backdrop-blur">
+                                                    {featuredAnnouncement.announcement_image && (
+                                                        <div className="relative mb-6 h-64 overflow-hidden rounded-[24px]">
+                                                            <img
+                                                                src={`/storage/${featuredAnnouncement.announcement_image}`}
+                                                                alt="announcement"
+                                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                            />
+                                                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60"></div>
+                                                            <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-rose-500 shadow">
+                                                                <Package className="h-3.5 w-3.5" /> Featured Memo
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-slate-400">
+                                                        <span className="inline-flex items-center gap-2 rounded-2xl shadow-inner bg-rose-100 px-3 py-1 font-semibold text-rose-500">                                                    <img src="/images/parcel-logo.png" alt="InstaStation" className="relative z-10 mx-auto w-10" />
+</span>
+                                                        <span className="h-px w-6 bg-rose-200"></span>
+                                                        <span>{formatDate(featuredAnnouncement.publish_date || featuredAnnouncement.created_at)}</span>
+                                                    </div>
+                                                    <h3 className="mt- text-xl font-black text-slate-900">{featuredAnnouncement.announcement_title}</h3>
+                                                        {/* <p className="mt-3 text-base text-slate-600 line-clamp-3">{featuredAnnouncement.announcement_content}</p> */}
+                                                    <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-rose-500">
+                                                        Dive deeper <ArrowUpRight className="h-4 w-4" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="relative grid gap-6">
+                                            <div className="absolute left-5 top-0 h-full w-px bg-gradient-to-b from-rose-200 via-purple-100 to-transparent md:left-6"></div>
+                                            {/* {secondaryAnnouncements.length === 0 && featuredAnnouncement && (
+                                                <div
+                                                    className="group relative cursor-pointer overflow-hidden rounded-[28px] border border-white/70 bg-white/80 p-6 shadow-md backdrop-blur"
+                                                    onClick={() => setSelectedAnnouncement(featuredAnnouncement)}
+                                                >
+                                                    <p className="text-sm text-gray-500">All caught up! Tap the featured story to read more.</p>
+                                                </div>
+                                            )} */}
+
+                                            {secondaryAnnouncements.map((a: AnnouncementCard, index: number) => (
+                                                <div
+                                                    key={a.announcement_id}
+                                                    className="group relative flex cursor-pointer gap-5 rounded-[26px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur transition hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(15,23,42,0.12)]"
+                                                    style={{ animationDelay: `${(index + 2) * 100}ms` }}
+                                                    onClick={() => setSelectedAnnouncement(a)}
+                                                >
+                                                    <span className="absolute left-4 top-8 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow ring-2 ring-rose-100 md:left-5">
+                                                        <span className="h-2 w-2 rounded-full bg-rose-400"></span>
+                                                    </span>
+                                                    {a.announcement_image && (
+                                                        <div className="relative h-28 w-28 overflow-hidden rounded-2xl">
+                                                            <img src={`/storage/${a.announcement_image}`} alt="announcement" className="h-full w-full object-cover" />
+                                                            <div className="absolute inset-0 border border-white/40"></div>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex flex-1 flex-col">
+                                                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
+                                                            <span className="text-rose-500">Postal Hub</span>
+                                                            <span className="h-0.5 w-4 bg-slate-200"></span>
+                                                            <span>{formatDate(a.publish_date || a.created_at)}</span>
+                                                        </div>
+                                                        <h4 className="mt-2 text-xl font-bold text-slate-900">{a.announcement_title}</h4>
+                                                        <p className="mt-1 text-sm text-slate-500 line-clamp-2">{a.announcement_content}</p>
+                                                        <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
+                                                            Read update <ArrowUpRight className="h-4 w-4" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -808,7 +864,7 @@ export default function Welcome() {
             </div>
 
             {/* Footer - Premium Professional Design */}
-            <footer className="relative overflow-hidden bg-pink-600 duration-1000 animate-in fade-in slide-in-from-bottom-8">
+            <footer className="relative overflow-hidden bg-gradient-to-r from-[#f7d8ff] via-[#fee5d3] to-[#d3e7ff] duration-1000 animate-in fade-in slide-in-from-bottom-8">
                 {/* Animated background decorations */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     <div className="absolute -top-40 -right-40 h-[600px] w-[600px] animate-pulse rounded-full bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-blue-500/10 blur-3xl"></div>
@@ -827,14 +883,12 @@ export default function Welcome() {
                             <div className="mb-8">
                                 {/* Logo with gradient */}
                                 <div className="mb-6 inline-flex items-center gap-3">
-                                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 via-purple-600 to-blue-600 shadow-2xl ring-4 ring-pink-500/20">
-                                        <Package className="h-8 w-8 text-white drop-shadow-lg" />
+                                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl">
+                                    <img src="/images/parcel-logo.png" alt="InstaStation" className="relative z-10 mx-auto w-70" />
                                     </div>
-                                    <h3 className="bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-5xl font-black text-transparent drop-shadow-lg">
-                                        InstaStation
-                                    </h3>
+                                    
                                 </div>
-                                <p className="max-w-md text-lg leading-relaxed text-gray-300">
+                                <p className="max-w-md text-lg leading-relaxed text-gray-700">
                                     The smart way to track and manage campus deliveries. Get notified instantly when your parcels arrive and collect
                                     them hassle-free.
                                 </p>
@@ -842,40 +896,40 @@ export default function Welcome() {
 
                             {/* Feature Pills - Enhanced */}
                             <div className="mb-8 flex flex-wrap gap-3">
-                                <div className="group relative overflow-hidden rounded-full border border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-purple-600/10 px-5 py-2.5 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-purple-400/50 hover:from-purple-500/20 hover:to-purple-600/20">
+                                <div className="group relative overflow-hidden rounded-full border border-purple-300 bg-gradient-to-r from-purple-100 to-purple-200 px-5 py-2.5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-purple-400 hover:from-purple-200 hover:to-purple-300">
                                     <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-600/0 transition-all duration-300 group-hover:from-purple-500/10 group-hover:to-purple-600/10"></div>
                                     <div className="relative flex items-center gap-2">
-                                        <Package className="h-4 w-4 text-purple-400" />
-                                        <span className="text-sm font-semibold text-gray-300">Smart Tracking</span>
+                                        <Package className="h-4 w-4 text-purple-500" />
+                                        <span className="text-sm font-semibold">Smart Tracking</span>
                                     </div>
                                 </div>
-                                <div className="group relative overflow-hidden rounded-full border border-pink-500/30 bg-gradient-to-r from-pink-500/10 to-pink-600/10 px-5 py-2.5 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-pink-400/50 hover:from-pink-500/20 hover:to-pink-600/20">
+                                <div className="group relative overflow-hidden rounded-full border border-pink-300 bg-gradient-to-r from-pink-100 to-pink-200 px-5 py-2.5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-pink-400 hover:from-pink-200 hover:to-pink-300">
                                     <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 to-pink-600/0 transition-all duration-300 group-hover:from-pink-500/10 group-hover:to-pink-600/10"></div>
                                     <div className="relative flex items-center gap-2">
-                                        <Bell className="h-4 w-4 text-pink-400" />
-                                        <span className="text-sm font-semibold text-gray-300">Instant Alerts</span>
+                                        <Bell className="h-4 w-4 text-pink-500" />
+                                        <span className="text-sm font-semibold">Instant Alerts</span>
                                     </div>
                                 </div>
-                                <div className="group relative overflow-hidden rounded-full border border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-blue-600/10 px-5 py-2.5 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-blue-400/50 hover:from-blue-500/20 hover:to-blue-600/20">
+                                <div className="group relative overflow-hidden rounded-full border border-blue-300 bg-gradient-to-r from-blue-100 to-blue-200 px-5 py-2.5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-blue-400 hover:from-blue-200 hover:to-blue-300">
                                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-blue-600/0 transition-all duration-300 group-hover:from-blue-500/10 group-hover:to-blue-600/10"></div>
                                     <div className="relative flex items-center gap-2">
-                                        <MapPin className="h-4 w-4 text-blue-400" />
-                                        <span className="text-sm font-semibold text-gray-300">Live Updates</span>
+                                        <MapPin className="h-4 w-4 text-blue-500" />
+                                        <span className="text-sm font-semibold">Live Updates</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Social Media Links - Enhanced */}
                             <div className="flex items-center gap-3">
-                                <span className="text-sm font-semibold text-gray-400">Follow us:</span>
+                                <span className="text-sm font-semibold text-gray-700">Follow us:</span>
                                 <div className="flex items-center gap-2">
                                     <a
                                         href="#"
-                                        className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-pink-500/30 bg-gradient-to-br from-pink-500/10 to-pink-600/10 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-pink-400/50 hover:from-pink-500/20 hover:to-pink-600/20 hover:shadow-lg hover:shadow-pink-500/20"
+                                        className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-pink-200 bg-gradient-to-br from-white to-pink-100 text-pink-500 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-pink-400 hover:from-pink-50 hover:to-pink-200 hover:shadow-lg hover:shadow-pink-200"
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 to-pink-600/0 transition-all duration-300 group-hover:from-pink-500/20 group-hover:to-pink-600/20"></div>
                                         <svg
-                                            className="relative h-5 w-5 text-pink-400 transition-colors group-hover:text-pink-300"
+                                            className="relative h-5 w-5 transition-colors group-hover:text-pink-600"
                                             fill="currentColor"
                                             viewBox="0 0 24 24"
                                         >
@@ -884,11 +938,11 @@ export default function Welcome() {
                                     </a>
                                     <a
                                         href="#"
-                                        className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-purple-600/10 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-purple-400/50 hover:from-purple-500/20 hover:to-purple-600/20 hover:shadow-lg hover:shadow-purple-500/20"
+                                        className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-purple-200 bg-gradient-to-br from-white to-purple-100 text-purple-500 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-purple-400 hover:from-purple-50 hover:to-purple-200 hover:shadow-lg hover:shadow-purple-200"
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-600/0 transition-all duration-300 group-hover:from-purple-500/20 group-hover:to-purple-600/20"></div>
                                         <svg
-                                            className="relative h-5 w-5 text-purple-400 transition-colors group-hover:text-purple-300"
+                                            className="relative h-5 w-5 transition-colors group-hover:text-purple-600"
                                             fill="currentColor"
                                             viewBox="0 0 24 24"
                                         >
@@ -897,11 +951,11 @@ export default function Welcome() {
                                     </a>
                                     <a
                                         href="#"
-                                        className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-blue-500/30 bg-gradient-to-br from-blue-500/10 to-blue-600/10 backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-blue-400/50 hover:from-blue-500/20 hover:to-blue-600/20 hover:shadow-lg hover:shadow-blue-500/20"
+                                        className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-blue-200 bg-gradient-to-br from-white to-blue-100 text-blue-500 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-blue-400 hover:from-blue-50 hover:to-blue-200 hover:shadow-lg hover:shadow-blue-200"
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-600/0 transition-all duration-300 group-hover:from-blue-500/20 group-hover:to-blue-600/20"></div>
                                         <svg
-                                            className="relative h-5 w-5 text-blue-400 transition-colors group-hover:text-blue-300"
+                                            className="relative h-5 w-5 transition-colors group-hover:text-blue-600"
                                             fill="currentColor"
                                             viewBox="0 0 24 24"
                                         >
@@ -914,18 +968,18 @@ export default function Welcome() {
 
                         {/* Quick Links Column - Enhanced */}
                         <div className="lg:col-span-3">
-                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-pink-500/30 bg-gradient-to-r from-pink-500/10 to-purple-500/10 px-4 py-2 backdrop-blur-sm">
-                                <Sparkles className="h-4 w-4 text-pink-400" />
-                                <h4 className="text-lg font-bold text-white">Quick Links</h4>
+                                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-gradient-to-r from-white to-pink-100 px-4 py-2 text-gray-700 backdrop-blur-sm">
+                                <Sparkles className="h-4 w-4 text-pink-500" />
+                                <h4 className="text-lg font-bold">Quick Links</h4>
                             </div>
-                            <ul className="space-y-4">
+                            <ul className="space-y-4 text-gray-700">
                                 <li>
                                     <a
-                                        href="#"
-                                        className="group relative inline-flex items-center gap-3 text-gray-300 transition-all duration-300 hover:translate-x-2 hover:text-pink-400"
+                                        href="#about"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-pink-500"
                                     >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-pink-400 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium">About Us</span>
+                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-pink-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                                        <span className="text-base font-medium text-gray-800">About Us</span>
                                         <svg
                                             className="h-4 w-4 text-pink-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
@@ -938,11 +992,11 @@ export default function Welcome() {
                                 </li>
                                 <li>
                                     <a
-                                        href="#"
-                                        className="group relative inline-flex items-center gap-3 text-gray-300 transition-all duration-300 hover:translate-x-2 hover:text-purple-400"
+                                        href="#how-it-works"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-purple-500"
                                     >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-purple-400 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium">How It Works</span>
+                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-purple-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                                        <span className="text-base font-medium text-gray-800">How It Works</span>
                                         <svg
                                             className="h-4 w-4 text-purple-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
@@ -955,11 +1009,11 @@ export default function Welcome() {
                                 </li>
                                 <li>
                                     <a
-                                        href="#"
-                                        className="group relative inline-flex items-center gap-3 text-gray-300 transition-all duration-300 hover:translate-x-2 hover:text-blue-400"
+                                        href="#process-timeline"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-blue-500"
                                     >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-blue-400 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium">FAQs</span>
+                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-blue-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                                        <span className="text-base font-medium text-gray-800">Process Timeline</span>
                                         <svg
                                             className="h-4 w-4 text-blue-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
@@ -972,11 +1026,11 @@ export default function Welcome() {
                                 </li>
                                 <li>
                                     <a
-                                        href="#"
-                                        className="group relative inline-flex items-center gap-3 text-gray-300 transition-all duration-300 hover:translate-x-2 hover:text-pink-400"
+                                        href="#newsletter"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-pink-500"
                                     >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-pink-400 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium">Support</span>
+                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-pink-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                                        <span className="text-base font-medium text-gray-800">Newsletter</span>
                                         <svg
                                             className="h-4 w-4 text-pink-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
@@ -989,11 +1043,11 @@ export default function Welcome() {
                                 </li>
                                 <li>
                                     <a
-                                        href="#"
-                                        className="group relative inline-flex items-center gap-3 text-gray-300 transition-all duration-300 hover:translate-x-2 hover:text-purple-400"
+                                        href="#contact"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-purple-500"
                                     >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-purple-400 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium">Contact Us</span>
+                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-purple-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                                        <span className="text-base font-medium text-gray-800">Contact Us</span>
                                         <svg
                                             className="h-4 w-4 text-purple-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
@@ -1008,19 +1062,19 @@ export default function Welcome() {
                         </div>
 
                         {/* Contact & Legal Column - Enhanced */}
-                        <div className="lg:col-span-4">
-                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 px-4 py-2 backdrop-blur-sm">
-                                <MapPin className="h-4 w-4 text-blue-400" />
-                                <h4 className="text-lg font-bold text-white">Get in Touch</h4>
+                        <div id="contact" className="lg:col-span-4">
+                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-gradient-to-r from-white to-blue-100 px-4 py-2 text-gray-700 backdrop-blur-sm">
+                                <MapPin className="h-4 w-4 text-blue-500" />
+                                <h4 className="text-lg font-bold">Get in Touch</h4>
                             </div>
 
                             {/* Contact Cards */}
                             <div className="mb-8 space-y-4">
-                                <div className="group relative overflow-hidden rounded-2xl border border-pink-500/30 bg-gradient-to-r from-pink-500/10 to-pink-600/10 p-5 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-pink-400/50 hover:from-pink-500/20 hover:to-pink-600/20 hover:shadow-lg hover:shadow-pink-500/10">
+                                <div className="group relative overflow-hidden rounded-2xl border border-pink-200 bg-gradient-to-r from-white to-pink-100 p-5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-pink-300 hover:from-pink-50 hover:to-pink-200 hover:shadow-lg hover:shadow-pink-200/50">
                                     <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 to-pink-600/0 transition-all duration-300 group-hover:from-pink-500/10 group-hover:to-pink-600/10"></div>
                                     <div className="relative flex items-start gap-4">
-                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500/20 to-pink-600/20 ring-2 ring-pink-500/30">
-                                            <svg className="h-6 w-6 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-200 to-pink-400 ring-2 ring-pink-200">
+                                            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
@@ -1030,10 +1084,10 @@ export default function Welcome() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="mb-1 text-xs font-semibold tracking-wider text-gray-400 uppercase">Email</p>
+                                            <p className="mb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase">Email</p>
                                             <a
                                                 href="mailto:support@instastation.edu"
-                                                className="text-base font-semibold text-gray-200 transition-colors hover:text-pink-400"
+                                                className="text-base font-semibold text-gray-800 transition-colors hover:text-pink-500"
                                             >
                                                 support@instastation.edu
                                             </a>
@@ -1041,11 +1095,11 @@ export default function Welcome() {
                                     </div>
                                 </div>
 
-                                <div className="group relative overflow-hidden rounded-2xl border border-purple-500/30 bg-gradient-to-r from-purple-500/10 to-purple-600/10 p-5 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-purple-400/50 hover:from-purple-500/20 hover:to-purple-600/20 hover:shadow-lg hover:shadow-purple-500/10">
+                                <div className="group relative overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-r from-white to-purple-100 p-5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-purple-300 hover:from-purple-50 hover:to-purple-200 hover:shadow-lg hover:shadow-purple-200/50">
                                     <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-600/0 transition-all duration-300 group-hover:from-purple-500/10 group-hover:to-purple-600/10"></div>
                                     <div className="relative flex items-start gap-4">
-                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/20 ring-2 ring-purple-500/30">
-                                            <svg className="h-6 w-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-300 to-purple-500 ring-2 ring-purple-200">
+                                            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
@@ -1061,32 +1115,32 @@ export default function Welcome() {
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="mb-1 text-xs font-semibold tracking-wider text-gray-400 uppercase">Location</p>
-                                            <p className="text-base font-semibold text-gray-200">Campus Postal Hub</p>
+                                            <p className="mb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase">Location</p>
+                                            <p className="text-base font-semibold text-gray-800">Campus Postal Hub</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Legal Section */}
-                            <div className="rounded-2xl border border-gray-700/50 bg-gradient-to-br from-gray-800/50 to-gray-900/50 p-5 backdrop-blur-sm">
-                                <h5 className="mb-4 text-sm font-bold tracking-wider text-gray-300 uppercase">Legal</h5>
+                            <div className="rounded-2xl border border-gray-200 bg-white/80 p-5 text-gray-700 backdrop-blur-sm shadow-lg">
+                                <h5 className="mb-4 text-sm font-bold tracking-wider text-gray-600 uppercase">Legal</h5>
                                 <ul className="space-y-3">
                                     <li>
                                         <a
                                             href="#"
-                                            className="group inline-flex items-center gap-2 text-sm text-gray-400 transition-all duration-300 hover:text-pink-400"
+                                            className="group inline-flex items-center gap-2 text-sm text-gray-600 transition-all duration-300 hover:text-pink-500"
                                         >
-                                            <div className="h-1 w-1 rounded-full bg-pink-400 opacity-0 transition-opacity group-hover:opacity-100"></div>
+                                            <div className="h-1 w-1 rounded-full bg-pink-500 opacity-0 transition-opacity group-hover:opacity-100"></div>
                                             Privacy Policy
                                         </a>
                                     </li>
                                     <li>
                                         <a
                                             href="#"
-                                            className="group inline-flex items-center gap-2 text-sm text-gray-400 transition-all duration-300 hover:text-purple-400"
+                                            className="group inline-flex items-center gap-2 text-sm text-gray-600 transition-all duration-300 hover:text-purple-500"
                                         >
-                                            <div className="h-1 w-1 rounded-full bg-purple-400 opacity-0 transition-opacity group-hover:opacity-100"></div>
+                                            <div className="h-1 w-1 rounded-full bg-purple-500 opacity-0 transition-opacity group-hover:opacity-100"></div>
                                             Terms of Service
                                         </a>
                                     </li>
@@ -1103,21 +1157,21 @@ export default function Welcome() {
 
                     {/* Bottom Bar - Enhanced */}
                     <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-                        <div className="flex flex-col items-center gap-2 md:flex-row md:gap-6">
-                            <p className="text-sm text-gray-400">
-                                © {new Date().getFullYear()} <span className="font-bold text-gray-300">InstaStation</span>. All rights reserved.
+                        <div className="flex flex-col items-center gap-2 text-gray-700 md:flex-row md:gap-6">
+                            <p className="text-sm">
+                                © {new Date().getFullYear()} <span className="font-bold text-gray-900">InstaStation</span>. All rights reserved.
                             </p>
                             <div className="hidden h-4 w-px bg-gray-700 md:block"></div>
-                            <p className="text-sm text-gray-500">
-                                Made with <span className="text-pink-400">❤️</span> for UMPSA
+                            <p className="text-sm text-gray-700">
+                                Universiti Malaysia Pahang Al-Sultan Abdullah
                             </p>
                         </div>
 
                         {/* Newsletter Signup or Additional CTA */}
-                        <div className="flex items-center gap-4">
-                            <div className="hidden items-center gap-3 rounded-xl border border-gray-700/50 bg-gradient-to-r from-gray-800/50 to-gray-900/50 px-4 py-2 backdrop-blur-sm lg:flex">
-                                <Bell className="h-4 w-4 text-purple-400" />
-                                <span className="text-sm font-medium text-gray-300">Stay Updated</span>
+                        <div className="flex items-center gap-4 text-gray-700">
+                            <div className="hidden items-center gap-3 rounded-xl border border-purple-200 bg-white/90 px-4 py-2 shadow lg:flex">
+                                <Bell className="h-4 w-4 text-purple-500" />
+                                <span className="text-sm font-medium">Stay Updated</span>
                             </div>
                         </div>
                     </div>
@@ -1127,26 +1181,36 @@ export default function Welcome() {
             {/* Announcement Detail Modal */}
             {selectedAnnouncement && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center duration-300 animate-in fade-in">
-                    <div className="absolute inset-0 bg-black/30" onClick={() => setSelectedAnnouncement(null)} />
-                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-card shadow-xl duration-300 animate-in slide-in-from-bottom-4 zoom-in-95">
-                        {/* Header */}
-                        <div className="flex items-center justify-between border-b border-border p-4">
-                            <div className="flex items-center gap-3">
-                                <button onClick={() => setSelectedAnnouncement(null)} className="text-muted-foreground hover:text-foreground">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedAnnouncement(null)} />
+                    <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-[32px] bg-white shadow-[0_20px_80px_rgba(0,0,0,0.2)] duration-300 animate-in slide-in-from-bottom-4 zoom-in-95">
+                        <div className="relative overflow-hidden bg-gradient-to-r from-pink-400 to-green-400 p-6 text-white">
+                            <div className="absolute inset-0 opacity-40">
+                                <div className="absolute -top-10 right-0 h-40 w-40 rounded-full bg-white/20 blur-3xl"></div>
+                                <div className="absolute -bottom-16 left-10 h-32 w-32 rounded-full bg-green-200/30 blur-3xl"></div>
+                            </div>
+                            <div className="relative flex items-center justify-between gap-3">
+                                <button
+                                    onClick={() => setSelectedAnnouncement(null)}
+                                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+                                >
                                     <ArrowLeft size={20} />
                                 </button>
-                                <h2 className="text-lg font-semibold text-card-foreground">{selectedAnnouncement.announcement_title}</h2>
+                                <div className="flex-1 px-4 text-center">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/80">Announcement</p>
+                                    <h2 className="text-xl font-bold">{selectedAnnouncement.announcement_title}</h2>
+                                </div>
+                                <button
+                                    onClick={() => setSelectedAnnouncement(null)}
+                                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+                                >
+                                    <X size={20} />
+                                </button>
                             </div>
-                            <button onClick={() => setSelectedAnnouncement(null)} className="text-muted-foreground hover:text-foreground">
-                                <X size={20} />
-                            </button>
                         </div>
 
-                        {/* Content */}
-                        <div className="p-6">
-                            {/* Image */}
+                        <div className="space-y-6 p-6">
                             {selectedAnnouncement.announcement_image && (
-                                <div className="mb-6 overflow-hidden rounded-lg">
+                                <div className="overflow-hidden rounded-2xl border border-pink-50">
                                     <img
                                         src={`/storage/${selectedAnnouncement.announcement_image}`}
                                         alt="announcement"
@@ -1155,23 +1219,22 @@ export default function Welcome() {
                                 </div>
                             )}
 
-                            {/* Sender info */}
-                            <div className="mb-4 flex items-center gap-2 text-sm text-gray-600">
-                                <span className="inline-flex items-center gap-1">
-                                    <Package className="h-4 w-4" />
-                                    by Postal Hub
-                                </span>
+                            <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gray-50 p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-inner">
+                                        <img src="/images/parcel-logo.png" alt="InstaStation" className="h-10 w-10" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">Publisher</p>
+                                        <p className="text-base font-semibold text-gray-800">UMPSA Postal Hub</p>
+                                    </div>
+                                </div>
+                                <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-pink-600 shadow">
+                                    <Calendar className="h-4 w-4 text-pink-500" />
+                                    {formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}
+                                </div>
                             </div>
 
-                            {/* Date and time */}
-                            <div className="mb-6 flex items-center gap-2 text-sm text-gray-500">
-                                <span>
-                                    <Calendar className="h-4 w-4" />
-                                </span>
-                                <span>{formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}</span>
-                            </div>
-
-                            {/* Content */}
                             <div className="prose max-w-none text-gray-700">{selectedAnnouncement.announcement_content}</div>
                         </div>
                     </div>
