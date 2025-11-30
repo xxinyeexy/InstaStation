@@ -41,17 +41,25 @@ class AuthenticatedSessionController extends Controller
             $user->save();
         }
 
-        // If user hasn't verified email yet, redirect to the intended URL if present (e.g., the email verification link),
-        // otherwise show the verification notice page.
+        // Preserve the intended URL if it exists (e.g., from parcel claim flow)
+        $intendedUrl = $request->session()->get('url.intended');
+
+        // If user hasn't verified email yet, preserve intended URL and redirect to verification notice
+        // The intended URL will be used after email verification
         if ($user && method_exists($user, 'hasVerifiedEmail') && ! $user->hasVerifiedEmail()) {
+            // Preserve intended URL for after verification
+            if ($intendedUrl) {
+                $request->session()->put('url.intended', $intendedUrl);
+            }
             return redirect()->intended(route('verification.notice'));
         }
 
+        // If user is verified, redirect to intended URL or default based on role
         if ($user->type === 'staff') {
             return redirect()->intended(route('staff.dashboard'));
         }
 
-        // Redirect students to their parcel page
+        // Redirect students to intended URL (e.g., parcel claim consume) or default parcel page
         return redirect()->intended(route('student.parcel'));
     }
 

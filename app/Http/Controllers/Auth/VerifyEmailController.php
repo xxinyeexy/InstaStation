@@ -22,14 +22,22 @@ class VerifyEmailController extends Controller
         // Get the authenticated user
         $user = $request->user();
 
-        // Determine post-verification destination based on user role
+        // Preserve the intended URL if it exists (e.g., from parcel claim flow)
+        // This ensures parcel linking happens after verification
+        $intendedUrl = $request->session()->get('url.intended');
+
+        // Determine post-verification destination based on user role (fallback)
         $roleTarget = ($user->type === 'staff')
             ? route('staff.dashboard')
             : route('student.parcel');
 
-        // If already verified, redirect
+        // If already verified, redirect to intended URL or role-based target
         if ($user->hasVerifiedEmail()) {
-            return redirect()->intended($roleTarget)->with('status', 'Email already verified!');
+            // If there's an intended URL (e.g., parcel claim), use it; otherwise use role target
+            if ($intendedUrl) {
+                return redirect($intendedUrl)->with('status', 'Email already verified!');
+            }
+            return redirect($roleTarget)->with('status', 'Email already verified!');
         }
 
         // Mark email as verified
@@ -37,6 +45,13 @@ class VerifyEmailController extends Controller
             event(new Verified($user));
         }
 
-        return redirect()->intended($roleTarget)->with('status', 'Email verified successfully!');
+        // After verification, redirect to intended URL (e.g., parcel claim consume) or role-based target
+        if ($intendedUrl) {
+            // Clear the intended URL from session after using it
+            $request->session()->forget('url.intended');
+            return redirect($intendedUrl)->with('status', 'Email verified successfully!');
+        }
+
+        return redirect($roleTarget)->with('status', 'Email verified successfully!');
     }
 }

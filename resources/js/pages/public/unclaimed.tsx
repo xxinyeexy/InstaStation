@@ -32,6 +32,7 @@ export default function Unclaimed({
     const pageErrors = pageProps.errors || {};
     // Check for flash messages (status is used by backend, success/error are standard)
     const flashStatus = (pageProps.flash?.status || pageProps.flash?.success || null) as string | null;
+    const flashError = (pageProps.flash?.error || null) as string | null;
     const [q, setQ] = useState(filters.q || '');
     const { post, processing } = useForm({});
 
@@ -74,11 +75,16 @@ export default function Unclaimed({
             }
         }
         
+        // Handle error flash messages (e.g., from backend redirect with error)
+        if (flashError) {
+            showToast(String(flashError), 'error');
+        }
+        
         // Handle success flash messages
         if (flashStatus) {
             showToast(String(flashStatus), 'success');
         }
-    }, [pageErrors, flashStatus]);
+    }, [pageErrors, flashError, flashStatus]);
 
     const filtered = parcels;
 
@@ -88,35 +94,16 @@ export default function Unclaimed({
     };
 
     const claim = (parcel_id: number, redirect: 'login' | 'register') => {
+        // Always navigate to login/register first, even if user is logged in
+        // This ensures the error message appears after login, not before
+        // The claim.start method always redirects, so no error handling needed here
         router.post(
             route('claim.start'),
             { parcel_id, redirect },
             {
                 preserveScroll: true,
-                onError: (errors) => {
-                    // Handle validation errors from backend
-                    const firstError = typeof errors === 'object' && errors !== null ? Object.values(errors)[0] : null;
-                    const errorMessage =
-                        firstError && Array.isArray(firstError)
-                            ? firstError[0]
-                            : firstError && typeof firstError === 'string'
-                              ? firstError
-                              : 'An error occurred while claiming the parcel. Please try again.';
-                    // Show error toast once
-                    showToast(errorMessage, 'error');
-                    // Refresh the page data after a short delay to allow error to be displayed
-                    // This clears the error state and allows student to try again
-                    setTimeout(() => {
-                        router.reload({
-                            only: ['parcels', 'stats', 'totalUnclaimed', 'filters'],
-                            preserveState: false,
-                            preserveScroll: true,
-                        });
-                    }, 500);
-                },
-                onSuccess: () => {
-                    // Success is handled by backend redirect with status message
-                },
+                // No onError handler - claim.start always redirects to login/register
+                // Errors will only appear after login via the consume method
             },
         );
     };
@@ -270,15 +257,13 @@ export default function Unclaimed({
                                                 >
                                                     <LogIn className="h-4 w-4" /> Yes, it's mine
                                                 </button>
-                                                {!auth.user && (
-                                                    <button
-                                                        disabled={processing}
-                                                        onClick={() => claim(p.parcel_id, 'register')}
-                                                        className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
-                                                    >
-                                                        <UserPlus className="h-4 w-4" /> I'm new here
-                                                    </button>
-                                                )}
+                                                <button
+                                                    disabled={processing}
+                                                    onClick={() => claim(p.parcel_id, 'register')}
+                                                    className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                                                >
+                                                    <UserPlus className="h-4 w-4" /> I'm new here
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>

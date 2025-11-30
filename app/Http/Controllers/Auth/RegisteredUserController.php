@@ -50,6 +50,10 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Preserve the intended URL if it exists (e.g., from parcel claim flow)
+        // This ensures the parcel linking happens after login and verification
+        $intendedUrl = $request->session()->get('url.intended');
+        
         // Return JSON response for axios requests
         if ($request->expectsJson()) {
             return response()->json([
@@ -58,7 +62,15 @@ class RegisteredUserController extends Controller
             ], 201);
         }
 
-        // Redirect to login page after registration for non-ajax requests
-        return redirect()->route('login')->with('status', 'You may proceed to login now!');
+        // Redirect to login page after registration, preserving intended URL
+        // The intended URL will be used after login and email verification
+        $redirect = redirect()->route('login')->with('status', 'You may proceed to login now!');
+        
+        // If there was an intended URL, preserve it in the session
+        if ($intendedUrl) {
+            $request->session()->put('url.intended', $intendedUrl);
+        }
+        
+        return $redirect;
     }
 }
