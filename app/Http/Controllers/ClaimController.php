@@ -70,9 +70,18 @@ class ClaimController extends Controller
         ]);
 
         $parcel = Parcel::findOrFail($request->integer('parcel_id'));
+        $redirectChoice = $request->get('redirect', 'login');
+        $allowNewClaim = $redirectChoice === 'register';
 
         if (Auth::check()) {
             $user = Auth::user();
+
+            $parcelMatric = strtolower(trim((string) ($parcel->recipient_matric ?? '')));
+            $userMatric = strtolower(trim((string) ($user->matric ?? '')));
+
+            if ($parcelMatric !== '' && ($userMatric === '' || $parcelMatric !== $userMatric)) {
+                return back()->with('error', 'This parcel is tagged for a different matric ID. Please visit the parcel office for assistance.');
+            }
 
             // Only link if it's still unclaimed or not assigned
             $parcel->student_id = $user->id;
@@ -92,13 +101,16 @@ class ClaimController extends Controller
         $signedUrl = URL::temporarySignedRoute(
             'claim.consume',
             now()->addMinutes(15),
-            ['parcel_id' => $parcel->parcel_id]
+            [
+                'parcel_id' => $parcel->parcel_id,
+                'allow_new' => $allowNewClaim ? 1 : 0,
+            ]
         );
 
         // After auth, redirect to consume URL automatically
         $request->session()->put('url.intended', $signedUrl);
 
-        $target = $request->get('redirect', 'login') === 'register' ? route('register') : route('login');
+        $target = $redirectChoice === 'register' ? route('register') : route('login');
 
         return redirect()->to($target)->with('status', 'Please sign in to link the parcel.');
     }
@@ -125,6 +137,16 @@ class ClaimController extends Controller
         }
 
         $user = Auth::user();
+        $parcelMatric = strtolower(trim((string) ($parcel->recipient_matric ?? '')));
+        $userMatric = strtolower(trim((string) ($user->matric ?? '')));
+        $allowNewClaim = (bool) $request->boolean('allow_new', false);
+
+        if (! $allowNewClaim && $parcelMatric !== '' && ($userMatric === '' || $parcelMatric !== $userMatric)) {
+            return redirect()
+                ->route('public.unclaimed', ['q' => $request->get('q')])
+                ->with('error', 'This parcel is tagged for a different matric ID. Please contact the parcel office.');
+        }
+
         $parcel->student_id = $user->id;
         $parcel->recipient_name = $user->name;
         $parcel->recipient_matric = $user->matric;

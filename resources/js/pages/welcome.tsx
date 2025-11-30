@@ -152,16 +152,19 @@ export default function Welcome() {
                                 </Link>
                             ) : (
                                 <>
-                                     <Link href={route('login')} className="rounded-lg bg-white px-4 py-2 text-black transition-colors hover:text-black">
-                                    Login
-                                </Link>
-                                <Link
-                                    href={route('register')}
-                                    className="rounded-lg bg-gray-900 px-6 py-2 text-white transition-colors hover:bg-black"
-                                >
-                                    Get Started
-                                </Link>
-                            </>
+                                    <Link
+                                        href={route('login')}
+                                        className="rounded-lg bg-white px-4 py-2 text-black transition-colors hover:text-black"
+                                    >
+                                        Login
+                                    </Link>
+                                    <Link
+                                        href={route('register')}
+                                        className="rounded-lg bg-gray-900 px-6 py-2 text-white transition-colors hover:bg-black"
+                                    >
+                                        Get Started
+                                    </Link>
+                                </>
                             )}
                         </nav>
                     </header>
@@ -334,7 +337,11 @@ export default function Welcome() {
                         </section>
 
                         {/* Interactive Demo Section */}
-                        <section id="how-it-works" className="my-20 duration-1000 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '800ms' }}>
+                        <section
+                            id="how-it-works"
+                            className="my-20 duration-1000 animate-in fade-in slide-in-from-left-8"
+                            style={{ animationDelay: '800ms' }}
+                        >
                             <div className="border-gradient-to-br relative overflow-hidden rounded-3xl border-2 bg-white from-pink-200 to-purple-200 p-12 shadow-2xl">
                                 {/* Animated background elements */}
                                 <div
@@ -742,23 +749,25 @@ export default function Welcome() {
                         </div>
 
                         {/* Newsletter Section - Curated Studio */}
-                        <div id="newsletter" className="relative mt-20 duration-700 animate-in fade-in slide-in-from-left-8" style={{ animationDelay: '100ms' }}>
+                        <div
+                            id="newsletter"
+                            className="relative mt-20 duration-700 animate-in fade-in slide-in-from-left-8"
+                            style={{ animationDelay: '100ms' }}
+                        >
                             <div className="relative overflow-hidden rounded-[40px] border border-white/70 bg-white/80 p-10 shadow-[0_30px_120px_rgba(15,23,42,0.1)] backdrop-blur-xl">
                                 <div className="pointer-events-none absolute inset-0">
-                                    <div className="absolute -right-16 top-[-40px] h-64 w-64 rounded-full bg-gradient-to-br from-pink-200/40 via-purple-200/30 to-blue-200/40 blur-[120px]"></div>
-                                    <div className="absolute -left-12 bottom-[-50px] h-56 w-56 rounded-full bg-gradient-to-br from-emerald-200/40 via-cyan-200/30 to-pink-200/40 blur-[110px]"></div>
+                                    <div className="absolute top-[-40px] -right-16 h-64 w-64 rounded-full bg-gradient-to-br from-pink-200/40 via-purple-200/30 to-blue-200/40 blur-[120px]"></div>
+                                    <div className="absolute bottom-[-50px] -left-12 h-56 w-56 rounded-full bg-gradient-to-br from-emerald-200/40 via-cyan-200/30 to-pink-200/40 blur-[110px]"></div>
                                 </div>
                                 <div className="relative mb-10 flex flex-wrap items-center justify-between gap-4">
                                     <div>
                                         <p className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-rose-50 px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4">
-
                                             <Sparkles className="h-3.5 w-3.5 text-rose-500" /> Curated
                                         </p>
-                                        <h2 className="mt-4 text-4xl font-black text-slate-900">
-                                            Campus Dispatch 
-                                        </h2>
-                                        <p className="text-sm text-slate-500">Hand-picked announcements and service notices from our postal studio.</p>
-                                        
+                                        <h2 className="mt-4 text-4xl font-black text-slate-900">Campus Dispatch</h2>
+                                        <p className="text-sm text-slate-500">
+                                            Hand-picked announcements and service notices from our postal studio.
+                                        </p>
                                     </div>
                                     {announcementsSorted.length > displayedAnnouncements.length && (
                                         <button
@@ -798,14 +807,24 @@ export default function Welcome() {
                                                             </div>
                                                         </div>
                                                     )}
-                                                    <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-slate-400">
-                                                        <span className="inline-flex items-center gap-2 rounded-2xl shadow-inner bg-rose-100 px-3 py-1 font-semibold text-rose-500">                                                    <img src="/images/parcel-logo.png" alt="InstaStation" className="relative z-10 mx-auto w-10" />
-</span>
+                                                    <div className="flex items-center gap-3 text-xs tracking-[0.2em] text-slate-400 uppercase">
+                                                        <span className="inline-flex items-center gap-2 rounded-2xl bg-rose-100 px-3 py-1 font-semibold text-rose-500 shadow-inner">
+                                                            {' '}
+                                                            <img
+                                                                src="/images/parcel-logo.png"
+                                                                alt="InstaStation"
+                                                                className="relative z-10 mx-auto w-10"
+                                                            />
+                                                        </span>
                                                         <span className="h-px w-6 bg-rose-200"></span>
-                                                        <span>{formatDate(featuredAnnouncement.publish_date || featuredAnnouncement.created_at)}</span>
+                                                        <span>
+                                                            {formatDate(featuredAnnouncement.publish_date || featuredAnnouncement.created_at)}
+                                                        </span>
                                                     </div>
-                                                    <h3 className="mt- text-xl font-black text-slate-900">{featuredAnnouncement.announcement_title}</h3>
-                                                        {/* <p className="mt-3 text-base text-slate-600 line-clamp-3">{featuredAnnouncement.announcement_content}</p> */}
+                                                    <h3 className="mt- text-xl font-black text-slate-900">
+                                                        {featuredAnnouncement.announcement_title}
+                                                    </h3>
+                                                    {/* <p className="mt-3 text-base text-slate-600 line-clamp-3">{featuredAnnouncement.announcement_content}</p> */}
                                                     <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-rose-500">
                                                         Dive deeper <ArrowUpRight className="h-4 w-4" />
                                                     </div>
@@ -814,7 +833,7 @@ export default function Welcome() {
                                         )}
 
                                         <div className="relative grid gap-6">
-                                            <div className="absolute left-5 top-0 h-full w-px bg-gradient-to-b from-rose-200 via-purple-100 to-transparent md:left-6"></div>
+                                            <div className="absolute top-0 left-5 h-full w-px bg-gradient-to-b from-rose-200 via-purple-100 to-transparent md:left-6"></div>
                                             {/* {secondaryAnnouncements.length === 0 && featuredAnnouncement && (
                                                 <div
                                                     className="group relative cursor-pointer overflow-hidden rounded-[28px] border border-white/70 bg-white/80 p-6 shadow-md backdrop-blur"
@@ -831,23 +850,27 @@ export default function Welcome() {
                                                     style={{ animationDelay: `${(index + 2) * 100}ms` }}
                                                     onClick={() => setSelectedAnnouncement(a)}
                                                 >
-                                                    <span className="absolute left-4 top-8 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow ring-2 ring-rose-100 md:left-5">
+                                                    <span className="absolute top-8 left-4 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow ring-2 ring-rose-100 md:left-5">
                                                         <span className="h-2 w-2 rounded-full bg-rose-400"></span>
                                                     </span>
                                                     {a.announcement_image && (
                                                         <div className="relative h-28 w-28 overflow-hidden rounded-2xl">
-                                                            <img src={`/storage/${a.announcement_image}`} alt="announcement" className="h-full w-full object-cover" />
+                                                            <img
+                                                                src={`/storage/${a.announcement_image}`}
+                                                                alt="announcement"
+                                                                className="h-full w-full object-cover"
+                                                            />
                                                             <div className="absolute inset-0 border border-white/40"></div>
                                                         </div>
                                                     )}
                                                     <div className="flex flex-1 flex-col">
-                                                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
+                                                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-[0.15em] text-slate-400 uppercase">
                                                             <span className="text-rose-500">Postal Hub</span>
                                                             <span className="h-0.5 w-4 bg-slate-200"></span>
                                                             <span>{formatDate(a.publish_date || a.created_at)}</span>
                                                         </div>
                                                         <h4 className="mt-2 text-xl font-bold text-slate-900">{a.announcement_title}</h4>
-                                                        <p className="mt-1 text-sm text-slate-500 line-clamp-2">{a.announcement_content}</p>
+                                                        <p className="mt-1 line-clamp-2 text-sm text-slate-500">{a.announcement_content}</p>
                                                         <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
                                                             Read update <ArrowUpRight className="h-4 w-4" />
                                                         </div>
@@ -884,9 +907,8 @@ export default function Welcome() {
                                 {/* Logo with gradient */}
                                 <div className="mb-6 inline-flex items-center gap-3">
                                     <div className="flex h-20 w-20 items-center justify-center rounded-2xl">
-                                    <img src="/images/parcel-logo.png" alt="InstaStation" className="relative z-10 mx-auto w-70" />
+                                        <img src="/images/parcel-logo.png" alt="InstaStation" className="relative z-10 mx-auto w-70" />
                                     </div>
-                                    
                                 </div>
                                 <p className="max-w-md text-lg leading-relaxed text-gray-700">
                                     The smart way to track and manage campus deliveries. Get notified instantly when your parcels arrive and collect
@@ -968,7 +990,7 @@ export default function Welcome() {
 
                         {/* Quick Links Column - Enhanced */}
                         <div className="lg:col-span-3">
-                                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-gradient-to-r from-white to-pink-100 px-4 py-2 text-gray-700 backdrop-blur-sm">
+                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-gradient-to-r from-white to-pink-100 px-4 py-2 text-gray-700 backdrop-blur-sm">
                                 <Sparkles className="h-4 w-4 text-pink-500" />
                                 <h4 className="text-lg font-bold">Quick Links</h4>
                             </div>
@@ -1123,7 +1145,7 @@ export default function Welcome() {
                             </div>
 
                             {/* Legal Section */}
-                            <div className="rounded-2xl border border-gray-200 bg-white/80 p-5 text-gray-700 backdrop-blur-sm shadow-lg">
+                            <div className="rounded-2xl border border-gray-200 bg-white/80 p-5 text-gray-700 shadow-lg backdrop-blur-sm">
                                 <h5 className="mb-4 text-sm font-bold tracking-wider text-gray-600 uppercase">Legal</h5>
                                 <ul className="space-y-3">
                                     <li>
@@ -1162,9 +1184,7 @@ export default function Welcome() {
                                 © {new Date().getFullYear()} <span className="font-bold text-gray-900">InstaStation</span>. All rights reserved.
                             </p>
                             <div className="hidden h-4 w-px bg-gray-700 md:block"></div>
-                            <p className="text-sm text-gray-700">
-                                Universiti Malaysia Pahang Al-Sultan Abdullah
-                            </p>
+                            <p className="text-sm text-gray-700">Universiti Malaysia Pahang Al-Sultan Abdullah</p>
                         </div>
 
                         {/* Newsletter Signup or Additional CTA */}
@@ -1196,7 +1216,7 @@ export default function Welcome() {
                                     <ArrowLeft size={20} />
                                 </button>
                                 <div className="flex-1 px-4 text-center">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/80">Announcement</p>
+                                    <p className="text-xs font-semibold tracking-[0.3em] text-white/80 uppercase">Announcement</p>
                                     <h2 className="text-xl font-bold">{selectedAnnouncement.announcement_title}</h2>
                                 </div>
                                 <button
@@ -1225,7 +1245,7 @@ export default function Welcome() {
                                         <img src="/images/parcel-logo.png" alt="InstaStation" className="h-10 w-10" />
                                     </div>
                                     <div>
-                                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400">Publisher</p>
+                                        <p className="text-xs font-semibold tracking-[0.2em] text-gray-400 uppercase">Publisher</p>
                                         <p className="text-base font-semibold text-gray-800">UMPSA Postal Hub</p>
                                     </div>
                                 </div>

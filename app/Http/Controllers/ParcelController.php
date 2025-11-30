@@ -80,9 +80,15 @@ class ParcelController extends Controller
 
             Log::info('Validation passed', ['validated_data' => $validatedData]);
 
-            // Try resolve student if provided; else allow null and mark Unclaimed
+            // Try resolve student ONLY if both name and matric are provided
+            // If only matric is provided (no name), keep parcel unclaimed even if student exists
             $student_user = null;
-            if ($request->filled('student_id')) {
+            $hasRecipientName = !empty(trim((string)($validatedData['recipient_name'] ?? '')));
+            $hasRecipientMatric = !empty(trim((string)($validatedData['recipient_matric'] ?? ''))) 
+                || !empty(trim((string)($request->student_id ?? '')));
+            
+            // Only link to student if BOTH name and matric/student_id are provided
+            if ($request->filled('student_id') && $hasRecipientName) {
                 $student_user = User::where('type', 'student')
                     ->where(function ($q) use ($request) {
                         $q->where('matric', $request->student_id)
@@ -96,10 +102,16 @@ class ParcelController extends Controller
             }
 
             if ($student_user) {
-                Log::info('Student user found', [
+                Log::info('Student user found and linked', [
                     'student_user_id' => $student_user->id,
                     'student_matric' => $student_user->matric,
                     'student_name' => $student_user->name
+                ]);
+            } else {
+                Log::info('Parcel will be created as Unclaimed', [
+                    'has_name' => $hasRecipientName,
+                    'has_matric' => $hasRecipientMatric,
+                    'reason' => $hasRecipientName ? 'Student not found' : 'No name provided - keeping unclaimed'
                 ]);
             }
 
@@ -108,16 +120,26 @@ class ParcelController extends Controller
                 'staff_name' => $user->name
             ]);
 
-            // Create the parcel - if no student, mark as Unclaimed
+            // Determine recipient details
+            // If student is linked, don't store recipient details (they're in user record)
+            // If no student linked, save provided recipient details (matric should be saved even without name)
+            $recipientName = $student_user ? null : (!empty(trim((string)($validatedData['recipient_name'] ?? ''))) ? trim((string)$validatedData['recipient_name']) : null);
+            $recipientMatric = $student_user ? null : (
+                !empty(trim((string)($validatedData['recipient_matric'] ?? ''))) 
+                    ? trim((string)$validatedData['recipient_matric'])
+                    : (!empty(trim((string)($request->student_id ?? ''))) ? trim((string)$request->student_id) : null)
+            );
+
+            // Create the parcel - if no student linked, mark as Unclaimed
             $parcel = Parcel::create([
                 'tracking_no' => $validatedData['tracking_no'],
                 'size' => $validatedData['size'],
                 'sender' => $validatedData['sender'],
                 'location' => $validatedData['location'],
-                'student_id' => $student_user?->id, // May be null
-                // Save fallback recipient details when student is not linked
-                'recipient_name' => $student_user ? null : ($validatedData['recipient_name'] ?? null),
-                'recipient_matric' => $student_user ? null : ($validatedData['recipient_matric'] ?? ($request->student_id ?: null)),
+                'student_id' => $student_user?->id, // May be null - only set if both name and matric provided
+                // Save recipient details when student is not linked (matric should be saved even without name)
+                'recipient_name' => $recipientName,
+                'recipient_matric' => $recipientMatric,
                 'parcel_status' => $student_user ? 'Pending Payment' : 'Unclaimed',
                 'days' => null,
                 'qr_code' => $validatedData['qr_code'],

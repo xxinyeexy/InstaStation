@@ -1,7 +1,7 @@
 import { type SharedData } from '@/types';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { ArrowLeft, CalendarDays, CheckCircle, LogIn, PackageSearch, UserPlus } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowLeft, CalendarDays, CheckCircle, LogIn, PackageSearch, UserPlus, X, XCircle } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 type Parcel = {
     parcel_id: number;
@@ -28,8 +28,57 @@ export default function Unclaimed({
     totalUnclaimed?: number;
 }) {
     const { auth } = usePage<SharedData>().props;
+    const pageProps = usePage().props as any;
+    const pageErrors = pageProps.errors || {};
+    // Check for flash messages (status is used by backend, success/error are standard)
+    const flashStatus = (pageProps.flash?.status || pageProps.flash?.success || null) as string | null;
     const [q, setQ] = useState(filters.q || '');
     const { post, processing } = useForm({});
+
+    // Toast notification state
+    const [toast, setToast] = useState<{ show: boolean; message: string; type: 'success' | 'error' }>({
+        show: false,
+        message: '',
+        type: 'error',
+    });
+    const toastTimerRef = useRef<number | null>(null);
+
+    const showToast = (message: string, type: 'success' | 'error' = 'error') => {
+        setToast({ show: true, message, type });
+
+        if (toastTimerRef.current) {
+            window.clearTimeout(toastTimerRef.current);
+        }
+
+        toastTimerRef.current = window.setTimeout(() => {
+            setToast({ show: false, message: '', type: 'error' });
+            toastTimerRef.current = null;
+        }, 5000);
+    };
+
+    // Clear timer on unmount
+    useEffect(() => {
+        return () => {
+            if (toastTimerRef.current) {
+                window.clearTimeout(toastTimerRef.current);
+            }
+        };
+    }, []);
+
+    // Handle errors and success messages from page props (e.g., from redirect with errors)
+    useEffect(() => {
+        if (pageErrors && Object.keys(pageErrors).length > 0) {
+            const firstError = Object.values(pageErrors)[0];
+            if (firstError) {
+                showToast(Array.isArray(firstError) ? firstError[0] : String(firstError), 'error');
+            }
+        }
+        
+        // Handle success flash messages
+        if (flashStatus) {
+            showToast(String(flashStatus), 'success');
+        }
+    }, [pageErrors, flashStatus]);
 
     const filtered = parcels;
 
@@ -39,12 +88,84 @@ export default function Unclaimed({
     };
 
     const claim = (parcel_id: number, redirect: 'login' | 'register') => {
-        router.post(route('claim.start'), { parcel_id, redirect }, { preserveScroll: true });
+        router.post(
+            route('claim.start'),
+            { parcel_id, redirect },
+            {
+                preserveScroll: true,
+                onError: (errors) => {
+                    // Handle validation errors from backend
+                    const firstError = typeof errors === 'object' && errors !== null ? Object.values(errors)[0] : null;
+                    const errorMessage =
+                        firstError && Array.isArray(firstError)
+                            ? firstError[0]
+                            : firstError && typeof firstError === 'string'
+                              ? firstError
+                              : 'An error occurred while claiming the parcel. Please try again.';
+                    // Show error toast once
+                    showToast(errorMessage, 'error');
+                    // Refresh the page data after a short delay to allow error to be displayed
+                    // This clears the error state and allows student to try again
+                    setTimeout(() => {
+                        router.reload({
+                            only: ['parcels', 'stats', 'totalUnclaimed', 'filters'],
+                            preserveState: false,
+                            preserveScroll: true,
+                        });
+                    }, 500);
+                },
+                onSuccess: () => {
+                    // Success is handled by backend redirect with status message
+                },
+            },
+        );
     };
 
     return (
         <div className="min-h-screen bg-gray-50">
             <Head title="Unclaimed Parcels" />
+
+            {/* Toast Notification */}
+            {toast.show && (
+                <div className="fixed top-4 right-4 z-50 animate-fade-in">
+                    <div
+                        className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm ${
+                            toast.type === 'success'
+                                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
+                                : 'border-red-200 bg-red-50/95 text-red-800'
+                        }`}
+                    >
+                        <div className="flex items-start gap-3">
+                            <div className="mt-0.5 flex-shrink-0">
+                                {toast.type === 'success' ? (
+                                    <CheckCircle className="h-5 w-5 text-emerald-600" />
+                                ) : (
+                                    <XCircle className="h-5 w-5 text-red-600" />
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <h4 className="text-sm font-semibold">
+                                    {toast.type === 'success' ? 'Success' : 'Error'}
+                                </h4>
+                                <p className="mt-1 text-sm opacity-90">{toast.message}</p>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setToast({ show: false, message: '', type: 'error' });
+                                    if (toastTimerRef.current) {
+                                        window.clearTimeout(toastTimerRef.current);
+                                        toastTimerRef.current = null;
+                                    }
+                                }}
+                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <Link
                 href="/"
                 className="group absolute top-4 left-4 inline-flex items-center gap-0 overflow-hidden rounded-full bg-gray-900 text-white shadow-lg transition-all duration-300 hover:gap-2 hover:pr-5 hover:shadow-xl dark:bg-gray-700"
