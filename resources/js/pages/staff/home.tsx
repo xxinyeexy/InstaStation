@@ -342,7 +342,7 @@ export default function StaffHome() {
                 </div>
 
                 {showExport && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/50 p-4">
                         <div className="flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-lg border bg-card shadow-xl">
                             {/* Modal Header (sticky) */}
                             <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-card px-6 py-4">
