@@ -1,10 +1,10 @@
 import QRCodeModal from '@/components/qr-code-modal';
+import { useLanguage } from '@/contexts/LanguageContext';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, CheckCircle, MapPin, Package, Sparkles, Upload, X, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 // Define the Parcel interface based on your database structure
 interface Parcel {
@@ -145,14 +145,14 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
 };
 export default function Dashboard({ parcels = [] }: DashboardProps) {
     const { t } = useLanguage();
-    
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: t('myParcels'),
             href: '/student/parcel',
         },
     ];
-    
+
     const { auth } = usePage<SharedData>().props;
     const currentUser = auth.user;
     const pageProps: any = usePage<SharedData>().props;
@@ -670,7 +670,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     setShowPayModal(false);
                     setPayParcelId(null);
                     addToastNotification('success', t('paymentUploaded'), t('paymentProofUploaded'));
-                    
+
                     // Reload only parcels and notifications data
                     router.reload({
                         only: ['parcels', 'notifications'],
@@ -966,9 +966,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             <div className="flex items-center justify-between border-b border-gray-200 p-6">
                                 <div>
                                     <h2 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('paymentQRScanner')}</h2>
-                                    <p className="mt-1 text-xs text-gray-600 dark:text-muted-foreground">
-                                        {t('scanPaymentQRAndUpload')}
-                                    </p>
+                                    <p className="mt-1 text-xs text-gray-600 dark:text-muted-foreground">{t('scanPaymentQRAndUpload')}</p>
                                 </div>
                                 <button
                                     onClick={() => setShowPayModal(false)}
@@ -1083,7 +1081,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         {/* Quick Actions */}
                         <div className="col-span-4 col-start-11 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm dark:border-border dark:bg-card">
                             <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-card-foreground">{t('quickActions')}</div>
-                        
+
                             <button
                                 onClick={() => {
                                     setSelectedHub(hubs[0]);
@@ -1267,14 +1265,31 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     >
                                         <div className="mb-3 flex items-start justify-between">
                                             <div className="flex items-center gap-2">
-                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400">
-                                                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-50 text-pink-500 dark:bg-pink-500/20 dark:text-pink-400">
+                                                    {/* <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path
                                                             strokeLinecap="round"
                                                             strokeLinejoin="round"
                                                             strokeWidth={2}
                                                             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                                                         />
+                                                        
+                                                    </svg> */}
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="24"
+                                                        height="24"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        stroke-width="2.5"
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                    >
+                                                        <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+                                                        <path d="M12 22V12" />
+                                                        <polyline points="3.29 7 12 12 20.71 7" />
+                                                        <path d="m7.5 4.27 9 5.15" />
                                                     </svg>
                                                 </div>
                                                 <div className="font-['Consolas'] text-sm font-semibold text-gray-900 dark:text-card-foreground">
@@ -1302,7 +1317,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                                                 />
                                             </svg>
-                                            <span>{t('arrived')}: {formatDate(parcel.created_at)}</span>
+                                            <span>
+                                                {t('arrived')}: {formatDate(parcel.created_at)}
+                                            </span>
                                         </div>
 
                                         <div className="mb-4 text-sm">
@@ -1432,9 +1449,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <div className="flex flex-col gap-4">
                             <div className="text-center">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('confirmDeletion')}</h3>
-                                <p className="mt-1 text-sm text-gray-600 dark:text-muted-foreground">
-                                    {t('areYouSureDeleteParcel')}
-                                </p>
+                                <p className="mt-1 text-sm text-gray-600 dark:text-muted-foreground">{t('areYouSureDeleteParcel')}</p>
                             </div>
 
                             {/* Parcel details for confirmation */}
