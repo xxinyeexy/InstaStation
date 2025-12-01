@@ -1,6 +1,6 @@
 import TextLink from '@/components/text-link';
 import Alert from '@/components/ui/alert';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import axios from 'axios';
 import { ArrowLeft, Building, Eye, EyeOff, IdCard, LoaderCircle, Lock, Mail, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -106,15 +106,22 @@ export default function Register() {
                 payload.department = formData.department;
             }
 
-            await axios.post(endpoint, payload);
-            setSuccess('You may proceed to login now.');
-
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 1500);
+            // Use Inertia router instead of axios to preserve session data
+            router.post('/register', payload, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setSuccess('You may proceed to login now.');
+                },
+                onError: (errors) => {
+                    setErrors(errors);
+                },
+                onFinish: () => {
+                    setProcessing(false);
+                },
+            });
         } catch (error: any) {
-            setErrors(error.response?.data?.errors || {});
-        } finally {
+            // This catch block is kept for any unexpected errors
+            console.error('Registration error:', error);
             setProcessing(false);
         }
     };
@@ -170,22 +177,20 @@ export default function Register() {
                                 <button
                                     type="button"
                                     onClick={() => handleInputChange('userType', 'Student')}
-                                    className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                                        formData.userType === 'Student'
-                                            ? 'border border-[#5BA35E] bg-[#E6F7E6] text-[#5BA35E] dark:bg-green-500/20 dark:text-green-400'
-                                            : 'text-gray-600 hover:text-gray-800 dark:text-muted-foreground dark:hover:text-foreground'
-                                    }`}
+                                    className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${formData.userType === 'Student'
+                                        ? 'border border-[#5BA35E] bg-[#E6F7E6] text-[#5BA35E] dark:bg-green-500/20 dark:text-green-400'
+                                        : 'text-gray-600 hover:text-gray-800 dark:text-muted-foreground dark:hover:text-foreground'
+                                        }`}
                                 >
                                     Student
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => handleInputChange('userType', 'Staff')}
-                                    className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${
-                                        formData.userType === 'Staff'
-                                            ? 'border border-[#5BA35E] bg-[#E6F7E6] text-[#5BA35E] dark:bg-green-500/20 dark:text-green-400'
-                                            : 'text-gray-600 hover:text-gray-800 dark:text-muted-foreground dark:hover:text-foreground'
-                                    }`}
+                                    className={`flex-1 rounded-md px-4 py-2 text-sm font-medium transition-colors ${formData.userType === 'Staff'
+                                        ? 'border border-[#5BA35E] bg-[#E6F7E6] text-[#5BA35E] dark:bg-green-500/20 dark:text-green-400'
+                                        : 'text-gray-600 hover:text-gray-800 dark:text-muted-foreground dark:hover:text-foreground'
+                                        }`}
                                 >
                                     Staff
                                 </button>

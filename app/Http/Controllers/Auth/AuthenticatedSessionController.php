@@ -32,6 +32,12 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        // CRITICAL: Retrieve session data BEFORE regenerating session
+        // Session regeneration creates a new session ID, and the old session data might be lost
+        $intendedUrl = $request->session()->get('url.intended');
+        $claimIntendedUrl = $request->session()->get('claim_intended_url');
+        $claimRedirectType = $request->session()->get('claim_redirect_type');
+
         $request->session()->regenerate();
 
         // Record last login timestamp
@@ -41,16 +47,50 @@ class AuthenticatedSessionController extends Controller
             $user->save();
         }
 
-        // Preserve the intended URL if it exists (e.g., from parcel claim flow)
-        $intendedUrl = $request->session()->get('url.intended');
+        // Restore the session data after regeneration
+        if ($intendedUrl) {
+            $request->session()->put('url.intended', $intendedUrl);
+        }
+        if ($claimIntendedUrl) {
+            $request->session()->put('claim_intended_url', $claimIntendedUrl);
+        }
+        if ($claimRedirectType) {
+            $request->session()->put('claim_redirect_type', $claimRedirectType);
+        }
 
         // If user hasn't verified email yet, preserve intended URL and redirect to verification notice
         // The intended URL will be used after email verification
         if ($user && method_exists($user, 'hasVerifiedEmail') && ! $user->hasVerifiedEmail()) {
-            // Preserve intended URL for after verification
-            if ($intendedUrl) {
-                $request->session()->put('url.intended', $intendedUrl);
-            }
+            // Session data already restored above, just log and redirect
+            
+            // Debug logging to file
+            $debugData = [
+                'timestamp' => now()->toDateTimeString(),
+                'action' => 'login.store',
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'session_id' => $request->session()->getId(),
+                'session_data_before' => [
+                    'url.intended' => $intendedUrl,
+                    'claim_intended_url' => $claimIntendedUrl,
+                    'claim_redirect_type' => $claimRedirectType,
+                ],
+                'session_data_after' => [
+                    'url.intended' => $request->session()->get('url.intended'),
+                    'claim_intended_url' => $request->session()->get('claim_intended_url'),
+                    'claim_redirect_type' => $request->session()->get('claim_redirect_type'),
+                ],
+            ];
+            file_put_contents(storage_path('logs/claim_debug.log'), json_encode($debugData, JSON_PRETTY_PRINT) . "\n\n", FILE_APPEND);
+            
+            \Illuminate\Support\Facades\Log::info('AuthenticatedSessionController: Preserved session before email verification', [
+                'user_id' => $user->id,
+                'intended_url' => $intendedUrl,
+                'claim_intended_url' => $claimIntendedUrl,
+                'claim_redirect_type' => $claimRedirectType,
+                'session_id' => $request->session()->getId(),
+            ]);
+            
             return redirect()->intended(route('verification.notice'));
         }
 

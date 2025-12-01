@@ -73,10 +73,6 @@ class ClaimController extends Controller
         $redirectChoice = $request->get('redirect', 'login');
         $allowNewClaim = $redirectChoice === 'register';
 
-        // Always redirect to login/register first, even if user is already logged in
-        // This ensures error messages appear after login, not before
-        // The actual claim processing happens in the consume() method after authentication
-
         // Preserve search query so we can redirect back to the same search after login
         $searchQuery = $request->get('q', '');
         if ($searchQuery) {
@@ -90,11 +86,37 @@ class ClaimController extends Controller
             [
                 'parcel_id' => $parcel->parcel_id,
                 'allow_new' => $allowNewClaim ? 1 : 0,
+                'redirect_type' => $redirectChoice, // Include redirect_type in the query params
             ]
         );
 
-        // After auth, redirect to consume URL automatically
+        // Store intended URL in both primary and backup session keys
         $request->session()->put('url.intended', $signedUrl);
+        $request->session()->put('claim_intended_url', $signedUrl);
+        $request->session()->put('claim_redirect_type', $redirectChoice); // Store redirect type in session
+        
+        // Debug logging to file
+        $debugData = [
+            'timestamp' => now()->toDateTimeString(),
+            'action' => 'claim.start',
+            'parcel_id' => $parcel->parcel_id,
+            'redirect_choice' => $redirectChoice,
+            'signed_url' => $signedUrl,
+            'session_id' => $request->session()->getId(),
+            'session_data' => [
+                'url.intended' => $request->session()->get('url.intended'),
+                'claim_intended_url' => $request->session()->get('claim_intended_url'),
+                'claim_redirect_type' => $request->session()->get('claim_redirect_type'),
+            ],
+        ];
+        file_put_contents(storage_path('logs/claim_debug.log'), json_encode($debugData, JSON_PRETTY_PRINT) . "\n\n", FILE_APPEND);
+        
+        Log::info('ClaimController@start: Stored claim URLs in session', [
+            'parcel_id' => $parcel->parcel_id,
+            'redirect_choice' => $redirectChoice,
+            'signed_url' => $signedUrl,
+            'session_id' => $request->session()->getId(),
+        ]);
 
         $target = $redirectChoice === 'register' ? route('register') : route('login');
 
@@ -125,17 +147,40 @@ class ClaimController extends Controller
         $user = Auth::user();
         $parcelMatric = strtolower(trim((string) ($parcel->recipient_matric ?? '')));
         $userMatric = strtolower(trim((string) ($user->matric ?? '')));
-        $allowNewClaim = (bool) $request->boolean('allow_new', false);
+        $redirectType = $request->get('redirect_type', $request->session()->get('claim_redirect_type', 'login'));
+        $allowNewClaim = $redirectType === 'register';
+        
+        Log::info('ClaimController@consume: Processing claim', [
+            'parcel_id' => $parcelId,
+            'user_id' => $user->id,
+            'user_matric' => $userMatric,
+            'parcel_matric' => $parcelMatric,
+            'redirect_type' => $redirectType,
+            'allow_new_claim' => $allowNewClaim,
+            'session_id' => $request->session()->getId(),
+        ]);
 
-        // Check matric match - if it doesn't match, log out the user and show error
-        // This prevents students from staying logged in with a mismatched account
-        if (! $allowNewClaim && $parcelMatric !== '' && ($userMatric === '' || $parcelMatric !== $userMatric)) {
-            // Log out the user since they're not allowed to claim this parcel
+        // Clear session keys after use
+        $request->session()->forget(['url.intended', 'claim_intended_url', 'claim_redirect_type']);
+
+        // For allow_new claims ("I'm new here"), always link the parcel to the student, even if recipient_matric is set
+        if ($allowNewClaim) {
+            $parcel->student_id = $user->id;
+            $parcel->recipient_name = $user->name;
+            $parcel->recipient_matric = $user->matric;
+            if (strtolower((string) $parcel->parcel_status) === 'unclaimed') {
+                $parcel->parcel_status = 'Pending Payment';
+            }
+            $parcel->save();
+            return redirect()->route('student.parcel')->with('status', 'Parcel linked to your account. Bring your student ID.');
+        }
+
+        // Only block if allow_new is false and there is a mismatch
+        if ($parcelMatric !== '' && ($userMatric === '' || $parcelMatric !== $userMatric)) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            // Get search query from session if available (preserved from claim.start)
             $searchQuery = $request->session()->get('claim_search_query', $request->get('q', ''));
             $request->session()->forget('claim_search_query');
 
@@ -144,6 +189,7 @@ class ClaimController extends Controller
                 ->with('error', 'Sorry, this parcel is tagged for a different matric ID. Please contact the parcel office.');
         }
 
+        // Default linking for 'Yes, it's mine' (matric match)
         $parcel->student_id = $user->id;
         $parcel->recipient_name = $user->name;
         $parcel->recipient_matric = $user->matric;

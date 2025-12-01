@@ -74,12 +74,12 @@ export default function Unclaimed({
                 showToast(Array.isArray(firstError) ? firstError[0] : String(firstError), 'error');
             }
         }
-        
+
         // Handle error flash messages (e.g., from backend redirect with error)
         if (flashError) {
             showToast(String(flashError), 'error');
         }
-        
+
         // Handle success flash messages
         if (flashStatus) {
             showToast(String(flashStatus), 'success');
@@ -94,16 +94,36 @@ export default function Unclaimed({
     };
 
     const claim = (parcel_id: number, redirect: 'login' | 'register') => {
+        console.log('🔵 Claim button clicked:', { parcel_id, redirect });
+
         // Always navigate to login/register first, even if user is logged in
         // This ensures the error message appears after login, not before
         // The claim.start method always redirects, so no error handling needed here
+        const data: Record<string, any> = { parcel_id, redirect };
+
+        if (redirect === 'register') {
+            data.allow_new = true; // Include allow_new for "I'm new here" flow
+        }
+
+        console.log('🔵 Sending POST to claim.start:', data);
+
         router.post(
             route('claim.start'),
-            { parcel_id, redirect },
+            data,
             {
                 preserveScroll: true,
-                // No onError handler - claim.start always redirects to login/register
-                // Errors will only appear after login via the consume method
+                onBefore: () => {
+                    console.log('🟢 Request starting...');
+                },
+                onSuccess: (page) => {
+                    console.log('🟢 Request successful:', page);
+                },
+                onError: (errors) => {
+                    console.error('🔴 Request failed:', errors);
+                },
+                onFinish: () => {
+                    console.log('🟡 Request finished');
+                },
             },
         );
     };
@@ -116,11 +136,10 @@ export default function Unclaimed({
             {toast.show && (
                 <div className="fixed top-4 right-4 z-50 animate-fade-in">
                     <div
-                        className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm ${
-                            toast.type === 'success'
+                        className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm ${toast.type === 'success'
                                 ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
                                 : 'border-red-200 bg-red-50/95 text-red-800'
-                        }`}
+                            }`}
                     >
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex-shrink-0">
