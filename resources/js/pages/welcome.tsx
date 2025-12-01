@@ -446,7 +446,7 @@ export default function Welcome() {
                                                                 </div>
                                                                 <div className="flex-1">
                                                                     <p className="text-sm font-bold text-gray-900">Parcel Arrived!</p>
-                                                                    <p className="text-xs text-gray-600">PKG-2024-001</p>
+                                                                    <p className="text-xs text-gray-600">PCL2025110001</p>
                                                                 </div>
                                                                 <div className="h-2 w-2 animate-pulse rounded-full bg-pink-500"></div>
                                                             </div>
@@ -462,7 +462,7 @@ export default function Welcome() {
                                                                 </div>
                                                                 <div className="flex-1">
                                                                     <p className="text-sm font-bold text-gray-900">Payment Verified</p>
-                                                                    <p className="text-xs text-gray-600">Ready for pickup</p>
+                                                                    <p className="text-xs text-gray-600">Schedule pickup time slot</p>
                                                                 </div>
                                                                 <svg
                                                                     className="h-5 w-5 text-green-500"
