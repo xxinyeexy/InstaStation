@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Announcement;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StudentController;
@@ -13,6 +14,10 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ClaimController;
+
+Route::get('/linkstorage', function () {
+    Artisan::call('storage:link'); 
+});
 
 Route::get('/', function () {
     $today = now()->toDateString();
