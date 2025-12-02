@@ -21,19 +21,19 @@ interface Parcel {
     schedule: string;
     time_slot?: string;
     created_by:
-        | number
-        | {
-              id: number;
-              name: string;
-              email: string;
-          };
+    | number
+    | {
+        id: number;
+        name: string;
+        email: string;
+    };
     last_edited_by:
-        | number
-        | {
-              id: number;
-              name: string;
-              email: string;
-          };
+    | number
+    | {
+        id: number;
+        name: string;
+        email: string;
+    };
     report_at: string;
     created_at: string;
     updated_at: string;
@@ -800,7 +800,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const formatDate = (dateString: string) => {
         if (!dateString) return 'N/A';
         try {
-            return new Date(dateString).toLocaleDateString('en-MY');
+            return new Date(dateString).toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
         } catch {
             return 'N/A';
         }
@@ -925,11 +929,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     {toastNotifications.map((notification) => (
                         <div
                             key={notification.id}
-                            className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${
-                                notification.type === 'success'
+                            className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${notification.type === 'success'
                                     ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800 dark:border-emerald-500/50 dark:bg-emerald-500/20 dark:text-emerald-300'
                                     : 'border-red-200 bg-red-50/95 text-red-800 dark:border-red-500/50 dark:bg-red-500/20 dark:text-red-300'
-                            } `}
+                                } `}
                         >
                             <div className="flex items-start gap-3">
                                 <div className="mt-0.5 flex-shrink-0">
@@ -1137,11 +1140,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             return (
                                                 <div
                                                     key={hub.name}
-                                                    className={`rounded-lg border p-4 transition-colors ${
-                                                        selectedHub?.name === hub.name
+                                                    className={`rounded-lg border p-4 transition-colors ${selectedHub?.name === hub.name
                                                             ? 'border-blue-300 bg-blue-50 dark:border-blue-500/50 dark:bg-blue-500/20'
                                                             : 'border-gray-200 bg-gray-50 dark:border-border dark:bg-muted/30'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <div className="flex items-start justify-between">
                                                         <div>
@@ -1154,11 +1156,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                             <p className="mt-1 text-xs">
                                                                 Status:{' '}
                                                                 <span
-                                                                    className={`font-semibold ${
-                                                                        open
+                                                                    className={`font-semibold ${open
                                                                             ? 'text-emerald-600 dark:text-emerald-400'
                                                                             : 'text-red-600 dark:text-red-400'
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     {open ? 'OPEN' : 'CLOSE'}
                                                                 </span>
@@ -1253,10 +1254,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 const isCollected = status === 'collected';
                                 const scheduledDateStr = parcel.schedule
                                     ? new Date(parcel.schedule).toLocaleDateString('en-MY', {
-                                          year: 'numeric',
-                                          month: 'short',
-                                          day: 'numeric',
-                                      })
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                    })
                                     : '';
                                 return (
                                     <div

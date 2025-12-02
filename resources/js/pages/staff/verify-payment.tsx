@@ -405,9 +405,9 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                     <div className="font-medium text-foreground">{detail.student_matric ?? '—'}</div>
                                     <div className="mt-2 text-gray-500 dark:text-muted-foreground">{t('submitted')}</div>
                                     <div className="font-medium text-foreground">
-                                        {(detail as any).created_at
-                                            ? new Date((detail as any).created_at).toLocaleString()
-                                            : (detail.submitted_at ?? '—')}
+                                        {detail.submitted_at
+                                            ? new Date(detail.submitted_at).toLocaleDateString('en-GB')
+                                            : (detail.created_at ? new Date(detail.created_at).toLocaleDateString('en-GB') : '—')}
                                     </div>
                                 </div>
                             </div>

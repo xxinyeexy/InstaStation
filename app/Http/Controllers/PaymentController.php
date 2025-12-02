@@ -52,7 +52,7 @@ class PaymentController extends Controller
                     'parcel_code' => $p->parcel_code,
                     'sender' => $p->sender,
                     'amount' => 1.00,
-                    'arrival' => $arrival->toDateString(),
+                    'arrival' => $arrival->format('d/m/Y'),
                     'payment_state' => $paymentState,
                 ];
             })->toArray();
@@ -84,8 +84,8 @@ class PaymentController extends Controller
                     'parcel_code' => optional($p->parcel)->parcel_code,
                     'amount' => 1.00,
                     'status' => $p->verified_by ? 'Verified' : 'Pending',
-                    'submitted_at' => optional($p->created_at)?->toDateString(),
-                    'verified_at' => $p->verified_by ? optional($p->updated_at)?->toDateString() : null,
+                    'submitted_at' => optional($p->created_at)?->format('d/m/Y, g:i:s A'),
+                    'verified_at' => $p->verified_by ? optional($p->updated_at)?->format('d/m/Y, g:i:s A') : null,
                     'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
                 ];
             })->toArray();
@@ -120,8 +120,8 @@ class PaymentController extends Controller
                     'parcel_code' => optional($p->parcel)->parcel_code,
                     'amount' => 1.00,
                     'status' => $p->verified_by ? 'Verified' : 'Pending',
-                    'submitted_at' => optional($p->created_at)?->toDateString(),
-                    'verified_at' => $p->verified_by ? optional($p->updated_at)?->toDateString() : null,
+                    'submitted_at' => optional($p->created_at)?->format('d/m/Y, g:i:s A'),
+                    'verified_at' => $p->verified_by ? optional($p->updated_at)?->format('d/m/Y, g:i:s A') : null,
                     'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
                 ];
             })->toArray();
@@ -142,7 +142,7 @@ class PaymentController extends Controller
                 'parcel_code' => $parcel->parcel_code,
                 'tracking_no' => $parcel->tracking_no,
                 'sender' => $parcel->sender,
-                'arrival' => optional($parcel->created_at)?->toDateString(),
+                'arrival' => optional($parcel->created_at)?->format('d/m/Y'),
                 'fee' => 1.00,
             ],
         ]);
@@ -174,7 +174,7 @@ class PaymentController extends Controller
             }
             $existing->payment = $originalFileName;
             $existing->file_path = $path;
-            $existing->payment_date = now()->toDateString();
+            $existing->payment_date = now()->format('Y-m-d');
             $existing->verified_by = null; // reset verification on resubmission
             $existing->save();
         } else {
@@ -182,7 +182,7 @@ class PaymentController extends Controller
             $payment->parcel_id = $parcel->parcel_id;
             $payment->payment = $originalFileName;
             $payment->file_path = $path;
-            $payment->payment_date = now()->toDateString();
+            $payment->payment_date = now()->format('Y-m-d');
             // verified_by stays null until staff verifies
             $payment->save();
         }
@@ -212,7 +212,7 @@ class PaymentController extends Controller
 
         // Summary based on latest entries
         $pendingCount = $latest->whereNull('verified_by')->count();
-        $verifiedToday = $latest->filter(fn($p) => $p->verified_by && optional($p->updated_at)?->toDateString() === now()->toDateString())->count();
+        $verifiedToday = $latest->filter(fn($p) => $p->verified_by && optional($p->updated_at)?->format('d/m/Y') === now()->format('d/m/Y'))->count();
         $totalRevenue = $latest->whereNotNull('verified_by')->count() * 1.00; // RM1 each
         $successRate = null;
 
@@ -239,7 +239,7 @@ class PaymentController extends Controller
                 'amount' => 1.00,
                 'method' => 'bank transfer',
                 'status' => $p->verified_by ? 'verified' : 'pending',
-                'submitted_at' => optional($p->created_at)?->toDateString(),
+                'submitted_at' => optional($p->created_at)?->format('d/m/Y, g:i:s A'),
                 'created_at' => optional($p->created_at)?->toIso8601String(),
                 'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
             ];

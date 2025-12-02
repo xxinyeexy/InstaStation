@@ -288,11 +288,10 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                                         <div>
                                             <label className="mb-1 block text-xs font-medium text-blue-700">{t('dateTime')}</label>
                                             <span className="text-sm font-medium text-blue-900">
-                                                {new Date(parcel.schedule).toLocaleDateString('en-US', {
-                                                    weekday: 'long',
+                                                {new Date(parcel.schedule).toLocaleDateString('en-GB', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
                                                     year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric',
                                                 })}
                                             </span>
                                         </div>
@@ -324,23 +323,22 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                                     <div key={event.id} className="relative flex items-start gap-4">
                                         {/* Timeline dot */}
                                         <div
-                                            className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-gray-200 ${
-                                                event.iconColor === 'blue'
+                                            className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-gray-200 ${event.iconColor === 'blue'
                                                     ? 'bg-blue-50'
                                                     : event.iconColor === 'orange'
-                                                      ? 'bg-orange-50'
-                                                      : event.iconColor === 'green'
-                                                        ? 'bg-green-50'
-                                                        : event.iconColor === 'pink'
-                                                          ? 'bg-pink-50'
-                                                          : event.iconColor === 'yellow'
-                                                            ? 'bg-yellow-50'
-                                                            : event.iconColor === 'purple'
-                                                              ? 'bg-purple-50'
-                                                              : event.iconColor === 'red'
-                                                                ? 'bg-gray-100'
-                                                                : 'bg-white'
-                                            }`}
+                                                        ? 'bg-orange-50'
+                                                        : event.iconColor === 'green'
+                                                            ? 'bg-green-50'
+                                                            : event.iconColor === 'pink'
+                                                                ? 'bg-pink-50'
+                                                                : event.iconColor === 'yellow'
+                                                                    ? 'bg-yellow-50'
+                                                                    : event.iconColor === 'purple'
+                                                                        ? 'bg-purple-50'
+                                                                        : event.iconColor === 'red'
+                                                                            ? 'bg-gray-100'
+                                                                            : 'bg-white'
+                                                }`}
                                         >
                                             {renderIcon(event.icon, event.iconColor)}
                                         </div>

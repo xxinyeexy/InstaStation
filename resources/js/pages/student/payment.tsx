@@ -48,7 +48,7 @@ interface Notification {
 
 export default function Payment({ summary, rows, payments }: { summary: Summary; rows: Row[]; payments: PaymentRow[] }) {
     const { t } = useLanguage();
-    
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: t('paymentCentre'),
@@ -100,6 +100,21 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
             const dateB = new Date(b.submitted_at || '').getTime();
             return paymentSort === 'newest' ? dateB - dateA : dateA - dateB;
         });
+
+
+    // Format date as DD/MM/YYYY, HH:MM AM/PM
+    const formatDate = (dateStr: string | null): string => {
+        if (!dateStr) return '—';
+        const date = new Date(dateStr);
+        return date.toLocaleString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
 
     // Function to translate payment states
     const getPaymentStateTranslation = (state: string): string => {
@@ -288,7 +303,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                                     <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
                                                     <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
                                                     <p className="mt-1 text-xs text-muted-foreground">
-                                                        {new Date(notification.created_at).toLocaleString()}
+                                                        {formatDate(notification.created_at)}
                                                     </p>
                                                 </div>
                                             </div>
