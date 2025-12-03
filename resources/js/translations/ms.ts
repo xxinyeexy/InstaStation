@@ -94,7 +94,7 @@ export const ms = {
     // Overview & Statistics
     totalParcels: 'Jumlah Bungkusan',
     newlyArrived: 'Baru Tiba',
-    readyToCollect: 'Sedia Diambil',
+    readyToCollect: 'Sedia Untuk Diambil',
     unclaimedParcels: 'Tidak Dituntut',
 
     // Dashboard

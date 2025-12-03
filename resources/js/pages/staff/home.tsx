@@ -666,14 +666,14 @@ export default function StaffHome() {
                 <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
                     {/* Daily Operations Overview */}
                     <AnimatedChart delay={500}>
-                        <Card>
-                            <CardHeader>
+                        <Card className="h-full">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                                 <CardTitle>{t('dailyOperations')}</CardTitle>
-                                <div className="mt-4 flex gap-2">
+                                <div className="flex gap-2">
                                     <button
                                         onClick={() => setActiveTab('arrivals')}
-                                        className={`rounded-md px-3 py-1 text-sm transition-colors ${activeTab === 'arrivals'
-                                            ? 'bg-secondary text-primary-foreground dark:bg-white dark:text-black'
+                                        className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${activeTab === 'arrivals'
+                                            ? 'bg-black text-white dark:bg-white dark:text-black'
                                             : 'bg-muted text-muted-foreground hover:bg-muted/80 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
                                             }`}
                                     >
@@ -681,8 +681,8 @@ export default function StaffHome() {
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('collected')}
-                                        className={`rounded-md px-3 py-1 text-sm transition-colors ${activeTab === 'collected'
-                                            ? 'bg-secondary text-primary-foreground dark:bg-white dark:text-black'
+                                        className={`rounded-md px-3 py-1 text-xs font-medium transition-colors ${activeTab === 'collected'
+                                            ? 'bg-black text-white dark:bg-white dark:text-black'
                                             : 'bg-muted text-muted-foreground hover:bg-muted/80 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
                                             }`}
                                     >
@@ -734,7 +734,7 @@ export default function StaffHome() {
 
                     {/* Parcel Senders Distribution */}
                     <AnimatedChart delay={600}>
-                        <Card>
+                        <Card className="h-full">
                             <CardHeader>
                                 <CardTitle>{t('parcelSenders')}</CardTitle>
                             </CardHeader>
@@ -770,7 +770,7 @@ export default function StaffHome() {
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
                     {/* Parcel Size */}
                     <AnimatedChart delay={700}>
-                        <Card>
+                        <Card className="h-full">
                             <CardHeader>
                                 <CardTitle>{t('parcelSize')}</CardTitle>
                             </CardHeader>
@@ -810,7 +810,7 @@ export default function StaffHome() {
 
                     {/* Parcel Status Distribution */}
                     <AnimatedChart delay={800}>
-                        <Card>
+                        <Card className="h-full">
                             <CardHeader>
                                 <CardTitle>{t('parcelStatusDistribution')}</CardTitle>
                             </CardHeader>
@@ -849,7 +849,7 @@ export default function StaffHome() {
 
                     {/* Collection Time Distribution */}
                     <AnimatedChart delay={900}>
-                        <Card>
+                        <Card className="h-full">
                             <CardHeader>
                                 <CardTitle>{t('collectionTime')}</CardTitle>
                             </CardHeader>

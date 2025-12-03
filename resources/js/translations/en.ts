@@ -101,7 +101,7 @@ export const en = {
     // Overview & Statistics
     totalParcels: 'Total Parcels',
     newlyArrived: 'Newly Arrived',
-    readyToCollect: 'Ready to Collect',
+    readyToCollect: 'Ready for Collection',
     unclaimedParcels: 'Unclaimed',
 
     // Dashboard
