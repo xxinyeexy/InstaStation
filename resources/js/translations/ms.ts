@@ -16,7 +16,7 @@ export const ms = {
     back: 'Kembali',
     next: 'Seterusnya',
     previous: 'Sebelum',
-    
+
     // Auth Pages
     createAccount: 'Buat Akaun',
     joinInstaStation: 'Sertai InstaStation untuk mengurus parsel universiti anda',
@@ -52,7 +52,7 @@ export const ms = {
     noMatricID: 'Tiada ID Matrik',
     noStudentsFound: 'Tiada pelajar dijumpai',
     registering: 'Mendaftar...',
-    
+
     // Navigation
     dashboard: 'Papan Pemuka',
     parcels: 'Bungkusan',
@@ -63,7 +63,7 @@ export const ms = {
     settings: 'Tetapan',
     logout: 'Log Keluar',
     home: 'Laman Utama',
-    
+
     // Settings
     profile: 'Profil',
     password: 'Kata Laluan',
@@ -80,7 +80,7 @@ export const ms = {
     themeDescription: 'Pilih mod tema pilihan anda',
     languageDescription: 'Pilih bahasa pilihan anda untuk antaramuka',
     languageSelection: 'Pemilihan Bahasa',
-    
+
     // Parcel Status
     pending: 'Menunggu',
     pendingPayment: 'Menunggu Pembayaran',
@@ -90,13 +90,13 @@ export const ms = {
     approved: 'Diluluskan',
     scheduled: 'Dijadualkan',
     arrived: 'Tiba',
-    
+
     // Overview & Statistics
     totalParcels: 'Jumlah Bungkusan',
     newlyArrived: 'Baru Tiba',
     readyToCollect: 'Sedia Diambil',
     unclaimedParcels: 'Tidak Dituntut',
-    
+
     // Dashboard
     overview: 'Gambaran Keseluruhan',
     dailyArrivals: 'Ketibaan Harian',
@@ -105,14 +105,14 @@ export const ms = {
     parcelsBySender: 'Pengirim Teratas',
     parcelStatus: 'Status Bungkusan',
     collectionTimeDistribution: 'Taburan Masa Pengambilan',
-    
+
     // Parcel Actions
     markAsCollected: 'Tandakan Sebagai Diambil',
     schedulePickup: 'Jadualkan Pengambilan',
     viewDetails: 'Lihat Butiran',
     viewQRCode: 'Lihat Kod QR',
     downloadQR: 'Muat Turun QR',
-    
+
     // Parcel Details
     parcelCode: 'Kod Bungkusan',
     trackingNumber: 'Nombor Penjejakan',
@@ -130,7 +130,7 @@ export const ms = {
     collectionCode: 'Kod Pengambilan',
     size: 'Saiz',
     weight: 'Berat',
-    
+
     // Time & Date
     today: 'Hari Ini',
     thisWeek: 'Minggu Ini',
@@ -138,7 +138,7 @@ export const ms = {
     last30Days: '30 Hari Lepas',
     selectDate: 'Pilih Tarikh',
     selectTime: 'Pilih Slot Masa',
-    
+
     // Messages & Notifications
     success: 'Berjaya',
     error: 'Ralat',
@@ -173,7 +173,7 @@ export const ms = {
     reminderFailed: 'Peringatan Gagal',
     failedToQueueReminder: 'Gagal mengantarkan peringatan',
     failedToSendReminder: 'Gagal menghantar peringatan',
-    
+
     // Forms
     name: 'Nama',
     email: 'E-mel',
@@ -181,7 +181,7 @@ export const ms = {
     address: 'Alamat',
     room: 'Bilik',
     department: 'Jabatan',
-    
+
     // Buttons
     apply: 'Guna',
     reset: 'Set Semula',
@@ -189,18 +189,18 @@ export const ms = {
     refresh: 'Muat Semula',
     download: 'Muat Turun',
     upload: 'Muat Naik',
-    
+
     // Theme Options
     light: 'Terang',
     dark: 'Gelap',
     system: 'Sistem',
-    
+
     // Size Options
     small: 'Kecil',
     medium: 'Sederhana',
     large: 'Besar',
     extraLarge: 'Sangat Besar',
-    
+
     // Password Page
     updatePassword: 'Kemas kini kata laluan',
     passwordDescription: 'Pastikan akaun anda menggunakan kata laluan yang panjang dan rawak untuk kekal selamat',
@@ -209,13 +209,19 @@ export const ms = {
     confirmPassword: 'Sahkan kata laluan',
     savePassword: 'Simpan kata laluan',
     passwordSettings: 'Tetapan kata laluan',
-    
+    passwordSameError: 'Kata laluan baharu tidak boleh sama dengan kata laluan semasa.',
+    passwordLengthError: 'Kata laluan mesti sekurang-kurangnya 8 aksara.',
+    passwordUppercaseError: 'Kata laluan mesti mengandungi sekurang-kurangnya satu huruf besar.',
+    passwordLowercaseError: 'Kata laluan mesti mengandungi sekurang-kurangnya satu huruf kecil.',
+    passwordDigitError: 'Kata laluan mesti mengandungi sekurang-kurangnya satu digit.',
+    passwordSymbolError: 'Kata laluan mesti mengandungi sekurang-kurangnya satu simbol (!@#$%^&* dll.).',
+
     // Sidebar Navigation
     platform: 'Platform',
     users: 'Pengguna',
     announcements: 'Pengumuman',
     faqs: 'Soalan Lazim',
-    
+
     // Dashboard Page
     welcomeBack: 'Selamat kembali! Inilah yang berlaku dengan bungkusan anda hari ini.',
     dailyOperations: 'Gambaran Keseluruhan Operasi Harian',
@@ -224,7 +230,7 @@ export const ms = {
     parcelSize: 'Saiz Bungkusan',
     parcelStatusDistribution: 'Pengedaran Status Bungkusan',
     collectionTime: 'Pengedaran Masa Pengambilan',
-    
+
     // User Management Page
     userManagement: 'Pengurusan Pengguna',
     manageStudents: 'Urus akaun pelajar dan jana laporan',
@@ -247,7 +253,7 @@ export const ms = {
     total: 'jumlah',
     active: 'Aktif',
     inactive: 'Tidak Aktif',
-    
+
     // Announcements Page
     manageAnnouncements: 'Urus pengumuman dan pemberitahuan untuk pelajar',
     totalAnnouncements: 'Jumlah Pengumuman',
@@ -268,7 +274,7 @@ export const ms = {
     thisAnnouncement: 'pengumuman ini',
     cannotBeUndone: 'Tindakan ini tidak boleh dibatalkan dan akan memadamkan pengumuman ini secara kekal.',
     deleting: 'Memadam...',
-    
+
     // FAQs Page
     manageFaqs: 'Urus soalan lazim untuk pelajar',
     totalFAQs: 'Jumlah Soalan Lazim',
@@ -280,7 +286,7 @@ export const ms = {
     thisFAQ: 'soalan lazim ini',
     cannotBeUndoneFAQ: 'Tindakan ini tidak boleh dibatalkan dan akan memadamkan soalan lazim ini secara kekal.',
     collection: 'Pengambilan',
-    
+
     // Export Modal
     exportParcels: 'Eksport Bungkusan',
     selectDateRange: 'Pilih Julat Tarikh',
@@ -306,7 +312,7 @@ export const ms = {
     exportCSV: 'Eksport CSV',
     verified: 'Disahkan',
     unverified: 'Tidak Disahkan',
-    
+
     // Announcement Modals
     createAnnouncement: 'Cipta Pengumuman',
     createAnnouncementDesc: 'Cipta pengumuman baru untuk pelajar',
@@ -325,7 +331,7 @@ export const ms = {
     noFileChosen: 'Tiada fail dipilih',
     noImage: 'Tiada imej',
     changeImage: 'Tukar imej',
-    
+
     // FAQ Modals
     editFAQ: 'Edit Soalan Lazim',
     updateFAQInfo: 'Kemaskini maklumat Soalan Lazim',
@@ -338,7 +344,7 @@ export const ms = {
     enterQuestion: 'Masukkan soalan...',
     enterAnswer: 'Masukkan jawapan...',
     chooseCategory: 'Pilih kategori',
-    
+
     // Payment Verification Page (NEW)
     paymentVerification: 'Pengesahan Pembayaran',
     reviewVerifyPayments: 'Semak dan sahkan penyerahan pembayaran pelajar',
@@ -347,7 +353,7 @@ export const ms = {
     searchParcels: 'Cari parsel...',
     amount: 'Jumlah',
     actions: 'Tindakan',
-    
+
     // Parcel Management Page (NEW)
     todayCollection: 'Pengambilan Hari Ini',
     paymentVerified: 'Pembayaran Disahkan',
@@ -363,7 +369,7 @@ export const ms = {
     allParcels: 'Semua Parsel',
     location: 'Lokasi',
     days: 'Hari',
-    
+
     // Add Parcel Page (NEW)
     scanParcelQR: 'Imbas kod QR parsel untuk isi butiran secara automatik',
     tapToScanQR: 'Ketik untuk Imbas Kod QR',
@@ -482,7 +488,7 @@ export const ms = {
     notifications: 'Pemberitahuan',
     noNotifications: 'Tiada pemberitahuan',
     paid: 'Dibayar',
-    
+
     // Payment Submit Page
     paymentFor: 'Bayaran untuk',
     collectionFee: 'Yuran Pengambilan',
@@ -501,9 +507,8 @@ export const ms = {
     scanPaymentQRAndUpload: 'Imbas kod QR pembayaran dan muat naik bukti pembayaran',
     collectionQRCode: 'Kod QR Pengambilan',
     showThisQRCode: 'Tunjukkan kod QR ini untuk mengambil parsel anda',
-    collectionCode: 'Kod Pengambilan',
     uploading: 'Memuat naik...',
-    
+
     // Profile Page
     profileSettings: 'Tetapan profil',
     manageProfile: 'Urus profil dan tetapan akaun anda',
@@ -516,7 +521,17 @@ export const ms = {
     deleteAccount: 'Padam akaun',
     deleteAccountDescription: 'Padamkan akaun anda dan semua sumbernya',
     deleteWarning: 'Sila teruskan dengan berhati-hati, ini tidak boleh dibatalkan.',
-    
+    deleteAccountConfirmation: 'Adakah anda pasti mahu memadam akaun anda?',
+    deleteAccountWarning: 'Setelah akaun anda dipadam, semua sumber dan datanya juga akan dipadam secara kekal. Sila masukkan kata laluan anda untuk mengesahkan bahawa anda ingin memadam akaun anda secara kekal.',
+    emailUnverified: 'Alamat e-mel anda belum disahkan.',
+    resendVerification: 'Klik di sini untuk menghantar semula e-mel pengesahan.',
+    verificationSent: 'Pautan pengesahan baharu telah dihantar ke alamat e-mel anda.',
+    photoRequirements: 'JPG, PNG atau GIF (MAX. 2MB)',
+    fullNamePlaceholder: 'Nama penuh',
+    emailPlaceholder: 'Alamat e-mel',
+    phonePlaceholder: 'cth., 0123456789',
+    roomPlaceholder: 'cth., A-101',
+
     // Student Parcel Page Greetings
     goodMorning: 'Selamat Pagi',
     goodAfternoon: 'Selamat Petang',

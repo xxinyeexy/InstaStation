@@ -930,8 +930,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <div
                             key={notification.id}
                             className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${notification.type === 'success'
-                                    ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800 dark:border-emerald-500/50 dark:bg-emerald-500/20 dark:text-emerald-300'
-                                    : 'border-red-200 bg-red-50/95 text-red-800 dark:border-red-500/50 dark:bg-red-500/20 dark:text-red-300'
+                                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800 dark:border-emerald-500/50 dark:bg-emerald-500/20 dark:text-emerald-300'
+                                : 'border-red-200 bg-red-50/95 text-red-800 dark:border-red-500/50 dark:bg-red-500/20 dark:text-red-300'
                                 } `}
                         >
                             <div className="flex items-start gap-3">
@@ -1018,15 +1018,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
                 )}
 
-                <div className="min-h-screen bg-white p-6 dark:bg-background">
+                <div className="min-h-screen bg-white p-4 sm:p-6 dark:bg-background">
                     {/* Header tiles matching screenshot */}
-                    <div className="mb-6 grid grid-cols-12 gap-x-4 gap-y-3">
+                    <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-x-4 sm:gap-y-3">
                         {/* My Parcels - Purple (icon on right) */}
-                        <div className="col-span-3 h-30 rounded-xl border-3 border-violet-300 bg-violet-50 p-4 dark:border-violet-500/50 dark:bg-violet-500/20">
+                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-violet-300 bg-violet-50 p-3 sm:p-4 dark:border-violet-500/50 dark:bg-violet-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="text-xs text-gray-600 dark:text-violet-400">{t('myParcels')}</div>
-                                    <div className="mt-1 text-3xl font-bold text-violet-700 dark:text-violet-300">{tileCounts.myParcels}</div>
+                                    <div className="text-xs sm:text-xs text-gray-600 dark:text-violet-400">{t('myParcels')}</div>
+                                    <div className="mt-1 text-2xl sm:text-3xl font-bold text-violet-700 dark:text-violet-300">{tileCounts.myParcels}</div>
                                 </div>
                                 <div className="flex h-13 w-13 items-center justify-center rounded-full bg-violet-100 text-violet-600 dark:bg-violet-500/30 dark:text-violet-300">
                                     <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1042,11 +1042,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Pending Payment - Yellow (icon on right) */}
-                        <div className="col-span-3 h-30 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-500/50 dark:bg-yellow-500/20">
+                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-3 sm:p-4 dark:border-yellow-500/50 dark:bg-yellow-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="text-xs text-gray-600 dark:text-yellow-400">{t('pendingPayment')}</div>
-                                    <div className="mt-1 text-3xl font-bold text-yellow-700 dark:text-yellow-300">{tileCounts.pendingPayment}</div>
+                                    <div className="text-xs sm:text-xs text-gray-600 dark:text-yellow-400">{t('pendingPayment')}</div>
+                                    <div className="mt-1 text-2xl sm:text-3xl font-bold text-yellow-700 dark:text-yellow-300">{tileCounts.pendingPayment}</div>
                                 </div>
                                 <div className="flex h-13 w-13 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 dark:bg-yellow-500/30 dark:text-yellow-300">
                                     <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1062,11 +1062,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Approved - Orange (icon on right) */}
-                        <div className="col-span-3 h-30 rounded-xl border-3 border-amber-200 bg-amber-50 p-4 dark:border-amber-500/50 dark:bg-amber-500/20">
+                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-amber-200 bg-amber-50 p-3 sm:p-4 dark:border-amber-500/50 dark:bg-amber-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="text-xs text-gray-600 dark:text-amber-400">{t('approved')}</div>
-                                    <div className="mt-1 text-3xl font-bold text-amber-700 dark:text-amber-300">{tileCounts.approved}</div>
+                                    <div className="text-xs sm:text-xs text-gray-600 dark:text-amber-400">{t('approved')}</div>
+                                    <div className="mt-1 text-2xl sm:text-3xl font-bold text-amber-700 dark:text-amber-300">{tileCounts.approved}</div>
                                 </div>
                                 <div className="flex h-13 w-13 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/30 dark:text-amber-300">
                                     <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1082,7 +1082,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="col-span-4 col-start-11 rounded-xl border-3 border-gray-100 bg-white p-4 shadow-sm dark:border-border dark:bg-card">
+                        <div className="lg:col-span-4 lg:col-start-11 h-28 sm:h-auto rounded-xl border-3 border-gray-100 bg-white p-3 sm:p-4 shadow-sm dark:border-border dark:bg-card">
                             <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-card-foreground">{t('quickActions')}</div>
 
                             <button
@@ -1097,7 +1097,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Ready for Collection - Green (icon on right) */}
-                        <div className="col-span-3 h-30 rounded-xl border-3 border-green-200 bg-green-50 p-4 dark:border-green-500/50 dark:bg-green-500/20">
+                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-green-200 bg-green-50 p-3 sm:p-4 dark:border-green-500/50 dark:bg-green-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="text-xs text-gray-600 dark:text-green-400">{t('readyForCollection')}</div>
@@ -1141,8 +1141,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 <div
                                                     key={hub.name}
                                                     className={`rounded-lg border p-4 transition-colors ${selectedHub?.name === hub.name
-                                                            ? 'border-blue-300 bg-blue-50 dark:border-blue-500/50 dark:bg-blue-500/20'
-                                                            : 'border-gray-200 bg-gray-50 dark:border-border dark:bg-muted/30'
+                                                        ? 'border-blue-300 bg-blue-50 dark:border-blue-500/50 dark:bg-blue-500/20'
+                                                        : 'border-gray-200 bg-gray-50 dark:border-border dark:bg-muted/30'
                                                         }`}
                                                 >
                                                     <div className="flex items-start justify-between">
@@ -1157,8 +1157,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                 Status:{' '}
                                                                 <span
                                                                     className={`font-semibold ${open
-                                                                            ? 'text-emerald-600 dark:text-emerald-400'
-                                                                            : 'text-red-600 dark:text-red-400'
+                                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                                        : 'text-red-600 dark:text-red-400'
                                                                         }`}
                                                                 >
                                                                     {open ? 'OPEN' : 'CLOSE'}
@@ -1210,11 +1210,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             </div>
                         )}
                         {/* Collected - Light Blue (icon on right) */}
-                        <div className="col-span-3 h-30 rounded-xl border-3 border-blue-200 bg-blue-50 p-4 dark:border-blue-500/50 dark:bg-blue-500/20">
+                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-blue-200 bg-blue-50 p-3 sm:p-4 dark:border-blue-500/50 dark:bg-blue-500/20">
                             <div className="flex items-start justify-between">
                                 <div>
-                                    <div className="text-xs text-gray-600 dark:text-blue-400">{t('collected')}</div>
-                                    <div className="mt-1 text-3xl font-bold text-blue-700 dark:text-blue-300">{tileCounts.collected}</div>
+                                    <div className="text-xs sm:text-xs text-gray-600 dark:text-blue-400">{t('collected')}</div>
+                                    <div className="mt-1 text-2xl sm:text-3xl font-bold text-blue-700 dark:text-blue-300">{tileCounts.collected}</div>
                                 </div>
                                 <div className="flex h-13 w-13 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-500/30 dark:text-blue-300">
                                     <svg
@@ -1245,7 +1245,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             {t('noParcelsFound')}
                         </div>
                     ) : (
-                        <div className="grid grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                             {displayParcels.map((parcel) => {
                                 const status = parcel.parcel_status?.toLowerCase();
                                 const isApproved = status === 'approved';

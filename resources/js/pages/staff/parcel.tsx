@@ -31,19 +31,19 @@ interface Parcel {
     recipient_name?: string | null;
     recipient_matric?: string | null;
     created_by:
-        | number
-        | {
-              id: number;
-              name: string;
-              email: string;
-          };
+    | number
+    | {
+        id: number;
+        name: string;
+        email: string;
+    };
     last_edited_by:
-        | number
-        | {
-              id: number;
-              name: string;
-              email: string;
-          };
+    | number
+    | {
+        id: number;
+        name: string;
+        email: string;
+    };
     report_at: string;
     created_at: string;
     updated_at: string;
@@ -132,7 +132,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     });
     const [isUpdating, setIsUpdating] = useState(false);
     const [editValidationError, setEditValidationError] = useState<string>('');
-    
+
     const showEditValidationError = (message: string) => {
         setEditValidationError(message);
         setTimeout(() => setEditValidationError(''), 3000);
@@ -161,15 +161,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setShowScanModal(false);
         try {
             if (scannerRef.current) {
-                await scannerRef.current.clear().catch(() => {});
+                await scannerRef.current.clear().catch(() => { });
             }
             if (html5Ref.current) {
-                await html5Ref.current.stop().catch(() => {});
+                await html5Ref.current.stop().catch(() => { });
                 try {
                     await html5Ref.current.clear();
-                } catch {}
+                } catch { }
             }
-        } catch {}
+        } catch { }
         scannerRef.current = null;
         html5Ref.current = null;
     };
@@ -229,11 +229,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     },
                 };
 
-                await html5.start(cameraConfig as any, scanConfig as any, onDecodeSuccess, () => {});
+                await html5.start(cameraConfig as any, scanConfig as any, onDecodeSuccess, () => { });
                 // Hint autofocus after start (typed as any to avoid TS lib gaps)
                 try {
                     await (html5Ref.current as any)?.applyVideoConstraints?.({ advanced: [{ focusMode: 'continuous' }] });
-                } catch {}
+                } catch { }
             } catch (e: any) {
                 setCameraError('Camera could not start. Use HTTPS or localhost, allow camera permissions, and ensure a camera is connected.');
             } finally {
@@ -249,7 +249,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         if (!selectedCameraId) return;
         (async () => {
             try {
-                await html5Ref.current!.stop().catch(() => {});
+                await html5Ref.current!.stop().catch(() => { });
                 const switchConfig: any = {
                     fps: 24,
                     qrbox: { width: 340, height: 340 },
@@ -262,10 +262,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     },
                 };
 
-                await html5Ref.current!.start({ deviceId: { exact: selectedCameraId } } as any, switchConfig as any, onDecodeSuccess, () => {});
+                await html5Ref.current!.start({ deviceId: { exact: selectedCameraId } } as any, switchConfig as any, onDecodeSuccess, () => { });
                 try {
                     await (html5Ref.current as any)?.applyVideoConstraints?.({ advanced: [{ focusMode: 'continuous' }] });
-                } catch {}
+                } catch { }
             } catch (e) {
                 setCameraError('Failed to switch camera');
             }
@@ -374,7 +374,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             showEditValidationError('Please enter a tracking number');
             return;
         }
-        
+
         if (editForm.tracking_no.trim().length < 5) {
             showEditValidationError('Tracking number must be at least 5 characters long');
             return;
@@ -389,7 +389,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             showEditValidationError('Please enter sender information');
             return;
         }
-        
+
         if (editForm.sender_name.trim().length < 3) {
             showEditValidationError('Sender name must be at least 3 characters long');
             return;
@@ -492,14 +492,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             activeTab === 'All Parcels'
                 ? ['pending payment', 'ready for collection', 'collected', 'unclaimed'].includes(status)
                 : activeTab === 'Pending Payment'
-                  ? ['pending payment'].includes(status)
-                  : activeTab === 'Ready For Collection'
-                    ? ['ready for collection', 'ready to collect'].includes(status)
-                    : activeTab === 'Collected'
-                      ? status === 'collected'
-                      : activeTab === 'Unclaimed'
-                        ? status === 'unclaimed'
-                        : true;
+                    ? ['pending payment'].includes(status)
+                    : activeTab === 'Ready For Collection'
+                        ? ['ready for collection', 'ready to collect'].includes(status)
+                        : activeTab === 'Collected'
+                            ? status === 'collected'
+                            : activeTab === 'Unclaimed'
+                                ? status === 'unclaimed'
+                                : true;
 
         const matchesSearch =
             searchTerm === '' ||
@@ -614,25 +614,25 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             case 'All Parcels':
                 return isActive
                     ? 'bg-blue-50 text-blue-600 border-blue-200'
-                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-blue-50 dark:hover:bg-blue-500/20 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 dark:hover:border-blue-500/50';
+                    : 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20';
             case 'Pending Payment':
                 return isActive
                     ? 'bg-orange-50 text-orange-600 border-orange-200'
-                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-orange-50 dark:hover:bg-orange-500/20 hover:text-orange-600 dark:hover:text-orange-400 hover:border-orange-200 dark:hover:border-orange-500/50';
+                    : 'bg-white dark:bg-gray-900 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-800 hover:bg-orange-50 dark:hover:bg-orange-900/20';
             case 'Ready For Collection':
                 return isActive
                     ? 'bg-[#EDE9FE] text-[#5B21B6] border-purple-200'
-                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-[#EDE9FE] dark:hover:bg-purple-500/20 hover:text-[#5B21B6] dark:hover:text-purple-400 hover:border-purple-200 dark:hover:border-purple-500/50';
+                    : 'bg-white dark:bg-gray-900 text-[#5B21B6] dark:text-purple-400 border-purple-200 dark:border-purple-800 hover:bg-[#EDE9FE] dark:hover:bg-purple-900/20';
             case 'Collected':
                 return isActive
                     ? 'bg-[#DCFCE7] text-[#166534] border-green-200'
-                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-[#DCFCE7] dark:hover:bg-green-500/20 hover:text-[#166534] dark:hover:text-green-400 hover:border-green-200 dark:hover:border-green-500/50';
+                    : 'bg-white dark:bg-gray-900 text-[#166534] dark:text-green-400 border-green-200 dark:border-green-800 hover:bg-[#DCFCE7] dark:hover:bg-green-900/20';
             case 'Unclaimed':
                 return isActive
                     ? 'bg-[#C5C5CF] text-black border-gray-300'
-                    : 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-[#C5C5CF] dark:hover:bg-gray-500/20 hover:text-black dark:hover:text-foreground hover:border-gray-300 dark:hover:border-border';
+                    : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-700 hover:bg-[#C5C5CF] dark:hover:bg-gray-800 hover:text-black dark:hover:text-white';
             default:
-                return 'bg-white dark:bg-background text-gray-600 dark:text-muted-foreground border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-accent hover:text-gray-700 dark:hover:text-foreground';
+                return 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-white';
         }
     };
 
@@ -640,25 +640,29 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const getBadgeStyles = (tab: TabType) => {
         const isActive = activeTab === tab;
 
-        if (isActive) {
-            // Active badge styles (semi-transparent white)
-            return 'bg-white/50 dark:bg-background/50';
-        } else {
-            // Inactive badge styles should match the active tab colors
-            switch (tab) {
-                case 'All Parcels':
-                    return 'bg-blue-100 text-blue-600';
-                case 'Pending Payment':
-                    return 'bg-orange-100 text-orange-600';
-                case 'Ready For Collection':
-                    return 'bg-purple-100 text-purple-600';
-                case 'Collected':
-                    return 'bg-green-100 text-green-600';
-                case 'Unclaimed':
-                    return 'bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground';
-                default:
-                    return 'bg-gray-100 dark:bg-muted text-white dark:text-foreground';
-            }
+        switch (tab) {
+            case 'All Parcels':
+                return isActive
+                    ? 'bg-blue-200 text-blue-700 dark:bg-blue-600 dark:text-white'
+                    : 'bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-300';
+            case 'Pending Payment':
+                return isActive
+                    ? 'bg-orange-200 text-orange-700 dark:bg-orange-600 dark:text-white'
+                    : 'bg-orange-100 text-orange-600 dark:bg-orange-900/50 dark:text-orange-300';
+            case 'Ready For Collection':
+                return isActive
+                    ? 'bg-purple-200 text-purple-700 dark:bg-purple-600 dark:text-white'
+                    : 'bg-purple-100 text-purple-600 dark:bg-purple-900/50 dark:text-purple-300';
+            case 'Collected':
+                return isActive
+                    ? 'bg-green-200 text-green-700 dark:bg-green-600 dark:text-white'
+                    : 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-300';
+            case 'Unclaimed':
+                return isActive
+                    ? 'bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-white'
+                    : 'bg-gray-100 dark:bg-muted text-gray-600 dark:text-muted-foreground';
+            default:
+                return 'bg-gray-100 dark:bg-muted text-white dark:text-foreground';
         }
     };
 
@@ -713,10 +717,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 p.parcel_id === parcelId ? { ...p, parcel_status: 'Collected' } : p
             )
         );
-        
+
         // Switch to Collected tab immediately for smooth UX
         setActiveTab('Collected');
-        
+
         // Show success notification immediately
         addNotification('success', t('success'), t('parcelCollectedSuccess'));
 
@@ -892,7 +896,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 try {
                     const err = await response.json();
                     if (err?.message) errorMessage = err.message;
-                } catch {}
+                } catch { }
                 throw new Error(errorMessage);
             }
 
@@ -985,11 +989,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 {notifications.map((notification) => (
                     <div
                         key={notification.id}
-                        className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${
-                            notification.type === 'success'
-                                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
-                                : 'border-red-200 bg-red-50/95 text-red-800'
-                        } `}
+                        className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${notification.type === 'success'
+                            ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
+                            : 'border-red-200 bg-red-50/95 text-red-800'
+                            } `}
                     >
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex-shrink-0">
@@ -1013,46 +1016,46 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         {/* Calendar Modal */}
                         {calendarOpen && (
                             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                                <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+                                <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800">
                                     <div className="flex items-center justify-between">
-                                        <h3 className="text-lg font-semibold">Collections for date</h3>
+                                        <h3 className="text-lg font-semibold dark:text-white">Collections for date</h3>
                                         <button onClick={() => setCalendarOpen(false)} className="text-sm text-gray-500">
                                             Close
                                         </button>
                                     </div>
                                     <div className="mt-4 flex items-center gap-4">
-                                        <label className="text-sm text-gray-600">Select date</label>
+                                        <label className="text-sm text-gray-600 dark:text-gray-400">Select date</label>
                                         <input
                                             type="date"
                                             value={selectedDate}
                                             onChange={(e) => setSelectedDate(e.target.value)}
-                                            className="rounded-md border px-3 py-2"
+                                            className="rounded-md border px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         />
-                                        <div className="ml-auto text-sm text-gray-600">Found: {groupedCollections.length}</div>
+                                        <div className="ml-auto text-sm text-gray-600 dark:text-gray-400">Found: {groupedCollections.length}</div>
                                     </div>
                                     <div className="mt-4 max-h-[60vh] space-y-3 overflow-y-auto">
                                         {groupedCollections.length === 0 ? (
-                                            <div className="text-sm text-gray-500">No parcels scheduled on this date.</div>
+                                            <div className="text-sm text-gray-500 dark:text-gray-400">No parcels scheduled on this date.</div>
                                         ) : (
                                             groupedCollections.map((g) => (
-                                                <div key={g.key} className="rounded-xl border border-gray-100 p-4">
+                                                <div key={g.key} className="rounded-xl border border-gray-100 p-4 dark:border-gray-700">
                                                     <div className="flex items-start gap-4">
                                                         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 font-semibold text-purple-600">
                                                             <span className="text-sm">{g.time_slot ? g.time_slot.split(' - ')[0] : ''}</span>
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2">
-                                                                <p className="text-sm font-semibold text-gray-900">{g.student_name}</p>
+                                                                <p className="text-sm font-semibold text-gray-900 dark:text-white">{g.student_name}</p>
                                                                 {g.student_matric && <p className="text-xs text-gray-500">({g.student_matric})</p>}
                                                             </div>
-                                                            <div className="mt-1 text-sm text-gray-700">Parcels: {g.parcels.length}</div>
-                                                            <div className="mt-1 truncate text-sm text-gray-700">
+                                                            <div className="mt-1 text-sm text-gray-700 dark:text-gray-300">Parcels: {g.parcels.length}</div>
+                                                            <div className="mt-1 truncate text-sm text-gray-700 dark:text-gray-300">
                                                                 Codes:{' '}
                                                                 <span className="font-mono">
                                                                     {g.parcels.map((pp) => pp.parcel_code || pp.tracking_no).join(', ')}
                                                                 </span>
                                                             </div>
-                                                            <div className="mt-1 text-xs text-gray-500">
+                                                            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                                                 Timeslot: {g.time_slot || formatScheduledDate(g.schedule || '')}
                                                             </div>
                                                             {(() => {
@@ -1060,9 +1063,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                     new Set(g.parcels.map((pp) => (pp.parcel_status || '').toString())),
                                                                 );
                                                                 return (
-                                                                    <div className="mt-2 text-xs text-gray-500">
+                                                                    <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                                                                         Status:{' '}
-                                                                        <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+                                                                        <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                                                                             {statuses.length === 1 ? statuses[0] : 'Multiple'}
                                                                         </span>
                                                                     </div>
@@ -1084,17 +1087,17 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {/* Parcel Details Modal */}
             {showDetailsModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-card">
+                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-border">
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-card-foreground">{t('parcelDetails')}</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('parcelDetails')}</h2>
 
-                                <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('completeInformation')}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{t('completeInformation')}</p>
                             </div>
                             <button
                                 onClick={handleCloseDetailsModal}
-                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                             >
                                 <X className="h-6 w-6" />
                             </button>
@@ -1107,20 +1110,20 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     {/* Top Section */}
                                     <div className="grid grid-cols-2 gap-6">
                                         <div>
-                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                                                 {t('trackingInformation')}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
                                                         {t('trackingNumber')}
                                                     </label>
-                                                    <p className="font-['Consolas'] text-lg font-bold text-gray-900 dark:text-card-foreground">
+                                                    <p className="font-['Consolas'] text-lg font-bold text-gray-900 dark:text-white">
                                                         {parcelDetails.tracking_no}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
                                                         {t('status')}
                                                     </label>
                                                     <span
@@ -1133,27 +1136,27 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         </div>
 
                                         <div>
-                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                                                 {t('recipientInformation')}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
                                                         {t('studentID')}
                                                     </label>
-                                                    <p className="text-gray-900 dark:text-card-foreground">
+                                                    <p className="text-gray-900 dark:text-white">
                                                         {parcelDetails.student_user?.matric || parcelDetails.student_id}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">{t('name')}</label>
-                                                    <p className="text-gray-900 dark:text-card-foreground">
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('name')}</label>
+                                                    <p className="text-gray-900 dark:text-white">
                                                         {parcelDetails.student_user?.name || 'N/A'}
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">{t('email')}</label>
-                                                    <p className="text-gray-900 dark:text-card-foreground">
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('email')}</label>
+                                                    <p className="text-gray-900 dark:text-white">
                                                         {parcelDetails.student_user?.email || 'N/A'}
                                                     </p>
                                                 </div>
@@ -1163,11 +1166,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Sender Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('senderInformation')}</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">{t('senderInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('sender')}</label>
-                                                <p className="text-gray-900 dark:text-card-foreground">{parcelDetails.sender || 'N/A'}</p>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('sender')}</label>
+                                                <p className="text-gray-900 dark:text-white">{parcelDetails.sender || 'N/A'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1177,12 +1180,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('parcelInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('dimensions')}</label>
-                                                <p className="text-gray-900">{parcelDetails.dimensions || parcelDetails.size || 'N/A'}</p>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('dimensions')}</label>
+                                                <p className="text-gray-900 dark:text-white">{parcelDetails.dimensions || parcelDetails.size || 'N/A'}</p>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('fee')}</label>
-                                                <p className="text-gray-900">RM{parcelDetails.fee || '1.00'}</p>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('fee')}</label>
+                                                <p className="text-gray-900 dark:text-white">RM{parcelDetails.fee || '1.00'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1192,12 +1195,12 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('additionalInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('location')}</label>
-                                                <p className="text-gray-900">{parcelDetails.location || 'N/A'}</p>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('location')}</label>
+                                                <p className="text-gray-900 dark:text-white">{parcelDetails.location || 'N/A'}</p>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('daysInStorage')}</label>
-                                                <p className="text-gray-900">{parcelDetails.days || 0} {t('days')}</p>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('daysInStorage')}</label>
+                                                <p className="text-gray-900 dark:text-white">{parcelDetails.days || 0} {t('days')}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1207,24 +1210,24 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         parcelDetails.parcel_status?.toLowerCase() === 'ready to collect') &&
                                         (parcelDetails.schedule || parcelDetails.time_slot) && (
                                             <div>
-                                                <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('scheduledPickupInfo')}</h3>
-                                                <div className="rounded-lg border border-purple-200 bg-purple-50 p-4">
+                                                <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">{t('scheduledPickupInfo')}</h3>
+                                                <div className="rounded-lg border border-purple-200 bg-purple-50 p-4 dark:border-purple-800 dark:bg-purple-900/20">
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div>
-                                                            <label className="block text-sm font-medium text-purple-700">{t('scheduledDate')}</label>
-                                                            <p className="font-medium text-purple-900">
+                                                            <label className="block text-sm font-medium text-purple-700 dark:text-purple-300">{t('scheduledDate')}</label>
+                                                            <p className="font-medium text-purple-900 dark:text-purple-100">
                                                                 {formatScheduledDate(parcelDetails.schedule) || t('notSet')}
                                                             </p>
                                                         </div>
                                                         <div>
-                                                            <label className="block text-sm font-medium text-purple-700">{t('timeSlot')}</label>
-                                                            <p className="font-medium text-purple-900">{parcelDetails.time_slot || t('notSet')}</p>
+                                                            <label className="block text-sm font-medium text-purple-700 dark:text-purple-300">{t('timeSlot')}</label>
+                                                            <p className="font-medium text-purple-900 dark:text-purple-100">{parcelDetails.time_slot || t('notSet')}</p>
                                                         </div>
                                                     </div>
                                                     {formatScheduledDate(parcelDetails.schedule) && parcelDetails.time_slot && (
-                                                        <div className="mt-3 border-t border-purple-200 pt-3">
-                                                            <label className="block text-sm font-medium text-purple-700">{t('fullSchedule')}</label>
-                                                            <p className="font-semibold text-purple-900">
+                                                        <div className="mt-3 border-t border-purple-200 pt-3 dark:border-purple-800">
+                                                            <label className="block text-sm font-medium text-purple-700 dark:text-purple-300">{t('fullSchedule')}</label>
+                                                            <p className="font-semibold text-purple-900 dark:text-purple-100">
                                                                 {formatScheduledDate(parcelDetails.schedule)} • {parcelDetails.time_slot}
                                                             </p>
                                                         </div>
@@ -1234,16 +1237,16 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         )}
 
                                     {/* Timestamps */}
-                                    <div className="border-t border-gray-200 pt-4">
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('timestamps')}</h3>
+                                    <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">{t('timestamps')}</h3>
                                         <div className="grid grid-cols-2 gap-4 text-sm">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('createdAt')}</label>
-                                                <p className="text-gray-900">{formatDateTime(parcelDetails.created_at)}</p>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('createdAt')}</label>
+                                                <p className="text-gray-900 dark:text-white">{formatDateTime(parcelDetails.created_at)}</p>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('lastUpdated')}</label>
-                                                <p className="text-gray-900">{formatDateTime(parcelDetails.updated_at)}</p>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('lastUpdated')}</label>
+                                                <p className="text-gray-900 dark:text-white">{formatDateTime(parcelDetails.updated_at)}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -1257,10 +1260,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                         {/* Modal Footer */}
                         {parcelDetails && (
-                            <div className="flex justify-end gap-3 border-t border-gray-200 p-6">
+                            <div className="flex justify-end gap-3 border-t border-gray-200 p-6 dark:border-gray-700">
                                 <button
                                     onClick={handleCloseDetailsModal}
-                                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                                    className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
                                 >
                                     {t('close')}
                                 </button>
@@ -1271,11 +1274,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             handleCloseDetailsModal();
                                         }}
                                         disabled={collectingParcels.has(parcelDetails.parcel_id)}
-                                        className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-150 ${
-                                            collectingParcels.has(parcelDetails.parcel_id)
-                                                ? 'cursor-not-allowed bg-green-500 opacity-80'
-                                                : 'bg-green-600 hover:scale-105 hover:bg-green-700 active:scale-95'
-                                        }`}
+                                        className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all duration-150 ${collectingParcels.has(parcelDetails.parcel_id)
+                                            ? 'cursor-not-allowed bg-green-500 opacity-80'
+                                            : 'bg-green-600 hover:scale-105 hover:bg-green-700 active:scale-95'
+                                            }`}
                                     >
                                         <CircleCheck className="h-4 w-4" />
                                         <span>{t('markAsCollected')}</span>
@@ -1290,16 +1292,16 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {/* QR Scan Modal */}
             {showScanModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl">
+                    <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-border">
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900">Scan Parcel QR Code</h2>
-                                <p className="mt-1 text-sm text-gray-600">Point your camera at a parcel QR to find it instantly</p>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Scan Parcel QR Code</h2>
+                                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Point your camera at a parcel QR to find it instantly</p>
                             </div>
                             <button
                                 onClick={closeScanModal}
-                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                             >
                                 <X className="h-6 w-6" />
                             </button>
@@ -1310,11 +1312,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             <div id={scanContainerId} className="w-full" />
                             {availableCameras.length > 1 && (
                                 <div className="mt-3 flex items-center gap-2">
-                                    <label className="text-xs text-gray-600">Camera:</label>
+                                    <label className="text-xs text-gray-600 dark:text-gray-400">Camera:</label>
                                     <select
                                         value={selectedCameraId ?? ''}
                                         onChange={(e) => setSelectedCameraId(e.target.value)}
-                                        className="rounded border border-gray-300 px-2 py-1 text-xs"
+                                        className="rounded border border-gray-300 px-2 py-1 text-xs dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     >
                                         {availableCameras.map((c) => (
                                             <option key={c.id} value={c.id}>
@@ -1326,26 +1328,26 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             )}
                             {cameraError && <p className="mt-2 text-xs text-red-600">{cameraError}</p>}
                             <div className="mt-3 flex items-center justify-between">
-                                <p className="text-xs text-gray-500">Ensure camera permission is granted.</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">Ensure camera permission is granted.</p>
                                 <button
                                     onClick={async () => {
                                         try {
                                             // try re-init by closing and re-opening scanner
                                             if (scannerRef.current) {
-                                                await scannerRef.current.clear().catch(() => {});
+                                                await scannerRef.current.clear().catch(() => { });
                                                 scannerRef.current = null;
                                             }
                                             if (html5Ref.current) {
                                                 try {
                                                     await html5Ref.current.stop();
-                                                } catch {}
+                                                } catch { }
                                                 try {
                                                     await html5Ref.current.clear();
-                                                } catch {}
+                                                } catch { }
                                                 html5Ref.current = null;
                                             }
                                             setTimeout(() => setShowScanModal((v) => v), 0);
-                                        } catch {}
+                                        } catch { }
                                     }}
                                     className="text-xs font-medium text-blue-600 hover:text-blue-800"
                                 >
@@ -1360,7 +1362,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {/* Edit Parcel Modal */}
             {showEditModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-card">
+                    <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-gray-800">
                         {/* Validation Error Toast */}
                         {editValidationError && (
                             <div className="absolute top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
@@ -1375,14 +1377,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             </div>
                         )}
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-border">
+                        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900">{t('editParcel')}</h2>
-                                <p className="text-sm text-gray-600">{t('updateParcelInfo')}</p>
+                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('editParcel')}</h2>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">{t('updateParcelInfo')}</p>
                             </div>
                             <button
                                 onClick={handleCloseEditModal}
-                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
+                                className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
                             >
                                 <X className="h-6 w-6" />
                             </button>
@@ -1401,29 +1403,29 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     {/* Top Section */}
                                     <div className="grid grid-cols-2 gap-6">
                                         <div>
-                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                                                 {t('trackingInformation')}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
                                                         {t('trackingNumber')}
                                                     </label>
                                                     <input
                                                         type="text"
                                                         value={editForm.tracking_no}
                                                         onChange={(e) => handleEditFormChange('tracking_no', e.target.value)}
-                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
                                                         {t('status')}
                                                     </label>
                                                     <select
                                                         value={editForm.parcel_status}
                                                         onChange={(e) => handleEditFormChange('parcel_status', e.target.value)}
-                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                     >
                                                         <option value="Pending Payment">{t('pendingPayment')}</option>
                                                         <option value="Ready For Collection">{t('readyForCollection')}</option>
@@ -1435,37 +1437,37 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         </div>
 
                                         <div>
-                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
                                                 {t('recipientInformation')}
                                             </h3>
                                             <div className="space-y-3">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600 dark:text-muted-foreground">
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">
                                                         {t('studentID')}
                                                     </label>
                                                     <input
                                                         type="text"
                                                         value={editForm.student_id}
                                                         onChange={(e) => handleEditFormChange('student_id', e.target.value)}
-                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">{t('name')}</label>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('name')}</label>
                                                     <input
                                                         type="text"
                                                         value={editForm.recipient_name}
                                                         onChange={(e) => handleEditFormChange('recipient_name', e.target.value)}
-                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-600">{t('email')}</label>
+                                                    <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('email')}</label>
                                                     <input
                                                         type="email"
                                                         value={editForm.email}
                                                         onChange={(e) => handleEditFormChange('email', e.target.value)}
-                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                     />
                                                 </div>
                                             </div>
@@ -1474,15 +1476,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Sender Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('senderInformation')}</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">{t('senderInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('sender')}</label>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('sender')}</label>
                                                 <input
                                                     type="text"
                                                     value={editForm.sender_name}
                                                     onChange={(e) => handleEditFormChange('sender_name', e.target.value)}
-                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                 />
                                             </div>
                                         </div>
@@ -1490,25 +1492,25 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Parcel Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('parcelInformation')}</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">{t('parcelInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('dimensions')}</label>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('dimensions')}</label>
                                                 <input
                                                     type="text"
                                                     value={editForm.dimensions}
                                                     onChange={(e) => handleEditFormChange('dimensions', e.target.value)}
-                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('fee')} (RM)</label>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('fee')} (RM)</label>
                                                 <input
                                                     type="number"
                                                     step="0.01"
                                                     value={editForm.fee}
                                                     onChange={(e) => handleEditFormChange('fee', parseFloat(e.target.value))}
-                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                 />
                                             </div>
                                         </div>
@@ -1516,10 +1518,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                     {/* Additional Information */}
                                     <div>
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-900">{t('additionalInformation')}</h3>
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">{t('additionalInformation')}</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-600">{t('location')}</label>
+                                                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('location')}</label>
                                                 <input
                                                     type="text"
                                                     value={editingParcel.location || ''}
@@ -1527,18 +1529,18 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         // Update the editingParcel directly for location
                                                         setEditingParcel((prev) => (prev ? { ...prev, location: e.target.value } : null));
                                                     }}
-                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none"
+                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                 />
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Modal Footer */}
-                                    <div className="flex justify-end gap-3 border-t border-gray-200 pt-6">
+                                    <div className="flex justify-end gap-3 border-t border-gray-200 pt-6 dark:border-gray-700">
                                         <button
                                             type="button"
                                             onClick={handleCloseEditModal}
-                                            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                                            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
                                         >
                                             {t('cancel')}
                                         </button>
@@ -1571,25 +1573,25 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {/* Delete Modal */}
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl">
-                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                            <Trash2 className="h-6 w-6 text-red-600" />
+                    <div className="w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl dark:bg-gray-800">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
+                            <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
                         </div>
 
-                        <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('deleteParcel')}</h2>
-                        <p className="mb-1 text-sm text-gray-600">
-                            {t('areYouSureDeleteParcel')} <span className="font-medium text-red-600">{selectedTrackingNo}</span>?
+                        <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t('deleteParcel')}</h2>
+                        <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
+                            {t('areYouSureDeleteParcel')} <span className="font-medium text-red-600 dark:text-red-400">{selectedTrackingNo}</span>?
                         </p>
                         <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
-                                <p className="text-sm text-red-800 dark:text-red-400">
-{t('cannotBeUndoneParcel')}                                </p>
-                            </div>
+                            <p className="text-sm text-red-800 dark:text-red-400">
+                                {t('cannotBeUndoneParcel')}                                </p>
+                        </div>
 
                         <div className="flex justify-center gap-3">
                             <button
                                 onClick={handleDeleteCancel}
                                 disabled={isDeleting}
-                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
                             >
                                 {t('cancel')}
                             </button>
@@ -1613,11 +1615,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             )}
 
             {/* Background with gradient */}
-            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 p-6">
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 p-4 sm:p-6 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/30">
                 {/* Top Stats Grid - Enhanced with better gradients and shadows */}
-                <div className="mb-8 grid grid-cols-3 gap-6">
+                <div className="mb-6 sm:mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Newly Arrived - Enhanced design */}
-                    <div className="group relative overflow-hidden rounded-3xl border-2 border-pink-100 bg-gradient-to-br from-pink-50 via-white to-pink-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-pink-200 hover:shadow-2xl">
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-pink-100 bg-gradient-to-br from-pink-50 via-white to-pink-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-pink-200 hover:shadow-2xl dark:border-pink-900/50 dark:from-pink-900/40 dark:via-gray-800 dark:to-pink-900/20">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-pink-200 to-pink-300 opacity-40 blur-2xl"></div>
                         <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-pink-100 to-pink-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
@@ -1633,7 +1635,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">{t('newlyArrived')}</p>
+                                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300">{t('newlyArrived')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-pink-800">{stats.newlyArrived}</p>
                             </div>
@@ -1641,7 +1643,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Pending Payments - Enhanced design */}
-                    <div className="group relative overflow-hidden rounded-3xl border-2 border-orange-100 bg-gradient-to-br from-orange-50 via-white to-orange-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-orange-200 hover:shadow-2xl">
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-orange-100 bg-gradient-to-br from-orange-50 via-white to-orange-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-orange-200 hover:shadow-2xl dark:border-orange-900/50 dark:from-orange-900/40 dark:via-gray-800 dark:to-orange-900/20">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-orange-200 to-orange-300 opacity-40 blur-2xl"></div>
                         <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-orange-100 to-orange-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
@@ -1657,7 +1659,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">{t('pendingPayment')}</p>
+                                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300">{t('pendingPayment')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-800">{stats.pendingPayments}</p>
                             </div>
@@ -1665,7 +1667,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Ready for Collection - Enhanced design */}
-                    <div className="group relative overflow-hidden rounded-3xl border-2 border-purple-100 bg-gradient-to-br from-purple-50 via-white to-purple-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-purple-200 hover:shadow-2xl">
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-purple-100 bg-gradient-to-br from-purple-50 via-white to-purple-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-purple-200 hover:shadow-2xl dark:border-purple-900/50 dark:from-purple-900/40 dark:via-gray-800 dark:to-purple-900/20">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-purple-200 to-purple-300 opacity-40 blur-2xl"></div>
                         <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-purple-100 to-purple-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
@@ -1681,7 +1683,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">{t('readyForCollection')}</p>
+                                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300">{t('readyForCollection')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-purple-800">{stats.readyForCollection}</p>
                             </div>
@@ -1690,9 +1692,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 </div>
 
                 {/* Second Row Stats - Enhanced design */}
-                <div className="mb-8 grid grid-cols-3 gap-6">
+                <div className="mb-6 sm:mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Total Collection - Enhanced design */}
-                    <div className="group relative overflow-hidden rounded-3xl border-2 border-green-100 bg-gradient-to-br from-green-50 via-white to-green-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-green-200 hover:shadow-2xl">
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-green-100 bg-gradient-to-br from-green-50 via-white to-green-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-green-200 hover:shadow-2xl dark:border-green-900/50 dark:from-green-900/40 dark:via-gray-800 dark:to-green-900/20">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-green-200 to-green-300 opacity-40 blur-2xl"></div>
                         <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-green-100 to-green-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
@@ -1708,7 +1710,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">{t('todayCollection')}</p>
+                                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300">{t('todayCollection')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-800">{stats.todayCollection}</p>
                             </div>
@@ -1716,7 +1718,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Total Revenue - Enhanced design */}
-                    <div className="group relative overflow-hidden rounded-3xl border-2 border-yellow-100 bg-gradient-to-br from-yellow-50 via-white to-yellow-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-yellow-200 hover:shadow-2xl">
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-yellow-100 bg-gradient-to-br from-yellow-50 via-white to-yellow-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-yellow-200 hover:shadow-2xl dark:border-yellow-900/50 dark:from-yellow-900/40 dark:via-gray-800 dark:to-yellow-900/20">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-yellow-200 to-yellow-300 opacity-40 blur-2xl"></div>
                         <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-yellow-100 to-yellow-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
@@ -1732,7 +1734,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">{t('totalRevenue')}</p>
+                                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300">{t('totalRevenue')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 to-yellow-800">RM{stats.totalRevenue}</p>
                             </div>
@@ -1740,7 +1742,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
 
                     {/* Payment Verified - Enhanced design */}
-                    <div className="group relative overflow-hidden rounded-3xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-indigo-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-indigo-200 hover:shadow-2xl">
+                    <div className="group relative overflow-hidden rounded-3xl border-2 border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-indigo-100 p-6 shadow-lg transition-all duration-500 hover:scale-[1.03] hover:border-indigo-200 hover:shadow-2xl dark:border-indigo-900/50 dark:from-indigo-900/40 dark:via-gray-800 dark:to-indigo-900/20">
                         <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-indigo-200 to-indigo-300 opacity-40 blur-2xl"></div>
                         <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-indigo-100 to-indigo-200 opacity-30 blur-xl"></div>
                         <div className="relative flex items-start justify-between">
@@ -1756,7 +1758,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             />
                                         </svg>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-700">{t('paymentVerified')}</p>
+                                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300">{t('paymentVerified')}</p>
                                 </div>
                                 <p className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-800">{stats.paymentVerified}</p>
                             </div>
@@ -1765,19 +1767,19 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 </div>
 
                 {/* Main Content Area with Sidebar */}
-                <div className="grid grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
                     {/* Main Table Area - 3 columns */}
-                    <div className="col-span-3">
-                        <div className="rounded-xl border border-gray-100 bg-white shadow-sm">
+                    <div className="lg:col-span-3">
+                        <div className="rounded-xl border border-gray-100 bg-white shadow-sm dark:bg-gray-800 dark:border-gray-700">
                             {/* Search Bar */}
-                            <div className="border-b border-gray-100 p-6">
+                            <div className="border-b border-gray-100 p-4 sm:p-6 dark:border-gray-700">
                                 <div className="relative">
                                     <input
                                         type="text"
                                         placeholder={t('searchParcels')}
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-pink-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="w-full rounded-lg border border-gray-200 py-3 pr-4 pl-10 text-gray-700 placeholder-gray-400 focus:ring-3 focus:ring-pink-400 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200 dark:placeholder-gray-500"
                                     />
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1793,21 +1795,23 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                             </div>
 
                             {/* Filter Tabs - Updated with colored badges */}
-                            <div className="flex gap-2 border-b border-gray-100 p-6">
-                                {(['All Parcels', 'Pending Payment', 'Ready For Collection', 'Collected', 'Unclaimed'] as TabType[]).map((tab) => (
-                                    <button
-                                        key={tab}
-                                        onClick={() => setActiveTab(tab)}
-                                        style={{ boxShadow: '0px 3px 4px rgba(0, 0, 0, 0.25)' }}
-                                        className={`rounded-lg border px-4 py-2 text-sm font-medium transition-all ${getTabStyles(tab)}`}
-                                    >
-                                        {getTranslatedTabName(tab)} <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${getBadgeStyles(tab)}`}>{counts[tab]}</span>
-                                    </button>
-                                ))}
+                            <div className="border-b border-gray-100 p-4 sm:p-6 dark:border-gray-700">
+                                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                    {(['All Parcels', 'Pending Payment', 'Ready For Collection', 'Collected', 'Unclaimed'] as TabType[]).map((tab) => (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setActiveTab(tab)}
+                                            style={{ boxShadow: '0px 3px 4px rgba(0, 0, 0, 0.25)' }}
+                                            className={`rounded-lg border px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${getTabStyles(tab)}`}
+                                        >
+                                            {getTranslatedTabName(tab)} <span className={`ml-1 rounded-full px-2 py-0.5 text-xs ${getBadgeStyles(tab)}`}>{counts[tab]}</span>
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Table Content */}
-                            <div className="space-y-6 p-6">
+                            <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                                 {filteredParcels.length === 0 ? (
                                     <div className="py-12 text-center">
                                         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
@@ -1820,7 +1824,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 />
                                             </svg>
                                         </div>
-                                        <h3 className="mb-2 text-lg font-medium text-gray-900">
+                                        <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
                                             {searchTerm ? `No parcels found matching "${searchTerm}"` : `No parcels in ${activeTab.toLowerCase()}`}
                                         </h3>
                                         <p className="text-gray-500">Try adjusting your search or filters</p>
@@ -1829,14 +1833,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     sortedParcels.map((parcel) => (
                                         <div
                                             key={parcel.parcel_id}
-                                            className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-6 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-xl"
+                                            className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-white p-4 sm:p-6 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-xl dark:bg-gray-800 dark:border-gray-700 dark:hover:border-blue-500/50"
                                         >
-                                            <div className="flex items-start justify-between">
+                                            <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-0">
                                                 {/* Left side - Parcel info */}
-                                                <div className="flex flex-1 items-start gap-6">
+                                                <div className="flex flex-1 items-start gap-3 sm:gap-6 w-full">
                                                     {/* Parcel icon */}
-                                                    <div className="relative">
-                                                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-50 to-pink-300 shadow-lg">
+                                                    <div className="relative flex-shrink-0">
+                                                        <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-50 to-pink-300 shadow-lg">
                                                             <svg
                                                                 xmlns="http://www.w3.org/2000/svg"
                                                                 className="h-6 w-6 text-pink-500"
@@ -1860,8 +1864,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     {/* Parcel details */}
                                                     <div className="flex-1 space-y-2">
                                                         {/* Header row */}
-                                                        <div className="flex items-center gap-4">
-                                                            <h3 className="font-['Consolas'] text-xl font-bold text-gray-900">
+                                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                                            <h3 className="font-['Consolas'] text-base sm:text-xl font-bold text-gray-900 dark:text-white">
                                                                 {parcel.parcel_code || 'N/A'}
                                                             </h3>
                                                             <span
@@ -1875,7 +1879,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         {parcel.collection_code && (
                                                             <div className="mt-1">
                                                                 <span className="text-xs text-gray-500">
-                                                                    {t('collectionCode')}: <span className="font-['Consolas'] font-medium text-gray-900">{parcel.collection_code}</span>
+                                                                    {t('collectionCode')}: <span className="font-['Consolas'] font-medium text-gray-900 dark:text-white">{parcel.collection_code}</span>
                                                                 </span>
                                                             </div>
                                                         )}
@@ -1898,10 +1902,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                 </svg>
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-medium text-gray-900">
+                                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
                                                                     {parcel.student_user?.name || parcel.recipient_name || 'N/A'}
                                                                 </p>
-                                                                <p className="text-xs text-gray-500">
+                                                                <p className="text-xs text-gray-500 dark:text-gray-400">
                                                                     {parcel.student_user?.matric || parcel.recipient_matric || 'No Matric ID'}
                                                                 </p>
                                                             </div>
@@ -1910,7 +1914,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         {/* Compact Two-Line Layout */}
                                                         <div className="space-y-5">
                                                             {/* First line - Location and Days */}
-                                                            <div className="flex items-center gap-6 text-sm text-gray-600">
+                                                            <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
                                                                 <div className="flex items-center gap-1">
                                                                     <svg
                                                                         className="h-4 w-4 text-gray-400"
@@ -1959,7 +1963,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                             {/* Scheduled pickup information for Ready For Collection parcels */}
                                                             {parcel.parcel_status?.toLowerCase() === 'ready for collection' &&
                                                                 (parcel.schedule || parcel.time_slot) && (
-                                                                    <div className="mt-3 flex items-center gap-3 rounded-xl border border-purple-200 bg-purple-50 p-3 px-4 shadow-sm transition-colors">
+                                                                    <div className="mt-3 flex items-center gap-3 rounded-xl border border-purple-200 bg-purple-50 p-3 px-4 shadow-sm transition-colors dark:border-purple-800 dark:bg-purple-900/20">
                                                                         <svg
                                                                             className="h-4 w-4 text-purple-600"
                                                                             fill="none"
@@ -1974,20 +1978,20 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                             />
                                                                         </svg>
                                                                         <div className="flex flex-col text-left leading-tight">
-                                                                            <span className="text-sm font-semibold text-purple-900">{t('scheduled')}</span>
-                                                                            <span className="text-xs text-purple-700">
+                                                                            <span className="text-sm font-semibold text-purple-900 dark:text-purple-100">{t('scheduled')}</span>
+                                                                            <span className="text-xs text-purple-700 dark:text-purple-300">
                                                                                 {formatScheduledDate(parcel.schedule) && parcel.time_slot
                                                                                     ? `${formatScheduledDate(parcel.schedule)} • ${parcel.time_slot}`
                                                                                     : parcel.time_slot ||
-                                                                                      formatScheduledDate(parcel.schedule) ||
-                                                                                      t('noScheduleSet')}
+                                                                                    formatScheduledDate(parcel.schedule) ||
+                                                                                    t('noScheduleSet')}
                                                                             </span>
                                                                         </div>
                                                                     </div>
                                                                 )}
 
                                                             {/* Second line - All staff and timestamp info in one line */}
-                                                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                                                                 <div className="flex items-center gap-1">
                                                                     <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                         <path
@@ -1999,7 +2003,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                     </svg>
                                                                     <span>
                                                                         {t('createdBy')}:{' '}
-                                                                        <span className="font-medium text-gray-700">
+                                                                        <span className="font-medium text-gray-700 dark:text-gray-300">
                                                                             {typeof parcel.created_by === 'object' && parcel.created_by?.name
                                                                                 ? parcel.created_by.name
                                                                                 : `Staff ID: ${parcel.created_by}`}
@@ -2018,7 +2022,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                     </svg>
                                                                     <span>
                                                                         {t('lastEditedBy')}:{' '}
-                                                                        <span className="font-medium text-gray-700">
+                                                                        <span className="font-medium text-gray-700 dark:text-gray-300">
                                                                             {typeof parcel.last_edited_by === 'object' && parcel.last_edited_by?.name
                                                                                 ? parcel.last_edited_by.name
                                                                                 : `Staff ID: ${parcel.last_edited_by}`}
@@ -2065,13 +2069,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 <div className="flex items-center gap-3">
                                                     {(parcel.parcel_status?.toLowerCase() === 'ready for collection' ||
                                                         parcel.parcel_status?.toLowerCase() === 'ready to collect') && (
-                                                        <button
-                                                            onClick={() => sendReminder(parcel.parcel_id)}
-                                                            className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg"
-                                                        >
-                                                            <BellRing className="h-5 w-5" />
-                                                        </button>
-                                                    )}
+                                                            <button
+                                                                onClick={() => sendReminder(parcel.parcel_id)}
+                                                                className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-yellow-50 hover:text-yellow-400 hover:shadow-lg"
+                                                            >
+                                                                <BellRing className="h-5 w-5" />
+                                                            </button>
+                                                        )}
                                                     <button
                                                         onClick={() => handleViewParcel(parcel.parcel_id)}
                                                         className="rounded-2xl p-3 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg"
@@ -2094,11 +2098,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         <button
                                                             onClick={() => handleMarkAsCollected(parcel.parcel_id)}
                                                             disabled={collectingParcels.has(parcel.parcel_id)}
-                                                            className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-150 ${
-                                                                collectingParcels.has(parcel.parcel_id)
-                                                                    ? 'cursor-not-allowed bg-green-500 opacity-80'
-                                                                    : 'bg-green-600 hover:scale-105 hover:bg-green-700 hover:shadow-xl active:scale-95'
-                                                            }`}
+                                                            className={`flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-150 ${collectingParcels.has(parcel.parcel_id)
+                                                                ? 'cursor-not-allowed bg-green-500 opacity-80'
+                                                                : 'bg-green-600 hover:scale-105 hover:bg-green-700 hover:shadow-xl active:scale-95'
+                                                                }`}
                                                         >
                                                             <CircleCheck className="h-4 w-4" />
                                                             <span>{t('markAsCollected')}</span>
@@ -2116,23 +2119,23 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     {/* Right Sidebar - 1 column */}
                     <div className="col-span-1 space-y-6">
                         {/* Quick Actions - Enhanced */}
-                        <div className="relative overflow-hidden rounded-3xl border-2 border-gradient-to-br from-pink-100 to-purple-100 bg-white p-6 shadow-xl">
+                        <div className="relative overflow-hidden rounded-3xl border-2 border-gradient-to-br from-pink-100 to-purple-100 bg-white p-6 shadow-xl dark:bg-gray-800 dark:border-gray-700">
                             <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-pink-200 to-purple-200 opacity-20 blur-3xl"></div>
                             <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-gradient-to-tr from-blue-200 to-cyan-200 opacity-20 blur-2xl"></div>
-                            
+
                             <div className="relative mb-6 flex items-center gap-3">
                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 shadow-lg">
                                     <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600">{t('quickActions')}</h3>
+                                <h3 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-100 dark:to-gray-300">{t('quickActions')}</h3>
                             </div>
-                            
+
                             <div className="relative space-y-4">
                                 <Link
                                     href="/staff/add-parcel"
-                                    className="group flex w-full items-center gap-4 rounded-2xl border-2 border-pink-100 bg-gradient-to-r from-pink-50 via-white to-pink-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-pink-300 hover:shadow-xl hover:from-pink-100 hover:to-pink-50"
+                                    className="group flex w-full items-center gap-4 rounded-2xl border-2 border-pink-100 bg-gradient-to-r from-pink-50 via-white to-pink-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-pink-300 hover:shadow-xl hover:from-pink-100 hover:to-pink-50 dark:border-pink-900/50 dark:from-pink-900/20 dark:via-gray-800 dark:to-pink-900/10"
                                 >
                                     <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-400 to-pink-600 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
                                         <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2140,8 +2143,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <span className="block text-base font-bold text-gray-900 group-hover:text-pink-700">{t('registerNewParcel')}</span>
-                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-pink-600">{t('addNewParcelSystem')}</p>
+                                        <span className="block text-base font-bold text-gray-900 group-hover:text-pink-700 dark:text-gray-100 dark:group-hover:text-pink-400">{t('registerNewParcel')}</span>
+                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-pink-600 dark:text-gray-400 dark:group-hover:text-pink-300">{t('addNewParcelSystem')}</p>
                                     </div>
                                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-100 text-pink-600 transition-all duration-300 group-hover:bg-pink-600 group-hover:text-white">
                                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2152,7 +2155,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                                 <button
                                     onClick={openScanModal}
-                                    className="group flex w-full items-center gap-4 rounded-2xl border-2 border-purple-100 bg-gradient-to-r from-purple-50 via-white to-purple-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-purple-300 hover:shadow-xl hover:from-purple-100 hover:to-purple-50"
+                                    className="group flex w-full items-center gap-4 rounded-2xl border-2 border-purple-100 bg-gradient-to-r from-purple-50 via-white to-purple-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-purple-300 hover:shadow-xl hover:from-purple-100 hover:to-purple-50 dark:border-purple-900/50 dark:from-purple-900/20 dark:via-gray-800 dark:to-purple-900/10"
                                 >
                                     <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
                                         <svg className="h-7 w-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2165,8 +2168,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         </svg>
                                     </div>
                                     <div className="flex-1">
-                                        <span className="block text-base font-bold text-gray-900 group-hover:text-purple-700">{t('scanQRCode')}</span>
-                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-purple-600">{t('quickParcelIdentification')}</p>
+                                        <span className="block text-base font-bold text-gray-900 group-hover:text-purple-700 dark:text-gray-100 dark:group-hover:text-purple-400">{t('scanQRCode')}</span>
+                                        <p className="mt-1 text-xs text-gray-500 group-hover:text-purple-600 dark:text-gray-400 dark:group-hover:text-purple-300">{t('quickParcelIdentification')}</p>
                                     </div>
                                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100 text-purple-600 transition-all duration-300 group-hover:bg-purple-600 group-hover:text-white">
                                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2176,45 +2179,45 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 </button>
 
                                 {/* Cleanup Old Records Button - Only for Operations/Admin */}
-                                {((currentUser?.department as string)?.trim() === 'Operations' || 
-                                  (currentUser?.department as string)?.trim() === 'Operations - Admin' || 
-                                  (currentUser?.department as string)?.trim() === 'Admin' ||
-                                  currentUser?.type === 'admin') && (
-                                    <button
-                                        onClick={() => {
-                                            if (window.confirm('Are you sure you want to delete all student collection history (parcels) older than 10 days? This action cannot be undone.')) {
-                                                router.post('/staff/parcels/cleanup-old', {}, {
-                                                    preserveScroll: true,
-                                                    onSuccess: () => {
-                                                        router.reload();
-                                                    },
-                                                });
-                                            }
-                                        }}
-                                        className="group flex w-full items-center gap-4 rounded-2xl border-2 border-red-100 bg-gradient-to-r from-red-50 via-white to-red-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-red-300 hover:shadow-xl hover:from-red-100 hover:to-red-50"
-                                    >
-                                        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
-                                            <Trash2 className="h-7 w-7 text-white" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <span className="block text-base font-bold text-gray-900 group-hover:text-red-700">Cleanup Old Records</span>
-                                            <p className="mt-1 text-xs text-gray-500 group-hover:text-red-600">Remove parcels older than 10 days</p>
-                                        </div>
-                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-600 transition-all duration-300 group-hover:bg-red-600 group-hover:text-white">
-                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </div>
-                                    </button>
-                                )}
+                                {((currentUser?.department as string)?.trim() === 'Operations' ||
+                                    (currentUser?.department as string)?.trim() === 'Operations - Admin' ||
+                                    (currentUser?.department as string)?.trim() === 'Admin' ||
+                                    currentUser?.type === 'admin') && (
+                                        <button
+                                            onClick={() => {
+                                                if (window.confirm('Are you sure you want to delete all student collection history (parcels) older than 10 days? This action cannot be undone.')) {
+                                                    router.post('/staff/parcels/cleanup-old', {}, {
+                                                        preserveScroll: true,
+                                                        onSuccess: () => {
+                                                            router.reload();
+                                                        },
+                                                    });
+                                                }
+                                            }}
+                                            className="group flex w-full items-center gap-4 rounded-2xl border-2 border-red-100 bg-gradient-to-r from-red-50 via-white to-red-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-red-300 hover:shadow-xl hover:from-red-100 hover:to-red-50 dark:border-red-900/50 dark:from-red-900/20 dark:via-gray-800 dark:to-red-900/10"
+                                        >
+                                            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+                                                <Trash2 className="h-7 w-7 text-white" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <span className="block text-base font-bold text-gray-900 group-hover:text-red-700 dark:text-gray-100 dark:group-hover:text-red-400">Cleanup Old Records</span>
+                                                <p className="mt-1 text-xs text-gray-500 group-hover:text-red-600 dark:text-gray-400 dark:group-hover:text-red-300">Remove parcels older than 10 days</p>
+                                            </div>
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-600 transition-all duration-300 group-hover:bg-red-600 group-hover:text-white">
+                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                                </svg>
+                                            </div>
+                                        </button>
+                                    )}
                             </div>
                         </div>
 
                         {/* Today's Collections - Enhanced */}
-                        <div className="relative overflow-hidden rounded-3xl border-2 border-gradient-to-br from-blue-100 to-cyan-100 bg-white p-6 shadow-xl">
+                        <div className="relative overflow-hidden rounded-3xl border-2 border-gradient-to-br from-blue-100 to-cyan-100 bg-white p-6 shadow-xl dark:bg-gray-800 dark:border-gray-700">
                             <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-blue-200 to-cyan-200 opacity-20 blur-3xl"></div>
                             <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-gradient-to-tr from-purple-200 to-pink-200 opacity-20 blur-2xl"></div>
-                            
+
                             <div className="relative mb-6 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 via-cyan-400 to-teal-400 shadow-lg">
@@ -2228,28 +2231,28 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600">{t('collections')}</h3>
-                                        <p className="text-xs text-gray-500">{formatScheduledDate(selectedDate)}</p>
+                                        <h3 className="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-100 dark:to-gray-300">{t('collections')}</h3>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">{formatScheduledDate(selectedDate)}</p>
                                     </div>
                                     <span className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-3 py-1 text-sm font-bold text-blue-700 shadow-sm">
                                         {todaysCollections.length}
                                     </span>
                                 </div>
                             </div>
-                            
+
                             <div className="relative mb-4">
                                 <input
                                     type="date"
                                     value={selectedDate}
                                     onChange={(e) => setSelectedDate(e.target.value)}
-                                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                                    className="w-full rounded-xl border-2 border-gray-200 px-4 py-3 text-sm font-medium text-gray-700 shadow-sm transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200"
                                     aria-label="Select date"
                                 />
                             </div>
-                            
+
                             <div className="relative max-h-[600px] space-y-3 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                 {todaysCollections.length === 0 ? (
-                                    <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+                                    <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center dark:bg-gray-900 dark:border-gray-700">
                                         <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200">
                                             <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path
@@ -2265,7 +2268,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     </div>
                                 ) : (
                                     todaysCollections.map((g) => (
-                                        <div key={g.key} className="group rounded-2xl border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50 p-4 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-lg">
+                                        <div key={g.key} className="group rounded-2xl border-2 border-gray-100 bg-gradient-to-br from-white to-gray-50 p-4 transition-all duration-300 hover:scale-[1.02] hover:border-blue-200 hover:shadow-lg dark:bg-gray-800 dark:border-gray-700 dark:from-gray-800 dark:to-gray-900">
                                             <div className="flex items-start gap-4">
                                                 <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 shadow-sm transition-all group-hover:scale-105 group-hover:from-purple-200 group-hover:to-purple-300">
                                                     <span className="text-sm font-bold text-purple-700">{g.time_slot ? g.time_slot.split(' - ')[0].replace(/\s?(AM|PM)/, '') : ''}</span>
@@ -2273,15 +2276,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 <div className="flex-1">
                                                     <div className="flex flex-col">
                                                         <div className="flex items-center gap-2">
-                                                            <p className="text-sm font-bold text-gray-900">{g.student_name}</p>
+                                                            <p className="text-sm font-bold text-gray-900 dark:text-white">{g.student_name}</p>
                                                             {g.student_matric && (
                                                                 <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
                                                                     {g.student_matric}
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <div className="mt-2 text-xs text-gray-700">
-                                                            <span className="font-semibold text-gray-500">Parcels:</span>
+                                                        <div className="mt-2 text-xs text-gray-700 dark:text-gray-300">
+                                                            <span className="font-semibold text-gray-500 dark:text-gray-400">Parcels:</span>
                                                             <div className="mt-1.5 flex flex-wrap gap-1.5">
                                                                 {g.parcels.map((pp) => (
                                                                     <span
@@ -2293,7 +2296,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                                 ))}
                                                             </div>
                                                         </div>
-                                                        <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-500">
+                                                        <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
                                                             <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path
                                                                     strokeLinecap="round"

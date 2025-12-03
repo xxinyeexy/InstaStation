@@ -37,7 +37,7 @@
                                 Please collect it today <strong>{{ $scheduleDetails }}</strong>. Thank you.
                             </p>
 
-                            <!-- QR Code Section Header -->
+                            {{-- <!-- QR Code Section Header -->
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin: 40px 0 20px 0;">
                                 <tr>
                                     <td align="center">
@@ -141,7 +141,7 @@
                                         </td>
                                     </tr>
                                 </table>
-                            @endif
+                            @endif --}}
 
                             <!-- Collection Code - Enhanced Design -->
                             <table width="100%" cellpadding="0" cellspacing="0" style="margin: 40px 0 30px 0;">

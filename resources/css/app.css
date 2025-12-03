@@ -57,6 +57,19 @@
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-ring: var(--sidebar-ring);
+
+    /* Override gray with neutral to remove blue tint */
+    --color-gray-50: var(--color-neutral-50);
+    --color-gray-100: var(--color-neutral-100);
+    --color-gray-200: var(--color-neutral-200);
+    --color-gray-300: var(--color-neutral-300);
+    --color-gray-400: var(--color-neutral-400);
+    --color-gray-500: var(--color-neutral-500);
+    --color-gray-600: var(--color-neutral-600);
+    --color-gray-700: var(--color-neutral-700);
+    --color-gray-800: var(--color-neutral-800);
+    --color-gray-900: var(--color-neutral-900);
+    --color-gray-950: var(--color-neutral-950);
 }
 
 /*
@@ -68,6 +81,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
     *,
     ::after,
     ::before,
@@ -75,7 +89,7 @@
     ::file-selector-button {
         border-color: transparent;
     }
-    
+
     /* Remove border from body and html */
     html,
     body {
@@ -125,9 +139,9 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
+    --background: oklch(0 0 0);
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
+    --card: oklch(0.12 0 0);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.145 0 0);
     --popover-foreground: oklch(0.985 0 0);
@@ -149,7 +163,7 @@
     --chart-3: oklch(0.769 0.188 70.08);
     --chart-4: oklch(0.627 0.265 303.9);
     --chart-5: oklch(0.645 0.246 16.439);
-    --sidebar: oklch(0.205 0 0);
+    --sidebar: oklch(0 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.985 0 0);
     --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -171,7 +185,7 @@ html[data-appearance='light'] {
     --sidebar-primary-foreground: oklch(0.985 0 0);
     --sidebar-accent: oklch(0.97 0 0);
     --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border:  oklch(0.922 0 0);
+    --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.87 0 0);
     --sidebar-active: oklch(0.87 0 0);
     --sidebar-active-foreground: oklch(0.145 0 0);
@@ -179,7 +193,7 @@ html[data-appearance='light'] {
 
 /* Dark mode - default dark colors */
 html[data-appearance='dark'] {
-    --sidebar: oklch(0.205 0 0);
+    --sidebar: oklch(0 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
     --sidebar-primary: oklch(0.985 0 0);
     --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -193,30 +207,44 @@ html[data-appearance='dark'] {
 
 /* System appearance with role-based theming for STUDENT - Green theme */
 html[data-appearance='system'][data-role='student'] {
-    --sidebar: #E6F7E6; /* mint green background */
-    --sidebar-foreground: #052e16; /* dark green text */
-    --sidebar-primary: #16A34A; /* green primary */
+    --sidebar: #E6F7E6;
+    /* mint green background */
+    --sidebar-foreground: #052e16;
+    /* dark green text */
+    --sidebar-primary: #16A34A;
+    /* green primary */
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #f0fdf4; /* lighter green for hover */
+    --sidebar-accent: #f0fdf4;
+    /* lighter green for hover */
     --sidebar-accent-foreground: #052e16;
-    --sidebar-border: oklch(0.922 0 0); /* green border */
+    --sidebar-border: oklch(0.922 0 0);
+    /* green border */
     --sidebar-ring: #16A34A;
-    --sidebar-active: #16A34A; /* green for active state */
-    --sidebar-active-foreground: #ffffff; /* white text on green */
+    --sidebar-active: #16A34A;
+    /* green for active state */
+    --sidebar-active-foreground: #ffffff;
+    /* white text on green */
 }
 
 /* System appearance with role-based theming for STAFF - Pink theme */
 html[data-appearance='system'][data-role='staff'] {
-    --sidebar: #FFE4FA; /* pink background */
-    --sidebar-foreground: #1f2937; /* dark gray text */
-    --sidebar-primary: #FF029A; /* magenta primary */
+    --sidebar: #FFE4FA;
+    /* pink background */
+    --sidebar-foreground: #1f2937;
+    /* dark gray text */
+    --sidebar-primary: #FF029A;
+    /* magenta primary */
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #fff0fd; /* lighter pink for hover */
+    --sidebar-accent: #fff0fd;
+    /* lighter pink for hover */
     --sidebar-accent-foreground: #1f2937;
-    --sidebar-border: oklch(0.922 0 0); /* magenta border */
+    --sidebar-border: oklch(0.922 0 0);
+    /* magenta border */
     --sidebar-ring: #FF029A;
-    --sidebar-active: #FF029A; /* magenta for active state */
-    --sidebar-active-foreground: #ffffff; /* white text on magenta */
+    --sidebar-active: #FF029A;
+    /* magenta for active state */
+    --sidebar-active-foreground: #ffffff;
+    /* white text on magenta */
 }
 
 /* Apply background colors to sidebar elements */
@@ -287,7 +315,7 @@ html[data-appearance='system'][data-role='staff'] .sidebar {
         border: none !important;
         border-top: none !important;
     }
-    
+
     /* Remove any top border from common elements */
     header,
     main,
@@ -298,48 +326,69 @@ html[data-appearance='system'][data-role='staff'] .sidebar {
 }
 
 @layer utilities {
+
     /* Custom animations for welcome page */
     @keyframes slide-down {
         from {
             opacity: 0;
             transform: translateY(-20px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
-    
+
     .animate-slide-down {
         animation: slide-down 0.6s ease-out forwards;
     }
-    
+
     /* Floating animation */
     @keyframes float {
-        0%, 100% {
+
+        0%,
+        100% {
             transform: translateY(0px);
         }
+
         50% {
             transform: translateY(-20px);
         }
     }
-    
+
     .animate-float {
         animation: float 3s ease-in-out infinite;
     }
-    
+
     /* Gradient animation */
     @keyframes gradient-shift {
-        0%, 100% {
+
+        0%,
+        100% {
             background-position: 0% 50%;
         }
+
         50% {
             background-position: 100% 50%;
         }
     }
-    
+
     .animate-gradient {
         background-size: 200% 200%;
         animation: gradient-shift 3s ease infinite;
+    }
+
+    /* Hide scrollbar but keep functionality */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+        /* Chrome, Safari and Opera */
     }
 }

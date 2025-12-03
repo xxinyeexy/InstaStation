@@ -1,11 +1,11 @@
 export const en = {
-        // Payment Verification - Sensitive Reject Modal
-        rejectPaymentSuccess: 'Payment is rejected successfully.',
-        rejectPaymentTitle: 'Reject Payment',
-        rejectPaymentPrompt: 'Are you sure you want to reject this payment? This may affect the student and their parcel delivery.',
-        rejectPaymentSensitiveWarning: 'This action cannot be undone. Please ensure you have reviewed all details before rejecting. The payment will be permanently removed from the verification queue and the student will be notified.',
-        rejectPaymentButton: 'Reject Payment',
-        rejecting: 'Rejecting...',
+    // Payment Verification - Sensitive Reject Modal
+    rejectPaymentSuccess: 'Payment is rejected successfully.',
+    rejectPaymentTitle: 'Reject Payment',
+    rejectPaymentPrompt: 'Are you sure you want to reject this payment? This may affect the student and their parcel delivery.',
+    rejectPaymentSensitiveWarning: 'This action cannot be undone. Please ensure you have reviewed all details before rejecting. The payment will be permanently removed from the verification queue and the student will be notified.',
+    rejectPaymentButton: 'Reject Payment',
+    rejecting: 'Rejecting...',
     // Common
     welcome: 'Welcome',
     loading: 'Loading...',
@@ -23,7 +23,7 @@ export const en = {
     back: 'Back',
     next: 'Next',
     previous: 'Previous',
-    
+
     // Auth Pages
     createAccount: 'Create an Account',
     joinInstaStation: 'Join InstaStation to manage your university parcels',
@@ -59,7 +59,7 @@ export const en = {
     noMatricID: 'No Matric ID',
     noStudentsFound: 'No students found',
     registering: 'Registering...',
-    
+
     // Navigation
     dashboard: 'Dashboard',
     parcels: 'Parcels',
@@ -70,7 +70,7 @@ export const en = {
     settings: 'Settings',
     logout: 'Logout',
     home: 'Home',
-    
+
     // Settings
     profile: 'Profile',
     password: 'Password',
@@ -87,7 +87,7 @@ export const en = {
     themeDescription: 'Select your preferred theme mode',
     languageDescription: 'Choose your preferred language for the interface',
     languageSelection: 'Language Selection',
-    
+
     // Parcel Status
     pending: 'Pending',
     pendingPayment: 'Pending Payment',
@@ -97,13 +97,13 @@ export const en = {
     approved: 'Approved',
     scheduled: 'Scheduled',
     arrived: 'Arrived',
-    
+
     // Overview & Statistics
     totalParcels: 'Total Parcels',
     newlyArrived: 'Newly Arrived',
     readyToCollect: 'Ready to Collect',
     unclaimedParcels: 'Unclaimed',
-    
+
     // Dashboard
     overview: 'Overview',
     dailyArrivals: 'Daily Arrivals',
@@ -112,18 +112,18 @@ export const en = {
     parcelsBySender: 'Top Senders',
     parcelStatus: 'Parcel Status',
     collectionTimeDistribution: 'Collection Time Distribution',
-    
+
     // Parcel Actions
     markAsCollected: 'Mark as Collected',
     schedulePickup: 'Schedule Pickup',
     viewDetails: 'View Details',
     viewQRCode: 'View QR Code',
     downloadQR: 'Download QR',
-    
+
     // Parcel Details
     parcelCode: 'Parcel Code',
-       parcelID: 'Parcel ID',
-       trackingNumber :'Tracking Number',
+    parcelID: 'Parcel ID',
+    trackingNumber: 'Tracking Number',
     sender: 'Sender',
     studentID: 'Student ID',
     dimensions: 'Dimensions',
@@ -140,7 +140,7 @@ export const en = {
     scheduledDate: 'Scheduled Date',
     size: 'Size',
     weight: 'Weight',
-    
+
     // Time & Date
     today: 'Today',
     thisWeek: 'This Week',
@@ -148,7 +148,7 @@ export const en = {
     last30Days: 'Last 30 Days',
     selectDate: 'Select Date',
     selectTime: 'Select Time Slot',
-    
+
     // Messages & Notifications
     success: 'Success',
     error: 'Error',
@@ -183,7 +183,7 @@ export const en = {
     reminderFailed: 'Reminder Failed',
     failedToQueueReminder: 'Failed to queue reminder',
     failedToSendReminder: 'Failed to send reminder',
-    
+
     // Forms
     name: 'Name',
     email: 'Email',
@@ -191,7 +191,7 @@ export const en = {
     address: 'Address',
     room: 'Room',
     department: 'Department',
-    
+
     // Buttons
     apply: 'Apply',
     reset: 'Reset',
@@ -199,18 +199,18 @@ export const en = {
     refresh: 'Refresh',
     download: 'Download',
     upload: 'Upload',
-    
+
     // Theme Options
     light: 'Light',
     dark: 'Dark',
     system: 'System',
-    
+
     // Size Options
     small: 'Small',
     medium: 'Medium',
     large: 'Large',
     extraLarge: 'Extra Large',
-    
+
     // Password Page
     updatePassword: 'Update password',
     passwordDescription: 'Ensure your account is using a long, random password to stay secure',
@@ -219,13 +219,19 @@ export const en = {
     confirmPassword: 'Confirm password',
     savePassword: 'Save password',
     passwordSettings: 'Password settings',
-    
+    passwordSameError: 'The new password cannot be the same as the current password.',
+    passwordLengthError: 'Password must be at least 8 characters long.',
+    passwordUppercaseError: 'Password must contain at least one uppercase letter.',
+    passwordLowercaseError: 'Password must contain at least one lowercase letter.',
+    passwordDigitError: 'Password must contain at least one digit.',
+    passwordSymbolError: 'Password must contain at least one symbol (!@#$%^&* etc.).',
+
     // Sidebar Navigation
     platform: 'Platform',
     users: 'Users',
     announcements: 'Announcements',
     faqs: 'FAQs',
-    
+
     // Dashboard Page
     welcomeBack: 'Welcome back! Here\'s what\'s happening with your parcels today.',
     dailyOperations: 'Daily Operations Overview',
@@ -234,7 +240,7 @@ export const en = {
     parcelSize: 'Parcel Size',
     parcelStatusDistribution: 'Parcel Status Distribution',
     collectionTime: 'Collection Time Distribution',
-    
+
     // User Management Page
     userManagement: 'User Management',
     manageStudents: 'Manage student accounts and generate reports',
@@ -257,7 +263,7 @@ export const en = {
     total: 'total',
     active: 'Active',
     inactive: 'Inactive',
-    
+
     // Announcements Page
     manageAnnouncements: 'Manage announcements and notifications for students',
     totalAnnouncements: 'Total Announcements',
@@ -278,7 +284,7 @@ export const en = {
     thisAnnouncement: 'this announcement',
     cannotBeUndone: 'This action cannot be undone and will permanently remove this announcement.',
     deleting: 'Deleting...',
-    
+
     // FAQs Page
     manageFaqs: 'Manage frequently asked questions for students',
     totalFAQs: 'Total FAQs',
@@ -290,7 +296,7 @@ export const en = {
     thisFAQ: 'this FAQ',
     cannotBeUndoneFAQ: 'This action cannot be undone and will permanently remove this FAQ.',
     collection: 'Collection',
-    
+
     // Export Modal
     exportParcels: 'Export Parcels',
     selectDateRange: 'Select Date Range',
@@ -316,7 +322,7 @@ export const en = {
     exportCSV: 'Export CSV',
     verified: 'Verified',
     unverified: 'Unverified',
-    
+
     // Announcement Modals
     createAnnouncement: 'Create Announcement',
     createAnnouncementDesc: 'Create a new announcement for students',
@@ -335,7 +341,7 @@ export const en = {
     noFileChosen: 'No file chosen',
     noImage: 'No image',
     changeImage: 'Change image',
-    
+
     // FAQ Modals
     editFAQ: 'Edit FAQ',
     updateFAQInfo: 'Update the FAQ information',
@@ -348,7 +354,7 @@ export const en = {
     enterQuestion: 'Enter the question...',
     enterAnswer: 'Enter the answer...',
     chooseCategory: 'Choose category',
-    
+
     // Payment Verification Page (NEW)
     paymentVerification: 'Payment Verification',
     reviewVerifyPayments: 'Review and verify student payment submissions',
@@ -357,7 +363,7 @@ export const en = {
     searchParcels: 'Search parcels...',
     amount: 'Amount',
     actions: 'Actions',
-    
+
     // Parcel Management Page (NEW)
     todayCollection: 'Today Collection',
     paymentVerified: 'Payment Verified',
@@ -373,7 +379,7 @@ export const en = {
     allParcels: 'All Parcels',
     location: 'Location',
     days: 'Days',
-    
+
     // Add Parcel Page (NEW)
     scanParcelQR: 'Scan the parcel\'s QR code to auto-fill the details',
     tapToScanQR: 'Tap to Scan QR Code',
@@ -492,7 +498,7 @@ export const en = {
     notifications: 'Notifications',
     noNotifications: 'No notifications',
     paid: 'Paid',
-    
+
     // Payment Submit Page
     paymentFor: 'Payment for',
     collectionFee: 'Collection Fee',
@@ -512,7 +518,7 @@ export const en = {
     collectionQRCode: 'Collection QR Code',
     showThisQRCode: 'Show this QR code to collect your parcel',
     uploading: 'Uploading...',
-    
+
     // Profile Page
     profileSettings: 'Profile settings',
     manageProfile: 'Manage your profile and account settings',
@@ -525,7 +531,17 @@ export const en = {
     deleteAccount: 'Delete account',
     deleteAccountDescription: 'Delete your account and all of its resources',
     deleteWarning: 'Please proceed with caution, this cannot be undone.',
-    
+    deleteAccountConfirmation: 'Are you sure you want to delete your account?',
+    deleteAccountWarning: 'Once your account is deleted, all of its resources and data will also be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.',
+    emailUnverified: 'Your email address is unverified.',
+    resendVerification: 'Click here to resend the verification email.',
+    verificationSent: 'A new verification link has been sent to your email address.',
+    photoRequirements: 'JPG, PNG or GIF (MAX. 2MB)',
+    fullNamePlaceholder: 'Full name',
+    emailPlaceholder: 'Email address',
+    phonePlaceholder: 'e.g., 0123456789',
+    roomPlaceholder: 'e.g., A-101',
+
     // Student Parcel Page Greetings
     goodMorning: 'Good Morning',
     goodAfternoon: 'Good Afternoon',

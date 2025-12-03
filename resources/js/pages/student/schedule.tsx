@@ -307,7 +307,7 @@ const SchedulePickup = ({ parcel }: Props) => {
         }
 
         const isWeekendDate = isWeekend(selectedDate);
-        
+
         if (isWeekendDate) {
             // Saturday & Sunday slots - must match backend exactly
             return [
@@ -417,50 +417,50 @@ const SchedulePickup = ({ parcel }: Props) => {
                 </div>
             )}
 
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 {/* Header */}
                 <div className="mx-auto max-w-6xl px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Schedule Pickup - {parcel.parcel_code}</h1>
-                            <p className="mt-1 text-gray-600">Choose your preferred date and time for parcel collection</p>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Schedule Pickup - {parcel.parcel_code}</h1>
+                            <p className="mt-1 text-gray-600 dark:text-gray-400">Choose your preferred date and time for parcel collection</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="mx-auto max-w-6xl px-6 py-8">
                     {/* Parcel Status Section */}
-                    <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-6">
+                    <div className="mb-6 rounded-lg border border-green-200 bg-green-50 p-6 dark:border-green-800 dark:bg-green-900/20">
                         <div className="mb-4 flex items-center gap-2">
                             <CircleCheck className="h-5 w-5 text-green-600" />
-                            <span className="text-lg font-semibold text-green-800">Approved</span>
+                            <span className="text-lg font-semibold text-green-800 dark:text-green-100">Approved</span>
                         </div>
                         <div className="grid grid-cols-2 gap-6">
                             <div>
-                                <span className="text-sm text-green-700">Tracking ID:</span>
-                                <span className="ml-2 font-medium text-green-900">{parcel.tracking_no}</span>
+                                <span className="text-sm text-green-700 dark:text-green-300">Tracking ID:</span>
+                                <span className="ml-2 font-medium text-green-900 dark:text-green-100">{parcel.tracking_no}</span>
                             </div>
                             <div>
-                                <span className="text-sm text-green-700">Sender:</span>
-                                <span className="ml-2 font-medium text-green-900">{parcel.sender}</span>
+                                <span className="text-sm text-green-700 dark:text-green-300">Sender:</span>
+                                <span className="ml-2 font-medium text-green-900 dark:text-green-100">{parcel.sender}</span>
                             </div>
                             <div>
-                                <span className="text-sm text-green-700">Payment Status:</span>
-                                <span className="ml-2 rounded bg-green-200 px-2 py-1 font-medium text-green-900">{parcel.payment_status}</span>
+                                <span className="text-sm text-green-700 dark:text-green-300">Payment Status:</span>
+                                <span className="ml-2 rounded bg-green-200 px-2 py-1 font-medium text-green-900 dark:bg-green-800 dark:text-green-100">{parcel.payment_status}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Collection Location Section */}
-                    <div className="mb-6 rounded-lg border bg-white p-6 shadow-sm">
-                        <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900">
+                    <div className="mb-6 rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                        <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white">
                             <MapPin className="h-5 w-5 text-blue-600" />
                             Collection Location
                         </h2>
                         <div className="space-y-2">
-                            <h3 className="font-semibold text-gray-900">University Parcel Center</h3>
-                            <p className="text-gray-600">Ground Floor, Student Services Building</p>
-                            <div className="text-gray-600">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">University Parcel Center</h3>
+                            <p className="text-gray-600 dark:text-gray-400">Ground Floor, Student Services Building</p>
+                            <div className="text-gray-600 dark:text-gray-400">
                                 <p className="font-medium">Operating Hours:</p>
                                 <p>Monday - Friday: 1:00 PM - 6:00 PM, 9:00 PM - 11:00 PM</p>
                                 <p>Saturday & Sunday: 10:00 AM - 1:00 PM, 2:00 PM - 5:00 PM</p>
@@ -471,24 +471,24 @@ const SchedulePickup = ({ parcel }: Props) => {
                     {/* Scheduling Section */}
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                         {/* Select Date Card */}
-                        <div className="rounded-lg border bg-white p-6 shadow-sm">
-                            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900">
+                        <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white">
                                 <Calendar className="h-5 w-5 text-blue-600" />
                                 Select Date
                             </h2>
-                            <p className="mb-4 text-gray-600">Choose your preferred collection date</p>
+                            <p className="mb-4 text-gray-600 dark:text-gray-400">Choose your preferred collection date</p>
 
                             {/* Calendar Header */}
                             <div className="mb-4 flex items-center justify-between">
-                                <button onClick={() => navigateMonth('prev')} className="rounded-full p-2 transition-colors hover:bg-gray-100">
+                                <button onClick={() => navigateMonth('prev')} className="rounded-full p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
                                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                                     </svg>
                                 </button>
-                                <h3 className="text-lg font-semibold text-gray-900">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                     {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
                                 </h3>
-                                <button onClick={() => navigateMonth('next')} className="rounded-full p-2 transition-colors hover:bg-gray-100">
+                                <button onClick={() => navigateMonth('next')} className="rounded-full p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700">
                                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                     </svg>
@@ -498,7 +498,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                             {/* Calendar Grid */}
                             <div className="mb-4 grid grid-cols-7 gap-1">
                                 {daysOfWeek.map((day) => (
-                                    <div key={day} className="py-2 text-center text-sm font-medium text-gray-500">
+                                    <div key={day} className="py-2 text-center text-sm font-medium text-gray-500 dark:text-gray-400">
                                         {day}
                                     </div>
                                 ))}
@@ -508,17 +508,16 @@ const SchedulePickup = ({ parcel }: Props) => {
                                             <button
                                                 onClick={() => handleDateClick(date)}
                                                 disabled={isPastDate(date)}
-                                                className={`h-10 w-10 rounded-full text-sm font-medium transition-colors ${
-                                                    isSelected(date)
+                                                className={`h-10 w-10 rounded-full text-sm font-medium transition-colors ${isSelected(date)
                                                         ? 'bg-blue-500 text-white'
                                                         : isToday(date)
-                                                          ? 'bg-blue-100 text-blue-700'
-                                                          : isPastDate(date)
-                                                            ? 'cursor-not-allowed text-gray-300'
-                                                            : isWeekend(date)
-                                                              ? 'text-purple-600 hover:bg-purple-50'
-                                                              : 'text-gray-700 hover:bg-gray-100'
-                                                } `}
+                                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                                            : isPastDate(date)
+                                                                ? 'cursor-not-allowed text-gray-300 dark:text-gray-600'
+                                                                : isWeekend(date)
+                                                                    ? 'text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20'
+                                                                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                                                    } `}
                                             >
                                                 {date.getDate()}
                                             </button>
@@ -530,7 +529,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                             </div>
 
                             {/* Calendar Notes */}
-                            <div className="space-y-1 text-sm text-gray-600">
+                            <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                                 <p className="font-semibold">Operating Hours:</p>
                                 <p>• Monday - Friday: 1 PM - 6 PM, 9 PM - 11 PM</p>
                                 <p>• Saturday & Sunday: 10 AM - 1 PM, 2 PM - 5 PM</p>
@@ -538,12 +537,12 @@ const SchedulePickup = ({ parcel }: Props) => {
                         </div>
 
                         {/* Select Time Slot Card */}
-                        <div className="rounded-lg border bg-white p-6 shadow-sm">
-                            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900">
+                        <div className="rounded-lg border bg-white p-6 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                            <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white">
                                 <Clock className="h-5 w-5 text-blue-600" />
                                 Select Time Slot
                             </h2>
-                            <p className="mb-4 text-gray-600">Choose your preferred collection time</p>
+                            <p className="mb-4 text-gray-600 dark:text-gray-400">Choose your preferred collection time</p>
 
                             {/* Time Slots */}
                             <div className="mb-6 space-y-3">
@@ -563,42 +562,40 @@ const SchedulePickup = ({ parcel }: Props) => {
                                             key={slot.id}
                                             onClick={() => isAvailable && setSelectedTimeSlot(slot.id)}
                                             disabled={!isAvailable || isLoadingSlots}
-                                            className={`flex w-full items-center justify-between rounded-lg border p-3 transition-colors ${
-                                                isAvailable
+                                            className={`flex w-full items-center justify-between rounded-lg border p-3 transition-colors ${isAvailable
                                                     ? isSelectedSlot
-                                                        ? 'border-blue-500 bg-blue-50'
-                                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                                    : 'cursor-not-allowed border-gray-200 bg-gray-50'
-                                            } `}
+                                                        ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/40'
+                                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-700'
+                                                    : 'cursor-not-allowed border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900'
+                                                } `}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <Clock className="h-4 w-4 text-gray-500" />
-                                                <span className={isAvailable ? 'text-gray-900' : 'text-gray-500'}>{slot.label}</span>
-                                                <span 
-                                                    className={`ml-2 text-xs font-medium ${
-                                                        isFull ? 'text-red-600' : currentCount >= 8 ? 'text-orange-600' : 'text-gray-500'
-                                                    }`}
+                                                <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                                                <span className={isAvailable ? 'text-gray-900 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}>{slot.label}</span>
+                                                <span
+                                                    className={`ml-2 text-xs font-medium ${isFull ? 'text-red-600' : currentCount >= 8 ? 'text-orange-600' : 'text-gray-500 dark:text-gray-400'
+                                                        }`}
                                                     title={`${currentCount} students scheduled out of ${maxCapacity} maximum capacity`}
                                                 >
                                                     {currentCount}/{maxCapacity} slots
                                                 </span>
                                                 {isRecommended && !hasPassed && (
-                                                    <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                                                    <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300">
                                                         Recommended
                                                     </span>
                                                 )}
                                             </div>
                                             {isFull && <span className="text-sm font-medium text-red-500">Full</span>}
-                                            {!isFull && hasPassed && <span className="text-sm font-medium text-gray-500">Passed</span>}
+                                            {!isFull && hasPassed && <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Passed</span>}
                                         </button>
                                     );
                                 })}
                             </div>
 
                             {/* Note Section */}
-                            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
-                                <h4 className="mb-1 font-semibold text-yellow-900">Note:</h4>
-                                <p className="text-sm text-yellow-800">
+                            <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
+                                <h4 className="mb-1 font-semibold text-yellow-900 dark:text-yellow-100">Note:</h4>
+                                <p className="text-sm text-yellow-800 dark:text-yellow-200">
                                     Please arrive within your selected time slot. Bring your QR code or collection code.
                                 </p>
                             </div>
@@ -607,12 +604,12 @@ const SchedulePickup = ({ parcel }: Props) => {
 
                     {/* Pickup Summary Section - Only show when both date and time are selected */}
                     {selectedDate && selectedTimeSlot && (
-                        <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-6">
-                            <h2 className="mb-4 text-xl font-semibold text-blue-900">Pickup Summary</h2>
+                        <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 p-6 dark:border-blue-800 dark:bg-blue-900/20">
+                            <h2 className="mb-4 text-xl font-semibold text-blue-900 dark:text-blue-100">Pickup Summary</h2>
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div>
-                                    <span className="text-sm text-blue-700">Date:</span>
-                                    <span className="ml-2 font-medium text-blue-900">
+                                    <span className="text-sm text-blue-700 dark:text-blue-300">Date:</span>
+                                    <span className="ml-2 font-medium text-blue-900 dark:text-blue-100">
                                         {selectedDate.toLocaleDateString('en-US', {
                                             weekday: 'long',
                                             year: 'numeric',
@@ -622,14 +619,14 @@ const SchedulePickup = ({ parcel }: Props) => {
                                     </span>
                                 </div>
                                 <div>
-                                    <span className="text-sm text-blue-700">Time:</span>
-                                    <span className="ml-2 font-medium text-blue-900">
+                                    <span className="text-sm text-blue-700 dark:text-blue-300">Time:</span>
+                                    <span className="ml-2 font-medium text-blue-900 dark:text-blue-100">
                                         {timeSlots.find((slot) => slot.id === selectedTimeSlot)?.label}
                                     </span>
                                 </div>
                                 <div>
-                                    <span className="text-sm text-blue-700">Location:</span>
-                                    <span className="ml-2 font-medium text-blue-900">University Parcel Center</span>
+                                    <span className="text-sm text-blue-700 dark:text-blue-300">Location:</span>
+                                    <span className="ml-2 font-medium text-blue-900 dark:text-blue-100">University Parcel Center</span>
                                 </div>
                             </div>
                         </div>
@@ -639,7 +636,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                     <div className="mt-8 flex justify-center gap-4">
                         <button
                             onClick={handleClose}
-                            className="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50"
+                            className="rounded-lg border border-gray-300 bg-white px-6 py-3 text-gray-700 transition-colors hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                         >
                             Cancel
                         </button>

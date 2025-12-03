@@ -22,6 +22,7 @@ type Row = {
     method: string;
     status: 'pending' | 'verified';
     submitted_at: string | null;
+    created_at?: string;
 };
 
 export default function VerifyPayment({ summary, rows, filters }: { summary: Summary; rows: Row[]; filters?: { q?: string; status?: string } }) {
@@ -214,26 +215,26 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                 </div>
             )}
 
-            <div className="space-y-6 p-6">
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-foreground">{t('paymentVerification')}</h1>
-                <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('reviewVerifyPayments')}</p>
+            <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-foreground">{t('paymentVerification')}</h1>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-muted-foreground">{t('reviewVerifyPayments')}</p>
 
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="rounded-xl border border-border bg-card p-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="rounded-xl border border-border bg-card p-3 sm:p-4">
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('pendingPayments')}</div>
                             <Clock className="h-4 w-4 text-orange-400" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-foreground">{summary.pending}</div>
                     </div>
-                    <div className="rounded-xl border border-border bg-card p-4">
+                    <div className="rounded-xl border border-border bg-card p-3 sm:p-4">
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('verifiedToday')}</div>
                             <CircleCheck className="h-4 w-4 text-emerald-500" />
                         </div>
                         <div className="mt-2 text-2xl font-bold text-foreground">{summary.verified_today}</div>
                     </div>
-                    <div className="rounded-xl border border-border bg-card p-4">
+                    <div className="rounded-xl border border-border bg-card p-3 sm:p-4">
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('totalRevenue')}</div>
                             <DollarSign className="h-4 w-4 text-yellow-400" />
@@ -242,8 +243,8 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                     </div>
                 </div>
 
-                <div className="rounded-xl border border-border bg-card">
-                    <div className="flex items-center justify-between border-b border-border p-4">
+                <div className="rounded-xl border border-border bg-card overflow-hidden">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-border p-3 sm:p-4 gap-3 sm:gap-0">
                         <div className="relative w-full max-w-xl">
                             {/* Search input */}
                             <input
@@ -291,73 +292,75 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                         </select>
                     </div>
 
-                    <div className="grid grid-cols-12 gap-2 bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
-                        <div className="col-span-3">{t('parcelID')}</div>
-                        <div className="col-span-4">{t('student')}</div>
-                        <div className="col-span-2">{t('amount')}</div>
-                        <div className="col-span-2">{t('status')}</div>
-                        <div className="col-span-1 text-right">{t('actions')}</div>
-                    </div>
+                    <div className="overflow-x-auto">
+                        <div className="min-w-[600px]">
+                            <div className="grid grid-cols-12 gap-2 bg-muted px-4 py-2 text-xs font-medium text-muted-foreground">
+                                <div className="col-span-3">{t('parcelID')}</div>
+                                <div className="col-span-4">{t('student')}</div>
+                                <div className="col-span-2">{t('amount')}</div>
+                                <div className="col-span-2">{t('status')}</div>
+                                <div className="col-span-1 text-right">{t('actions')}</div>
+                            </div>
 
-                    {list.map((r) => (
-                        <div key={r.payment_id} className="grid grid-cols-12 items-center gap-2 border-b border-border px-4 py-3">
-                            <div className="col-span-3 font-medium text-foreground">{r.tracking_no ?? '—'}</div>
-                            <div className="col-span-4">
-                                <div className="text-foreground">{r.student ?? '—'}</div>
-                                <div className="text-xs text-muted-foreground">{r.student_matric ?? ''}</div>
-                            </div>
-                            <div className="col-span-2 font-medium text-foreground">RM{r.amount.toFixed(2)}</div>
-                            <div className="col-span-2">
-                                <span
-                                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${r.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-500/20 dark:text-green-400 dark:ring-green-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
-                                >
-                                    {r.status === 'verified' ? <CircleCheck className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
-                                    {getTranslatedStatus(r.status)}
-                                </span>
-                            </div>
-                            <div className="col-span-1 ml-auto flex items-center justify-end gap-4 text-muted-foreground">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setDetail(r as any);
-                                    }}
-                                    className="rounded p-1 hover:bg-gray-100 hover:text-foreground dark:hover:bg-accent"
-                                >
-                                    <Eye className="h-4 w-4" />
-                                </button>
-                                {r.status !== 'verified' && (
-                                    <>
+                            {list.map((r) => (
+                                <div key={r.payment_id} className="grid grid-cols-12 items-center gap-2 border-b border-border px-4 py-3">
+                                    <div className="col-span-3 font-medium text-foreground">{r.tracking_no ?? '—'}</div>
+                                    <div className="col-span-4">
+                                        <div className="text-foreground">{r.student ?? '—'}</div>
+                                        <div className="text-xs text-muted-foreground">{r.student_matric ?? ''}</div>
+                                    </div>
+                                    <div className="col-span-2 font-medium text-foreground">RM{r.amount.toFixed(2)}</div>
+                                    <div className="col-span-2">
+                                        <span
+                                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${r.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-500/20 dark:text-green-400 dark:ring-green-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
+                                        >
+                                            {r.status === 'verified' ? <CircleCheck className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                                            {getTranslatedStatus(r.status)}
+                                        </span>
+                                    </div>
+                                    <div className="col-span-1 ml-auto flex items-center justify-end gap-4 text-muted-foreground">
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleApprovePayment(r.payment_id);
+                                                setDetail(r as any);
                                             }}
-                                            disabled={processingPayments.has(r.payment_id)}
-                                            className={`rounded p-1 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-500/20 ${
-                                                processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : ''
-                                            }`}
+                                            className="rounded p-1 hover:bg-gray-100 hover:text-foreground dark:hover:bg-accent"
                                         >
-                                            <CircleCheck className="h-4 w-4" />
+                                            <Eye className="h-4 w-4" />
                                         </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                openRejectModal(r.payment_id);
-                                            }}
-                                            title={t('rejectPaymentButton')}
-                                            aria-label={t('rejectPaymentButton')}
-                                            disabled={processingPayments.has(r.payment_id)}
-                                            className={`rounded p-1 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-500/10 ${
-                                                processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
-                                            }`}
-                                        >
-                                            <CircleX className="h-4 w-4" />
-                                        </button>
-                                    </>
-                                )}
-                            </div>
+                                        {r.status !== 'verified' && (
+                                            <>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleApprovePayment(r.payment_id);
+                                                    }}
+                                                    disabled={processingPayments.has(r.payment_id)}
+                                                    className={`rounded p-1 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-500/20 ${processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : ''
+                                                        }`}
+                                                >
+                                                    <CircleCheck className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        openRejectModal(r.payment_id);
+                                                    }}
+                                                    title={t('rejectPaymentButton')}
+                                                    aria-label={t('rejectPaymentButton')}
+                                                    disabled={processingPayments.has(r.payment_id)}
+                                                    className={`rounded p-1 text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-500/10 ${processingPayments.has(r.payment_id) ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                                                        }`}
+                                                >
+                                                    <CircleX className="h-4 w-4" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                    ))}
+                    </div>
                 </div>
                 {detail && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
@@ -384,7 +387,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                     </button>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-6 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm">
                                 <div>
                                     <div className="text-gray-500 dark:text-muted-foreground">{t('trackingNumber')}</div>
                                     <div className="font-medium text-foreground">{detail.tracking_no}</div>

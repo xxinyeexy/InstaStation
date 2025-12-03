@@ -1,5 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { router } from '@inertiajs/react';
+import axios from 'axios';
 import { Html5Qrcode } from 'html5-qrcode';
 import { AlertTriangle, ArrowLeft, Camera, CircleCheck, QrCode, Search, X, XCircle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -167,7 +168,7 @@ const ParcelRegistrationForm = () => {
             showErrorToast('Please enter a tracking number');
             return;
         }
-        
+
         if (formData.trackingNumber.trim().length < 5) {
             showErrorToast('Tracking number must be at least 5 characters long');
             return;
@@ -177,137 +178,86 @@ const ParcelRegistrationForm = () => {
             showErrorToast('Please enter sender information');
             return;
         }
-        
+
         if (formData.sender.trim().length < 3) {
             showErrorToast('Sender name must be at least 3 characters long');
             return;
         }
-        
+
         if (!formData.size) {
             showErrorToast('Please select a parcel size');
             return;
         }
-        
+
         if (!formData.location.trim()) {
             showErrorToast('Please enter storage location');
             return;
         }
-        
-        // Validate student information if provided
-        // if (formData.studentName.trim() && !formData.matricId.trim()) {
-        //     showErrorToast('Please select a valid student from the search results');
-        //     return;
-        // }
-        
-        // student info is optional; if not provided, backend will mark as Unclaimed
 
         setIsSubmitting(true);
 
-        try {
-            // Get CSRF token
-            const getCsrfToken = () => {
-                // First try to get from meta tag
-                const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                if (metaToken) return metaToken;
+        // Transform the data to match Laravel controller expectations
+        const requestData = {
+            tracking_no: formData.trackingNumber.trim(),
+            size: formData.size || null,
+            sender: formData.sender.trim(),
+            location: formData.location.trim() || null,
+            student_id: formData.matricId.trim() || '',
+            recipient_name: formData.studentName.trim() || null,
+            recipient_matric: formData.matricId.trim() || null,
+            qr_code: null,
+        };
 
-                // If no meta tag, try to get from cookies (Laravel's default XSRF-TOKEN)
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name === 'XSRF-TOKEN') {
-                        return decodeURIComponent(value);
+        // Use Axios for API request to handle JSON response and CSRF automatically
+        axios.post('/parcels', requestData)
+            .then((response) => {
+                // Show success message
+                setShowRegisterToast(true);
+                setTimeout(() => setShowRegisterToast(false), 3000);
+
+                // Clear form
+                handleCancel();
+            })
+            .catch((error) => {
+                console.error('Registration error:', error);
+
+                if (error.response) {
+                    // Handle server errors (422, 500, etc.)
+                    const status = error.response.status;
+                    const data = error.response.data;
+
+                    if (status === 422 && data.errors) {
+                        // Validation errors
+                        const errorMessages = Object.entries(data.errors);
+                        if (errorMessages.length > 0) {
+                            errorMessages.forEach(([field, messages], index) => {
+                                setTimeout(() => {
+                                    const msg = Array.isArray(messages) ? messages[0] : messages;
+
+                                    // Provide user-friendly messages for specific errors
+                                    if (field === 'tracking_no' && typeof msg === 'string' && msg.includes('already been taken')) {
+                                        showErrorToast('⚠️ This tracking number already exists in the system. Please use a different tracking number or check existing parcels.');
+                                    } else {
+                                        showErrorToast(msg as string);
+                                    }
+                                }, index * 500);
+                            });
+                        }
+                    } else if (data.message) {
+                        showErrorToast(data.message);
+                    } else {
+                        showErrorToast(`Error ${status}: ${error.response.statusText}`);
                     }
+                } else if (error.request) {
+                    // Network error
+                    showErrorToast('Network error. Please check your connection.');
+                } else {
+                    showErrorToast('An unexpected error occurred.');
                 }
-                return null;
-            };
-
-            const csrfToken = getCsrfToken();
-
-            if (!csrfToken) {
-                throw new Error('CSRF token not found. Please refresh the page and try again.');
-            }
-
-            // Transform the data to match Laravel controller expectations
-            const requestData = {
-                tracking_no: formData.trackingNumber.trim(),
-                size: formData.size || null,
-                sender: formData.sender.trim(),
-                location: formData.location.trim() || null,
-                // send empty string if none so backend treats as missing
-                student_id: formData.matricId.trim() || '',
-                recipient_name: formData.studentName.trim() || null,
-                recipient_matric: formData.matricId.trim() || null,
-                qr_code: null,
-            };
-
-            console.log('Sending request with data:', requestData);
-
-            const response = await fetch('/parcels', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify(requestData),
+            })
+            .finally(() => {
+                setIsSubmitting(false);
             });
-
-            console.log('Response status:', response.status);
-
-            if (!response.ok) {
-                let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-                try {
-                    const errorData = await response.json();
-                    console.log('Error response:', errorData);
-
-                    if (errorData.message) {
-                        showErrorToast(errorData.message);
-                        return; // Exit early, don't throw
-                    } else if (errorData.errors) {
-                        // Handle validation errors - show each error as a toast
-                        const errors = errorData.errors;
-                        Object.entries(errors).forEach(([field, messages], index) => {
-                            const errorMsg = Array.isArray(messages) ? messages[0] : messages;
-                            setTimeout(() => {
-                                showErrorToast(errorMsg as string);
-                            }, index * 500); // Stagger the toasts
-                        });
-                        return; // Exit early, don't throw
-                    }
-                } catch (parseError) {
-                    console.log('Could not parse error response as JSON');
-                    const errorText = await response.text();
-                    console.log('Error response text:', errorText);
-                    showErrorToast(`HTTP ${response.status}: ${response.statusText}`);
-                    return; // Exit early
-                }
-
-                showErrorToast(errorMessage);
-                return; // Exit early
-            }
-
-            const result = await response.json();
-            console.log('Success response:', result);
-
-            // Show success message
-            setShowRegisterToast(true);
-            setTimeout(() => setShowRegisterToast(false), 3000);
-
-            // Clear form
-            handleCancel();
-        } catch (err) {
-            console.error('Registration error:', err);
-            if (err instanceof Error) {
-                showErrorToast('Registration failed: ' + err.message);
-            } else {
-                showErrorToast('An unexpected error occurred.');
-            }
-        } finally {
-            setIsSubmitting(false);
-        }
     };
 
     const handleCancel = () => {
@@ -420,7 +370,7 @@ const ParcelRegistrationForm = () => {
             {showRegisterToast && <Toast type="success" message=" Parcel registered successfully!" />}
             {errorToast.show && <Toast type="error" message={errorToast.message} />}
 
-            <div className="min-h-screen bg-gray-50 p-4 dark:bg-background">
+            <div className="min-h-screen bg-gray-50 p-4 sm:p-6 dark:bg-background">
                 <style>{`
                     @keyframes scan {
                         0% { transform: translateY(-100px); }
@@ -437,7 +387,7 @@ const ParcelRegistrationForm = () => {
                 `}</style>
                 <div className="mx-auto max-w-2xl rounded-lg border border-border bg-white shadow-sm dark:bg-card">
                     {/* Header */}
-                    <div className="flex items-center gap-3 border-b border-border p-6">
+                    <div className="flex items-center gap-3 border-b border-border p-4 sm:p-6">
                         <button
                             onClick={() => (window.history.length > 1 ? window.history.back() : router.visit('/parcels'))}
                             className="flex items-center gap-2 text-gray-600 transition-colors hover:text-gray-800 dark:text-muted-foreground dark:hover:text-foreground"
@@ -448,13 +398,13 @@ const ParcelRegistrationForm = () => {
                     </div>
 
                     {/* Title */}
-                    <div className="px-6 py-4">
-                        <h1 className="mb-2 text-xl font-semibold text-gray-900 dark:text-card-foreground">📦 {t('registerNewParcel')}</h1>
-                        <p className="text-sm text-gray-600 dark:text-muted-foreground">{t('scanQRToAutoFill')}</p>
+                    <div className="px-4 sm:px-6 py-3 sm:py-4">
+                        <h1 className="mb-2 text-lg sm:text-xl font-semibold text-gray-900 dark:text-card-foreground">📦 {t('registerNewParcel')}</h1>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-muted-foreground">{t('scanQRToAutoFill')}</p>
                     </div>
 
                     {/* QR Scanner Area */}
-                    <div className="mb-6 px-6">
+                    <div className="mb-4 sm:mb-6 px-4 sm:px-6">
                         {/* Toast Notification */}
                         {showToast && <Toast type="success" message={t('trackingNumberFilled')} />}
 
@@ -557,9 +507,9 @@ const ParcelRegistrationForm = () => {
                     </div>
 
                     {/* Parcel Information */}
-                    <div className="mb-6 px-6">
-                        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-card-foreground">{t('parcelInformation')}</h2>
-                        <div className="grid grid-cols-2 gap-4">
+                    <div className="mb-4 sm:mb-6 px-4 sm:px-6">
+                        <h2 className="mb-3 sm:mb-4 text-base sm:text-lg font-medium text-gray-900 dark:text-card-foreground">{t('parcelInformation')}</h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                             <div>
                                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">{t('trackingNumber')} *</label>
                                 <input
@@ -611,9 +561,9 @@ const ParcelRegistrationForm = () => {
                     </div>
 
                     {/* Student Information */}
-                    <div className="mb-6 px-6">
-                        <h2 className="mb-4 text-lg font-medium text-gray-900 dark:text-card-foreground">{t('studentInformation')}</h2>
-                        <p className="mb-3 text-sm text-gray-600 dark:text-muted-foreground">{t('searchRecipientDatabase')}</p>
+                    <div className="mb-4 sm:mb-6 px-4 sm:px-6">
+                        <h2 className="mb-3 sm:mb-4 text-base sm:text-lg font-medium text-gray-900 dark:text-card-foreground">{t('studentInformation')}</h2>
+                        <p className="mb-3 text-xs sm:text-sm text-gray-600 dark:text-muted-foreground">{t('searchRecipientDatabase')}</p>
 
                         <div className="mb-4">
                             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">{t('studentName')}</label>
@@ -686,8 +636,8 @@ const ParcelRegistrationForm = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="rounded-b-lg border-t border-border bg-gray-50 px-6 py-4 dark:bg-muted">
-                        <div className="flex justify-end gap-3">
+                    <div className="rounded-b-lg border-t border-border bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 dark:bg-muted">
+                        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                             <button
                                 onClick={handleCancel}
                                 className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"

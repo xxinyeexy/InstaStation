@@ -40,7 +40,7 @@ export default function ManageFaq({
     const searchRef = useRef<HTMLInputElement | null>(null);
     const [editing, setEditing] = useState<FaqRow | null>(null);
     const [validationError, setValidationError] = useState<string>('');
-    
+
     const showValidationError = (message: string) => {
         setValidationError(message);
         setTimeout(() => setValidationError(''), 3000);
@@ -57,7 +57,7 @@ export default function ManageFaq({
     const [addCategory, setAddCategory] = useState('');
     const [addStatus, setAddStatus] = useState<'Active' | 'Inactive'>('Active');
     const [successMessage, setSuccessMessage] = useState<string>('');
-    
+
     const showSuccessMessage = (message: string) => {
         setSuccessMessage(message);
         setTimeout(() => setSuccessMessage(''), 3000);
@@ -164,75 +164,77 @@ export default function ManageFaq({
             )}
             <div className="space-y-6 p-6">
                 <div>
-                    <h1 className="text-2xl font-bold">{t('faqs')}</h1>
-                    <p className="text-sm text-gray-500">{t('manageFaqs')}</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('faqs')}</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('manageFaqs')}</p>
                 </div>
 
                 {/* Summary cards */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-xl border border-border bg-white p-4">
-                        <div className="text-sm text-gray-600">{t('totalFAQs')}</div>
-                        <div className="text-2xl font-bold">{list.length}</div>
-                        <div className="text-xs text-gray-500">{t('allQuestions')}</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{t('totalFAQs')}</div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">{list.length}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">{t('allQuestions')}</div>
                     </div>
-                    <div className="rounded-xl border border-border bg-white p-4">
-                        <div className="text-sm text-gray-600">{t('published')}</div>
-                        <div className="text-2xl font-bold">{list.filter((r) => r.faq_status === 'Active').length}</div>
-                        <div className="text-xs text-gray-500">{t('visibleToStudents')}</div>
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{t('published')}</div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">{list.filter((r) => r.faq_status === 'Active').length}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">{t('visibleToStudents')}</div>
                     </div>
                 </div>
 
                 {/* Search and filter */}
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <div className="relative flex-1">
-                        <Search size={16} className="absolute top-1/2 left-2 -translate-y-1/2 text-gray-400" />
+                        <Search size={16} className="absolute top-1/2 left-2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                         <input
                             ref={searchRef}
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
                             placeholder={t('searchFAQs')}
-                            className="w-full rounded-md border border-border bg-background px-7 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+                            className="w-full rounded-md border border-gray-200 bg-white px-7 py-2 text-sm text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
                             onKeyDown={(e) => e.key === 'Enter' && refreshFromServer()}
                         />
                     </div>
-                    <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-                    >
-                        <option value="">{t('allCategories')}</option>
-                        {categories
-                            .filter((c, index, arr) => arr.indexOf(c) === index)
-                            .filter((c) => c && c.trim() !== '')
-                            .map((c) => (
-                                <option key={c} value={c}>
-                                    {t(c.toLowerCase() as any) || c}
-                                </option>
-                            ))}
-                    </select>
-                    <button
-                        onClick={() => setAdding(true)}
-                        className="inline-flex items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white"
-                    >
-                        <Plus size={16} /> {t('addFAQ')}
-                    </button>
+                    <div className="flex gap-3">
+                        <select
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className="flex-1 sm:flex-none rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
+                        >
+                            <option value="">{t('allCategories')}</option>
+                            {categories
+                                .filter((c, index, arr) => arr.indexOf(c) === index)
+                                .filter((c) => c && c.trim() !== '')
+                                .map((c) => (
+                                    <option key={c} value={c}>
+                                        {t(c.toLowerCase() as any) || c}
+                                    </option>
+                                ))}
+                        </select>
+                        <button
+                            onClick={() => setAdding(true)}
+                            className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-700"
+                        >
+                            <Plus size={16} /> {t('addFAQ')}
+                        </button>
+                    </div>
                 </div>
 
                 {/* List */}
                 <div className="space-y-4">
                     {filtered.map((f) => (
-                        <div key={f.faq_id} className="rounded-xl border border-border bg-white">
+                        <div key={f.faq_id} className="rounded-xl border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
                             <div className="flex items-start justify-between p-4">
                                 <div className="pr-4">
                                     <div className="mb-2 flex items-center gap-2 text-xs">
                                         <span className={`rounded-full px-2 py-0.5 ${categoryClasses(f.category)}`}>{t((f.category || 'General').toLowerCase() as any)}</span>
                                         {f.faq_status === 'Inactive' && (
-                                            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600">{t('draft')}</span>
+                                            <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 dark:bg-gray-700 dark:text-gray-300">{t('draft')}</span>
                                         )}
                                     </div>
-                                    <div className="text-lg font-semibold">{f.faq_question}</div>
-                                    <div className="mt-2 text-sm text-gray-600">{f.faq_answer}</div>
-                                    <div className="mt-3 text-xs text-gray-400">
+                                    <div className="text-lg font-semibold text-gray-900 dark:text-white">{f.faq_question}</div>
+                                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">{f.faq_answer}</div>
+                                    <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
                                         Created: {f.created_at ? new Date(f.created_at).toLocaleDateString() : 'N/A'}
                                     </div>
                                 </div>
@@ -240,14 +242,14 @@ export default function ManageFaq({
                                     {f.faq_status === 'Active' ? (
                                         <button
                                             onClick={() => publish(f.faq_id, 'unpublish')}
-                                            className="text-sm text-black hover:bg-pink-50 hover:text-pink-600 hover:shadow-lg focus-visible:outline-none active:bg-gray-200"
+                                            className="text-sm text-gray-900 hover:bg-pink-50 hover:text-pink-600 hover:shadow-lg focus-visible:outline-none active:bg-gray-200 dark:text-white dark:hover:bg-pink-900/20 dark:hover:text-pink-400 dark:active:bg-gray-700"
                                         >
                                             {t('unpublish')}
                                         </button>
                                     ) : (
                                         <button
                                             onClick={() => publish(f.faq_id, 'publish')}
-                                            className="rounded-full border bg-gray-100 px-3 py-1 text-xs text-gray-600 opacity-80 hover:opacity-100"
+                                            className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-600 opacity-80 hover:opacity-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400"
                                         >
                                             {t('publish')}
                                         </button>
@@ -260,65 +262,65 @@ export default function ManageFaq({
                                             setEditCategory(f.category || '');
                                             setEditStatus(f.faq_status);
                                         }}
-                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg"
+                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg dark:hover:bg-orange-900/20 dark:hover:text-orange-400"
                                     >
                                         <Edit2 size={14} />
                                     </button>
                                     <button
                                         onClick={() => handleDeleteClick(f.faq_id, f.faq_question)}
-                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
+                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg dark:hover:bg-red-900/20 dark:hover:text-red-400"
                                     >
                                         <Trash2 size={14} />
                                     </button>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-end pr-4 pb-3 text-xs text-gray-400">
+                            <div className="flex items-center justify-end pr-4 pb-3 text-xs text-gray-400 dark:text-gray-500">
                                 Updated: {f.updated_at ? new Date(f.updated_at).toLocaleDateString() : 'N/A'}
                             </div>
                         </div>
                     ))}
-                    {filtered.length === 0 && <div className="py-16 text-center text-gray-400">No results.</div>}
+                    {filtered.length === 0 && <div className="py-16 text-center text-gray-400 dark:text-gray-500">No results.</div>}
                 </div>
             </div>
 
             {editing && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setEditing(null)} />
-                    <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-xl">
+                    <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold">{t('editFAQ')}</div>
+                                <div className="text-lg font-semibold text-gray-900 dark:text-white">{t('editFAQ')}</div>
 
-                                <div className="text-xs text-gray-500">{t('updateFAQInfo')}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{t('updateFAQInfo')}</div>
                             </div>
-                            <button className="text-gray-500 hover:text-gray-700" onClick={() => setEditing(null)}>
+                            <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white" onClick={() => setEditing(null)}>
                                 <X size={18} />
                             </button>
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <div className="mb-1 text-sm font-medium">{t('question')}</div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('question')}</div>
                                 <input
                                     value={editQuestion}
                                     onChange={(e) => setEditQuestion(e.target.value)}
-                                    className="w-full rounded-md border border-border px-3 py-2 text-sm"
+                                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium">{t('answer')}</div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('answer')}</div>
                                 <textarea
                                     value={editAnswer}
                                     onChange={(e) => setEditAnswer(e.target.value)}
-                                    className="h-28 w-full rounded-md border border-border px-3 py-2 text-sm"
+                                    className="h-28 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium">{t('category')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('category')}</div>
                                     <select
                                         value={editCategory}
                                         onChange={(e) => setEditCategory(e.target.value)}
-                                        className="w-full rounded-md border border-border px-3 py-2 text-sm"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     >
                                         <option value="">{t('general')}</option>
                                         {categories
@@ -332,11 +334,11 @@ export default function ManageFaq({
                                     </select>
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium">{t('status')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('status')}</div>
                                     <select
                                         value={editStatus}
                                         onChange={(e) => setEditStatus(e.target.value as 'Active' | 'Inactive')}
-                                        className="w-full rounded-md border border-border px-3 py-2 text-sm"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     >
                                         <option value="Inactive">{t('draft')}</option>
                                         <option value="Active">{t('published')}</option>
@@ -344,14 +346,14 @@ export default function ManageFaq({
                                 </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 pt-2">
-                                <button className="rounded-md border border-border px-3 py-2 text-sm hover:bg-gray-100" onClick={() => setEditing(null)}>
+                                <button className="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700" onClick={() => setEditing(null)}>
                                     {t('cancel')}
                                 </button>
                                 <button
                                     className="rounded-md bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600"
                                     onClick={async () => {
                                         if (!editing) return;
-                                        
+
                                         // Validation
                                         if (!editQuestion.trim()) {
                                             showValidationError('Please enter a question');
@@ -373,7 +375,7 @@ export default function ManageFaq({
                                             showValidationError('Please select a category');
                                             return;
                                         }
-                                        
+
                                         await fetch(`/staff/faq/${editing.faq_id}`, {
                                             method: 'PUT',
                                             headers: {
@@ -392,12 +394,12 @@ export default function ManageFaq({
                                             prev.map((r) =>
                                                 r.faq_id === editing.faq_id
                                                     ? {
-                                                          ...r,
-                                                          faq_question: editQuestion,
-                                                          faq_answer: editAnswer,
-                                                          category: editCategory,
-                                                          faq_status: editStatus,
-                                                      }
+                                                        ...r,
+                                                        faq_question: editQuestion,
+                                                        faq_answer: editAnswer,
+                                                        category: editCategory,
+                                                        faq_status: editStatus,
+                                                    }
                                                     : r,
                                             ),
                                         );
@@ -416,12 +418,12 @@ export default function ManageFaq({
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div className="absolute inset-0 bg-black/30" onClick={handleDeleteCancel} />
-                    <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl">
-                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                            <Trash2 className="h-6 w-6 text-red-600" />
+                    <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl dark:bg-gray-800">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
+                            <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
                         </div>
-                        <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('deleteFAQ')}</h2>
-                        <p className="mb-1 text-left text-sm text-gray-600">
+                        <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t('deleteFAQ')}</h2>
+                        <p className="mb-1 text-left text-sm text-gray-600 dark:text-gray-400">
                             {t('areYouSureDeleteFAQ')}
                             {selectedDeleteLabel ? (
                                 <>
@@ -433,17 +435,17 @@ export default function ManageFaq({
                             )}
                             ?
                         </p>
-                         <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
-                                <p className="text-sm text-left text-red-800 dark:text-red-400">
-                            {t('cannotBeUndoneFAQ')}
-                                </p>
-                            </div>
-                      
+                        <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
+                            <p className="text-sm text-left text-red-800 dark:text-red-400">
+                                {t('cannotBeUndoneFAQ')}
+                            </p>
+                        </div>
+
                         <div className="flex justify-center gap-3">
                             <button
                                 onClick={handleDeleteCancel}
                                 disabled={isDeleting}
-                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
                             >
                                 {t('cancel')}
                             </button>
@@ -460,44 +462,44 @@ export default function ManageFaq({
             )}
 
             {adding && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setAdding(false)} />
-                    <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-xl">
+                    <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold">{t('addNewFAQ')}</div>
-                                <div className="text-xs text-gray-500">{t('createNewFAQ')}</div>
+                                <div className="text-lg font-semibold text-gray-900 dark:text-white">{t('addNewFAQ')}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{t('createNewFAQ')}</div>
                             </div>
-                            <button className="text-gray-500 hover:text-gray-700" onClick={() => setAdding(false)}>
+                            <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white" onClick={() => setAdding(false)}>
                                 <X size={18} />
                             </button>
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <div className="mb-1 text-sm font-medium">{t('question')}</div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('question')}</div>
                                 <input
                                     value={addQuestion}
                                     onChange={(e) => setAddQuestion(e.target.value)}
-                                    className="w-full rounded-md border border-border px-3 py-2 text-sm"
+                                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     placeholder={t('enterQuestion')}
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium">{t('answer')}</div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('answer')}</div>
                                 <textarea
                                     value={addAnswer}
                                     onChange={(e) => setAddAnswer(e.target.value)}
-                                    className="h-28 w-full rounded-md border border-border px-3 py-2 text-sm"
+                                    className="h-28 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     placeholder={t('enterAnswer')}
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium">{t('category')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('category')}</div>
                                     <select
                                         value={addCategory}
                                         onChange={(e) => setAddCategory(e.target.value)}
-                                        className="w-full rounded-md border border-border px-3 py-2 text-sm"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     >
                                         <option value="">{t('chooseCategory')}</option>
                                         {categories
@@ -511,11 +513,11 @@ export default function ManageFaq({
                                     </select>
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium">{t('status')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('status')}</div>
                                     <select
                                         value={addStatus}
                                         onChange={(e) => setAddStatus(e.target.value as 'Active' | 'Inactive')}
-                                        className="w-full rounded-md border border-border px-3 py-2 text-sm"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     >
                                         <option value="Active">{t('published')}</option>
                                         <option value="Inactive">{t('draft')}</option>
@@ -523,7 +525,7 @@ export default function ManageFaq({
                                 </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 pt-2">
-                                <button className="rounded-md border border-border px-3 py-2 text-sm hover:bg-gray-100" onClick={() => setAdding(false)}>
+                                <button className="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700" onClick={() => setAdding(false)}>
                                     {t('cancel')}
                                 </button>
                                 <button
@@ -550,7 +552,7 @@ export default function ManageFaq({
                                             showValidationError('Please select a category');
                                             return;
                                         }
-                                        
+
                                         try {
                                             const res = await fetch('/staff/faq', {
                                                 method: 'POST',
@@ -566,14 +568,14 @@ export default function ManageFaq({
                                                     faq_status: addStatus,
                                                 }),
                                             });
-                                            
+
                                             if (!res.ok) {
                                                 const errorData = await res.json();
                                                 console.error('Server error:', errorData);
                                                 showValidationError('Failed to add FAQ. Please ensure all fields are valid.');
                                                 return;
                                             }
-                                            
+
                                             const json = await res.json();
                                             if (json.success) {
                                                 const newFaq = {

@@ -25,6 +25,13 @@ export default function Password() {
     const currentPasswordInput = useRef<HTMLInputElement>(null);
     const [validationError, setValidationError] = useState<string>('');
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('passwordSettings'),
+            href: '/settings/password',
+        },
+    ];
+
     const { data, setData, errors, put, reset, processing, recentlySuccessful } = useForm({
         current_password: '',
         password: '',
@@ -37,34 +44,34 @@ export default function Password() {
 
         // Validate that new password is different from current password
         if (data.current_password && data.password && data.current_password === data.password) {
-            setValidationError('The new password cannot be the same as the current password.');
+            setValidationError(t('passwordSameError'));
             passwordInput.current?.focus();
             return;
         }
 
         // Validate password requirements
         if (data.password.length < 8) {
-            setValidationError('Password must be at least 8 characters long.');
+            setValidationError(t('passwordLengthError'));
             passwordInput.current?.focus();
             return;
         }
         if (!/[A-Z]/.test(data.password)) {
-            setValidationError('Password must contain at least one uppercase letter.');
+            setValidationError(t('passwordUppercaseError'));
             passwordInput.current?.focus();
             return;
         }
         if (!/[a-z]/.test(data.password)) {
-            setValidationError('Password must contain at least one lowercase letter.');
+            setValidationError(t('passwordLowercaseError'));
             passwordInput.current?.focus();
             return;
         }
         if (!/[0-9]/.test(data.password)) {
-            setValidationError('Password must contain at least one digit.');
+            setValidationError(t('passwordDigitError'));
             passwordInput.current?.focus();
             return;
         }
         if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(data.password)) {
-            setValidationError('Password must contain at least one symbol (!@#$%^&* etc.).');
+            setValidationError(t('passwordSymbolError'));
             passwordInput.current?.focus();
             return;
         }
@@ -94,7 +101,7 @@ export default function Password() {
             <Head title={t('passwordSettings')} />
 
             <SettingsLayout>
-                <div className="space-y-6">
+                <div className="max-w-xl space-y-6">
                     <HeadingSmall title={t('updatePassword')} description={t('passwordDescription')} />
 
                     <form onSubmit={updatePassword} className="space-y-6">

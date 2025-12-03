@@ -75,7 +75,7 @@ const OverviewCard = ({
     }, [value]);
 
     return (
-        <Card className="overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg">
+        <Card className="overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-lg dark:border dark:border-gray-800">
             <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                     <div>
@@ -84,9 +84,8 @@ const OverviewCard = ({
                             <p className="text-3xl font-bold text-foreground">{animatedValue.toLocaleString()}</p>
                             {trend && trendValue && (
                                 <div
-                                    className={`flex items-center gap-1 text-sm ${
-                                        trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                                    }`}
+                                    className={`flex items-center gap-1 text-sm ${trend === 'up' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                                        }`}
                                 >
                                     {trend === 'up' ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                                     <span>{trendValue}</span>
@@ -221,14 +220,14 @@ export default function StaffHome() {
             if (saved) {
                 setPresets(JSON.parse(saved));
             }
-        } catch {}
+        } catch { }
     }, []);
 
     const savePresetsToStorage = (list: Array<{ name: string; data: any }>) => {
         setPresets(list);
         try {
             localStorage.setItem('exportPresets', JSON.stringify(list));
-        } catch {}
+        } catch { }
     };
 
     const currentConfig = useMemo(
@@ -328,14 +327,14 @@ export default function StaffHome() {
 
     return (
         <AppSidebarLayout breadcrumbs={breadcrumbs}>
-            <div className="space-y-6 p-6 duration-500 animate-in fade-in-0">
+            <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 duration-500 animate-in fade-in-0">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">{t('overview')}</h1>
-                        <p className="text-muted-foreground">{t('welcomeBack')}</p>
+                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('overview')}</h1>
+                        <p className="text-sm sm:text-base text-muted-foreground">{t('welcomeBack')}</p>
                     </div>
-                    <Button onClick={() => setShowExport(true)} className="flex items-center gap-2">
+                    <Button onClick={() => setShowExport(true)} className="flex items-center gap-2 w-full sm:w-auto">
                         <Download className="h-4 w-4" />
                         {t('export')}
                     </Button>
@@ -417,11 +416,10 @@ export default function StaffHome() {
                                                     {statusOptions.map((s) => (
                                                         <label
                                                             key={s}
-                                                            className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors ${
-                                                                selectedStatuses.includes(s)
-                                                                    ? 'border-[#FF029A] bg-[#FF029A]/10 text-[#FF029A]'
-                                                                    : 'border-muted-foreground/30 text-muted-foreground hover:border-[#FF029A] hover:text-[#FF029A]'
-                                                            }`}
+                                                            className={`inline-flex cursor-pointer items-center gap-2 rounded-full border px-3 py-1 text-sm transition-colors ${selectedStatuses.includes(s)
+                                                                ? 'border-[#FF029A] bg-[#FF029A]/10 text-[#FF029A]'
+                                                                : 'border-muted-foreground/30 text-muted-foreground hover:border-[#FF029A] hover:text-[#FF029A]'
+                                                                }`}
                                                         >
                                                             <input
                                                                 type="checkbox"
@@ -617,7 +615,7 @@ export default function StaffHome() {
                 )}
 
                 {/* Overview Cards */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     <AnimatedChart delay={100}>
                         <OverviewCard
                             title={t('totalParcels')}
@@ -665,7 +663,7 @@ export default function StaffHome() {
                 </div>
 
                 {/* Main Charts Grid */}
-                <div className="grid gap-6 lg:grid-cols-2">
+                <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
                     {/* Daily Operations Overview */}
                     <AnimatedChart delay={500}>
                         <Card>
@@ -674,21 +672,19 @@ export default function StaffHome() {
                                 <div className="mt-4 flex gap-2">
                                     <button
                                         onClick={() => setActiveTab('arrivals')}
-                                        className={`rounded-md px-3 py-1 text-sm transition-colors ${
-                                            activeTab === 'arrivals'
-                                                ? 'bg-secondary text-primary-foreground'
-                                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                        }`}
+                                        className={`rounded-md px-3 py-1 text-sm transition-colors ${activeTab === 'arrivals'
+                                            ? 'bg-secondary text-primary-foreground dark:bg-white dark:text-black'
+                                            : 'bg-muted text-muted-foreground hover:bg-muted/80 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+                                            }`}
                                     >
                                         {t('dailyArrivalsThisWeek')}
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('collected')}
-                                        className={`rounded-md px-3 py-1 text-sm transition-colors ${
-                                            activeTab === 'collected'
-                                                ? 'bg-secondary text-primary-foreground'
-                                                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                        }`}
+                                        className={`rounded-md px-3 py-1 text-sm transition-colors ${activeTab === 'collected'
+                                            ? 'bg-secondary text-primary-foreground dark:bg-white dark:text-black'
+                                            : 'bg-muted text-muted-foreground hover:bg-muted/80 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
+                                            }`}
                                     >
                                         {t('dailyCollected')}
                                     </button>
@@ -771,7 +767,7 @@ export default function StaffHome() {
                 </div>
 
                 {/* Bottom Charts Grid */}
-                <div className="grid gap-6 lg:grid-cols-3">
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
                     {/* Parcel Size */}
                     <AnimatedChart delay={700}>
                         <Card>
@@ -779,7 +775,7 @@ export default function StaffHome() {
                                 <CardTitle>{t('parcelSize')}</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <ResponsiveContainer width="100%" height={250}>
+                                <ResponsiveContainer width="100%" height={300}>
                                     {(() => {
                                         const rawMax = Math.max(1, ...data.parcelSize.map((d) => Number(d.count || 0)));
                                         const padded = Math.ceil(rawMax * 1.1);
@@ -791,9 +787,9 @@ export default function StaffHome() {
                                         const ticks = [0, step, step * 2, step * 3, step * 4];
 
                                         return (
-                                            <BarChart data={data.parcelSize}>
+                                            <BarChart data={data.parcelSize} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
                                                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                                                <XAxis dataKey="size" />
+                                                <XAxis dataKey="size" interval={0} tick={{ fontSize: 11 }} />
                                                 <YAxis domain={[0, roundedMax]} ticks={ticks} />
                                                 <Tooltip
                                                     formatter={(value) => [`${Number(value).toLocaleString()}`, 'Count']}
@@ -819,14 +815,14 @@ export default function StaffHome() {
                                 <CardTitle>{t('parcelStatusDistribution')}</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <ResponsiveContainer width="100%" height={250}>
+                                <ResponsiveContainer width="100%" height={350}>
                                     <PieChart>
                                         <Pie
                                             data={data.parcelStatus}
                                             cx="50%"
                                             cy="50%"
                                             innerRadius={60}
-                                            outerRadius={100}
+                                            outerRadius={80}
                                             paddingAngle={2}
                                             dataKey="value"
                                         >
@@ -844,7 +840,7 @@ export default function StaffHome() {
                                                 borderRadius: '8px',
                                             }}
                                         />
-                                        <Legend />
+                                        <Legend verticalAlign="bottom" height={36} />
                                     </PieChart>
                                 </ResponsiveContainer>
                             </CardContent>

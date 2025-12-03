@@ -25,6 +25,13 @@ const languages = [
 export default function Appearance() {
     const { language, setLanguage, t } = useLanguage();
 
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('appearanceSettings'),
+            href: '/settings/appearance',
+        },
+    ];
+
     const handleLanguageChange = (code: 'en' | 'ms' | 'zh') => {
         setLanguage(code);
     };
@@ -34,7 +41,7 @@ export default function Appearance() {
             <Head title={t('appearanceSettings')} />
 
             <SettingsLayout>
-                <div className="space-y-8">
+                <div className="max-w-xl space-y-8">
                     {/* Theme Settings */}
                     <div className="space-y-4">
                         <HeadingSmall title={t('theme')} description={t('themeDescription')} />
@@ -44,7 +51,7 @@ export default function Appearance() {
                     {/* Language Settings */}
                     <div className="space-y-4">
                         <HeadingSmall title={t('language')} description={t('languageDescription')} />
-                        
+
                         <div className="rounded-lg border bg-card p-6">
                             <div className="mb-4 flex items-center gap-2">
                                 <Globe className="h-5 w-5 text-muted-foreground" />
@@ -56,11 +63,10 @@ export default function Appearance() {
                                     <button
                                         key={lang.code}
                                         onClick={() => handleLanguageChange(lang.code)}
-                                        className={`flex items-center gap-3 rounded-lg border-2 p-4 transition-all duration-200 ${
-                                            language === lang.code
-                                                ? 'border-primary bg-primary/5 shadow-sm ring-2 ring-primary/20'
-                                                : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                                        }`}
+                                        className={`flex items-center gap-3 rounded-lg border-2 p-4 transition-all duration-200 ${language === lang.code
+                                            ? 'border-primary bg-primary/5 shadow-sm ring-2 ring-primary/20'
+                                            : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                                            }`}
                                     >
                                         <span className="text-3xl">{lang.flag}</span>
                                         <div className="flex-1 text-left">

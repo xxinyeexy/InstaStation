@@ -9,7 +9,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { t } = useLanguage();
-    
+
     const sidebarNavItems: NavItem[] = [
         {
             title: t('profile'),
@@ -62,8 +62,8 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
 
                 <Separator className="my-6 md:hidden" />
 
-                <div className="flex-1 md:max-w-2xl">
-                    <section className="max-w-xl space-y-12">{children}</section>
+                <div className="flex-1 lg:max-w-4xl">
+                    <section className="space-y-12">{children}</section>
                 </div>
             </div>
         </div>

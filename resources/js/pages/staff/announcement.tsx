@@ -40,7 +40,7 @@ export default function StaffAnnouncements(props: {
     const [viewing, setViewing] = useState<any | null>(null);
     const [validationError, setValidationError] = useState<string>('');
     const [successMessage, setSuccessMessage] = useState<string>('');
-    
+
     const showValidationError = (message: string) => {
         setValidationError(message);
         setTimeout(() => setValidationError(''), 3000);
@@ -178,12 +178,12 @@ export default function StaffAnnouncements(props: {
             prev.map((r) =>
                 ((r as any).announcement_id || r.faq_id) === announcement_id
                     ? {
-                          ...r,
-                          announcement_status: to === 'publish' ? 'Published' : 'Draft',
-                          publish_date: to === 'publish' ? currentTimestamp : (r as any).publish_date,
-                          faq_status: to === 'publish' ? 'Active' : 'Inactive',
-                          updated_at: currentTimestamp,
-                      }
+                        ...r,
+                        announcement_status: to === 'publish' ? 'Published' : 'Draft',
+                        publish_date: to === 'publish' ? currentTimestamp : (r as any).publish_date,
+                        faq_status: to === 'publish' ? 'Active' : 'Inactive',
+                        updated_at: currentTimestamp,
+                    }
                     : r,
             ),
         );
@@ -231,11 +231,11 @@ export default function StaffAnnouncements(props: {
         return 'bg-gray-100 text-gray-700';
     };
     const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: t('announcements'),
-        href: '/student/announcements',
-    },
-];
+        {
+            title: t('announcements'),
+            href: '/student/announcements',
+        },
+    ];
 
 
     return (
@@ -266,94 +266,96 @@ export default function StaffAnnouncements(props: {
             )}
             <div className="space-y-6 p-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">{t('announcements')}</h1>
-                    <p className="text-sm text-gray-500 dark:text-muted-foreground">{t('manageAnnouncements')}</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('announcements')}</h1>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('manageAnnouncements')}</p>
                 </div>
 
                 {/* Summary cards */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="rounded-xl border border-border bg-card p-4">
-                        <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('totalAnnouncements')}</div>
-                        <div className="text-2xl font-bold text-foreground">{list.length}</div>
-                        <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('allAnnouncements')}</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{t('totalAnnouncements')}</div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">{list.length}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">{t('allAnnouncements')}</div>
                     </div>
-                    <div className="rounded-xl border border-border bg-card p-4">
-                        <div className="text-sm text-gray-600 dark:text-muted-foreground">{t('published')}</div>
-                        <div className="text-2xl font-bold text-foreground">
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:bg-gray-800 dark:border-gray-700">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{t('published')}</div>
+                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
                             {list.filter((r) => (r as any).announcement_status === 'Published' || r.faq_status === 'Active').length}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('visibleToStudents')}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">{t('visibleToStudents')}</div>
                     </div>
                 </div>
 
                 {/* Search and filter */}
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                     <div className="relative flex-1">
-                        <Search size={16} className="absolute top-1/2 left-2 -translate-y-1/2 text-gray-400 dark:text-muted-foreground" />
+                        <Search size={16} className="absolute top-1/2 left-2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
                         <input
                             ref={searchRef}
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
                             placeholder={t('searchAnnouncements')}
-                            className="w-full rounded-md border border-border bg-background px-7 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+                            className="w-full rounded-md border border-gray-200 bg-white px-7 py-2 text-sm text-gray-900 placeholder:text-gray-400 dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
                             onKeyDown={(e) => e.key === 'Enter' && refreshFromServer()}
                         />
                     </div>
-                    <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-                    >
-                        <option value="">{t('allCategories')}</option>
-                        <option value="General">{t('general')}</option>
-                        <option value="Holiday">{t('holiday')}</option>
-                        <option value="Maintenance">{t('maintenance')}</option>
-                        <option value="Policy">{t('policy')}</option>
-                    </select>
-                    <button
-                        onClick={() => {
-                            setAdding(true);
-                            // Initialize with current time in datetime-local format
-                            const now = new Date();
-                            const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-                            setPublishDate(localDateTime);
-                            setAnnStatus('Active'); // Set to Published by default when publish date is current
-                        }}
-                        className="inline-flex items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white dark:bg-gray-700"
-                    >
-                        <Plus size={16} /> {t('newAnnouncement')}
-                    </button>
+                    <div className="flex gap-3">
+                        <select
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className="flex-1 sm:flex-none rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
+                        >
+                            <option value="">{t('allCategories')}</option>
+                            <option value="General">{t('general')}</option>
+                            <option value="Holiday">{t('holiday')}</option>
+                            <option value="Maintenance">{t('maintenance')}</option>
+                            <option value="Policy">{t('policy')}</option>
+                        </select>
+                        <button
+                            onClick={() => {
+                                setAdding(true);
+                                // Initialize with current time in datetime-local format
+                                const now = new Date();
+                                const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                                setPublishDate(localDateTime);
+                                setAnnStatus('Active'); // Set to Published by default when publish date is current
+                            }}
+                            className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-700"
+                        >
+                            <Plus size={16} /> {t('newAnnouncement')}
+                        </button>
+                    </div>
                 </div>
 
                 {/* List */}
                 <div className="space-y-4">
                     {filtered.map((f) => (
-                        <div key={f.announcement_id} className="rounded-xl border border-border bg-card">
+                        <div key={f.announcement_id} className="rounded-xl border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
                             <div className="flex items-start justify-between p-4">
                                 <div className="pr-4">
                                     <div className="mb-2 flex items-center gap-2 text-xs">
                                         <span className={`rounded-full px-2 py-0.5 text-xs ${categoryClasses((f as any).announcement_type || f.category)}`}>{t(((f as any).announcement_type || f.category || 'General').toLowerCase() as any)}</span>
                                         {((f as any).announcement_status || (f as any).faq_status) &&
                                             ((f as any).announcement_status === 'Draft' || (f as any).faq_status === 'Inactive') && (
-                                                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 dark:bg-muted dark:text-muted-foreground">
+                                                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
                                                     {t('draft')}
                                                 </span>
                                             )}
                                     </div>
-                                    <div className="text-lg font-semibold text-foreground">
+                                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
                                         {(f as any).announcement_title || (f as any).faq_question}
                                     </div>
-                                    <div className="mt-2 text-sm text-gray-600 dark:text-muted-foreground">
+                                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
                                         {(f as any).announcement_content || (f as any).faq_answer}
                                     </div>
-                                    <div className="mt-3 text-xs text-gray-400 dark:text-muted-foreground">
+                                    <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
                                         {t('publishLabel')}: {formatDateTime((f as any).publish_date as string | undefined)}
                                     </div>
                                 </div>
                                 <div className="flex shrink-0 items-center gap-3">
                                     <button
                                         onClick={() => setViewing(f)}
-                                        className="rounded-full border border-border bg-muted px-2 py-1 text-xs text-muted-foreground hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg"
+                                        className="rounded-full border border-gray-200 bg-gray-50 px-2 py-1 text-xs text-gray-500 hover:scale-110 hover:bg-blue-50 hover:text-blue-600 hover:shadow-lg dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
                                         title="View"
                                     >
                                         <Eye size={16} />
@@ -361,14 +363,14 @@ export default function StaffAnnouncements(props: {
                                     {(f as any).announcement_status === 'Published' || (f as any).faq_status === 'Active' ? (
                                         <button
                                             onClick={() => publish(((f as any).announcement_id || f.faq_id) as number, 'unpublish')}
-                                            className="text-sm text-foreground hover:bg-pink-50 hover:text-pink-600 hover:shadow-lg focus-visible:outline-none active:bg-gray-200"
+                                            className="text-sm text-gray-900 hover:bg-pink-50 hover:text-pink-600 hover:shadow-lg focus-visible:outline-none active:bg-gray-200 dark:text-white dark:hover:bg-pink-900/20 dark:hover:text-pink-400 dark:active:bg-gray-700"
                                         >
                                             {t('unpublish')}
                                         </button>
                                     ) : (
                                         <button
                                             onClick={() => publish(((f as any).announcement_id || f.faq_id) as number, 'publish')}
-                                            className="rounded-full border border-border bg-muted px-3 py-1 text-xs text-muted-foreground opacity-80 hover:opacity-100"
+                                            className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-500 opacity-80 hover:opacity-100 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400"
                                         >
                                             {t('publish')}
                                         </button>
@@ -387,7 +389,7 @@ export default function StaffAnnouncements(props: {
                                             setEditImageFile(null);
                                             setEditImagePreview((f as any).announcement_image ? `/storage/${(f as any).announcement_image}` : null);
                                         }}
-                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg"
+                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-orange-50 hover:text-orange-500 hover:shadow-lg dark:hover:bg-orange-900/20 dark:hover:text-orange-400"
                                     >
                                         <Edit2 size={14} />
                                     </button>
@@ -398,30 +400,30 @@ export default function StaffAnnouncements(props: {
                                                 (((f as any).announcement_title || (f as any).faq_question) as string) || '',
                                             )
                                         }
-                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg"
+                                        className="rounded-2xl p-2 text-gray-400 transition-all duration-300 hover:scale-110 hover:bg-red-50 hover:text-red-600 hover:shadow-lg dark:hover:bg-red-900/20 dark:hover:text-red-400"
                                     >
                                         <Trash2 size={14} />
                                     </button>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-end pr-4 pb-3 text-xs text-gray-400 dark:text-muted-foreground">
+                            <div className="flex items-center justify-end pr-4 pb-3 text-xs text-gray-400 dark:text-gray-500">
                                 Updated: {f.updated_at ? new Date(f.updated_at).toLocaleString() : 'N/A'}
                             </div>
                         </div>
                     ))}
-                    {filtered.length === 0 && <div className="py-16 text-center text-gray-400 dark:text-muted-foreground">No results.</div>}
+                    {filtered.length === 0 && <div className="py-16 text-center text-gray-400 dark:text-gray-500">No results.</div>}
                 </div>
             </div>
 
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div className="absolute inset-0 bg-black/30" onClick={handleDeleteCancel} />
-                    <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl dark:bg-card">
-                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                            <Trash2 className="h-6 w-6 text-red-600" />
+                    <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl dark:bg-gray-800">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
+                            <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
                         </div>
-                        <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-foreground">{t('deleteAnnouncement')}</h2>
-                        <p className="mb-1 text-sm text-gray-600 dark:text-muted-foreground">
+                        <h2 className="mb-2 text-lg font-semibold text-gray-900 dark:text-white">{t('deleteAnnouncement')}</h2>
+                        <p className="mb-1 text-sm text-gray-600 dark:text-gray-400">
                             {t('areYouSureDeleteAnnouncement')}
                             {selectedDeleteLabel ? (
                                 <>
@@ -434,15 +436,15 @@ export default function StaffAnnouncements(props: {
                             ?
                         </p>
                         <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
-                                <p className="text-sm text-left text-red-800 dark:text-red-400">
-                            {t('cannotBeUndone')}
-                                </p>
-                            </div>
+                            <p className="text-sm text-left text-red-800 dark:text-red-400">
+                                {t('cannotBeUndone')}
+                            </p>
+                        </div>
                         <div className="flex justify-center gap-3">
                             <button
                                 onClick={handleDeleteCancel}
                                 disabled={isDeleting}
-                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-card dark:text-muted-foreground"
+                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
                             >
                                 {t('cancel')}
                             </button>
@@ -459,16 +461,16 @@ export default function StaffAnnouncements(props: {
             )}
 
             {editing && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setEditing(null)} />
-                    <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-xl dark:bg-card">
+                    <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold">{t('editAnnouncement')}</div>
-                                <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('updateAnnouncementDesc')}</div>
+                                <div className="text-lg font-semibold text-gray-900 dark:text-white">{t('editAnnouncement')}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{t('updateAnnouncementDesc')}</div>
                             </div>
                             <button
-                                className="text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                                 onClick={() => setEditing(null)}
                             >
                                 <X size={18} />
@@ -476,28 +478,28 @@ export default function StaffAnnouncements(props: {
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">{t('title')}</div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('title')}</div>
                                 <input
                                     value={editTitle}
                                     onChange={(e) => setEditTitle(e.target.value)}
-                                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">{t('content')}</div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('content')}</div>
                                 <textarea
                                     value={editContent}
                                     onChange={(e) => setEditContent(e.target.value)}
-                                    className="h-28 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                    className="h-28 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">{t('type')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('type')}</div>
                                     <select
                                         value={editType}
                                         onChange={(e) => setEditType(e.target.value)}
-                                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     >
                                         <option value="General">{t('general')}</option>
                                         <option value="Holiday">{t('holiday')}</option>
@@ -506,11 +508,11 @@ export default function StaffAnnouncements(props: {
                                     </select>
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">{t('status')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('status')}</div>
                                     <select
                                         value={editStatus}
                                         onChange={(e) => setEditStatus(e.target.value as any)}
-                                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     >
                                         <option value="Inactive">{t('draft')}</option>
                                         <option value="Active">{t('published')}</option>
@@ -518,16 +520,16 @@ export default function StaffAnnouncements(props: {
                                 </div>
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">{t('image')}</div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('image')}</div>
                                 <div className="flex items-center gap-3">
-                                    <div className="relative h-20 w-32 overflow-hidden rounded-md border bg-gray-50">
+                                    <div className="relative h-20 w-32 overflow-hidden rounded-md border bg-gray-50 dark:bg-gray-900 dark:border-gray-700">
                                         {editImagePreview ? (
                                             <img src={editImagePreview} alt="preview" className="h-full w-full object-cover" />
                                         ) : (
                                             <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">{t('noImage')}</div>
                                         )}
                                     </div>
-                                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm">
+                                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -544,35 +546,35 @@ export default function StaffAnnouncements(props: {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">{t('publishDate')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('publishDate')}</div>
                                     <input
                                         type="datetime-local"
                                         value={editPublishDate}
                                         onChange={(e) => setEditPublishDate(e.target.value)}
                                         min={nowDateTimeLocal}
-                                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     />
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">{t('expiryDate')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('expiryDate')}</div>
                                     <input
                                         type="datetime-local"
                                         value={editExpiryDate}
                                         onChange={(e) => setEditExpiryDate(e.target.value)}
                                         min={editPublishDate || nowDateTimeLocal}
-                                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     />
                                 </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 pt-2">
-                                <button className="rounded-md border border-border px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800" onClick={() => setEditing(null)}>
+                                <button className="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700" onClick={() => setEditing(null)}>
                                     {t('cancel')}
                                 </button>
                                 <button
                                     className="rounded-md bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600"
                                     onClick={async () => {
                                         if (!editing) return;
-                                        
+
                                         // Validation
                                         if (!editTitle.trim()) {
                                             showValidationError('Please enter a title');
@@ -622,20 +624,20 @@ export default function StaffAnnouncements(props: {
                                         setList((prev) =>
                                             prev.map((r) =>
                                                 (((r as any).announcement_id || r.faq_id) as number) ===
-                                                (((editing as any).announcement_id || (editing as any).faq_id) as number)
+                                                    (((editing as any).announcement_id || (editing as any).faq_id) as number)
                                                     ? {
-                                                          ...r,
-                                                          announcement_title: editTitle,
-                                                          announcement_content: editContent,
-                                                          announcement_type: editType,
-                                                          announcement_status: editStatus === 'Active' ? 'Published' : 'Draft',
-                                                          publish_date: editPublishDate
-                                                              ? toIsoStringFromLocal(editPublishDate)
-                                                              : (r as any).publish_date,
-                                                          expiry_date: editExpiryDate ? toIsoStringFromLocal(editExpiryDate) : (r as any).expiry_date,
-                                                          category: editType,
-                                                          updated_at: new Date().toISOString(),
-                                                      }
+                                                        ...r,
+                                                        announcement_title: editTitle,
+                                                        announcement_content: editContent,
+                                                        announcement_type: editType,
+                                                        announcement_status: editStatus === 'Active' ? 'Published' : 'Draft',
+                                                        publish_date: editPublishDate
+                                                            ? toIsoStringFromLocal(editPublishDate)
+                                                            : (r as any).publish_date,
+                                                        expiry_date: editExpiryDate ? toIsoStringFromLocal(editExpiryDate) : (r as any).expiry_date,
+                                                        category: editType,
+                                                        updated_at: new Date().toISOString(),
+                                                    }
                                                     : r,
                                             ),
                                         );
@@ -652,12 +654,12 @@ export default function StaffAnnouncements(props: {
             )}
 
             {viewing && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setViewing(null)} />
-                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl">
+                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold">Announcement Details</div>
+                                <div className="text-lg font-semibold text-gray-900 dark:text-white">Announcement Details</div>
                                 <div className="mt-2 flex items-center gap-2">
                                     <span
                                         className={`rounded-full px-2 py-0.5 ${categoryClasses((viewing as any).announcement_type || (viewing as any).category)}`}
@@ -667,14 +669,14 @@ export default function StaffAnnouncements(props: {
                                 </div>
                             </div>
                             <button
-                                className="text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                                 onClick={() => setViewing(null)}
                             >
                                 <X size={18} />
                             </button>
                         </div>
                         <div className="space-y-4">
-                            <div className="text-2xl font-bold">{(viewing as any).announcement_title || (viewing as any).faq_question}</div>
+                            <div className="text-2xl font-bold text-gray-900 dark:text-white">{(viewing as any).announcement_title || (viewing as any).faq_question}</div>
                             {(viewing as any).announcement_image && (
                                 <img
                                     src={`/storage/${(viewing as any).announcement_image}`}
@@ -682,11 +684,11 @@ export default function StaffAnnouncements(props: {
                                     className="h-56 w-full rounded-md object-cover"
                                 />
                             )}
-                            <div className="prose max-w-none text-gray-700 dark:text-muted-foreground">
+                            <div className="prose max-w-none text-gray-700 dark:text-gray-300">
                                 {(viewing as any).announcement_content || (viewing as any).faq_answer}
                             </div>
-                            <hr />
-                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                            <hr className="dark:border-gray-700" />
+                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
                                 <div>
                                     <div className="font-medium">Created</div>
                                     <div>{(viewing as any).created_at ? new Date((viewing as any).created_at).toLocaleString() : 'N/A'}</div>
@@ -706,16 +708,16 @@ export default function StaffAnnouncements(props: {
             )}
 
             {adding && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setAdding(false)} />
-                    <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-6 shadow-xl dark:bg-card">
+                    <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold">{t('createAnnouncement')}</div>
-                                <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('createAnnouncementDesc')}</div>
+                                <div className="text-lg font-semibold text-gray-900 dark:text-white">{t('createAnnouncement')}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{t('createAnnouncementDesc')}</div>
                             </div>
                             <button
-                                className="text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground"
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                                 onClick={() => setAdding(false)}
                             >
                                 <X size={18} />
@@ -723,25 +725,25 @@ export default function StaffAnnouncements(props: {
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">{t('title')}</div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('title')}</div>
                                 <input
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     placeholder={t('enterAnnouncementTitle')}
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium text-foreground">{t('content')}</div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('content')}</div>
                                 <textarea
                                     value={content}
                                     onChange={(e) => setContent(e.target.value)}
-                                    className="h-28 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                    className="h-28 w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     placeholder={t('enterAnnouncementContent')}
                                 />
                             </div>
                             <div>
-                                <div className="mb-1 text-sm font-medium">{t('image')} </div>
+                                <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('image')} </div>
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -750,17 +752,17 @@ export default function StaffAnnouncements(props: {
                                         setImageFile(f);
                                         setImagePreview(f ? URL.createObjectURL(f) : null);
                                     }}
-                                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                    className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                 />
                                 {imagePreview && <img src={imagePreview} alt="preview" className="mt-2 h-28 w-full rounded-md object-cover" />}
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">{t('type')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('type')}</div>
                                     <select
                                         value={annType}
                                         onChange={(e) => setAnnType(e.target.value)}
-                                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     >
                                         <option value="General">{t('general')}</option>
                                         <option value="Holiday">{t('holiday')}</option>
@@ -769,11 +771,11 @@ export default function StaffAnnouncements(props: {
                                     </select>
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">{t('status')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('status')}</div>
                                     <select
                                         value={annStatus}
                                         onChange={(e) => setAnnStatus(e.target.value as 'Active' | 'Inactive')}
-                                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     >
                                         <option value="Inactive">{t('draft')}</option>
                                         <option value="Active">{t('published')}</option>
@@ -782,28 +784,28 @@ export default function StaffAnnouncements(props: {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">{t('publishDate')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('publishDate')}</div>
                                     <input
                                         type="datetime-local"
                                         value={toDateTimeLocalValue(publishDate)}
                                         onChange={(e) => setPublishDate(e.target.value)}
                                         min={nowDateTimeLocal}
-                                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     />
                                 </div>
                                 <div>
-                                    <div className="mb-1 text-sm font-medium text-foreground">{t('expiryDate')}</div>
+                                    <div className="mb-1 text-sm font-medium text-gray-900 dark:text-white">{t('expiryDate')}</div>
                                     <input
                                         type="datetime-local"
                                         value={toDateTimeLocalValue(expiryDate)}
                                         onChange={(e) => setExpiryDate(e.target.value)}
                                         min={publishDate ? toDateTimeLocalValue(publishDate) || nowDateTimeLocal : nowDateTimeLocal}
-                                        className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
+                                        className="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                     />
                                 </div>
                             </div>
                             <div className="flex items-center justify-end gap-2 pt-2">
-                                <button className="rounded-md border border-border px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800" onClick={() => setAdding(false)}>
+                                <button className="rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700" onClick={() => setAdding(false)}>
                                     {t('cancel')}
                                 </button>
                                 <button

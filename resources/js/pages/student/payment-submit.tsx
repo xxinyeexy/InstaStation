@@ -12,7 +12,7 @@ type Parcel = {
     arrival: string;
     fee: number;
 };
-   
+
 
 export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
     const { t } = useLanguage();
@@ -100,7 +100,7 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Validate that a file is selected
         if (!data.proof) {
             setValidationError('Please upload a payment proof before submitting.');
@@ -115,7 +115,7 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
         }
 
         setValidationError('');
-        
+
         // useForm already tracks `data`; just force FormData for file upload
         post(`/student/payment/submit/${parcel.parcel_id}`, {
             forceFormData: true,
@@ -138,10 +138,10 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Payment for ${parcel.parcel_code}`} />
-            <div className="p-6">
-                <div className="mx-auto max-w-xl rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="p-4 sm:p-6">
+                <div className="mx-auto max-w-xl rounded-2xl border bg-white p-4 sm:p-6 shadow-sm dark:bg-gray-800 dark:border-gray-700">
                     <div className="mb-4 flex items-center justify-between">
-                        <h1 className="text-lg font-semibold text-gray-900">
+                        <h1 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                             {t('paymentFor')} <span className="text-green-600">{parcel.parcel_code}</span>
                         </h1>
                         <Link href={route('student.payment')} className="text-sm text-gray-400 hover:text-gray-600">
@@ -149,57 +149,56 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6 text-sm text-gray-700">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm text-gray-700 dark:text-gray-300">
                         <div>
-                            <div className="text-gray-500">{t('trackingID')}:</div>
+                            <div className="text-gray-500 dark:text-gray-400">{t('trackingID')}:</div>
                             <div className="font-medium">{parcel.tracking_no}</div>
                         </div>
                         <div>
-                            <div className="text-gray-500">{t('sender')}:</div>
+                            <div className="text-gray-500 dark:text-gray-400">{t('sender')}:</div>
                             <div className="font-medium">{parcel.sender}</div>
                         </div>
                         <div>
-                            <div className="text-gray-500">{t('arrivalDate')}:</div>
+                            <div className="text-gray-500 dark:text-gray-400">{t('arrivalDate')}:</div>
                             <div className="font-medium">{parcel.arrival}</div>
                         </div>
                         <div>
-                            <div className="text-gray-500">{t('collectionFee')}:</div>
+                            <div className="text-gray-500 dark:text-gray-400">{t('collectionFee')}:</div>
                             <div className="font-medium">RM {parcel.fee.toFixed(2)}</div>
                         </div>
                     </div>
 
-                    <div className="my-4 h-px w-full bg-gray-200" />
+                    <div className="my-4 h-px w-full bg-gray-200 dark:bg-gray-700" />
 
-                    <button className="mb-4 w-full rounded-md border border-gray-200 bg-gray-50 py-2 text-sm font-medium text-gray-700">
+                    <button className="mb-4 w-full rounded-md border border-gray-200 bg-gray-50 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
                         {t('qrPayment')}
                     </button>
 
-                    <div className="mb-2 text-sm font-semibold text-gray-800">{t('scanToPay')}</div>
-                    <p className="mb-3 text-xs text-gray-500">{t('scanQRWithBankingApp')}</p>
+                    <div className="mb-2 text-sm font-semibold text-gray-800 dark:text-gray-200">{t('scanToPay')}</div>
+                    <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">{t('scanQRWithBankingApp')}</p>
                     <div className="mb-6 flex justify-center">
-                        <div className="flex items-center justify-center rounded-md border border-dashed border-gray-300 p-2">
+                        <div className="flex items-center justify-center rounded-md border border-dashed border-gray-300 p-2 dark:border-gray-600">
                             <img src="/images/qrpayment.png" alt="DuitNow QR" className="h-40 w-40 object-contain" />
                         </div>
                     </div>
-                    <div className="mb-6 text-center text-xs text-gray-600">{t('amount')}: RM {parcel.fee.toFixed(2)}</div>
+                    <div className="mb-6 text-center text-xs text-gray-600 dark:text-gray-400">{t('amount')}: RM {parcel.fee.toFixed(2)}</div>
 
                     <form onSubmit={onSubmit} className="space-y-4">
                         <div>
                             <div className="mb-2 flex items-center gap-2">
-                                <svg className="h-5 w-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="h-5 w-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <span className="text-sm font-semibold text-gray-800">{t('uploadPaymentProof')}</span>
+                                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{t('uploadPaymentProof')}</span>
                             </div>
-                            <p className="mb-4 text-xs text-gray-500">{t('uploadScreenshotOrPhoto')}</p>
-                            <label 
-                                className={`group relative flex h-48 w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed text-center transition-all duration-200 ${
-                                    isDragging 
-                                        ? 'scale-[1.02] border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg' 
-                                        : validationError || errors.proof
-                                            ? 'border-red-400 bg-red-50/50'
-                                            : 'border-gray-300 bg-gradient-to-br from-gray-50 to-white hover:border-green-400 hover:shadow-md'
-                                }`}
+                            <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">{t('uploadScreenshotOrPhoto')}</p>
+                            <label
+                                className={`group relative flex h-48 w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed text-center transition-all duration-200 ${isDragging
+                                    ? 'scale-[1.02] border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg'
+                                    : validationError || errors.proof
+                                        ? 'border-red-400 bg-red-50/50'
+                                        : 'border-gray-300 bg-gradient-to-br from-gray-50 to-white hover:border-green-400 hover:shadow-md dark:border-gray-600 dark:from-gray-800 dark:to-gray-900'
+                                    }`}
                                 onDragEnter={handleDragEnter}
                                 onDragLeave={handleDragLeave}
                                 onDragOver={handleDragOver}
@@ -238,12 +237,11 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className={`space-y-3 px-6 transition-all duration-200 ${isDragging ? 'scale-105 text-green-600' : 'text-gray-500 group-hover:text-green-600'}`}>
-                                        <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full transition-all duration-200 ${
-                                            isDragging 
-                                                ? 'bg-green-100 ring-4 ring-green-200' 
-                                                : 'bg-gray-100 group-hover:bg-green-50 group-hover:ring-2 group-hover:ring-green-200'
-                                        }`}>
+                                    <div className={`space-y-3 px-6 transition-all duration-200 ${isDragging ? 'scale-105 text-green-600' : 'text-gray-500 group-hover:text-green-600 dark:text-gray-400'}`}>
+                                        <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full transition-all duration-200 ${isDragging
+                                            ? 'bg-green-100 ring-4 ring-green-200'
+                                            : 'bg-gray-100 group-hover:bg-green-50 group-hover:ring-2 group-hover:ring-green-200 dark:bg-gray-800 dark:group-hover:bg-gray-700'
+                                            }`}>
                                             <svg className={`h-8 w-8 transition-transform duration-200 ${isDragging ? 'scale-110' : 'group-hover:scale-110'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                                             </svg>
@@ -257,12 +255,12 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
                                                 ) : (
                                                     <>
                                                         <span className="text-green-600">Click to upload</span>
-                                                        <span className="text-gray-500"> or drag and drop</span>
+                                                        <span className="text-gray-500 dark:text-gray-400"> or drag and drop</span>
                                                     </>
                                                 )}
                                             </p>
-                                            <p className="text-xs text-gray-400">PNG, JPG, GIF or WEBP</p>
-                                            <p className="text-xs text-gray-400 font-medium">(Maximum size: 10MB)</p>
+                                            <p className="text-xs text-gray-400 dark:text-gray-500">PNG, JPG, GIF or WEBP</p>
+                                            <p className="text-xs text-gray-400 font-medium dark:text-gray-500">(Maximum size: 10MB)</p>
                                         </div>
                                     </div>
                                 )}
@@ -285,8 +283,8 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
                             )}
                         </div>
 
-                        <div className="flex items-center justify-end gap-2">
-                            <Link href={route('student.payment')} className="rounded-md border px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <div className="flex flex-col sm:flex-row items-center justify-end gap-2 sm:gap-2">
+                            <Link href={route('student.payment')} className="rounded-md border px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-800">
                                 {t('cancel')}
                             </Link>
                             <button
