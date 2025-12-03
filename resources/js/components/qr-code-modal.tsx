@@ -15,7 +15,7 @@ interface QRCodeModalProps {
 
 const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeModalProps) => {
     const { t } = useLanguage();
-    
+
     if (!isOpen) return null;
 
     return (
@@ -40,21 +40,21 @@ const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeM
                     <div className="space-y-6">
                         {/* QR Code Display */}
                         <div className="flex justify-center">
-                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
                                 {isLoading ? (
                                     <div className="flex h-48 w-48 items-center justify-center">
                                         <div className="text-center">
-                                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
-                                            <p className="mt-4 text-sm text-gray-600">Generating QR Code...</p>
+                                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600 dark:border-gray-600 dark:border-t-blue-500"></div>
+                                            <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">Generating QR Code...</p>
                                         </div>
                                     </div>
                                 ) : qrCodeData ? (
-                                    <img src={qrCodeData.qr_code_image} alt="QR Code" className="h-48 w-48" />
+                                    <img src={qrCodeData.qr_code_image} alt="QR Code" className="h-48 w-48 rounded-lg bg-white" />
                                 ) : (
                                     <div className="flex h-48 w-48 items-center justify-center">
                                         <div className="text-center">
-                                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
-                                            <p className="mt-4 text-sm text-gray-600">Loading QR Code...</p>
+                                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600 dark:border-gray-600 dark:border-t-blue-500"></div>
+                                            <p className="mt-4 text-sm text-gray-600 dark:text-gray-300">Loading QR Code...</p>
                                         </div>
                                     </div>
                                 )}
@@ -65,12 +65,12 @@ const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeM
                         {qrCodeData && !isLoading && (
                             <div className="space-y-3 text-center">
                                 <div>
-                                    <p className="text-lg font-bold text-gray-900">{qrCodeData.qr_code}</p>
+                                    <p className="text-lg font-bold text-gray-900 dark:text-white">{qrCodeData.qr_code}</p>
                                 </div>
                                 <div>
-                                    <p className="text-sm text-gray-600">
+                                    <p className="text-sm text-gray-600 dark:text-gray-300">
                                         {t('collectionCode')}:{' '}
-                                        <span className="font-['Consolas'] font-bold text-gray-900">{qrCodeData.collection_code}</span>
+                                        <span className="font-['Consolas'] font-bold text-gray-900 dark:text-white">{qrCodeData.collection_code}</span>
                                     </p>
                                 </div>
                             </div>
@@ -79,10 +79,10 @@ const QRCodeModal = ({ isOpen, onClose, qrCodeData, isLoading = false }: QRCodeM
                 </div>
 
                 {/* Modal Footer */}
-                <div className="flex justify-end gap-3 border-t border-gray-200 p-6">
+                <div className="flex justify-end gap-3 border-t border-gray-200 p-6 dark:border-gray-700">
                     <button
                         onClick={onClose}
-                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                     >
                         {t('close')}
                     </button>
