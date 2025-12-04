@@ -225,13 +225,12 @@ export default function Welcome() {
                                 {words.map((word, index) => (
                                     <div
                                         key={word}
-                                        className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${
-                                            index === currentWord
+                                        className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${index === currentWord
                                                 ? 'translate-y-0 opacity-100'
                                                 : index < currentWord
-                                                  ? '-translate-y-full opacity-0'
-                                                  : 'translate-y-full opacity-0'
-                                        }`}
+                                                    ? '-translate-y-full opacity-0'
+                                                    : 'translate-y-full opacity-0'
+                                            }`}
                                     >
                                         <span className="bg-gradient-to-r from-[#FF029A] to-[#16A34A] bg-clip-text text-transparent">{word}</span>
                                     </div>
@@ -275,7 +274,7 @@ export default function Welcome() {
                                 href={route('public.unclaimed')}
                                 className="group relative inline-flex items-center gap-3 overflow-hidden rounded-2xl border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 px-8 py-4 font-semibold text-green-700 shadow-lg transition-all duration-300 hover:scale-105 hover:border-green-400 hover:shadow-2xl"
                             >
-                                <div className="rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 p-2 shadow-md transition-transform duration-300 group-hover:scale-110">
+                                <div className="relative z-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 p-2 shadow-md transition-transform duration-300 group-hover:scale-90">
                                     <Package className="h-5 w-5 text-white" />
                                 </div>
                                 <span className="relative z-10">Check Unclaimed Parcels</span>
