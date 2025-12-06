@@ -7,14 +7,16 @@ import { type BreadcrumbItem } from '@/types';
 import { usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
-export default function AppSidebarLayout({ children, breadcrumbs = [] }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[] }>) {
+export default function AppSidebarLayout({ children, breadcrumbs = [], headerAction }: PropsWithChildren<{ breadcrumbs?: BreadcrumbItem[], headerAction?: React.ReactNode }>) {
     const { props } = usePage();
     const flash = (props as any).flash || {};
     return (
         <AppShell variant="sidebar">
             <AppSidebar />
             <AppContent variant="sidebar" className="overflow-x-hidden">
-                <AppSidebarHeader breadcrumbs={breadcrumbs} />
+                <AppSidebarHeader breadcrumbs={breadcrumbs}>
+                    {headerAction}
+                </AppSidebarHeader>
                 {children}
                 {flash.success && (
                     <div className="fixed right-6 bottom-6 z-50">

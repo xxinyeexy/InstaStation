@@ -36,7 +36,7 @@ export default function StudentFaq({
     filters?: { q?: string; category?: string };
 }) {
     const { t } = useLanguage();
-    
+
     const breadcrumbs = [
         { title: t('faqs'), href: '/student/faq' },
     ];
@@ -164,63 +164,62 @@ export default function StudentFaq({
         window.location.href = `/student/faq?${params.toString()}`;
     };
 
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+    const headerAction = (
+        <div className="relative">
+            <button
+                onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                className="notification-bell relative rounded-full border border-border bg-background p-2.5 shadow-sm hover:bg-accent"
+            >
+                <Bell className="h-5 w-5 text-foreground" />
+                {notificationList.length > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                        {notificationList.length}
+                    </span>
+                )}
+            </button>
 
-            {/* Notification Bell - Positioned at top right (same as parcel page) */}
-            <div className="fixed top-4 right-6 z-50">
-                <div className="relative">
-                    <button
-                        onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
-                        className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
-                    >
-                        <Bell className="h-6 w-6 text-foreground" />
-                        {notificationList.length > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-                                {notificationList.length}
-                            </span>
-                        )}
-                    </button>
-
-                    {/* Notification Dropdown */}
-                    {showNotificationDropdown && (
-                        <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
-                            <div className="border-b border-border p-4">
-                                <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
-                            </div>
-                            <div className="max-h-96 overflow-y-auto">
-                                {notificationList.length === 0 ? (
-                                    <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
-                                ) : (
-                                    notificationList.map((notification) => (
-                                        <div
-                                            key={notification.id}
-                                            className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
-                                            onClick={() => handleNotificationClick(notification)}
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                <div className="mt-1 flex-shrink-0">
-                                                    <AlertCircle className="h-5 w-5 text-destructive" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
-                                                    <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
-                                                    {notification.parcel_code && (
-                                                        <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
-                                                    )}
-                                                    <p className="mt-1 text-xs text-muted-foreground">
-                                                        {new Date(notification.created_at).toLocaleString()}
-                                                    </p>
-                                                </div>
-                                            </div>
+            {/* Notification Dropdown */}
+            {showNotificationDropdown && (
+                <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
+                    <div className="border-b border-border p-4">
+                        <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                        {notificationList.length === 0 ? (
+                            <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
+                        ) : (
+                            notificationList.map((notification) => (
+                                <div
+                                    key={notification.id}
+                                    className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
+                                    onClick={() => handleNotificationClick(notification)}
+                                >
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-1 flex-shrink-0">
+                                            <AlertCircle className="h-5 w-5 text-destructive" />
                                         </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    )}
+                                        <div className="flex-1">
+                                            <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
+                                            <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+                                            {notification.parcel_code && (
+                                                <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
+                                            )}
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {new Date(notification.created_at).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
+        </div>
+    );
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs} headerAction={headerAction}>
 
             <div className="min-h-screen bg-white dark:bg-background">
                 <div className="mx-auto max-w-4xl px-4 py-8">
@@ -253,11 +252,10 @@ export default function StudentFaq({
                         <div className="flex flex-wrap justify-center gap-2">
                             <button
                                 onClick={() => setSelectedCategory('')}
-                                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                                    selectedCategory === ''
-                                        ? 'bg-gray-100 text-gray-700 dark:bg-muted dark:text-muted-foreground'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-muted dark:text-muted-foreground dark:hover:bg-accent'
-                                }`}
+                                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${selectedCategory === ''
+                                    ? 'bg-gray-100 text-gray-700 dark:bg-muted dark:text-muted-foreground'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-muted dark:text-muted-foreground dark:hover:bg-accent'
+                                    }`}
                             >
                                 {t('allCategories')}
                             </button>
@@ -272,11 +270,10 @@ export default function StudentFaq({
                                     <button
                                         key={category}
                                         onClick={() => setSelectedCategory(category)}
-                                        className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                                            selectedCategory === category
-                                                ? selectedClasses
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-muted dark:text-muted-foreground dark:hover:bg-accent'
-                                        }`}
+                                        className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${selectedCategory === category
+                                            ? selectedClasses
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-muted dark:text-muted-foreground dark:hover:bg-accent'
+                                            }`}
                                     >
                                         {getCategoryTranslation(category)}
                                     </button>
@@ -371,6 +368,6 @@ export default function StudentFaq({
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </AppLayout >
     );
 }

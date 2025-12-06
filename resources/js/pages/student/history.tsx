@@ -146,62 +146,62 @@ export default function History({ total_collections, collections_this_year, tota
             }
         });
 
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            {/* Notification Bell - Positioned at top right (same as parcel page) */}
-            <div className="fixed top-4 right-6 z-50">
-                <div className="relative">
-                    <button
-                        onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
-                        className="notification-bell relative rounded-full border border-gray-200 bg-white p-3 shadow-md hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-800 dark:hover:bg-gray-800"
-                    >
-                        <Bell className="h-6 w-6 text-gray-900 dark:text-white" />
-                        {notificationList.length > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-                                {notificationList.length}
-                            </span>
-                        )}
-                    </button>
+    const headerAction = (
+        <div className="relative">
+            <button
+                onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
+                className="notification-bell relative rounded-full border border-gray-200 bg-white p-2.5 shadow-sm hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-800 dark:hover:bg-gray-800"
+            >
+                <Bell className="h-5 w-5 text-gray-900 dark:text-white" />
+                {notificationList.length > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                        {notificationList.length}
+                    </span>
+                )}
+            </button>
 
-                    {/* Notification Dropdown */}
-                    {showNotificationDropdown && (
-                        <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border border-gray-200 bg-white shadow-lg dark:bg-gray-900 dark:border-gray-800">
-                            <div className="border-b border-gray-200 p-4 dark:border-gray-800">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
-                            </div>
-                            <div className="max-h-96 overflow-y-auto">
-                                {notificationList.length === 0 ? (
-                                    <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">No notifications</div>
-                                ) : (
-                                    notificationList.map((notification) => (
-                                        <div
-                                            key={notification.id}
-                                            className="cursor-pointer border-b border-gray-200 bg-white p-4 hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-800 dark:hover:bg-gray-800"
-                                            onClick={() => handleNotificationClick(notification)}
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                <div className="mt-1 flex-shrink-0">
-                                                    <AlertCircle className="h-5 w-5 text-red-500" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{notification.title}</h4>
-                                                    <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{notification.message}</p>
-                                                    {notification.parcel_code && (
-                                                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">Parcel: {notification.parcel_code}</p>
-                                                    )}
-                                                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-600">
-                                                        {new Date(notification.created_at).toLocaleString()}
-                                                    </p>
-                                                </div>
-                                            </div>
+            {/* Notification Dropdown */}
+            {showNotificationDropdown && (
+                <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border border-gray-200 bg-white shadow-lg dark:bg-gray-900 dark:border-gray-800">
+                    <div className="border-b border-gray-200 p-4 dark:border-gray-800">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                        {notificationList.length === 0 ? (
+                            <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">No notifications</div>
+                        ) : (
+                            notificationList.map((notification) => (
+                                <div
+                                    key={notification.id}
+                                    className="cursor-pointer border-b border-gray-200 bg-white p-4 hover:bg-gray-50 dark:bg-gray-900 dark:border-gray-800 dark:hover:bg-gray-800"
+                                    onClick={() => handleNotificationClick(notification)}
+                                >
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-1 flex-shrink-0">
+                                            <AlertCircle className="h-5 w-5 text-red-500" />
                                         </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    )}
+                                        <div className="flex-1">
+                                            <h4 className="text-sm font-semibold text-gray-900 dark:text-white">{notification.title}</h4>
+                                            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{notification.message}</p>
+                                            {notification.parcel_code && (
+                                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">Parcel: {notification.parcel_code}</p>
+                                            )}
+                                            <p className="mt-1 text-xs text-gray-400 dark:text-gray-600">
+                                                {new Date(notification.created_at).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
+        </div>
+    );
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs} headerAction={headerAction}>
 
             <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                 <div>
@@ -354,6 +354,6 @@ export default function History({ total_collections, collections_this_year, tota
                     </div>
                 </div>
             </div>
-        </AppLayout>
+        </AppLayout >
     );
 }
