@@ -137,8 +137,8 @@ export default function Unclaimed({
                 <div className="fixed top-4 right-4 z-50 animate-fade-in">
                     <div
                         className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm ${toast.type === 'success'
-                                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
-                                : 'border-red-200 bg-red-50/95 text-red-800'
+                            ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
+                            : 'border-red-200 bg-red-50/95 text-red-800'
                             }`}
                     >
                         <div className="flex items-start gap-3">
@@ -269,13 +269,15 @@ export default function Unclaimed({
                                         </td>
                                         <td className="px-4 py-3">
                                             <div className="flex gap-2">
-                                                <button
-                                                    disabled={processing}
-                                                    onClick={() => claim(p.parcel_id, 'login')}
-                                                    className="inline-flex items-center gap-1 rounded-md bg-gray-900 px-3 py-1.5 text-white hover:bg-black disabled:opacity-50"
-                                                >
-                                                    <LogIn className="h-4 w-4" /> Yes, it's mine
-                                                </button>
+                                                {(p.recipient_name || p.recipient_matric) && (
+                                                    <button
+                                                        disabled={processing}
+                                                        onClick={() => claim(p.parcel_id, 'login')}
+                                                        className="inline-flex items-center gap-1 rounded-md bg-gray-900 px-3 py-1.5 text-white hover:bg-black disabled:opacity-50"
+                                                    >
+                                                        <LogIn className="h-4 w-4" /> Yes, it's mine
+                                                    </button>
+                                                )}
                                                 <button
                                                     disabled={processing}
                                                     onClick={() => claim(p.parcel_id, 'register')}

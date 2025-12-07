@@ -26,16 +26,41 @@ class ClaimController extends Controller
         $parcels = collect();
         if ($q !== '') {
             $needle = mb_strtolower(trim($q));
-            $parcels = Parcel::query()
+            $needleNoSpaces = str_replace(' ', '', $needle);
+            
+            Log::info('Searching unclaimed parcels', ['q' => $q, 'needle' => $needle, 'needleNoSpaces' => $needleNoSpaces]);
+
+            Log::info('Searching unclaimed parcels (PHP filtering)', ['q' => $q]);
+
+            // Fetch all unclaimed parcels first
+            $allParcels = Parcel::query()
                 ->with('studentUser')
-                ->whereRaw('lower(parcel_status) = ?', ['unclaimed'])
-                ->where(function ($qq) use ($needle) {
-                    $qq->whereRaw('lower(tracking_no) = ?', [$needle])
-                        ->orWhereRaw('lower(recipient_name) = ?', [$needle])
-                        ->orWhereRaw('lower(recipient_matric) = ?', [$needle]);
-                })
+                ->whereRaw('lower(trim(parcel_status)) = ?', ['unclaimed'])
                 ->orderBy('created_at', 'desc')
                 ->get();
+
+            // Filter in PHP for precise control
+            $parcels = $allParcels->filter(function ($p) use ($needle, $needleNoSpaces) {
+                // 1. Tracking Number (Exact)
+                if (mb_strtolower(trim($p->tracking_no ?? '')) === $needle) return true;
+
+                // 2. Recipient Name (Exact)
+                if (mb_strtolower(trim($p->recipient_name ?? '')) === $needle) return true;
+
+                // 3. Recipient Matric (Exact & Robust)
+                $pMatric = mb_strtolower(trim($p->recipient_matric ?? ''));
+                if ($pMatric === $needle) return true;
+                if (str_replace(' ', '', $pMatric) === $needleNoSpaces) return true;
+
+                // 4. Linked Student Matric (Exact & Robust)
+                if ($p->studentUser) {
+                    $sMatric = mb_strtolower(trim($p->studentUser->matric ?? ''));
+                    if ($sMatric === $needle) return true;
+                    if (str_replace(' ', '', $sMatric) === $needleNoSpaces) return true;
+                }
+
+                return false;
+            });
         }
 
         // Global stats across the entire database of unclaimed parcels

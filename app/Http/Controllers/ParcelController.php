@@ -19,6 +19,20 @@ class ParcelController extends Controller
      */
     public function index()
     {
+        // Self-healing: Ensure all "Ready for Collection" parcels have a collection code
+        // This fixes existing parcels that might be missing it
+        $parcelsToFix = Parcel::whereIn('parcel_status', ['Ready For Collection', 'Ready to Collect'])
+            ->whereNull('collection_code')
+            ->get();
+
+        if ($parcelsToFix->isNotEmpty()) {
+            foreach ($parcelsToFix as $p) {
+                $alphabet = chr(rand(65, 90));
+                $numbers = str_pad(rand(0, 999), 3, '0', STR_PAD_LEFT);
+                $p->update(['collection_code' => $alphabet . $numbers]);
+            }
+        }
+
         $parcels = Parcel::with(['studentUser', 'createdBy', 'lastEditedBy'])  // Updated relationship names
             ->orderBy('created_at', 'desc')
             ->get();
