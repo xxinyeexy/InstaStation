@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, FileText, IdCard, MapPin, Package, UserRound } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -49,6 +49,7 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={t('parcelReport')} />
             <div className="p-6">
                 <div className="mx-auto max-w-3xl rounded-xl border bg-white shadow-sm">
                     <div className="flex items-start justify-between border-b p-5">

@@ -226,10 +226,10 @@ export default function Welcome() {
                                     <div
                                         key={word}
                                         className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${index === currentWord
-                                                ? 'translate-y-0 opacity-100'
-                                                : index < currentWord
-                                                    ? '-translate-y-full opacity-0'
-                                                    : 'translate-y-full opacity-0'
+                                            ? 'translate-y-0 opacity-100'
+                                            : index < currentWord
+                                                ? '-translate-y-full opacity-0'
+                                                : 'translate-y-full opacity-0'
                                             }`}
                                     >
                                         <span className="bg-gradient-to-r from-[#FF029A] to-[#16A34A] bg-clip-text text-transparent">{word}</span>
@@ -886,12 +886,12 @@ export default function Welcome() {
             </div>
 
             {/* Footer - Premium Professional Design */}
-            <footer className="relative overflow-hidden bg-gradient-to-r from-[#f7d8ff] via-[#fee5d3] to-[#d3e7ff] duration-1000 animate-in fade-in slide-in-from-bottom-8">
+            <footer className="relative overflow-hidden bg-gradient-to-r from-pink-200 via-green-200 to-blue-200 duration-1000 animate-in fade-in slide-in-from-bottom-8">
                 {/* Animated background decorations */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     <div className="absolute -top-40 -right-40 h-[600px] w-[600px] animate-pulse rounded-full bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-blue-500/10 blur-3xl"></div>
                     <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] animate-pulse rounded-full bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-teal-500/10 blur-3xl delay-1000"></div>
-                    <div className="absolute top-1/2 left-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-gradient-to-br from-purple-500/8 via-pink-500/8 to-rose-500/8 blur-3xl delay-500"></div>
+                    <div className="absolute top-1/2 left-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-lime-500/10 blur-3xl delay-500"></div>
                 </div>
 
                 {/* Grid pattern overlay */}
@@ -940,51 +940,6 @@ export default function Welcome() {
                                 </div>
                             </div>
 
-                            {/* Social Media Links - Enhanced */}
-                            <div className="flex items-center gap-3">
-                                <span className="text-sm font-semibold text-gray-700">Follow us:</span>
-                                <div className="flex items-center gap-2">
-                                    <a
-                                        href="#"
-                                        className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-pink-200 bg-gradient-to-br from-white to-pink-100 text-pink-500 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-pink-400 hover:from-pink-50 hover:to-pink-200 hover:shadow-lg hover:shadow-pink-200"
-                                    >
-                                        <div className="absolute inset-0 bg-gradient-to-br from-pink-500/0 to-pink-600/0 transition-all duration-300 group-hover:from-pink-500/20 group-hover:to-pink-600/20"></div>
-                                        <svg
-                                            className="relative h-5 w-5 transition-colors group-hover:text-pink-600"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                                        </svg>
-                                    </a>
-                                    <a
-                                        href="#"
-                                        className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-purple-200 bg-gradient-to-br from-white to-purple-100 text-purple-500 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-purple-400 hover:from-purple-50 hover:to-purple-200 hover:shadow-lg hover:shadow-purple-200"
-                                    >
-                                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-600/0 transition-all duration-300 group-hover:from-purple-500/20 group-hover:to-purple-600/20"></div>
-                                        <svg
-                                            className="relative h-5 w-5 transition-colors group-hover:text-purple-600"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                                        </svg>
-                                    </a>
-                                    <a
-                                        href="#"
-                                        className="group relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-blue-200 bg-gradient-to-br from-white to-blue-100 text-blue-500 shadow-sm backdrop-blur-sm transition-all duration-300 hover:scale-110 hover:border-blue-400 hover:from-blue-50 hover:to-blue-200 hover:shadow-lg hover:shadow-blue-200"
-                                    >
-                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-600/0 transition-all duration-300 group-hover:from-blue-500/20 group-hover:to-blue-600/20"></div>
-                                        <svg
-                                            className="relative h-5 w-5 transition-colors group-hover:text-blue-600"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-                                        </svg>
-                                    </a>
-                                </div>
-                            </div>
                         </div>
 
                         {/* Quick Links Column - Enhanced */}

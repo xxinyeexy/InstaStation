@@ -13,10 +13,12 @@ class ParcelReminderNotification extends Notification
     use Queueable;
 
     protected Parcel $parcel;
+    protected int $reminderNumber;
 
-    public function __construct(Parcel $parcel)
+    public function __construct(Parcel $parcel, int $reminderNumber)
     {
         $this->parcel = $parcel;
+        $this->reminderNumber = $reminderNumber;
     }
 
     public function via($notifiable)
@@ -32,24 +34,11 @@ class ParcelReminderNotification extends Notification
 
         $url = url('/student/parcel/' . $parcel->parcel_id);
 
-        // Determine reminder count for this parcel to this student
-        $previousCount = 0;
-        try {
-            $previousCount = DBNotification::where('notifiable_id', $notifiable->id)
-                ->where('type', self::class)
-                ->where('data->parcel_id', $parcel->parcel_id)
-                ->count();
-        } catch (\Throwable $e) {
-            // Fallback: ignore counting issues
-            $previousCount = 0;
-        }
-
-        $reminderNumber = $previousCount + 1; // number for this send
-        $ordinal = match ($reminderNumber) {
+        $ordinal = match ($this->reminderNumber) {
             1 => 'First Reminder',
             2 => 'Second Reminder',
             3 => 'Third Reminder',
-            default => $reminderNumber . 'th Reminder',
+            default => $this->reminderNumber . 'th Reminder',
         };
 
         // Prepare view variables
@@ -81,23 +70,12 @@ class ParcelReminderNotification extends Notification
         $parcel = $this->parcel;
         $parcelCode = $parcel->parcel_code ?? $parcel->tracking_no ?? $parcel->parcel_id;
 
-        // Compute and store reminder number for reference
-        $previousCount = 0;
-        try {
-            $previousCount = DBNotification::where('notifiable_id', $notifiable->id)
-                ->where('type', self::class)
-                ->where('data->parcel_id', $parcel->parcel_id)
-                ->count();
-        } catch (\Throwable $e) {
-            $previousCount = 0;
-        }
-
         return [
             'title' => 'Parcel Reminder',
             'message' => "Your parcel ({$parcelCode}) is ready for collection. Please collect it as soon as possible.",
             'parcel_code' => $parcelCode,
             'parcel_id' => $parcel->parcel_id,
-            'reminder_number' => $previousCount + 1,
+            'reminder_number' => $this->reminderNumber,
             'sent_at' => now()->toDateTimeString(),
         ];
     }

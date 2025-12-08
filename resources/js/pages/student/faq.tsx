@@ -220,6 +220,7 @@ export default function StudentFaq({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} headerAction={headerAction}>
+            <Head title={t('frequentlyAskedQuestions')} />
 
             <div className="min-h-screen bg-white dark:bg-background">
                 <div className="mx-auto max-w-4xl px-4 py-8">

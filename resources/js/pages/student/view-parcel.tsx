@@ -1,8 +1,8 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { router } from '@inertiajs/react';
-import { AlarmClock, ArrowLeft, CheckCircle, CircleAlert, CreditCard, Package, User } from 'lucide-react';
+import { Head, router } from '@inertiajs/react';
+import { AlarmClock, ArrowLeft, CheckCircle, CircleAlert, CreditCard, Package, PackageOpen, User, WalletCards } from 'lucide-react';
 
 // TypeScript interfaces
 interface ParcelData {
@@ -88,10 +88,14 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
         switch (iconName) {
             case 'package':
                 return <Package className={iconClass} />;
+            case 'package-open':
+                return <PackageOpen className={iconClass} />;
             case 'clock':
                 return <CircleAlert className={iconClass} />;
             case 'credit-card':
                 return <CreditCard className={iconClass} />;
+            case 'wallet-cards':
+                return <WalletCards className={iconClass} />;
             case 'check-circle':
                 return <CheckCircle className={iconClass} />;
             default:
@@ -184,6 +188,7 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={t('parcelDetails')} />
             <div className="min-h-screen bg-white p-4 sm:p-6 dark:bg-gray-900">
                 {/* Header */}
                 <div className="mb-6 sm:mb-8 flex items-center gap-3">
@@ -340,7 +345,7 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                                                                         : 'bg-white dark:bg-gray-800'
                                                 }`}
                                         >
-                                            {renderIcon(event.icon, event.iconColor)}
+                                            {renderIcon(event.title === 'Ready for Collection' ? 'package-open' : event.title === 'Payment Verified' ? 'wallet-cards' : event.icon, event.iconColor)}
                                         </div>
 
                                         {/* Event content */}

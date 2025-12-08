@@ -52,8 +52,16 @@ class SendParcelReminder implements ShouldQueue
                 }
             }
 
+            // Calculate reminder number
+            $previousCount = DBNotification::where('notifiable_id', $student->id)
+                ->where('type', ParcelReminderNotification::class)
+                ->where('data->parcel_id', $this->parcel->parcel_id)
+                ->count();
+            
+            $reminderNumber = $previousCount + 1;
+
             // Use Notification to send email (to keep it simple and centralized)
-            $student->notify(new ParcelReminderNotification($this->parcel));
+            $student->notify(new ParcelReminderNotification($this->parcel, $reminderNumber));
             // Update parcel to record reminder was sent (after notify)
             try {
                 $this->parcel->reminder_sent_at = now();

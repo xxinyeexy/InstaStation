@@ -2,8 +2,9 @@ import QRCodeModal from '@/components/qr-code-modal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, CheckCircle, MapPin, Package, Sparkles, Upload, X, XCircle } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Head, router, usePage } from '@inertiajs/react';
+import { AlertCircle, Bell, CalendarDays, CheckCircle, MapPin, Package, Sparkles, Timer, Upload, X, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Define the Parcel interface based on your database structure
@@ -87,6 +88,15 @@ interface EditParcelForm {
     description: string;
 }
 const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcelCount: number; t: any }) => {
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
     // Get current time for greeting
     const getCurrentGreeting = () => {
         const hour = new Date().getHours();
@@ -114,30 +124,94 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
         return `${t('matricID')}: A12345678`;
     };
 
-    return (
-        <div className="mb-6 rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100 dark:bg-card dark:ring-border">
-            <div className="flex items-center justify-between">
-                <div>
-                    <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-500/20 dark:text-green-400">
-                        <Sparkles className="h-3 w-3" />
-                        {t('welcomeBackBadge')}
-                    </div>
+    const profilePhotoUrl = user?.profile_pic ? `/storage/${user.profile_pic}` : undefined;
 
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-card-foreground">
-                            {getCurrentGreeting()}, {getDisplayName()}!
+    return (
+        <div className="mb-6 rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100 dark:bg-card dark:ring-border relative overflow-hidden transition-all hover:shadow-xl">
+            <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
+                <div className="flex items-start gap-5">
+                    <Avatar className="h-20 w-20 border-4 border-white shadow-lg ring-1 ring-gray-100 dark:border-gray-800 dark:ring-gray-800">
+                        <AvatarImage src={profilePhotoUrl} alt={user?.name} className="object-cover" />
+                        <AvatarFallback className="bg-emerald-100 text-emerald-700 text-3xl font-bold dark:bg-emerald-900 dark:text-emerald-300">
+                            {user?.name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="pt-1">
+                        <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20">
+                            <span className="relative flex h-2 w-2">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                            </span>
+                            {t('welcomeBackBadge')}
+                        </div>
+                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-card-foreground">
+                            {getCurrentGreeting()}, {getDisplayName().toUpperCase()} <span className="inline-block animate-wave origin-bottom-right">👋🏻</span>
                         </h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-muted-foreground">{getUserIdentifier()}</p>
+                        <p className="mt-1 text-base font-medium text-gray-500 dark:text-muted-foreground">{getUserIdentifier()}</p>
                     </div>
                 </div>
 
-                {/* Right side - Active parcels count */}
-                <div className="text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-600 to-green-600 shadow-lg">
-                        <Package className="h-8 w-8 text-white" />
+                <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+                    {/* Date/Time Widget - Glassmorphism */}
+                    {/* Date/Time Widget - Creative Design */}
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-400 via-emerald-400 to-green-500 p-5 text-white shadow-lg shadow-emerald-200/50 w-full sm:w-auto min-w-[280px] group transition-all duration-300 hover:scale-[1.02] hover:shadow-emerald-300/50 dark:shadow-none">
+                        <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]"></div>
+
+                        {/* Decorative animated elements */}
+                        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/20 blur-2xl transition-all duration-700 group-hover:bg-white/30 group-hover:scale-110 animate-pulse"></div>
+                        <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-white/20 blur-2xl transition-all duration-700 group-hover:bg-white/30 group-hover:scale-110 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-32 rounded-full bg-white/5 blur-3xl"></div>
+
+                        <div className="relative z-10 flex flex-col gap-3">
+                            <div className="flex items-center gap-3 text-sm font-semibold text-white/90 tracking-wide">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 backdrop-blur-md shadow-sm ring-1 ring-white/30 transition-transform group-hover:scale-110">
+                                    <CalendarDays className="h-4 w-4 text-white stroke-[2]" />
+                                </div>
+                                <span className="drop-shadow-sm">
+                                    {currentTime.toLocaleDateString('en-MY', {
+                                        weekday: 'short',
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric'
+                                    }).replace(/(\w+)\s(\d+)/, '$1, $2')}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md shadow-sm ring-1 ring-white/30 transition-transform group-hover:scale-110">
+                                    <Timer className="h-6 w-6 text-white stroke-[2]" />
+                                </div>
+                                <span className="tabular-nums text-3xl font-black tracking-tight drop-shadow-md">
+                                    {currentTime.toLocaleTimeString('en-MY', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        second: '2-digit',
+                                        hour12: true
+                                    })}
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="mt-2 text-2xl font-bold text-gray-900 dark:text-card-foreground">{activeParcelCount}</div>
-                    <div className="text-xs text-gray-500 dark:text-muted-foreground">{t('active')}</div>
+
+                    {/* Active Parcels Count */}
+                    {/* Active Parcels Count - Professional Stat Card */}
+                    {/* Active Parcels Count - Creative Gradient Card */}
+                    <div className="relative flex items-center justify-between gap-4 rounded-2xl bg-gradient-to-br from-pink-500 to-green-500 p-5 shadow-lg shadow-pink-200/50 min-w-[220px] transition-all duration-300 hover:scale-[1.02] hover:shadow-pink-300/50 dark:shadow-none overflow-hidden group">
+                        {/* Background decorative elements */}
+                        <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/10 blur-2xl transition-transform group-hover:scale-110"></div>
+                        <div className="absolute bottom-0 left-0 -mb-4 -ml-4 h-24 w-24 rounded-full bg-white/10 blur-2xl transition-transform group-hover:scale-110"></div>
+
+                        <div className="relative z-10">
+                            <div className="text-xs font-bold uppercase tracking-wider text-pink-100 mb-0.5">{t('active')}</div>
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-4xl font-black text-white tracking-tight leading-none">{activeParcelCount}</span>
+                                <span className="text-sm font-medium text-pink-100/80">parcels</span>
+                            </div>
+                        </div>
+
+                        <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-pink-50 text-pink-500 dark:bg-pink-500/20 dark:text-pink-400 backdrop-blur-md shadow-inner ring-1 ring-white/30 transition-transform group-hover:rotate-6">
+                            <Package className="h-7 w-7 text-pink" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -210,6 +284,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         console.log('Filtered notifications:', filteredNotifications.length);
         setNotificationList(filteredNotifications);
     }, [serverNotifications, dismissedNotificationIds]);
+
+
 
     // Show ALL notifications (unified across all pages - payment, parcel, etc.)
     const visibleNotifications = notificationList;
@@ -866,62 +942,63 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         };
     }, [showPayModal, showDetailsModal, showDeleteModal, showQRModal, showLocations]);
 
-    return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            {/* Notification Bell - Positioned at top right */}
-            <div className="fixed top-4 right-6 z-50">
-                <div className="relative">
-                    <button
-                        onClick={() => setShowNotificationDropdown((s) => !s)}
-                        className="notification-bell relative rounded-full border border-border bg-background p-3 shadow-md hover:bg-accent"
-                    >
-                        <Bell className="h-6 w-6 text-foreground" />
-                        {visibleNotifications.length > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
-                                {visibleNotifications.length}
-                            </span>
-                        )}
-                    </button>
+    const headerAction = (
+        <div className="relative">
+            <button
+                onClick={() => setShowNotificationDropdown((s) => !s)}
+                className="notification-bell relative rounded-full border border-border bg-background p-2.5 shadow-sm hover:bg-accent"
+            >
+                <Bell className="h-5 w-5 text-foreground" />
+                {visibleNotifications.length > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white">
+                        {visibleNotifications.length}
+                    </span>
+                )}
+            </button>
 
-                    {/* Notification Dropdown */}
-                    {showNotificationDropdown && (
-                        <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
-                            <div className="border-b border-border p-4">
-                                <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
-                            </div>
-                            <div className="max-h-96 overflow-y-auto">
-                                {visibleNotifications.length === 0 ? (
-                                    <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
-                                ) : (
-                                    visibleNotifications.map((notification) => (
-                                        <div
-                                            key={notification.id}
-                                            className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
-                                            onClick={() => handleNotificationClick(notification)}
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                <div className="mt-1 flex-shrink-0">
-                                                    <AlertCircle className="h-5 w-5 text-destructive" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
-                                                    <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
-                                                    {notification.parcel_code && (
-                                                        <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
-                                                    )}
-                                                    <p className="mt-1 text-xs text-muted-foreground">
-                                                        {new Date(notification.created_at).toLocaleString()}
-                                                    </p>
-                                                </div>
-                                            </div>
+            {/* Notification Dropdown */}
+            {showNotificationDropdown && (
+                <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
+                    <div className="border-b border-border p-4">
+                        <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                        {visibleNotifications.length === 0 ? (
+                            <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
+                        ) : (
+                            visibleNotifications.map((notification) => (
+                                <div
+                                    key={notification.id}
+                                    className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
+                                    onClick={() => handleNotificationClick(notification)}
+                                >
+                                    <div className="flex items-start gap-3">
+                                        <div className="mt-1 flex-shrink-0">
+                                            <AlertCircle className="h-5 w-5 text-destructive" />
                                         </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    )}
+                                        <div className="flex-1">
+                                            <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
+                                            <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+                                            {notification.parcel_code && (
+                                                <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
+                                            )}
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {new Date(notification.created_at).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
+        </div>
+    );
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs} headerAction={headerAction}>
+            <Head title="My Parcels" />
 
             <div className="space-y-6 p-6">
                 {/* Toast Notification Container */}
@@ -1444,77 +1521,79 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             </div>
 
             {/* Delete Confirmation Modal */}
-            {showDeleteModal && selectedParcelId !== null && (
-                <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
-                    <div className="w-full max-w-md rounded-lg bg-white p-4 shadow-lg dark:bg-card">
-                        <div className="flex flex-col gap-4">
-                            <div className="text-center">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('confirmDeletion')}</h3>
-                                <p className="mt-1 text-sm text-gray-600 dark:text-muted-foreground">{t('areYouSureDeleteParcel')}</p>
-                            </div>
-
-                            {/* Parcel details for confirmation */}
-                            <div className="rounded-md bg-gray-50 p-3 text-sm text-gray-700 dark:bg-muted">
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Parcel Code:</span>
-                                    <span>{selectedParcelCode}</span>
+            {
+                showDeleteModal && selectedParcelId !== null && (
+                    <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
+                        <div className="w-full max-w-md rounded-lg bg-white p-4 shadow-lg dark:bg-card">
+                            <div className="flex flex-col gap-4">
+                                <div className="text-center">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('confirmDeletion')}</h3>
+                                    <p className="mt-1 text-sm text-gray-600 dark:text-muted-foreground">{t('areYouSureDeleteParcel')}</p>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="font-medium">Status:</span>
-                                    <span className={getStatusStyles('Pending Payment')}>Pending Payment</span>
+
+                                {/* Parcel details for confirmation */}
+                                <div className="rounded-md bg-gray-50 p-3 text-sm text-gray-700 dark:bg-muted">
+                                    <div className="flex justify-between">
+                                        <span className="font-medium">Parcel Code:</span>
+                                        <span>{selectedParcelCode}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="font-medium">Status:</span>
+                                        <span className={getStatusStyles('Pending Payment')}>Pending Payment</span>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    onClick={() => setShowDeleteModal(false)}
-                                    className="flex-1 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={async () => {
-                                        if (selectedParcelId === null) return;
-                                        setIsDeleting(true);
-                                        try {
-                                            const response = await fetch(`/staff/parcel/${selectedParcelId}`, {
-                                                method: 'DELETE',
-                                                headers: {
-                                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                                                },
-                                            });
+                                <div className="flex justify-end gap-2">
+                                    <button
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="flex-1 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={async () => {
+                                            if (selectedParcelId === null) return;
+                                            setIsDeleting(true);
+                                            try {
+                                                const response = await fetch(`/staff/parcel/${selectedParcelId}`, {
+                                                    method: 'DELETE',
+                                                    headers: {
+                                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                                                    },
+                                                });
 
-                                            if (!response.ok) {
-                                                throw new Error('Failed to delete parcel. Please try again.');
+                                                if (!response.ok) {
+                                                    throw new Error('Failed to delete parcel. Please try again.');
+                                                }
+
+                                                // Remove from local state
+                                                setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== selectedParcelId));
+
+                                                addToastNotification('success', t('parcelDeleted'), t('parcelDeletedSuccess'));
+                                                setShowDeleteModal(false);
+                                            } catch (error) {
+                                                console.error('Delete parcel error:', error);
+                                                addToastNotification('error', t('deletionFailed'), t('failedToDeleteParcel'));
+                                            } finally {
+                                                setIsDeleting(false);
                                             }
-
-                                            // Remove from local state
-                                            setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== selectedParcelId));
-
-                                            addToastNotification('success', t('parcelDeleted'), t('parcelDeletedSuccess'));
-                                            setShowDeleteModal(false);
-                                        } catch (error) {
-                                            console.error('Delete parcel error:', error);
-                                            addToastNotification('error', t('deletionFailed'), t('failedToDeleteParcel'));
-                                        } finally {
-                                            setIsDeleting(false);
-                                        }
-                                    }}
-                                    className="flex-1 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                                >
-                                    {isDeleting ? (
-                                        <div className="flex items-center justify-center">
-                                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-white"></div>
-                                        </div>
-                                    ) : (
-                                        'Delete Parcel'
-                                    )}
-                                </button>
+                                        }}
+                                        className="flex-1 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                                    >
+                                        {isDeleting ? (
+                                            <div className="flex items-center justify-center">
+                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-white"></div>
+                                            </div>
+                                        ) : (
+                                            'Delete Parcel'
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </AppLayout>
+                )
+            }
+        </AppLayout >
     );
 }

@@ -144,6 +144,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     // Collecting state - track which parcels are being collected
     const [collectingParcels, setCollectingParcels] = useState<Set<number>>(new Set());
 
+    // Reminding state - track which parcels are being reminded
+    const [sendingReminders, setSendingReminders] = useState<Set<number>>(new Set());
+
     // QR Scan modal state
     const [showScanModal, setShowScanModal] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
@@ -862,31 +865,39 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // Send reminder for a single parcel (fire-and-forget with no loading state)
     const sendReminder = async (parcelId: number) => {
+        // Prevent multiple simultaneous requests
+        if (sendingReminders.has(parcelId)) return;
+
+        setSendingReminders((prev) => new Set(prev).add(parcelId));
+
+        // Immediate feedback (Optimistic UI)
+        addNotification('success', t('reminderProcessed'), t('reminderSent') || 'Reminder request has been sent.');
+
         try {
-            // Read CSRF token from meta tag, fallback to XSRF-TOKEN cookie (decoded)
-            const csrfToken = (() => {
-                const meta = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
-                if (meta && meta.getAttribute('content')) return meta.getAttribute('content')!;
-                // Robust cookie parsing: preserve '=' characters in value
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            };
+
+            const meta = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
+            if (meta && meta.content) {
+                headers['X-CSRF-TOKEN'] = meta.content;
+            } else {
                 const getCookie = (name: string) => {
                     const match = document.cookie.split('; ').find((row) => row && row.startsWith(name + '='));
                     if (!match) return '';
                     return match.split('=').slice(1).join('=');
                 };
-                const raw = getCookie('XSRF-TOKEN');
-                return raw ? decodeURIComponent(raw) : '';
-            })();
+                const xsrfToken = getCookie('XSRF-TOKEN');
+                if (xsrfToken) {
+                    headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken);
+                }
+            }
 
             const response = await fetch('/staff/parcels/remind', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    // Send both header names for maximum compatibility
-                    'X-CSRF-TOKEN': csrfToken,
-                    'X-XSRF-TOKEN': csrfToken,
-                },
+                headers,
                 credentials: 'same-origin',
                 body: JSON.stringify({ parcel_ids: [parcelId] }),
             });
@@ -901,20 +912,19 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             }
 
             const data = await response.json();
-            if (data?.success) {
-                const queued = data.queued ?? 0;
-                const skipped_no_contact = data.skipped_no_contact ?? 0;
-                const skipped_recently = data.skipped_recently ?? 0;
-                let message = `Queued: ${queued}`;
-                if (skipped_no_contact) message += ` • Skipped (no contact): ${skipped_no_contact}`;
-                if (skipped_recently) message += ` • Skipped (already reminded today): ${skipped_recently}`;
-                addNotification('success', t('reminderProcessed'), message);
-            } else {
+            if (!data?.success) {
                 addNotification('error', t('reminderFailed'), data.message || t('failedToQueueReminder'));
             }
+            // Success notification is handled optimistically above
         } catch (error: any) {
             console.error('Failed to send reminder:', error);
             addNotification('error', t('error'), error?.message || t('failedToSendReminder'));
+        } finally {
+            setSendingReminders((prev) => {
+                const next = new Set(prev);
+                next.delete(parcelId);
+                return next;
+            });
         }
     };
 
@@ -982,7 +992,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Parcel" />
+            <Head title="Parcels" />
 
             {/* Notification Container */}
             <div className="fixed right-4 bottom-4 z-50 space-y-3">

@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { AlertCircle, Calendar, CircleCheck, Clock, MapPin, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -368,6 +368,7 @@ const SchedulePickup = ({ parcel }: Props) => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Schedule Pickup" />
             {/* Success Toast Notification */}
             {showSuccessToast && (
                 <div className="fixed top-4 right-4 z-50 duration-300 animate-in fade-in slide-in-from-top-4">
@@ -509,14 +510,14 @@ const SchedulePickup = ({ parcel }: Props) => {
                                                 onClick={() => handleDateClick(date)}
                                                 disabled={isPastDate(date)}
                                                 className={`h-10 w-10 rounded-full text-sm font-medium transition-colors ${isSelected(date)
-                                                        ? 'bg-blue-500 text-white'
-                                                        : isToday(date)
-                                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
-                                                            : isPastDate(date)
-                                                                ? 'cursor-not-allowed text-gray-300 dark:text-gray-600'
-                                                                : isWeekend(date)
-                                                                    ? 'text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20'
-                                                                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                                                    ? 'bg-blue-500 text-white'
+                                                    : isToday(date)
+                                                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                                                        : isPastDate(date)
+                                                            ? 'cursor-not-allowed text-gray-300 dark:text-gray-600'
+                                                            : isWeekend(date)
+                                                                ? 'text-purple-600 hover:bg-purple-50 dark:text-purple-400 dark:hover:bg-purple-900/20'
+                                                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
                                                     } `}
                                             >
                                                 {date.getDate()}
@@ -563,10 +564,10 @@ const SchedulePickup = ({ parcel }: Props) => {
                                             onClick={() => isAvailable && setSelectedTimeSlot(slot.id)}
                                             disabled={!isAvailable || isLoadingSlots}
                                             className={`flex w-full items-center justify-between rounded-lg border p-3 transition-colors ${isAvailable
-                                                    ? isSelectedSlot
-                                                        ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/40'
-                                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-700'
-                                                    : 'cursor-not-allowed border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900'
+                                                ? isSelectedSlot
+                                                    ? 'border-blue-500 bg-blue-50 dark:border-blue-400 dark:bg-blue-900/40'
+                                                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 dark:border-gray-700 dark:hover:border-gray-600 dark:hover:bg-gray-700'
+                                                : 'cursor-not-allowed border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-900'
                                                 } `}
                                         >
                                             <div className="flex items-center gap-3">

@@ -1,5 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { Head } from '@inertiajs/react';
 import { Edit2, Plus, Search, Trash2, X } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -138,6 +139,7 @@ export default function ManageFaq({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Manage FAQs" />
             {validationError && (
                 <div className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
                     <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 shadow-lg">

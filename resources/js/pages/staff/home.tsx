@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
-import { usePage } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { AlertCircle, CheckCircle, Clock, Download, Package, TrendingDown, TrendingUp, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -327,6 +327,7 @@ export default function StaffHome() {
 
     return (
         <AppSidebarLayout breadcrumbs={breadcrumbs}>
+            <Head title={t('dashboard')} />
             <div className="space-y-4 sm:space-y-6 p-4 sm:p-6 duration-500 animate-in fade-in-0">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">

@@ -375,7 +375,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                             <div className="mt-1 text-xs text-muted-foreground">{t('successfullyVerified')}</div>
                         </div>
                         <div className="rounded-full bg-green-500/10 p-2 text-green-600 dark:text-green-400">
-                            <CircleCheck className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleCheck>
+                            <WalletCards className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></WalletCards>
                         </div>
                     </div>
                     <div className="flex items-start justify-between rounded-xl border border-border bg-card p-3 sm:p-4">
@@ -450,7 +450,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                                     </svg>
                                                 )}
                                                 {r.payment_state === 'Verified' && (
-                                                    <CircleCheck className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleCheck>
+                                                    <WalletCards className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></WalletCards>
                                                 )}
                                                 {getPaymentStateTranslation(r.payment_state)}
                                             </span>
@@ -486,7 +486,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                                 </svg>
                                             )}
                                             {r.payment_state === 'Verified' && (
-                                                <CircleCheck className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></CircleCheck>
+                                                <WalletCards className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></WalletCards>
                                             )}
                                             {getPaymentStateTranslation(r.payment_state)}
                                         </span>
@@ -553,7 +553,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                             className={`rounded-full p-1 ${p.status === 'Verified' ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'}`}
                                         >
                                             {p.status === 'Verified' ? (
-                                                <CircleCheck className="h-4 w-4" />
+                                                <WalletCards className="h-4 w-4" />
                                             ) : (
                                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                                     <path
@@ -570,7 +570,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                             className={`ml-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${p.status === 'Verified' ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400' : 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400'}`}
                                         >
                                             {p.status === 'Verified' ? (
-                                                <CircleCheck className="h-3 w-3" />
+                                                <WalletCards className="h-3 w-3" />
                                             ) : (
                                                 <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                                     <path

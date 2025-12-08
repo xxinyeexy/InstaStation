@@ -1,9 +1,8 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { CircleCheck, CircleX, Clock, DollarSign, Download, Eye, Search, X } from 'lucide-react';
-import { usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 
 type Summary = {
@@ -207,6 +206,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Payment" />
             {/* Toast for approve/reject success */}
             {showSuccessToast.show && (
                 <div className="fixed top-6 left-1/2 z-[100] -translate-x-1/2 animate-fade-in rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 shadow-lg flex items-center gap-2">

@@ -54,6 +54,7 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Manage Users" />
             <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                 <div>
                     <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-foreground">{t('userManagement')}</h1>

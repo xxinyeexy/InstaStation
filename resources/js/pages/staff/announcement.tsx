@@ -1,4 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
+import { Head } from '@inertiajs/react';
 import { Edit2, Eye, Plus, Search, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { type BreadcrumbItem, type SharedData } from '@/types';
@@ -240,6 +241,7 @@ export default function StaffAnnouncements(props: {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={t('announcements')} />
             {validationError && (
                 <div className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
                     <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 shadow-lg">

@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
-import { router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { AlertCircle, Bell, Calendar, FileText, Search, SlidersHorizontal, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -202,6 +202,7 @@ export default function History({ total_collections, collections_this_year, tota
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} headerAction={headerAction}>
+            <Head title={t('collectionHistory')} />
 
             <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                 <div>

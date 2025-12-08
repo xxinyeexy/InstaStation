@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
 import { Html5Qrcode } from 'html5-qrcode';
 import { AlertTriangle, ArrowLeft, Camera, CircleCheck, QrCode, Search, X, XCircle } from 'lucide-react';
@@ -367,6 +367,7 @@ const ParcelRegistrationForm = () => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={t('registerParcel')} />
             {showRegisterToast && <Toast type="success" message=" Parcel registered successfully!" />}
             {errorToast.show && <Toast type="error" message={errorToast.message} />}
 
