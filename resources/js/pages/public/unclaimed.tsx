@@ -174,7 +174,7 @@ export default function Unclaimed({
 
             <Link
                 href="/"
-                className="group absolute top-4 left-4 inline-flex items-center gap-0 overflow-hidden rounded-full bg-gray-900 text-white shadow-lg transition-all duration-300 hover:gap-2 hover:pr-5 hover:shadow-xl dark:bg-gray-700"
+                className="group m-4 inline-flex items-center gap-0 overflow-hidden rounded-full bg-gray-900 text-white shadow-lg transition-all duration-300 hover:gap-2 hover:pr-5 hover:shadow-xl dark:bg-gray-700 md:absolute md:top-4 md:left-4 md:m-0"
             >
                 <div className="flex h-10 w-10 items-center justify-center">
                     <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
@@ -222,7 +222,7 @@ export default function Unclaimed({
                     <div className="mt-2 text-xs text-gray-500">Tip: Search by your name, tracking number, or matric ID</div>
                 </form>
 
-                {/* Table */}
+                {/* Table / Cards */}
                 {q === '' ? (
                     <div className="rounded-xl border bg-white p-8 text-center text-gray-500">
                         Enter your tracking number to search unclaimed parcels.
@@ -230,75 +230,144 @@ export default function Unclaimed({
                 ) : filtered.length === 0 ? (
                     <div className="rounded-xl border bg-white p-8 text-center text-gray-500">No results found.</div>
                 ) : (
-                    <div className="overflow-hidden rounded-xl border bg-white">
-                        <table className="min-w-full text-left text-sm">
-                            <thead className="bg-gray-50 text-xs text-gray-500">
-                                <tr>
-                                    <th className="px-4 py-3">Tracking No</th>
-                                    <th className="px-4 py-3">Student</th>
-                                    <th className="px-4 py-3">Matric ID</th>
-                                    <th className="px-4 py-3">Sender</th>
-                                    <th className="px-4 py-3">Arrived</th>
-                                    <th className="px-4 py-3">Days</th>
-                                    <th className="px-4 py-3">Size</th>
-                                    <th className="px-4 py-3">Location</th>
-                                    <th className="px-4 py-3">Status</th>
-                                    <th className="px-4 py-3"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filtered.map((p) => (
-                                    <tr key={p.parcel_id} className="border-t">
-                                        <td className="px-4 py-3 font-mono">{p.tracking_no}</td>
-                                        <td className="px-4 py-3 text-gray-700">{p.recipient_name ?? '—'}</td>
-                                        <td className="px-4 py-3 text-gray-700">{p.recipient_matric ?? '—'}</td>
-                                        <td className="px-4 py-3">{p.sender}</td>
-                                        <td className="flex items-center gap-1 px-4 py-3 text-gray-600">
-                                            <CalendarDays className="h-4 w-4" />{' '}
-                                            {p.created_at ? new Date(p.created_at).toISOString().slice(0, 10) : '—'}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className="rounded-md bg-orange-50 px-2 py-1 text-xs text-orange-600">{p.days ?? '—'}d</span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs text-emerald-700">{p.size ?? '—'}</span>
-                                        </td>
-                                        <td className="px-4 py-3">{p.location ?? '—'}</td>
-                                        <td className="px-4 py-3">
-                                            <span className="rounded-md bg-rose-50 px-2 py-1 text-xs text-rose-700">unclaimed</span>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex gap-2">
-                                                {(p.recipient_name || p.recipient_matric) && (
-                                                    <button
-                                                        disabled={processing}
-                                                        onClick={() => claim(p.parcel_id, 'login')}
-                                                        className="inline-flex items-center gap-1 rounded-md bg-gray-900 px-3 py-1.5 text-white hover:bg-black disabled:opacity-50"
-                                                    >
-                                                        <LogIn className="h-4 w-4" /> Yes, it's mine
-                                                    </button>
-                                                )}
+                    <>
+                        {/* Mobile Card View */}
+                        <div className="space-y-4 md:hidden">
+                            {filtered.map((p) => (
+                                <div key={p.parcel_id} className="rounded-xl border bg-white p-4 shadow-sm">
+                                    <div className="mb-3 flex items-start justify-between">
+                                        <div>
+                                            <div className="font-mono font-bold text-gray-900">{p.tracking_no}</div>
+                                            <div className="text-sm text-gray-500">{p.sender}</div>
+                                        </div>
+                                        <span className="rounded-md bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700">unclaimed</span>
+                                    </div>
+
+                                    <div className="mb-4 grid grid-cols-2 gap-y-3 text-sm">
+                                        <div>
+                                            <span className="block text-xs text-gray-500">Student</span>
+                                            <span className="font-medium text-gray-900">{p.recipient_name ?? '—'}</span>
+                                        </div>
+                                        <div>
+                                            <span className="block text-xs text-gray-500">Matric ID</span>
+                                            <span className="font-medium text-gray-900">{p.recipient_matric ?? '—'}</span>
+                                        </div>
+                                        <div>
+                                            <span className="block text-xs text-gray-500">Location</span>
+                                            <span className="text-gray-900">{p.location ?? '—'}</span>
+                                        </div>
+                                        <div>
+                                            <span className="block text-xs text-gray-500">Size</span>
+                                            <span className="inline-block rounded-md bg-emerald-50 px-2 py-0.5 text-xs text-emerald-700">
+                                                {p.size ?? '—'}
+                                            </span>
+                                        </div>
+                                        <div className="col-span-2">
+                                            <span className="block text-xs text-gray-500">Arrived</span>
+                                            <div className="flex items-center gap-1 text-gray-700">
+                                                <CalendarDays className="h-3 w-3 text-gray-400" />
+                                                {p.created_at ? new Date(p.created_at).toISOString().slice(0, 10) : '—'}
+                                                <span className="mx-1 text-gray-400">•</span>
+                                                <span className="text-orange-600">{p.days ?? '—'} days ago</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t border-gray-100 pt-3">
+                                        <div className="flex gap-2">
+                                            {(p.recipient_name || p.recipient_matric) && (
                                                 <button
                                                     disabled={processing}
-                                                    onClick={() => claim(p.parcel_id, 'register')}
-                                                    className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                                                    onClick={() => claim(p.parcel_id, 'login')}
+                                                    className="inline-flex flex-1 items-center justify-center gap-1 rounded-md bg-gray-900 px-3 py-2 text-sm text-white hover:bg-black disabled:opacity-50"
                                                 >
-                                                    <UserPlus className="h-4 w-4" /> I'm new here
+                                                    <LogIn className="h-4 w-4" /> Yes, it's mine
                                                 </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                                {filtered.length === 0 && (
+                                            )}
+                                            <button
+                                                disabled={processing}
+                                                onClick={() => claim(p.parcel_id, 'register')}
+                                                className="inline-flex flex-1 items-center justify-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                                            >
+                                                <UserPlus className="h-4 w-4" /> I'm new here
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Desktop Table View */}
+                        <div className="hidden overflow-hidden rounded-xl border bg-white md:block">
+                            <table className="min-w-full text-left text-sm">
+                                <thead className="bg-gray-50 text-xs text-gray-500">
                                     <tr>
-                                        <td className="px-4 py-12 text-center text-gray-500" colSpan={9}>
-                                            No unclaimed parcels match your search.
-                                        </td>
+                                        <th className="px-4 py-3">Tracking No</th>
+                                        <th className="px-4 py-3">Student</th>
+                                        <th className="px-4 py-3">Matric ID</th>
+                                        <th className="px-4 py-3">Sender</th>
+                                        <th className="px-4 py-3">Arrived</th>
+                                        <th className="px-4 py-3">Days</th>
+                                        <th className="px-4 py-3">Size</th>
+                                        <th className="px-4 py-3">Location</th>
+                                        <th className="px-4 py-3">Status</th>
+                                        <th className="px-4 py-3"></th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {filtered.map((p) => (
+                                        <tr key={p.parcel_id} className="border-t">
+                                            <td className="px-4 py-3 font-mono">{p.tracking_no}</td>
+                                            <td className="px-4 py-3 text-gray-700">{p.recipient_name ?? '—'}</td>
+                                            <td className="px-4 py-3 text-gray-700">{p.recipient_matric ?? '—'}</td>
+                                            <td className="px-4 py-3">{p.sender}</td>
+                                            <td className="flex items-center gap-1 px-4 py-3 text-gray-600">
+                                                <CalendarDays className="h-4 w-4" />{' '}
+                                                {p.created_at ? new Date(p.created_at).toISOString().slice(0, 10) : '—'}
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span className="rounded-md bg-orange-50 px-2 py-1 text-xs text-orange-600">{p.days ?? '—'}d</span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs text-emerald-700">{p.size ?? '—'}</span>
+                                            </td>
+                                            <td className="px-4 py-3">{p.location ?? '—'}</td>
+                                            <td className="px-4 py-3">
+                                                <span className="rounded-md bg-rose-50 px-2 py-1 text-xs text-rose-700">unclaimed</span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex gap-2">
+                                                    {(p.recipient_name || p.recipient_matric) && (
+                                                        <button
+                                                            disabled={processing}
+                                                            onClick={() => claim(p.parcel_id, 'login')}
+                                                            className="inline-flex items-center gap-1 rounded-md bg-gray-900 px-3 py-1.5 text-white hover:bg-black disabled:opacity-50"
+                                                        >
+                                                            <LogIn className="h-4 w-4" /> Yes, it's mine
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        disabled={processing}
+                                                        onClick={() => claim(p.parcel_id, 'register')}
+                                                        className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 hover:bg-gray-50 disabled:opacity-50"
+                                                    >
+                                                        <UserPlus className="h-4 w-4" /> I'm new here
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {filtered.length === 0 && (
+                                        <tr>
+                                            <td className="px-4 py-12 text-center text-gray-500" colSpan={9}>
+                                                No unclaimed parcels match your search.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
                 )}
 
                 {/* Helper cards */}

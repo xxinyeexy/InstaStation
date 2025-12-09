@@ -127,6 +127,7 @@ export default function Welcome() {
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
             <div className="relative min-h-screen overflow-hidden bg-[#FFE0F2]">
+                <span id="about" className="absolute top-0 -mt-20 h-0 w-0 opacity-0"></span>
                 {/* Animated background blobs */}
                 <div className="absolute -top-40 -right-40 h-96 w-96 animate-pulse rounded-full bg-gradient-to-br from-pink-300 to-purple-400 opacity-20 blur-3xl"></div>
                 <div
@@ -170,7 +171,7 @@ export default function Welcome() {
                     </header>
 
                     {/* Main Content */}
-                    <div id="about" className="mx-auto max-w-4xl text-center">
+                    <div className="mx-auto max-w-4xl text-center">
                         {/* Badge - Fade in and slide from top */}
                         <div
                             className="mb-8 inline-flex items-center gap-3 rounded-full border-2 border-pink-300/50 bg-white/90 px-6 py-3 shadow-2xl ring-2 ring-pink-100/50 backdrop-blur-md duration-700 animate-in fade-in slide-in-from-top-4"
@@ -188,7 +189,7 @@ export default function Welcome() {
                         <div className="mb-8 duration-700 animate-in fade-in zoom-in-95" style={{ animationDelay: '200ms' }}>
                             <h1 className="relative mb-4">
                                 <span className="block">
-                                    <span className="relative inline-block bg-gradient-to-r from-[#FF029A] via-pink-600 to-[#FF029A] bg-clip-text text-7xl font-black tracking-tight text-transparent">
+                                    <span className="relative inline-block bg-gradient-to-r from-[#FF029A] via-pink-600 to-[#FF029A] bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-7xl">
                                         Insta
                                         <span className="relative">
                                             <span className="relative z-10 bg-gradient-to-r from-gray-900 via-green-300 to-green-600 bg-clip-text text-transparent">
@@ -291,7 +292,7 @@ export default function Welcome() {
                                         <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-pink-700 shadow-xl transition-transform duration-300 group-hover:rotate-12">
                                             <Package className="h-10 w-10 text-white" />
                                         </div>
-                                        <h3 className="mb-2 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-5xl font-black text-transparent">
+                                        <h3 className="mb-2 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-4xl font-black text-transparent md:text-5xl">
                                             1000+
                                         </h3>
                                         <p className="font-semibold text-gray-700">Parcels Delivered</p>
@@ -306,7 +307,7 @@ export default function Welcome() {
                                                 <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                                             </svg>
                                         </div>
-                                        <h3 className="mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-5xl font-black text-transparent">
+                                        <h3 className="mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-4xl font-black text-transparent md:text-5xl">
                                             500+
                                         </h3>
                                         <p className="font-semibold text-gray-700">Active Students</p>
@@ -326,7 +327,7 @@ export default function Welcome() {
                                                 />
                                             </svg>
                                         </div>
-                                        <h3 className="mb-2 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-5xl font-black text-transparent">
+                                        <h3 className="mb-2 bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-4xl font-black text-transparent md:text-5xl">
                                             99%
                                         </h3>
                                         <p className="font-semibold text-gray-700">Success Rate</p>
@@ -336,157 +337,136 @@ export default function Welcome() {
                         </section>
 
                         {/* Interactive Demo Section */}
-                        <section
-                            id="how-it-works"
-                            className="my-20 duration-1000 animate-in fade-in slide-in-from-left-8"
-                            style={{ animationDelay: '800ms' }}
-                        >
-                            <div className="border-gradient-to-br relative overflow-hidden rounded-3xl border-2 bg-white from-pink-200 to-purple-200 p-12 shadow-2xl">
-                                {/* Animated background elements */}
-                                <div
-                                    className="absolute -top-20 -left-20 h-40 w-40 animate-spin rounded-full bg-gradient-to-r from-pink-200 to-purple-200 opacity-30 blur-3xl"
-                                    style={{ animationDuration: '20s' }}
-                                ></div>
-                                <div
-                                    className="absolute -right-20 -bottom-20 h-40 w-40 animate-spin rounded-full bg-gradient-to-r from-blue-200 to-cyan-200 opacity-30 blur-3xl"
-                                    style={{ animationDuration: '15s', animationDirection: 'reverse' }}
-                                ></div>
+                        <div className="relative">
+                            <span id="how-it-works" className="absolute -top-32 left-0 h-px w-px opacity-0"></span>
+                            <section
+                                className="my-20 duration-1000 animate-in fade-in slide-in-from-left-8"
+                                style={{ animationDelay: '800ms' }}
+                            >
+                                <div className="border-gradient-to-br relative overflow-hidden rounded-3xl border-2 bg-white from-pink-200 to-purple-200 p-12 shadow-2xl">
+                                    {/* Animated background elements */}
+                                    <div
+                                        className="absolute -top-20 -left-20 h-40 w-40 animate-spin rounded-full bg-gradient-to-r from-pink-200 to-purple-200 opacity-30 blur-3xl"
+                                        style={{ animationDuration: '20s' }}
+                                    ></div>
+                                    <div
+                                        className="absolute -right-20 -bottom-20 h-40 w-40 animate-spin rounded-full bg-gradient-to-r from-blue-200 to-cyan-200 opacity-30 blur-3xl"
+                                        style={{ animationDuration: '15s', animationDirection: 'reverse' }}
+                                    ></div>
 
-                                <div className="relative grid gap-8 lg:grid-cols-2">
-                                    <div className="space-y-6">
-                                        <div className="inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-pink-50 px-4 py-2">
-                                            <Sparkles className="h-4 w-4 text-pink-600" />
-                                            <span className="text-sm font-bold text-pink-700">How It Works</span>
+                                    <div className="relative grid gap-8 lg:grid-cols-2">
+                                        <div className="space-y-6">
+                                            <div className="inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-pink-50 px-4 py-2">
+                                                <Sparkles className="h-4 w-4 text-pink-600" />
+                                                <span className="text-sm font-bold text-pink-700">How It Works</span>
+                                            </div>
+                                            <h2 className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-3xl font-black text-transparent md:text-5xl">
+                                                Seamless Parcel Management
+                                            </h2>
+                                            <p className="text-lg leading-relaxed text-gray-600">
+                                                Our intelligent system automates every step of the parcel handling process, from arrival notification to
+                                                secure collection.
+                                            </p>
+
+                                            {/* Feature list with icons */}
+                                            <div className="space-y-4">
+                                                <div className="flex items-start gap-4 rounded-2xl border-2 border-orange-200 bg-orange-200 p-4 transition-all hover:scale-105">
+                                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-orange-600 shadow-lg">
+                                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M13 10V3L4 14h7v7l9-11h-7z"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-900">Instant Notifications</h4>
+                                                        <p className="text-sm text-gray-600">Get real-time alerts when your parcel arrives</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-start gap-4 rounded-2xl border-2 border-blue-200 bg-blue-200 p-4 transition-all hover:scale-105">
+                                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 shadow-lg">
+                                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-900">Secure Storage</h4>
+                                                        <p className="text-sm text-gray-600">Your parcels are safely stored until collection</p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-start gap-4 rounded-2xl border-2 border-green-200 bg-green-200 p-4 transition-all hover:scale-105">
+                                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg">
+                                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-gray-900">Easy Payment</h4>
+                                                        <p className="text-sm text-gray-600">Quick and secure payment processing</p>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <h2 className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-5xl font-black text-transparent">
-                                            Seamless Parcel Management
-                                        </h2>
-                                        <p className="text-lg leading-relaxed text-gray-600">
-                                            Our intelligent system automates every step of the parcel handling process, from arrival notification to
-                                            secure collection.
-                                        </p>
 
-                                        {/* Feature list with icons */}
-                                        <div className="space-y-4">
-                                            <div className="flex items-start gap-4 rounded-2xl border-2 border-orange-200 bg-orange-200 p-4 transition-all hover:scale-105">
-                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-orange-600 shadow-lg">
-                                                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M13 10V3L4 14h7v7l9-11h-7z"
-                                                        />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-gray-900">Instant Notifications</h4>
-                                                    <p className="text-sm text-gray-600">Get real-time alerts when your parcel arrives</p>
-                                                </div>
-                                            </div>
+                                        {/* Animated Phone Mockup */}
+                                        <div className="relative flex items-center justify-center">
+                                            <div className="relative">
+                                                {/* Glowing ring animation */}
+                                                <div
+                                                    className="absolute inset-0 animate-ping rounded-3xl bg-gradient-to-r from-pink-400 to-purple-400 opacity-20"
+                                                    style={{ animationDuration: '3s' }}
+                                                ></div>
 
-                                            <div className="flex items-start gap-4 rounded-2xl border-2 border-blue-200 bg-blue-200 p-4 transition-all hover:scale-105">
-                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 shadow-lg">
-                                                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                                        />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-gray-900">Secure Storage</h4>
-                                                    <p className="text-sm text-gray-600">Your parcels are safely stored until collection</p>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-start gap-4 rounded-2xl border-2 border-green-200 bg-green-200 p-4 transition-all hover:scale-105">
-                                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg">
-                                                    <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                        />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-bold text-gray-900">Easy Payment</h4>
-                                                    <p className="text-sm text-gray-600">Quick and secure payment processing</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Animated Phone Mockup */}
-                                    <div className="relative flex items-center justify-center">
-                                        <div className="relative">
-                                            {/* Glowing ring animation */}
-                                            <div
-                                                className="absolute inset-0 animate-ping rounded-3xl bg-gradient-to-r from-pink-400 to-purple-400 opacity-20"
-                                                style={{ animationDuration: '3s' }}
-                                            ></div>
-
-                                            {/* Phone mockup */}
-                                            <div className="relative rounded-3xl border-8 border-gray-900 bg-white p-4 shadow-2xl">
-                                                <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100">
-                                                    <div className="space-y-3 p-6">
-                                                        {/* Notification cards */}
-                                                        <div
-                                                            className="animate-slide-down rounded-2xl border-2 border-pink-200 bg-white p-4 shadow-lg"
-                                                            style={{ animationDelay: '0s' }}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-pink-700">
-                                                                    <Package className="h-6 w-6 text-white" />
+                                                {/* Phone mockup */}
+                                                <div className="relative rounded-3xl border-8 border-gray-900 bg-white p-4 shadow-2xl">
+                                                    <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100">
+                                                        <div className="space-y-3 p-6">
+                                                            {/* Notification cards */}
+                                                            <div
+                                                                className="animate-slide-down rounded-2xl border-2 border-pink-200 bg-white p-4 shadow-lg"
+                                                                style={{ animationDelay: '0s' }}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-pink-700">
+                                                                        <Package className="h-6 w-6 text-white" />
+                                                                    </div>
+                                                                    <div className="flex-1">
+                                                                        <p className="text-sm font-bold text-gray-900">Parcel Arrived!</p>
+                                                                        <p className="text-xs text-gray-600">PCL2025110001</p>
+                                                                    </div>
+                                                                    <div className="h-2 w-2 animate-pulse rounded-full bg-pink-500"></div>
                                                                 </div>
-                                                                <div className="flex-1">
-                                                                    <p className="text-sm font-bold text-gray-900">Parcel Arrived!</p>
-                                                                    <p className="text-xs text-gray-600">PCL2025110001</p>
-                                                                </div>
-                                                                <div className="h-2 w-2 animate-pulse rounded-full bg-pink-500"></div>
                                                             </div>
-                                                        </div>
 
-                                                        <div
-                                                            className="animate-slide-down rounded-2xl border-2 border-green-200 bg-white p-4 shadow-lg"
-                                                            style={{ animationDelay: '0.3s' }}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600">
-                                                                    <CreditCard className="h-6 w-6 text-white" />
-                                                                </div>
-                                                                <div className="flex-1">
-                                                                    <p className="text-sm font-bold text-gray-900">Payment Verified</p>
-                                                                    <p className="text-xs text-gray-600">Schedule pickup time slot</p>
-                                                                </div>
-                                                                <svg
-                                                                    className="h-5 w-5 text-green-500"
-                                                                    fill="none"
-                                                                    stroke="currentColor"
-                                                                    viewBox="0 0 24 24"
-                                                                >
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M5 13l4 4L19 7"
-                                                                    />
-                                                                </svg>
-                                                            </div>
-                                                        </div>
-
-                                                        <div
-                                                            className="animate-slide-down rounded-2xl border-2 border-purple-200 bg-white p-4 shadow-lg"
-                                                            style={{ animationDelay: '0.6s' }}
-                                                        >
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-700">
+                                                            <div
+                                                                className="animate-slide-down rounded-2xl border-2 border-green-200 bg-white p-4 shadow-lg"
+                                                                style={{ animationDelay: '0.3s' }}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600">
+                                                                        <CreditCard className="h-6 w-6 text-white" />
+                                                                    </div>
+                                                                    <div className="flex-1">
+                                                                        <p className="text-sm font-bold text-gray-900">Payment Verified</p>
+                                                                        <p className="text-xs text-gray-600">Schedule pickup time slot</p>
+                                                                    </div>
                                                                     <svg
-                                                                        className="h-6 w-6 text-white"
+                                                                        className="h-5 w-5 text-green-500"
                                                                         fill="none"
                                                                         stroke="currentColor"
                                                                         viewBox="0 0 24 24"
@@ -495,13 +475,36 @@ export default function Welcome() {
                                                                             strokeLinecap="round"
                                                                             strokeLinejoin="round"
                                                                             strokeWidth={2}
-                                                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                                                                            d="M5 13l4 4L19 7"
                                                                         />
                                                                     </svg>
                                                                 </div>
-                                                                <div className="flex-1">
-                                                                    <p className="text-sm font-bold text-gray-900">QR Code Ready</p>
-                                                                    <p className="text-xs text-gray-600">Scan to collect</p>
+                                                            </div>
+
+                                                            <div
+                                                                className="animate-slide-down rounded-2xl border-2 border-purple-200 bg-white p-4 shadow-lg"
+                                                                style={{ animationDelay: '0.6s' }}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-700">
+                                                                        <svg
+                                                                            className="h-6 w-6 text-white"
+                                                                            fill="none"
+                                                                            stroke="currentColor"
+                                                                            viewBox="0 0 24 24"
+                                                                        >
+                                                                            <path
+                                                                                strokeLinecap="round"
+                                                                                strokeLinejoin="round"
+                                                                                strokeWidth={2}
+                                                                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                                                                            />
+                                                                        </svg>
+                                                                    </div>
+                                                                    <div className="flex-1">
+                                                                        <p className="text-sm font-bold text-gray-900">QR Code Ready</p>
+                                                                        <p className="text-xs text-gray-600">Scan to collect</p>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -511,8 +514,8 @@ export default function Welcome() {
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </section>
+                            </section>
+                        </div>
 
                         {/* Feature Cards - Staggered fade in from bottom */}
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -588,8 +591,10 @@ export default function Welcome() {
                         </div>
 
                         {/* How It Works Section - Redesigned with Timeline */}
+                        <div className="relative h-0 w-0">
+                            <span id="process-timeline" className="absolute -top-32 left-0 h-px w-px opacity-0"></span>
+                        </div>
                         <div
-                            id="process-timeline"
                             className="relative mt-32 overflow-hidden rounded-3xl border-2 border-pink-200 bg-gradient-to-br from-white via-pink-50/30 to-purple-50/30 p-12 shadow-2xl duration-1000 animate-in fade-in zoom-in-95"
                             style={{ animationDelay: '100ms' }}
                         >
@@ -612,7 +617,7 @@ export default function Welcome() {
                                     Process Timeline
                                 </div>
                                 <h2
-                                    className="mb-4 bg-gradient-to-r from-pink-600 via-pink-400 to-green-300 bg-clip-text text-5xl font-black text-transparent duration-700 animate-in fade-in slide-in-from-bottom-4"
+                                    className="mb-4 bg-gradient-to-r from-pink-600 via-pink-400 to-green-300 bg-clip-text text-3xl font-black text-transparent duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-5xl"
                                     style={{ animationDelay: '300ms' }}
                                 >
                                     Your Parcel Journey
@@ -748,8 +753,10 @@ export default function Welcome() {
                         </div>
 
                         {/* Newsletter Section - Curated Studio */}
+                        <div className="relative h-0 w-0">
+                            <span id="newsletter" className="absolute -top-32 left-0 h-px w-px opacity-0"></span>
+                        </div>
                         <div
-                            id="newsletter"
                             className="relative mt-20 duration-700 animate-in fade-in slide-in-from-left-8"
                             style={{ animationDelay: '100ms' }}
                         >
@@ -763,7 +770,7 @@ export default function Welcome() {
                                         <p className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-rose-50 px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4">
                                             <Sparkles className="h-3.5 w-3.5 text-rose-500" /> Curated
                                         </p>
-                                        <h2 className="mt-4 text-4xl font-black text-slate-900">Campus Dispatch</h2>
+                                        <h2 className="mt-4 text-3xl font-black text-slate-900 md:text-4xl">Campus Dispatch</h2>
                                         <p className="text-sm text-slate-500">
                                             Hand-picked announcements and service notices from our postal studio.
                                         </p>
@@ -884,7 +891,6 @@ export default function Welcome() {
                     </div>
                 </div>
             </div>
-
             {/* Footer - Premium Professional Design */}
             <footer className="relative overflow-hidden bg-gradient-to-r from-pink-200 via-green-200 to-blue-200 duration-1000 animate-in fade-in slide-in-from-bottom-8">
                 {/* Animated background decorations */}
@@ -1150,70 +1156,72 @@ export default function Welcome() {
                         </div>
                     </div>
                 </div>
-            </footer>
+            </footer >
 
             {/* Announcement Detail Modal */}
-            {selectedAnnouncement && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center duration-300 animate-in fade-in">
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedAnnouncement(null)} />
-                    <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-[32px] bg-white shadow-[0_20px_80px_rgba(0,0,0,0.2)] duration-300 animate-in slide-in-from-bottom-4 zoom-in-95">
-                        <div className="relative overflow-hidden bg-gradient-to-r from-pink-400 to-green-400 p-6 text-white">
-                            <div className="absolute inset-0 opacity-40">
-                                <div className="absolute -top-10 right-0 h-40 w-40 rounded-full bg-white/20 blur-3xl"></div>
-                                <div className="absolute -bottom-16 left-10 h-32 w-32 rounded-full bg-green-200/30 blur-3xl"></div>
-                            </div>
-                            <div className="relative flex items-center justify-between gap-3">
-                                <button
-                                    onClick={() => setSelectedAnnouncement(null)}
-                                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
-                                >
-                                    <ArrowLeft size={20} />
-                                </button>
-                                <div className="flex-1 px-4 text-center">
-                                    <p className="text-xs font-semibold tracking-[0.3em] text-white/80 uppercase">Announcement</p>
-                                    <h2 className="text-xl font-bold">{selectedAnnouncement.announcement_title}</h2>
+            {
+                selectedAnnouncement && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center duration-300 animate-in fade-in">
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedAnnouncement(null)} />
+                        <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-[32px] bg-white shadow-[0_20px_80px_rgba(0,0,0,0.2)] duration-300 animate-in slide-in-from-bottom-4 zoom-in-95">
+                            <div className="relative overflow-hidden bg-gradient-to-r from-pink-400 to-green-400 p-6 text-white">
+                                <div className="absolute inset-0 opacity-40">
+                                    <div className="absolute -top-10 right-0 h-40 w-40 rounded-full bg-white/20 blur-3xl"></div>
+                                    <div className="absolute -bottom-16 left-10 h-32 w-32 rounded-full bg-green-200/30 blur-3xl"></div>
                                 </div>
-                                <button
-                                    onClick={() => setSelectedAnnouncement(null)}
-                                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
-                                >
-                                    <X size={20} />
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="space-y-6 p-6">
-                            {selectedAnnouncement.announcement_image && (
-                                <div className="overflow-hidden rounded-2xl border border-pink-50">
-                                    <img
-                                        src={`/storage/${selectedAnnouncement.announcement_image}`}
-                                        alt="announcement"
-                                        className="h-64 w-full object-cover"
-                                    />
-                                </div>
-                            )}
-
-                            <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gray-50 p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-inner">
-                                        <img src="/images/parcel-logo.png" alt="InstaStation" className="h-10 w-10" />
+                                <div className="relative flex items-center justify-between gap-3">
+                                    <button
+                                        onClick={() => setSelectedAnnouncement(null)}
+                                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+                                    >
+                                        <ArrowLeft size={20} />
+                                    </button>
+                                    <div className="flex-1 px-4 text-center">
+                                        <p className="text-xs font-semibold tracking-[0.3em] text-white/80 uppercase">Announcement</p>
+                                        <h2 className="text-xl font-bold">{selectedAnnouncement.announcement_title}</h2>
                                     </div>
-                                    <div>
-                                        <p className="text-xs font-semibold tracking-[0.2em] text-gray-400 uppercase">Publisher</p>
-                                        <p className="text-base font-semibold text-gray-800">UMPSA Postal Hub</p>
-                                    </div>
-                                </div>
-                                <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-pink-600 shadow">
-                                    <Calendar className="h-4 w-4 text-pink-500" />
-                                    {formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}
+                                    <button
+                                        onClick={() => setSelectedAnnouncement(null)}
+                                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+                                    >
+                                        <X size={20} />
+                                    </button>
                                 </div>
                             </div>
 
-                            <div className="prose max-w-none text-gray-700">{selectedAnnouncement.announcement_content}</div>
+                            <div className="space-y-6 p-6">
+                                {selectedAnnouncement.announcement_image && (
+                                    <div className="overflow-hidden rounded-2xl border border-pink-50">
+                                        <img
+                                            src={`/storage/${selectedAnnouncement.announcement_image}`}
+                                            alt="announcement"
+                                            className="h-64 w-full object-cover"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gray-50 p-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-inner">
+                                            <img src="/images/parcel-logo.png" alt="InstaStation" className="h-10 w-10" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold tracking-[0.2em] text-gray-400 uppercase">Publisher</p>
+                                            <p className="text-base font-semibold text-gray-800">UMPSA Postal Hub</p>
+                                        </div>
+                                    </div>
+                                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-pink-600 shadow">
+                                        <Calendar className="h-4 w-4 text-pink-500" />
+                                        {formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}
+                                    </div>
+                                </div>
+
+                                <div className="prose max-w-none text-gray-700">{selectedAnnouncement.announcement_content}</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
         </>
     );
 }
