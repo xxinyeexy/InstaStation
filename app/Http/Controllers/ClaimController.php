@@ -188,8 +188,28 @@ class ClaimController extends Controller
         // Clear session keys after use
         $request->session()->forget(['url.intended', 'claim_intended_url', 'claim_redirect_type']);
 
-        // For allow_new claims ("I'm new here"), always link the parcel to the student, even if recipient_matric is set
+        // For allow_new claims ("I'm new here"), validate matric ID if parcel has matric but no name
         if ($allowNewClaim) {
+            // Check if parcel has matric ID but no student name (staff entered only matric)
+            $hasMatricOnly = $parcelMatric !== '' && trim((string) ($parcel->recipient_name ?? '')) === '';
+            
+            if ($hasMatricOnly) {
+                // Validate that the student's matric matches the parcel's matric
+                if ($userMatric === '' || $parcelMatric !== $userMatric) {
+                    Auth::logout();
+                    $request->session()->invalidate();
+                    $request->session()->regenerateToken();
+
+                    $searchQuery = $request->session()->get('claim_search_query', $request->get('q', ''));
+                    $request->session()->forget('claim_search_query');
+
+                    return redirect()
+                        ->route('public.unclaimed', $searchQuery ? ['q' => $searchQuery] : [])
+                        ->with('error', 'This parcel is for matric ID: ' . strtoupper($parcel->recipient_matric) . '. Please register with the correct matric ID or contact the parcel office.');
+                }
+            }
+            
+            // Link the parcel to the student
             $parcel->student_id = $user->id;
             $parcel->recipient_name = $user->name;
             $parcel->recipient_matric = $user->matric;
