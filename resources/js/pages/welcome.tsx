@@ -986,12 +986,12 @@ export default function Welcome() {
                                 <li>
                                     <a
                                         href="#about"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-pink-500"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white"
                                     >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-pink-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-white opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
                                         <span className="text-base font-medium text-gray-800">About Us</span>
                                         <svg
-                                            className="h-4 w-4 text-pink-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
+                                            className="h-4 w-4 text-white opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -1003,12 +1003,12 @@ export default function Welcome() {
                                 <li>
                                     <a
                                         href="#how-it-works"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-purple-500"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white"
                                     >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-purple-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-white opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
                                         <span className="text-base font-medium text-gray-800">How It Works</span>
                                         <svg
-                                            className="h-4 w-4 text-purple-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
+                                            className="h-4 w-4 text-white opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -1020,12 +1020,12 @@ export default function Welcome() {
                                 <li>
                                     <a
                                         href="#process-timeline"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-blue-500"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white"
                                     >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-blue-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-white opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
                                         <span className="text-base font-medium text-gray-800">Process Timeline</span>
                                         <svg
-                                            className="h-4 w-4 text-blue-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
+                                            className="h-4 w-4 text-white opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -1037,12 +1037,12 @@ export default function Welcome() {
                                 <li>
                                     <a
                                         href="#newsletter"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white-500"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white"
                                     >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-pink-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-white opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
                                         <span className="text-base font-medium text-gray-800">Newsletter</span>
                                         <svg
-                                            className="h-4 w-4 text-white-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
+                                            className="h-4 w-4 text-white opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -1089,31 +1089,7 @@ export default function Welcome() {
                                     </div>
                                 </div>
 
-                                <div className="group relative overflow-hidden rounded-2xl border border-purple-200 bg-gradient-to-r from-white to-purple-100 p-5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-purple-300 hover:from-purple-50 hover:to-purple-200 hover:shadow-lg hover:shadow-purple-200/50">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-600/0 transition-all duration-300 group-hover:from-purple-500/10 group-hover:to-purple-600/10"></div>
-                                    <div className="relative flex items-start gap-4">
-                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-300 to-purple-500 ring-2 ring-purple-200">
-                                            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                                />
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                                />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p className="mb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase">Location</p>
-                                            <p className="text-base font-semibold text-gray-800">Campus Postal Hub</p>
-                                        </div>
-                                    </div>
-                                </div>
+                         
                             </div>
 
                             {/* Legal Section */}
