@@ -920,7 +920,7 @@ export default function Welcome() {
                 </div>
             </div>
             {/* Footer - Premium Professional Design */}
-            <footer className="relative overflow-hidden bg-gradient-to-r from-pink-200 via-green-200 to-blue-200 duration-1000 animate-in fade-in slide-in-from-bottom-8">
+            <footer className="relative overflow-hidden bg-[#FF029A] duration-1000 animate-in fade-in slide-in-from-bottom-8">
                 {/* Animated background decorations */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     <div className="absolute -top-40 -right-40 h-[600px] w-[600px] animate-pulse rounded-full bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-blue-500/10 blur-3xl"></div>
@@ -1037,12 +1037,12 @@ export default function Welcome() {
                                 <li>
                                     <a
                                         href="#newsletter"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-pink-500"
+                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white-500"
                                     >
                                         <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-pink-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
                                         <span className="text-base font-medium text-gray-800">Newsletter</span>
                                         <svg
-                                            className="h-4 w-4 text-pink-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
+                                            className="h-4 w-4 text-white-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -1051,23 +1051,7 @@ export default function Welcome() {
                                         </svg>
                                     </a>
                                 </li>
-                                <li>
-                                    <a
-                                        href="#contact"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-purple-500"
-                                    >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-purple-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium text-gray-800">Contact Us</span>
-                                        <svg
-                                            className="h-4 w-4 text-purple-400 opacity-0 transition-all duration-300 group-hover:opacity-100"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
-                                </li>
+
                             </ul>
                         </div>
 

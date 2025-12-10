@@ -275,7 +275,7 @@ export default function Unclaimed({
 
                                     <div className="border-t border-gray-100 pt-3">
                                         <div className="flex gap-2">
-                                            {(p.recipient_name || p.recipient_matric) && (
+                                            {!(p.recipient_matric && !p.recipient_name) && (
                                                 <button
                                                     disabled={processing}
                                                     onClick={() => claim(p.parcel_id, 'login')}
@@ -337,7 +337,7 @@ export default function Unclaimed({
                                             </td>
                                             <td className="px-4 py-3">
                                                 <div className="flex gap-2">
-                                                    {(p.recipient_name || p.recipient_matric) && (
+                                                    {!(p.recipient_matric && !p.recipient_name) && (
                                                         <button
                                                             disabled={processing}
                                                             onClick={() => claim(p.parcel_id, 'login')}
