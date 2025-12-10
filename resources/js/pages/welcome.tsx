@@ -27,6 +27,34 @@ export default function Welcome() {
         return () => clearInterval(interval);
     }, []);
 
+    // Smooth scroll handler for footer links
+    useEffect(() => {
+        const handleAnchorClick = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            const anchor = target.closest('a[href^="#"]');
+
+            if (anchor) {
+                const href = anchor.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    e.preventDefault();
+                    const targetId = href.substring(1);
+                    const targetElement = document.getElementById(targetId);
+
+                    if (targetElement) {
+                        const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - 100;
+                        window.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            }
+        };
+
+        document.addEventListener('click', handleAnchorClick);
+        return () => document.removeEventListener('click', handleAnchorClick);
+    }, []);
+
     // Format date consistently
     const formatDate = (dateStr?: string | null) => {
         if (!dateStr) return '';
@@ -127,7 +155,7 @@ export default function Welcome() {
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
             <div className="relative min-h-screen overflow-hidden bg-[#FFE0F2]">
-                <span id="about" className="absolute top-0 -mt-20 h-0 w-0 opacity-0"></span>
+                <span id="about" className="absolute top-0 h-0 w-0 opacity-0"></span>
                 {/* Animated background blobs */}
                 <div className="absolute -top-40 -right-40 h-96 w-96 animate-pulse rounded-full bg-gradient-to-br from-pink-300 to-purple-400 opacity-20 blur-3xl"></div>
                 <div
@@ -338,7 +366,7 @@ export default function Welcome() {
 
                         {/* Interactive Demo Section */}
                         <div className="relative">
-                            <span id="how-it-works" className="absolute -top-32 left-0 h-px w-px opacity-0"></span>
+                            <span id="how-it-works" className="absolute -top-20 left-0 h-px w-px opacity-0"></span>
                             <section
                                 className="my-20 duration-1000 animate-in fade-in slide-in-from-left-8"
                                 style={{ animationDelay: '800ms' }}
@@ -592,7 +620,7 @@ export default function Welcome() {
 
                         {/* How It Works Section - Redesigned with Timeline */}
                         <div className="relative h-0 w-0">
-                            <span id="process-timeline" className="absolute -top-32 left-0 h-px w-px opacity-0"></span>
+                            <span id="process-timeline" className="absolute -top-20 left-0 h-px w-px opacity-0"></span>
                         </div>
                         <div
                             className="relative mt-32 overflow-hidden rounded-3xl border-2 border-pink-200 bg-gradient-to-br from-white via-pink-50/30 to-purple-50/30 p-12 shadow-2xl duration-1000 animate-in fade-in zoom-in-95"
@@ -754,7 +782,7 @@ export default function Welcome() {
 
                         {/* Newsletter Section - Curated Studio */}
                         <div className="relative h-0 w-0">
-                            <span id="newsletter" className="absolute -top-32 left-0 h-px w-px opacity-0"></span>
+                            <span id="newsletter" className="absolute -top-20 left-0 h-px w-px opacity-0"></span>
                         </div>
                         <div
                             className="relative mt-20 duration-700 animate-in fade-in slide-in-from-left-8"
