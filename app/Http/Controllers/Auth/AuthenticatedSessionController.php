@@ -37,6 +37,8 @@ class AuthenticatedSessionController extends Controller
         $intendedUrl = $request->session()->get('url.intended');
         $claimIntendedUrl = $request->session()->get('claim_intended_url');
         $claimRedirectType = $request->session()->get('claim_redirect_type');
+        $pendingParcelClaim = $request->session()->get('pending_parcel_claim');
+        $pendingClaimRedirectType = $request->session()->get('pending_claim_redirect_type');
 
         $request->session()->regenerate();
 
@@ -57,6 +59,35 @@ class AuthenticatedSessionController extends Controller
         if ($claimRedirectType) {
             $request->session()->put('claim_redirect_type', $claimRedirectType);
         }
+        if ($pendingParcelClaim) {
+            $request->session()->put('pending_parcel_claim', $pendingParcelClaim);
+            
+            // If we have a pending parcel claim but no claim URL, reconstruct it
+            if (!$claimIntendedUrl) {
+                $redirectType = $pendingClaimRedirectType ?? $claimRedirectType ?? 'register';
+                $claimIntendedUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'claim.consume',
+                    now()->addMinutes(15),
+                    [
+                        'parcel_id' => $pendingParcelClaim,
+                        'allow_new' => $redirectType === 'register' ? 1 : 0,
+                        'redirect_type' => $redirectType,
+                    ]
+                );
+                $request->session()->put('claim_intended_url', $claimIntendedUrl);
+                $request->session()->put('url.intended', $claimIntendedUrl);
+                
+                \Illuminate\Support\Facades\Log::info('Reconstructed claim URL from pending parcel claim', [
+                    'user_id' => $user->id,
+                    'parcel_id' => $pendingParcelClaim,
+                    'claim_url' => $claimIntendedUrl,
+                ]);
+            }
+        }
+        if ($pendingClaimRedirectType) {
+            $request->session()->put('pending_claim_redirect_type', $pendingClaimRedirectType);
+        }
+        $request->session()->save(); // Explicitly save session
 
         // If user hasn't verified email yet, preserve intended URL and redirect to verification notice
         // The intended URL will be used after email verification

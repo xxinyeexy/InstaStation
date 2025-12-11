@@ -110,7 +110,7 @@ export default function Register() {
             router.post('/register', payload, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    setSuccess('You may proceed to login now.');
+                    setSuccess('You may proceed to login after verifying your email.');
                 },
                 onError: (errors) => {
                     setErrors(errors);

@@ -188,25 +188,22 @@ class ClaimController extends Controller
         // Clear session keys after use
         $request->session()->forget(['url.intended', 'claim_intended_url', 'claim_redirect_type']);
 
-        // For allow_new claims ("I'm new here"), validate matric ID if parcel has matric but no name
+        // For allow_new claims ("I'm new here"), link the parcel with basic validation
         if ($allowNewClaim) {
-            // Check if parcel has matric ID but no student name (staff entered only matric)
+            // Safety check: if parcel has matric ID but no name, verify matric matches
+            // This is a backup check since primary validation happens during registration
             $hasMatricOnly = $parcelMatric !== '' && trim((string) ($parcel->recipient_name ?? '')) === '';
             
-            if ($hasMatricOnly) {
-                // Validate that the student's matric matches the parcel's matric
-                if ($userMatric === '' || $parcelMatric !== $userMatric) {
-                    Auth::logout();
-                    $request->session()->invalidate();
-                    $request->session()->regenerateToken();
+            if ($hasMatricOnly && $userMatric !== '' && $parcelMatric !== $userMatric) {
+                // This should rarely happen since we validate during registration
+                // But keep as safety check in case someone bypasses registration flow
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-                    $searchQuery = $request->session()->get('claim_search_query', $request->get('q', ''));
-                    $request->session()->forget('claim_search_query');
-
-                    return redirect()
-                        ->route('public.unclaimed', $searchQuery ? ['q' => $searchQuery] : [])
-                        ->with('error', 'This parcel is for matric ID: ' . strtoupper($parcel->recipient_matric) . '. Please register with the correct matric ID or contact the parcel office.');
-                }
+                return redirect()
+                    ->route('public.unclaimed')
+                    ->with('error', 'Matric ID mismatch. Please contact the parcel office.');
             }
             
             // Link the parcel to the student
@@ -217,6 +214,13 @@ class ClaimController extends Controller
                 $parcel->parcel_status = 'Pending Payment';
             }
             $parcel->save();
+            
+            Log::info('Parcel linked via allow_new claim', [
+                'parcel_id' => $parcel->parcel_id,
+                'user_id' => $user->id,
+                'user_matric' => $user->matric,
+            ]);
+            
             return redirect()->route('student.parcel')->with('status', 'Parcel linked to your account. Bring your student ID.');
         }
 

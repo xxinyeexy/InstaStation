@@ -25,6 +25,67 @@ class VerifyEmailController extends Controller
         // Preserve the intended URL if it exists (e.g., from parcel claim flow)
         // This ensures parcel linking happens after verification
         $intendedUrl = $request->session()->get('url.intended') ?: $request->session()->get('claim_intended_url');
+        $pendingParcelClaim = $request->session()->get('pending_parcel_claim');
+        $pendingClaimRedirectType = $request->session()->get('pending_claim_redirect_type');
+        
+        // Comprehensive logging
+        \Illuminate\Support\Facades\Log::info('VerifyEmailController: Starting verification', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'user_matric' => $user->matric,
+            'session_id' => $request->session()->getId(),
+            'intended_url' => $intendedUrl,
+            'pending_parcel_claim' => $pendingParcelClaim,
+            'pending_claim_redirect_type' => $pendingClaimRedirectType,
+            'all_session_data' => $request->session()->all(),
+        ]);
+        
+        // If we have a pending parcel claim but no intended URL, reconstruct it
+        if (!$intendedUrl && $pendingParcelClaim) {
+            $redirectType = $pendingClaimRedirectType ?? 'register';
+            $intendedUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'claim.consume',
+                now()->addMinutes(15),
+                [
+                    'parcel_id' => $pendingParcelClaim,
+                    'allow_new' => $redirectType === 'register' ? 1 : 0,
+                    'redirect_type' => $redirectType,
+                ]
+            );
+            
+            \Illuminate\Support\Facades\Log::info('VerifyEmailController: Reconstructed claim URL from pending parcel', [
+                'user_id' => $user->id,
+                'parcel_id' => $pendingParcelClaim,
+                'claim_url' => $intendedUrl,
+            ]);
+        }
+        
+        // FALLBACK: If no session data at all, check for unclaimed parcels matching this user's matric
+        if (!$intendedUrl && !$pendingParcelClaim && $user->type === 'student' && $user->matric) {
+            $unclaimedParcel = \App\Models\Parcel::where('recipient_matric', $user->matric)
+                ->whereRaw('lower(parcel_status) = ?', ['unclaimed'])
+                ->whereNull('student_id')
+                ->first();
+            
+            if ($unclaimedParcel) {
+                \Illuminate\Support\Facades\Log::info('VerifyEmailController: Found unclaimed parcel matching matric, auto-linking', [
+                    'user_id' => $user->id,
+                    'user_matric' => $user->matric,
+                    'parcel_id' => $unclaimedParcel->parcel_id,
+                ]);
+                
+                // Auto-link the parcel
+                $unclaimedParcel->student_id = $user->id;
+                $unclaimedParcel->recipient_name = $user->name;
+                $unclaimedParcel->parcel_status = 'Pending Payment';
+                $unclaimedParcel->save();
+                
+                \Illuminate\Support\Facades\Log::info('VerifyEmailController: Parcel auto-linked successfully', [
+                    'user_id' => $user->id,
+                    'parcel_id' => $unclaimedParcel->parcel_id,
+                ]);
+            }
+        }
 
         // Determine post-verification destination based on user role (fallback)
         $roleTarget = ($user->type === 'staff')

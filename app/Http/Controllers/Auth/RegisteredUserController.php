@@ -39,6 +39,36 @@ class RegisteredUserController extends Controller
             'department' => 'required_if:type,staff|nullable|string',
         ]);
 
+        // Check if this is a parcel claim registration for "I'm new here" flow
+        $claimIntendedUrl = $request->session()->get('claim_intended_url');
+        $claimRedirectType = $request->session()->get('claim_redirect_type');
+        
+        if ($request->type === 'student' && $claimRedirectType === 'register' && $claimIntendedUrl) {
+            // Extract parcel_id from the claim URL
+            parse_str(parse_url($claimIntendedUrl, PHP_URL_QUERY), $queryParams);
+            $parcelId = $queryParams['parcel_id'] ?? null;
+            
+            if ($parcelId) {
+                $parcel = \App\Models\Parcel::find($parcelId);
+                
+                if ($parcel) {
+                    $parcelMatric = strtolower(trim((string) ($parcel->recipient_matric ?? '')));
+                    $parcelName = trim((string) ($parcel->recipient_name ?? ''));
+                    $studentMatric = strtolower(trim((string) ($request->matric ?? '')));
+                    
+                    // Check if parcel has matric ID but no student name (staff entered only matric)
+                    $hasMatricOnly = $parcelMatric !== '' && $parcelName === '';
+                    
+                    if ($hasMatricOnly && $parcelMatric !== $studentMatric) {
+                        // Matric ID mismatch - reject registration
+                        return back()->withErrors([
+                            'matric' => 'This parcel is for matric ID: ' . strtoupper($parcel->recipient_matric) . '. Please register with the correct matric ID or contact the parcel office.',
+                        ])->withInput();
+                    }
+                }
+            }
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -54,6 +84,29 @@ class RegisteredUserController extends Controller
         $intendedUrl = $request->session()->get('url.intended');
         $claimIntendedUrl = $request->session()->get('claim_intended_url');
         $claimRedirectType = $request->session()->get('claim_redirect_type');
+        
+        // IMPORTANT: Store parcel claim info more persistently
+        // Extract parcel_id from claim URL and store it for later retrieval
+        if ($claimIntendedUrl) {
+            parse_str(parse_url($claimIntendedUrl, PHP_URL_QUERY), $queryParams);
+            $parcelId = $queryParams['parcel_id'] ?? null;
+            
+            if ($parcelId) {
+                // Store in multiple places to ensure it survives session changes
+                $request->session()->put('pending_parcel_claim', $parcelId);
+                $request->session()->put('pending_claim_redirect_type', $claimRedirectType);
+                
+                // Also store in user's session data (Laravel's session table)
+                $request->session()->save();
+                
+                \Illuminate\Support\Facades\Log::info('Stored pending parcel claim for new user', [
+                    'user_id' => $user->id,
+                    'parcel_id' => $parcelId,
+                    'redirect_type' => $claimRedirectType,
+                    'session_id' => $request->session()->getId(),
+                ]);
+            }
+        }
 
         // Return JSON response for axios requests
         if ($request->expectsJson()) {
@@ -66,6 +119,7 @@ class RegisteredUserController extends Controller
             if ($claimRedirectType) {
                 $request->session()->put('claim_redirect_type', $claimRedirectType);
             }
+            $request->session()->save(); // Ensure session is saved
             return response()->json([
                 'message' => 'Account created successfully! Please check your email to verify your account.',
                 'loginMessage' => 'You may proceed to login now!',
@@ -83,6 +137,7 @@ class RegisteredUserController extends Controller
         if ($claimRedirectType) {
             $request->session()->put('claim_redirect_type', $claimRedirectType);
         }
+        $request->session()->save(); // Explicitly save session
         
         // Debug logging to file
         $debugData = [
@@ -111,6 +166,6 @@ class RegisteredUserController extends Controller
             'claim_redirect_type' => $claimRedirectType,
             'session_id' => $request->session()->getId(),
         ]);
-        return redirect()->route('login')->with('status', 'You may proceed to login now!');
+        return redirect()->route('login')->with('status', 'You may proceed to login after verifying your email address.');
     }
 }

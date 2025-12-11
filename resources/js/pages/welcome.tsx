@@ -1,6 +1,6 @@
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, ArrowUpRight, Bell, Calendar, CreditCard, MapPin, Package, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Bell, Calendar, CreditCard, MapPin, Package, Sparkles, X, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 type AnnouncementCard = {
@@ -385,7 +385,7 @@ export default function Welcome() {
                                     <div className="relative grid gap-8 lg:grid-cols-2">
                                         <div className="space-y-6">
                                             <div className="inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-pink-50 px-4 py-2">
-                                                <Sparkles className="h-4 w-4 text-pink-600" />
+                                                <Zap className="h-4 w-4 text-pink-600" />
                                                 <span className="text-sm font-bold text-pink-700">How It Works</span>
                                             </div>
                                             <h2 className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-3xl font-black text-transparent md:text-5xl">
@@ -626,16 +626,7 @@ export default function Welcome() {
                             className="relative mt-32 overflow-hidden rounded-3xl border-2 border-pink-200 bg-gradient-to-br from-white via-pink-50/30 to-purple-50/30 p-12 shadow-2xl duration-1000 animate-in fade-in zoom-in-95"
                             style={{ animationDelay: '100ms' }}
                         >
-                            {/* Floating shapes */}
-                            <div
-                                className="absolute top-10 right-10 h-20 w-20 animate-bounce rounded-2xl bg-gradient-to-br from-pink-400 to-purple-400 opacity-10"
-                                style={{ animationDuration: '3s' }}
-                            ></div>
-                            <div
-                                className="absolute bottom-10 left-10 h-16 w-16 animate-bounce rounded-full bg-gradient-to-br from-blue-400 to-cyan-400 opacity-10"
-                                style={{ animationDuration: '4s', animationDelay: '1s' }}
-                            ></div>
-
+                           
                             <div className="relative">
                                 <div
                                     className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4"
@@ -920,7 +911,7 @@ export default function Welcome() {
                 </div>
             </div>
             {/* Footer - Premium Professional Design */}
-            <footer className="relative overflow-hidden bg-[#FF029A] duration-1000 animate-in fade-in slide-in-from-bottom-8">
+            <footer className="relative overflow-hidden bg-gradient-to-r from-[#f7d8ff] via-[#fee5d3] to-[#d3e7ff] duration-1000 animate-in fade-in slide-in-from-bottom-8">
                 {/* Animated background decorations */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     <div className="absolute -top-40 -right-40 h-[600px] w-[600px] animate-pulse rounded-full bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-blue-500/10 blur-3xl"></div>
@@ -1135,13 +1126,7 @@ export default function Welcome() {
                             <p className="text-sm text-gray-700">Universiti Malaysia Pahang Al-Sultan Abdullah</p>
                         </div>
 
-                        {/* Newsletter Signup or Additional CTA */}
-                        <div className="flex items-center gap-4 text-gray-700">
-                            <div className="hidden items-center gap-3 rounded-xl border border-purple-200 bg-white/90 px-4 py-2 shadow lg:flex">
-                                <Bell className="h-4 w-4 text-purple-500" />
-                                <span className="text-sm font-medium">Stay Updated</span>
-                            </div>
-                        </div>
+                       
                     </div>
                 </div>
             </footer >
