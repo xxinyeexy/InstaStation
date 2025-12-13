@@ -20,6 +20,37 @@ export default function Welcome() {
     const [currentWord, setCurrentWord] = useState(0);
     const words = ['Smart', 'Instant', 'Swift', 'Secure'];
 
+    // Timeline State
+    const [activeTimelineStep, setActiveTimelineStep] = useState(0);
+
+    // Timeline Observer
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const step = parseInt(entry.target.getAttribute('data-step') || '0');
+                        setActiveTimelineStep(step);
+                    }
+                });
+            },
+            {
+                root: null,
+                rootMargin: '-25% 0px -25% 0px', // Active when element is in center 50% of viewport
+                threshold: 0
+            }
+        );
+
+        const steps = document.querySelectorAll('.timeline-step');
+        steps.forEach((step) => observer.observe(step));
+
+        // Also observe the section to reset or pin if needed, but for now steps are enough.
+        // Cleanup
+        return () => {
+            steps.forEach((step) => observer.unobserve(step));
+        };
+    }, []);
+
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentWord((prev) => (prev + 1) % words.length);
@@ -618,158 +649,186 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        {/* How It Works Section - Redesigned with Timeline */}
+                        {/* How It Works Section - Redesigned Film Strip Style */}
                         <div className="relative h-0 w-0">
                             <span id="process-timeline" className="absolute -top-20 left-0 h-px w-px opacity-0"></span>
                         </div>
-                        <div
-                            className="relative mt-32 overflow-hidden rounded-3xl border-2 border-pink-200 bg-gradient-to-br from-white via-pink-50/30 to-purple-50/30 p-12 shadow-2xl duration-1000 animate-in fade-in zoom-in-95"
-                            style={{ animationDelay: '100ms' }}
-                        >
 
-                            <div className="relative">
-                                <div
-                                    className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4"
-                                    style={{ animationDelay: '200ms' }}
-                                >
-                                    <Sparkles className="h-4 w-4" />
-                                    Process Timeline
+                        <section className="relative py-32">
+                            {/* Cute Pattern Background */}
+                            <div className="absolute inset-0 opacity-10" style={{
+                                backgroundImage: 'radial-gradient(#dccfb6 2px, transparent 2px)',
+                                backgroundSize: '30px 30px'
+                            }}></div>
+
+                            <div className="container mx-auto px-6">
+                                <div className="text-center mb-24">
+                                    <div className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-6 py-2 text-sm font-bold text-pink-700 shadow-lg animate-in fade-in slide-in-from-top-4">
+                                        <Sparkles className="h-4 w-4" />
+                                        Process Timeline
+                                    </div>
+                                    <h2 className="mb-4 text-4xl font-black text-[#594a3a] md:text-6xl animate-in fade-in slide-in-from-bottom-4">
+                                        Your Parcel Journey
+                                    </h2>
+                                    <p className="mx-auto max-w-2xl text-lg font-medium text-[#8d7f6d] animate-in fade-in slide-in-from-bottom-4">
+                                        Scroll down to follow your parcel's adventure!
+                                    </p>
                                 </div>
-                                <h2
-                                    className="mb-4 bg-gradient-to-r from-pink-600 via-pink-400 to-green-300 bg-clip-text text-3xl font-black text-transparent duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-5xl"
-                                    style={{ animationDelay: '300ms' }}
-                                >
-                                    Your Parcel Journey
-                                </h2>
-                                <p
-                                    className="mx-auto mb-16 max-w-2xl text-lg text-gray-600 duration-700 animate-in fade-in slide-in-from-bottom-4"
-                                    style={{ animationDelay: '400ms' }}
-                                >
-                                    From arrival to collection in 4 simple steps
-                                </p>
 
-                                {/* Timeline Layout */}
                                 <div className="relative">
-                                    {/* Connecting Line - Vertical on mobile, Horizontal on desktop */}
-                                    <div className="absolute top-0 left-1/2 h-full w-1 -translate-x-1/2 bg-gradient-to-b from-pink-300 via-purple-300 to-blue-300 lg:top-12 lg:right-[10%] lg:left-[10%] lg:h-1 lg:w-auto lg:translate-x-0 lg:bg-gradient-to-r"></div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-start">
 
-                                    <div className="grid grid-cols-1 gap-12 lg:grid-cols-4 lg:gap-8">
-                                        {/* Step 1 */}
-                                        <div className="relative duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '500ms' }}>
-                                            <div className="flex flex-col items-center text-center">
-                                                <div className="group relative z-10 mb-6">
-                                                    {/* Pulsing ring */}
+                                        {/* Left Column: Sticky Film Frame */}
+                                        <div className="sticky top-[calc(50vh-250px)] hidden lg:flex h-[500px] justify-center items-center">
+                                            {/* The Frame */}
+                                            <div className="relative w-80 h-[420px] bg-[#fffbf0] rounded-[3rem] border-[16px] border-[#e6dcc6] shadow-[0_40px_80px_rgba(0,0,0,0.15)] overflow-hidden transform rotate-[-2deg] transition-all duration-500 hover:rotate-0 hover:scale-105">
+                                                {/* Inner Shadow / Depth */}
+                                                <div className="absolute inset-0 m-2 rounded-[2.5rem] bg-[#f2eadd] pointer-events-none"></div>
+
+                                                {/* The Film Strip Viewport */}
+                                                <div className="absolute inset-4 rounded-[2.2rem] overflow-hidden bg-white ring-4 ring-white shadow-inner">
+                                                    {/* The Sliding Strip */}
                                                     <div
-                                                        className="absolute inset-0 animate-ping rounded-full bg-pink-400 opacity-20"
-                                                        style={{ animationDuration: '2s' }}
-                                                    ></div>
+                                                        className="h-full w-full flex flex-col transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                                                        style={{ transform: `translateY(-${activeTimelineStep * 100}%)` }}
+                                                    >
+                                                        {/* Scene 1: Arrival */}
+                                                        <div className="h-full w-full flex-shrink-0 flex flex-col items-center justify-center bg-pink-50 p-6 text-center">
+                                                            <div className="mb-6 h-32 w-32 rounded-full bg-pink-200 flex items-center justify-center shadow-lg animate-bounce-slow">
+                                                                <Package className="h-16 w-16 text-pink-600" />
+                                                            </div>
+                                                            <div className="font-black text-2xl text-pink-400 opacity-20">STEP 01</div>
+                                                        </div>
 
-                                                    {/* Main circle */}
-                                                    <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-pink-300 to-pink-600 shadow-2xl transition-all duration-500 hover:scale-110 hover:rotate-12">
-                                                        <Package className="h-12 w-12 text-white" />
-                                                        <div className="absolute -top-3 -right-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-base font-black text-gray-900 shadow-xl ring-4 ring-pink-100">
+                                                        {/* Scene 2: Alert */}
+                                                        <div className="h-full w-full flex-shrink-0 flex flex-col items-center justify-center bg-purple-50 p-6 text-center">
+                                                            <div className="relative mb-6">
+                                                                <div className="absolute inset-0 animate-ping rounded-full bg-purple-200 opacity-75"></div>
+                                                                <div className="relative h-32 w-32 rounded-full bg-purple-200 flex items-center justify-center shadow-lg">
+                                                                    <Bell className="h-16 w-16 text-purple-600" />
+                                                                </div>
+                                                                <div className="absolute top-0 right-0 h-8 w-8 rounded-full bg-red-500 border-4 border-white"></div>
+                                                            </div>
+                                                            <div className="font-black text-2xl text-purple-400 opacity-20">STEP 02</div>
+                                                        </div>
+
+                                                        {/* Scene 3: Payment */}
+                                                        <div className="h-full w-full flex-shrink-0 flex flex-col items-center justify-center bg-blue-50 p-6 text-center">
+                                                            <div className="mb-6 h-32 w-32 rounded-full bg-blue-200 flex items-center justify-center shadow-lg transform rotate-3">
+                                                                <CreditCard className="h-16 w-16 text-blue-600" />
+                                                            </div>
+                                                            <div className="font-black text-2xl text-blue-400 opacity-20">STEP 03</div>
+                                                        </div>
+
+                                                        {/* Scene 4: Collection */}
+                                                        <div className="h-full w-full flex-shrink-0 flex flex-col items-center justify-center bg-green-50 p-6 text-center">
+                                                            <div className="mb-6 h-32 w-32 rounded-full bg-green-200 flex items-center justify-center shadow-lg">
+                                                                <MapPin className="h-16 w-16 text-green-600 animate-bounce" />
+                                                            </div>
+                                                            <div className="font-black text-2xl text-green-400 opacity-20">STEP 04</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Glint/Reflection */}
+                                                <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-white/20 to-transparent pointer-events-none rounded-[3rem]"></div>
+                                            </div>
+
+                                            {/* Decoration below frame */}
+                                            <div className="absolute -bottom-10 -z-10 h-12 w-48 rounded-[100%] bg-black/10 blur-xl"></div>
+                                        </div>
+
+                                        {/* Right Column: Scrolling Steps */}
+                                        <div className="relative">
+                                            {/* Connecting Line */}
+                                            <div className="absolute left-8 lg:left-[-40px] top-0 bottom-0 w-1 bg-gradient-to-b from-pink-200 via-purple-200 to-green-200 hidden lg:block rounded-full"></div>
+
+                                            <div className="space-y-[30vh] md:space-y-[40vh] pb-[80vh] pt-[5vh]">
+                                                {/* Step 1 */}
+                                                <div className={`timeline-step relative transition-all duration-700 ${activeTimelineStep === 0 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 blur-[1px]'}`} data-step="0">
+                                                    <div className="flex gap-6 md:gap-8">
+                                                        <div className="flex-shrink-0 hidden lg:flex h-16 w-16 items-center justify-center rounded-2xl bg-white border-4 border-pink-100 text-2xl font-black text-pink-500 shadow-xl z-10 relative">
                                                             01
+                                                            {activeTimelineStep === 0 && <span className="absolute inset-0 rounded-xl ring-2 ring-pink-400 animate-ping opacity-50"></span>}
+                                                        </div>
+                                                        <div className="flex-1 rounded-3xl bg-white p-8 shadow-[0_20px_40px_rgba(0,0,0,0.05)] border-2 border-pink-100 backdrop-blur-sm">
+                                                            <div className="flex items-center gap-4 mb-4 lg:hidden">
+                                                                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-pink-100 text-pink-600 font-bold">01</div>
+                                                                <Package className="h-6 w-6 text-pink-500" />
+                                                            </div>
+                                                            <h3 className="mb-4 text-3xl font-black text-[#594a3a]">Parcel Arrival</h3>
+                                                            <p className="text-lg leading-relaxed text-[#8d7f6d]">
+                                                                Your parcel arrives at our secure hub. Our staff carefully scans and logs it into the InstaStation system, creating a digital record instantly.
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="rounded-2xl border-2 border-pink-200 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
-                                                    <h3 className="mb-3 text-2xl font-black text-gray-900">Parcel Arrival</h3>
-                                                    <p className="text-sm leading-relaxed text-gray-600">
-                                                        Your parcel is received and securely logged into our system with instant tracking
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Step 2 */}
-                                        <div className="relative duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '700ms' }}>
-                                            <div className="flex flex-col items-center text-center">
-                                                <div className="group relative z-10 mb-6">
-                                                    <div
-                                                        className="absolute inset-0 animate-ping rounded-full bg-purple-400 opacity-20"
-                                                        style={{ animationDuration: '2s', animationDelay: '0.3s' }}
-                                                    ></div>
-
-                                                    <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-purple-300 to-purple-600 shadow-2xl transition-all duration-500 hover:scale-110 hover:rotate-12">
-                                                        <Bell className="h-12 w-12 text-white" />
-                                                        <div className="absolute -top-3 -right-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-base font-black text-gray-900 shadow-xl ring-4 ring-purple-100">
+                                                {/* Step 2 */}
+                                                <div className={`timeline-step relative transition-all duration-700 ${activeTimelineStep === 1 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 blur-[1px]'}`} data-step="1">
+                                                    <div className="flex gap-6 md:gap-8">
+                                                        <div className="flex-shrink-0 hidden lg:flex h-16 w-16 items-center justify-center rounded-2xl bg-white border-4 border-purple-100 text-2xl font-black text-purple-500 shadow-xl z-10 relative">
                                                             02
+                                                            {activeTimelineStep === 1 && <span className="absolute inset-0 rounded-xl ring-2 ring-purple-400 animate-ping opacity-50"></span>}
+                                                        </div>
+                                                        <div className="flex-1 rounded-3xl bg-white p-8 shadow-[0_20px_40px_rgba(0,0,0,0.05)] border-2 border-purple-100 backdrop-blur-sm">
+                                                            <div className="flex items-center gap-4 mb-4 lg:hidden">
+                                                                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-purple-100 text-purple-600 font-bold">02</div>
+                                                                <Bell className="h-6 w-6 text-purple-500" />
+                                                            </div>
+                                                            <h3 className="mb-4 text-3xl font-black text-[#594a3a]">Smart Alert</h3>
+                                                            <p className="text-lg leading-relaxed text-[#8d7f6d]">
+                                                                You get a notification right away! Check your email or the student portal to see your parcel details, photo, and collection status.
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="rounded-2xl border-2 border-purple-200 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
-                                                    <h3 className="mb-3 text-2xl font-black text-gray-900">Smart Alert</h3>
-                                                    <p className="text-sm leading-relaxed text-gray-600">
-                                                        Get instant notifications via email and in-app alerts about your parcel
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Step 3 */}
-                                        <div className="relative duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '900ms' }}>
-                                            <div className="flex flex-col items-center text-center">
-                                                <div className="group relative z-10 mb-6">
-                                                    <div
-                                                        className="absolute inset-0 animate-ping rounded-full bg-blue-400 opacity-20"
-                                                        style={{ animationDuration: '2s', animationDelay: '0.6s' }}
-                                                    ></div>
-
-                                                    <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-blue-300 to-blue-600 shadow-2xl transition-all duration-500 hover:scale-110 hover:rotate-12">
-                                                        <CreditCard className="h-12 w-12 text-white" />
-                                                        <div className="absolute -top-3 -right-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-base font-black text-gray-900 shadow-xl ring-4 ring-blue-100">
+                                                {/* Step 3 */}
+                                                <div className={`timeline-step relative transition-all duration-700 ${activeTimelineStep === 2 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 blur-[1px]'}`} data-step="2">
+                                                    <div className="flex gap-6 md:gap-8">
+                                                        <div className="flex-shrink-0 hidden lg:flex h-16 w-16 items-center justify-center rounded-2xl bg-white border-4 border-blue-100 text-2xl font-black text-blue-500 shadow-xl z-10 relative">
                                                             03
+                                                            {activeTimelineStep === 2 && <span className="absolute inset-0 rounded-xl ring-2 ring-blue-400 animate-ping opacity-50"></span>}
+                                                        </div>
+                                                        <div className="flex-1 rounded-3xl bg-white p-8 shadow-[0_20px_40px_rgba(0,0,0,0.05)] border-2 border-blue-100 backdrop-blur-sm">
+                                                            <div className="flex items-center gap-4 mb-4 lg:hidden">
+                                                                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 font-bold">03</div>
+                                                                <CreditCard className="h-6 w-6 text-blue-500" />
+                                                            </div>
+                                                            <h3 className="mb-4 text-3xl font-black text-[#594a3a]">Easy Payment</h3>
+                                                            <p className="text-lg leading-relaxed text-[#8d7f6d]">
+                                                                Need to pay a handling fee? Just upload your payment proof directly through the dashboard. Our staff verifies it in minutes.
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="rounded-2xl border-2 border-blue-200 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
-                                                    <h3 className="mb-3 text-2xl font-black text-gray-900">Easy Payment</h3>
-                                                    <p className="text-sm leading-relaxed text-gray-600">
-                                                        Upload payment proof and get quick verification from our staff
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Step 4 */}
-                                        <div className="relative duration-700 animate-in fade-in zoom-in-50" style={{ animationDelay: '1100ms' }}>
-                                            <div className="flex flex-col items-center text-center">
-                                                <div className="group relative z-10 mb-6">
-                                                    <div
-                                                        className="absolute inset-0 animate-ping rounded-full bg-green-400 opacity-20"
-                                                        style={{ animationDuration: '2s', animationDelay: '0.9s' }}
-                                                    ></div>
-
-                                                    <div className="relative flex h-28 w-28 items-center justify-center rounded-full bg-gradient-to-br from-green-300 to-green-600 shadow-2xl transition-all duration-500 hover:scale-110 hover:rotate-12">
-                                                        <svg className="h-12 w-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2.5}
-                                                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                                                            />
-                                                        </svg>
-                                                        <div className="absolute -top-3 -right-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-base font-black text-gray-900 shadow-xl ring-4 ring-green-100">
+                                                {/* Step 4 */}
+                                                <div className={`timeline-step relative transition-all duration-700 ${activeTimelineStep === 3 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 blur-[1px]'}`} data-step="3">
+                                                    <div className="flex gap-6 md:gap-8">
+                                                        <div className="flex-shrink-0 hidden lg:flex h-16 w-16 items-center justify-center rounded-2xl bg-white border-4 border-green-100 text-2xl font-black text-green-500 shadow-xl z-10 relative">
                                                             04
+                                                            {activeTimelineStep === 3 && <span className="absolute inset-0 rounded-xl ring-2 ring-green-400 animate-ping opacity-50"></span>}
+                                                        </div>
+                                                        <div className="flex-1 rounded-3xl bg-white p-8 shadow-[0_20px_40px_rgba(0,0,0,0.05)] border-2 border-green-100 backdrop-blur-sm">
+                                                            <div className="flex items-center gap-4 mb-4 lg:hidden">
+                                                                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-green-100 text-green-600 font-bold">04</div>
+                                                                <MapPin className="h-6 w-6 text-green-500" />
+                                                            </div>
+                                                            <h3 className="mb-4 text-3xl font-black text-[#594a3a]">Quick Collection</h3>
+                                                            <p className="text-lg leading-relaxed text-[#8d7f6d]">
+                                                                Head to the counter, show your unique collection QR code, and grab your parcel. Simple, secure, and super fast!
+                                                            </p>
                                                         </div>
                                                     </div>
-                                                </div>
-
-                                                <div className="rounded-2xl border-2 border-green-200 bg-white/80 p-6 shadow-xl backdrop-blur-sm">
-                                                    <h3 className="mb-3 text-2xl font-black text-gray-900">Quick Collection</h3>
-                                                    <p className="text-sm leading-relaxed text-gray-600">
-                                                        Show QR code or collection code and collect your parcel hassle-free
-                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </section>
 
                         {/* Newsletter Section - Curated Studio */}
                         <div className="relative h-0 w-0">
