@@ -1116,6 +1116,7 @@ export default function Welcome() {
                     </div>
 
                     {/* Bottom Bar - Enhanced */}
+                    {/* Bottom Bar - Enhanced */}
                     <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
                         <div className="flex flex-col items-center gap-2 text-gray-700 md:flex-row md:gap-6">
                             <p className="text-sm">
@@ -1124,73 +1125,128 @@ export default function Welcome() {
                             <div className="hidden h-4 w-px bg-gray-700 md:block"></div>
                             <p className="text-sm text-gray-700">Universiti Malaysia Pahang Al-Sultan Abdullah</p>
                         </div>
-
-
                     </div>
                 </div>
             </footer >
 
-            {/* Announcement Detail Modal */}
+            {/* Announcement Detail Modal - Wooden Menu Board Style */}
             {
                 selectedAnnouncement && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center duration-300 animate-in fade-in">
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedAnnouncement(null)} />
-                        <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-[32px] bg-white shadow-[0_20px_80px_rgba(0,0,0,0.2)] duration-300 animate-in slide-in-from-bottom-4 zoom-in-95">
-                            <div className="relative overflow-hidden bg-gradient-to-r from-pink-400 to-green-400 p-6 text-white">
-                                <div className="absolute inset-0 opacity-40">
-                                    <div className="absolute -top-10 right-0 h-40 w-40 rounded-full bg-white/20 blur-3xl"></div>
-                                    <div className="absolute -bottom-16 left-10 h-32 w-32 rounded-full bg-green-200/30 blur-3xl"></div>
-                                </div>
-                                <div className="relative flex items-center justify-between gap-3">
-                                    <button
-                                        onClick={() => setSelectedAnnouncement(null)}
-                                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
-                                    >
-                                        <ArrowLeft size={20} />
-                                    </button>
-                                    <div className="flex-1 px-4 text-center">
-                                        <p className="text-xs font-semibold tracking-[0.3em] text-white/80 uppercase">Announcement</p>
-                                        <h2 className="text-xl font-bold">{selectedAnnouncement.announcement_title}</h2>
-                                    </div>
-                                    <button
-                                        onClick={() => setSelectedAnnouncement(null)}
-                                        className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
-                                    >
-                                        <X size={20} />
-                                    </button>
-                                </div>
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 duration-300 animate-in fade-in">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSelectedAnnouncement(null)} />
+
+                        {/* Wrapper to control max height and ensure it fits */}
+                        <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col translate-y-8 duration-500 animate-in slide-in-from-bottom-8 zoom-in-95">
+
+                            {/* Hanging String & Nail - Positioned absolutely relative to wrapper */}
+                            <div className="absolute -top-24 left-1/2 h-24 w-60 -translate-x-1/2 pointer-events-none">
+                                <svg width="100%" height="100%" viewBox="0 0 240 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    {/* String */}
+                                    <path d="M120 10L20 90" stroke="#dcdde1" strokeWidth="4" strokeLinecap="round" />
+                                    <path d="M120 10L220 90" stroke="#dcdde1" strokeWidth="4" strokeLinecap="round" />
+                                    {/* Nail */}
+                                    <circle cx="120" cy="10" r="8" fill="#bdc3c7" stroke="#95a5a6" strokeWidth="2" />
+                                    <circle cx="120" cy="10" r="3" fill="#ecf0f1" className="opacity-50" />
+                                </svg>
                             </div>
 
-                            <div className="space-y-6 p-6">
-                                {selectedAnnouncement.announcement_image && (
-                                    <div className="overflow-hidden rounded-2xl border border-pink-50">
-                                        <img
-                                            src={`/storage/${selectedAnnouncement.announcement_image}`}
-                                            alt="announcement"
-                                            className="h-64 w-full object-cover"
-                                        />
-                                    </div>
-                                )}
+                            {/* Main Board Container */}
+                            <div className="relative flex flex-col overflow-hidden rounded-[48px] bg-[#dccfb6] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+                                {/* Wood Texture/Frame Details */}
+                                <div className="absolute inset-0 pointer-events-none rounded-[48px] border-[12px] border-[#cbbca0]"></div>
+                                {/* Corner Accents */}
+                                <div className="absolute top-6 left-6 h-8 w-1 rotate-45 rounded-full bg-[#b0a28a] pointer-events-none"></div>
+                                <div className="absolute top-6 right-6 h-8 w-1 -rotate-45 rounded-full bg-[#b0a28a] pointer-events-none"></div>
+                                <div className="absolute bottom-6 left-6 h-8 w-1 -rotate-45 rounded-full bg-[#b0a28a] pointer-events-none"></div>
+                                <div className="absolute bottom-6 right-6 h-8 w-1 rotate-45 rounded-full bg-[#b0a28a] pointer-events-none"></div>
 
-                                <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-gray-50 p-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-inner">
-                                            <img src="/images/parcel-logo.png" alt="InstaStation" className="h-10 w-10" />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-semibold tracking-[0.2em] text-gray-400 uppercase">Publisher</p>
-                                            <p className="text-base font-semibold text-gray-800">UMPSA Postal Hub</p>
+                                {/* Inner Paper Content Area - Scrollable */}
+                                <div className="relative mx-3 my-3 flex flex-col overflow-y-auto rounded-[36px] bg-[#fbf9f5] px-6 pt-12 pb-10 shadow-inner md:px-8 custom-scrollbar">
+                                    {/* Close Button */}
+                                    <button
+                                        onClick={() => setSelectedAnnouncement(null)}
+                                        className="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#e3dad0] text-[#8d7f6d] transition-transform hover:rotate-90 hover:bg-[#d6c9bc]"
+                                    >
+                                        <X size={18} strokeWidth={3} />
+                                    </button>
+
+                                    {/* Title Section with Organic Green Blob */}
+                                    <div className="relative mb-8 flex-shrink-0 text-center">
+                                        <div className="relative inline-block">
+                                            {/* Green Organic Background */}
+                                            <div className="absolute inset-0 -rotate-2 scale-110 transform rounded-[30%] bg-[#8bad6b] opacity-90 blur-[1px]"></div>
+                                            <h2 className="relative z-10 px-6 py-2 text-2xl font-black tracking-widest text-white">
+                                                ANNOUNCEMENT
+                                            </h2>
                                         </div>
                                     </div>
-                                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-pink-600 shadow">
-                                        <Calendar className="h-4 w-4 text-pink-500" />
-                                        {formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}
+
+                                    {/* Image Area */}
+                                    {selectedAnnouncement.announcement_image && (
+                                        <div className="mb-6 w-full flex-shrink-0 overflow-hidden rounded-xl shadow-sm">
+                                            <img
+                                                src={`/storage/${selectedAnnouncement.announcement_image}`}
+                                                alt="announcement"
+                                                className="h-56 w-full object-cover"
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Content Info */}
+                                    <div className="flex-1 text-center">
+                                        <h3 className="text-2xl font-black text-[#594a3a] md:text-3xl">
+                                            {selectedAnnouncement.announcement_title}
+                                        </h3>
+
+                                        {/* Meta Data Stickers */}
+                                        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                                            <span className="relative z-0 inline-block">
+                                                <span className="absolute inset-0 top-1/2 h-3 w-full -translate-y-1/2 scale-110 -rotate-2 transform bg-[#ffeaa7]/60"></span>
+                                                <span className="relative z-10 text-xs font-bold text-[#8d7f6d] md:text-sm">
+                                                    {formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}
+                                                </span>
+                                            </span>
+                                            <span className="text-[#cbbca0]">●</span>
+                                            <span className="relative z-0 inline-block">
+                                                <span className="absolute inset-0 top-1/2 h-3 w-full -translate-y-1/2 scale-110 rotate-1 transform bg-[#fab1a0]/40"></span>
+                                                <span className="relative z-10 text-xs font-bold text-[#8d7f6d] md:text-sm">
+                                                    UMPSA Postal Hub
+                                                </span>
+                                            </span>
+                                        </div>
+
+                                        {/* Description - The scrolling part */}
+                                        <div className="relative mt-6 text-left">
+                                            <p className="whitespace-pre-line text-base font-bold leading-relaxed text-[#8d7f6d] md:text-lg">
+                                                {selectedAnnouncement.announcement_content}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Bottom Decorative Footer Text */}
+                                    <div className="mt-8 flex-shrink-0 text-center text-xs font-bold text-[#cbbca0]">
+                                        Always welcome to visit us! 🦦
                                     </div>
                                 </div>
-
-                                <div className="prose max-w-none text-gray-700">{selectedAnnouncement.announcement_content}</div>
                             </div>
                         </div>
+                        {/* Style for custom scrollbar within this component */}
+                        <style>{`
+                            .custom-scrollbar::-webkit-scrollbar {
+                                width: 8px;
+                            }
+                            .custom-scrollbar::-webkit-scrollbar-track {
+                                background: transparent;
+                            }
+                            .custom-scrollbar::-webkit-scrollbar-thumb {
+                                background-color: #e3dad0;
+                                border-radius: 20px;
+                                border: 2px solid #fbf9f5;
+                            }
+                            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                                background-color: #d6c9bc;
+                            }
+                        `}</style>
                     </div>
                 )
             }
