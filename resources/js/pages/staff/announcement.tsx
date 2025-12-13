@@ -100,6 +100,18 @@ export default function StaffAnnouncements(props: {
         }
     }, [publishDate]);
 
+    // Keep session alive - ping every 5 minutes
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetch('/staff/announcements?keep-alive=1', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'include',
+            }).catch(() => { });
+        }, 5 * 60 * 1000); // 5 minutes
+
+        return () => clearInterval(interval);
+    }, []);
+
     const toDateInputValue = (value?: string | null) => {
         if (!value) return '';
         if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
@@ -173,6 +185,7 @@ export default function StaffAnnouncements(props: {
             method: 'POST',
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
             body: to === 'publish' ? body : undefined,
+            credentials: 'include',
         });
 
         setList((prev) =>
@@ -193,6 +206,7 @@ export default function StaffAnnouncements(props: {
         await fetch(`/staff/announcements/${announcement_id}`, {
             method: 'DELETE',
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
+            credentials: 'include',
         });
         setList((prev) => prev.filter((r) => ((r as any).announcement_id || r.faq_id) !== announcement_id));
     };
@@ -608,41 +622,54 @@ export default function StaffAnnouncements(props: {
                                         }
                                         const id = ((editing as any).announcement_id || (editing as any).faq_id) as number;
                                         const form = new FormData();
+                                        form.append('_method', 'PUT'); // Spoof PUT method for file upload support
                                         form.append('title', editTitle);
                                         form.append('content', editContent);
                                         form.append('type', editType);
                                         form.append('status', editStatus);
-                                        if (editPublishDate) form.append('publish_date', toIsoStringFromLocal(editPublishDate));
+                                        // Ensure we have a valid publish date, prevent clearing it unintentionally
+                                        if (editPublishDate) {
+                                            form.append('publish_date', toIsoStringFromLocal(editPublishDate));
+                                        } else if (editStatus === 'Active') {
+                                            // If setting to Active but no date, default to now
+                                            form.append('publish_date', new Date().toISOString().slice(0, 19).replace('T', ' '));
+                                        }
+
                                         if (editExpiryDate) form.append('expiry_date', toIsoStringFromLocal(editExpiryDate));
                                         if (editImageFile) form.append('image', editImageFile);
-                                        await fetch(`/staff/announcements/${id}`, {
-                                            method: 'PUT',
+
+                                        const res = await fetch(`/staff/announcements/${id}`, {
+                                            method: 'POST', // Use POST for FormData with files
                                             headers: {
                                                 'X-Requested-With': 'XMLHttpRequest',
                                                 'X-CSRF-TOKEN': csrf,
                                             },
                                             body: form,
+                                            credentials: 'include',
                                         });
-                                        setList((prev) =>
-                                            prev.map((r) =>
-                                                (((r as any).announcement_id || r.faq_id) as number) ===
-                                                    (((editing as any).announcement_id || (editing as any).faq_id) as number)
-                                                    ? {
-                                                        ...r,
-                                                        announcement_title: editTitle,
-                                                        announcement_content: editContent,
-                                                        announcement_type: editType,
-                                                        announcement_status: editStatus === 'Active' ? 'Published' : 'Draft',
-                                                        publish_date: editPublishDate
-                                                            ? toIsoStringFromLocal(editPublishDate)
-                                                            : (r as any).publish_date,
-                                                        expiry_date: editExpiryDate ? toIsoStringFromLocal(editExpiryDate) : (r as any).expiry_date,
-                                                        category: editType,
-                                                        updated_at: new Date().toISOString(),
-                                                    }
-                                                    : r,
-                                            ),
-                                        );
+
+                                        if (!res.ok) {
+                                            if (res.status === 419) {
+                                                showValidationError('Session expired. Reloading page...');
+                                                setTimeout(() => window.location.reload(), 1500);
+                                                return;
+                                            }
+                                            const errorText = await res.text();
+                                            console.error('Update announcement failed:', res.status, errorText);
+                                            showValidationError(`Failed to update announcement: ${res.statusText}`);
+                                            return;
+                                        }
+
+                                        const json = await res.json();
+                                        if (json.success && json.announcement) {
+                                            setList((prev) =>
+                                                prev.map((r) =>
+                                                    (((r as any).announcement_id || r.faq_id) as number) === id
+                                                        ? json.announcement
+                                                        : r,
+                                                ),
+                                            );
+                                        }
                                         setEditing(null);
                                         showSuccessMessage('Announcement updated successfully!');
                                     }}
@@ -863,11 +890,26 @@ export default function StaffAnnouncements(props: {
                                                 method: 'POST',
                                                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
                                                 body: form,
+                                                credentials: 'include', // Ensure cookies are sent
                                             });
+
                                             if (!res.ok) {
+                                                if (res.status === 419) {
+                                                    showValidationError('Session expired. Reloading page...');
+                                                    setTimeout(() => window.location.reload(), 1500);
+                                                    return;
+                                                }
+
                                                 const errorText = await res.text();
+                                                let errorMessage = res.statusText || 'Unknown error';
+                                                try {
+                                                    const json = JSON.parse(errorText);
+                                                    if (json.message) errorMessage = json.message;
+                                                } catch (e) {
+                                                    // Not JSON
+                                                }
                                                 console.error('Create announcement failed:', res.status, errorText);
-                                                showValidationError(`Failed to create announcement: ${res.statusText}`);
+                                                showValidationError(`Failed to create announcement: ${errorMessage}`);
                                                 return;
                                             }
                                             const json = await res.json();

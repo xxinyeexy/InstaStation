@@ -779,28 +779,39 @@ export default function Welcome() {
                             className="relative mt-20 duration-700 animate-in fade-in slide-in-from-left-8"
                             style={{ animationDelay: '100ms' }}
                         >
-                            <div className="relative overflow-hidden rounded-[40px] border border-white/70 bg-white/80 p-10 shadow-[0_30px_120px_rgba(15,23,42,0.1)] backdrop-blur-xl">
-                                <div className="pointer-events-none absolute inset-0">
-                                    <div className="absolute top-[-40px] -right-16 h-64 w-64 rounded-full bg-gradient-to-br from-pink-200/40 via-purple-200/30 to-blue-200/40 blur-[120px]"></div>
-                                    <div className="absolute bottom-[-50px] -left-12 h-56 w-56 rounded-full bg-gradient-to-br from-emerald-200/40 via-cyan-200/30 to-pink-200/40 blur-[110px]"></div>
+                            <div className="relative overflow-hidden rounded-[40px] border-[8px] border-[#f2e8da] bg-[#fffbf0] p-10 shadow-[0_30px_60px_rgba(200,180,160,0.2)]">
+                                {/* Decorative elements mimicking the reference */}
+                                <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                                    {/* Top Tablet 'notch' or decorative bar */}
+                                    <div className="absolute top-0 left-1/2 h-6 w-32 -translate-x-1/2 rounded-b-xl bg-[#f2e8da]"></div>
                                 </div>
-                                <div className="relative mb-10 flex flex-wrap justify-between">
-                                    <div>
-                                        <p className="mb-6 ml-10 inline-flex gap-2 rounded-full border-2 border-pink-300 bg-rose-50 px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4">
-                                            <Sparkles className="h-3.5 w-3.5 text-rose-500" /> Curated
-                                        </p>
-                                        <h2 className="mb-4 text-left text-3xl font-black text-slate-900 md:text-4xl">Campus Dispatch</h2>
-                                        <p className="text-left text-sm text-slate-500">
-                                            Hand-picked announcements and service notices from our postal studio.
-                                        </p>
+
+                                <div className="relative mb-12 text-center">
+                                    <div className="mb-4 inline-flex -rotate-2 transform items-center gap-2 rounded-2xl bg-[#ffecb3] px-6 py-3 shadow-sm transition-transform hover:rotate-0">
+                                        <Sparkles className="h-5 w-5 text-orange-400" />
+                                        <span className="font-black tracking-wide text-orange-900">Beaver's News!</span>
                                     </div>
+
+                                    <h2 className="relative z-10 font-black text-[#2c3e50] md:text-5xl">
+                                        Campus <span className="relative inline-block text-[#ff8e8e]">Dispatch
+                                            <svg className="absolute -bottom-2 -left-2 -z-10 h-4 w-full text-[#ffeb3b]" viewBox="0 0 100 10" preserveAspectRatio="none">
+                                                <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
+                                            </svg>
+                                        </span>
+                                    </h2>
+                                    <p className="mt-4 font-bold text-[#95a5a6]">
+                                        | Daily News | Cultural Express | Otter Knowledge |
+                                    </p>
+
                                     {announcementsSorted.length > displayedAnnouncements.length && (
-                                        <button
-                                            onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
-                                            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
-                                        >
-                                            View more <ArrowUpRight className="h-4 w-4" />
-                                        </button>
+                                        <div className="mt-6 flex justify-center">
+                                            <button
+                                                onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
+                                                className="group inline-flex items-center gap-2 rounded-full bg-[#81ecec] px-8 py-3 font-black text-[#00cec9] transition-all hover:-translate-y-1 hover:bg-[#4dd0e1] hover:text-white"
+                                            >
+                                                View More <ArrowUpRight className="h-5 w-5 transition-transform group-hover:rotate-45" />
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
 
@@ -812,91 +823,81 @@ export default function Welcome() {
                                         <p className="text-lg font-semibold text-gray-500">No announcements yet.</p>
                                     </div>
                                 ) : (
-                                    <div className="grid gap-8 lg:grid-cols-[1.05fr,0.95fr]">
+                                    <div className="grid gap-12 lg:grid-cols-2">
                                         {featuredAnnouncement && (
                                             <div
-                                                className="group relative overflow-hidden rounded-[34px] border border-white/70 bg-gradient-to-br from-[#ffe4f1] via-white to-[#e4fbff] p-1 shadow-[0_25px_90px_rgba(236,72,153,0.25)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_30px_110px_rgba(236,72,153,0.4)]"
+                                                className="group relative rotate-1 transform overflow-hidden rounded-[30px] border-[6px] border-[#fff] bg-[#fdf2f8] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] transition-transform duration-300 hover:rotate-0 hover:scale-[1.02]"
                                                 onClick={() => setSelectedAnnouncement(featuredAnnouncement)}
                                             >
-                                                <div className="rounded-[30px] bg-white/80 p-8 backdrop-blur">
+                                                {/* Decorative Tape */}
+                                                <div className="absolute top-2 left-1/2 h-8 w-24 -translate-x-1/2 -rotate-2 bg-[#ffeaa7]/50 shadow-sm backdrop-blur-sm"></div>
+
+                                                <div className="h-full rounded-[20px] bg-white p-6">
                                                     {featuredAnnouncement.announcement_image && (
-                                                        <div className="relative mb-6 h-64 overflow-hidden rounded-[24px]">
+                                                        <div className="relative mb-6 aspect-[4/3] overflow-hidden rounded-[16px] border-4 border-[#fff0f6]">
                                                             <img
                                                                 src={`/storage/${featuredAnnouncement.announcement_image}`}
                                                                 alt="announcement"
-                                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                                             />
-                                                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60"></div>
-
                                                         </div>
                                                     )}
-                                                    <div className="flex items-center gap-3 text-xs tracking-[0.2em] text-slate-400 uppercase">
-                                                        <span className="inline-flex items-center gap-2 rounded-2xl bg-rose-100 px-3 py-1 font-semibold text-rose-500 shadow-inner">
-                                                            {' '}
-                                                            <img
-                                                                src="/images/parcel-logo.png"
-                                                                alt="InstaStation"
-                                                                className="relative z-10 mx-auto w-10"
-                                                            />
+                                                    <div className="flex items-center gap-3 text-xs font-bold tracking-widest text-slate-400 uppercase">
+                                                        <span className="inline-flex items-center gap-2 rounded-full bg-[#fae3d9] px-3 py-1 text-[#e17055]">
+                                                            <Package className="h-3 w-3" /> FEATURED
                                                         </span>
-                                                        <span className="h-px w-6 bg-rose-200"></span>
+                                                        <span className="h-1.5 w-1.5 rounded-full bg-slate-300"></span>
                                                         <span>
                                                             {formatDate(featuredAnnouncement.publish_date || featuredAnnouncement.created_at)}
                                                         </span>
                                                     </div>
-                                                    <h3 className="mt- text-xl font-black text-slate-900">
+                                                    <h3 className="mt-4 text-2xl font-black text-[#2d3436]">
                                                         {featuredAnnouncement.announcement_title}
                                                     </h3>
-                                                    {/* <p className="mt-3 text-base text-slate-600 line-clamp-3">{featuredAnnouncement.announcement_content}</p> */}
-                                                    <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-rose-500">
-                                                        Dive deeper <ArrowUpRight className="h-4 w-4" />
+                                                    <div className="mt-4 flex items-center justify-between">
+                                                        <span className="text-sm font-bold text-[#b2bec3]">Tap to read more...</span>
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fab1a0] text-white transition-colors group-hover:bg-[#e17055]">
+                                                            <ArrowUpRight className="h-5 w-5" />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
 
-                                        <div className="relative grid gap-6">
-                                            <div className="absolute top-0 left-5 h-full w-px bg-gradient-to-b from-rose-200 via-purple-100 to-transparent md:left-6"></div>
-                                            {/* {secondaryAnnouncements.length === 0 && featuredAnnouncement && (
-                                                <div
-                                                    className="group relative cursor-pointer overflow-hidden rounded-[28px] border border-white/70 bg-white/80 p-6 shadow-md backdrop-blur"
-                                                    onClick={() => setSelectedAnnouncement(featuredAnnouncement)}
-                                                >
-                                                    <p className="text-sm text-gray-500">All caught up! Tap the featured story to read more.</p>
-                                                </div>
-                                            )} */}
+                                        <div className="relative grid content-start gap-4">
+                                            {/* Removed timeline line for cleaner blocky look */}
 
                                             {secondaryAnnouncements.map((a: AnnouncementCard, index: number) => (
                                                 <div
                                                     key={a.announcement_id}
-                                                    className="group relative flex cursor-pointer gap-5 rounded-[26px] border border-white/70 bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur transition hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(15,23,42,0.12)]"
+                                                    className="group relative flex cursor-pointer gap-5 rounded-[24px] border-2 border-[#eeebe6] bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ffeaa7] hover:shadow-[4px_4px_0px_#ffeaa7]"
                                                     style={{ animationDelay: `${(index + 2) * 100}ms` }}
                                                     onClick={() => setSelectedAnnouncement(a)}
                                                 >
-                                                    <span className="absolute top-8 left-4 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow ring-2 ring-rose-100 md:left-5">
-                                                        <span className="h-2 w-2 rounded-full bg-rose-400"></span>
-                                                    </span>
                                                     {a.announcement_image && (
-                                                        <div className="relative h-28 w-28 overflow-hidden rounded-2xl">
+                                                        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[18px] border-2 border-[#f0f0f0]">
                                                             <img
                                                                 src={`/storage/${a.announcement_image}`}
                                                                 alt="announcement"
-                                                                className="h-full w-full object-cover"
+                                                                className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
                                                             />
-                                                            <div className="absolute inset-0 border border-white/40"></div>
                                                         </div>
                                                     )}
-                                                    <div className="flex flex-1 flex-col">
-                                                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-[0.15em] text-slate-400 uppercase">
-                                                            <span className="text-rose-500">Postal Hub</span>
-                                                            <span className="h-0.5 w-4 bg-slate-200"></span>
-                                                            <span>{formatDate(a.publish_date || a.created_at)}</span>
+                                                    <div className="flex flex-1 flex-col justify-center">
+                                                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold tracking-wider text-[#b2bec3] uppercase">
+                                                            <span className="flex items-center gap-1 rounded-md bg-[#f1f2f6] px-2 py-0.5 text-[#a4b0be]">
+                                                                <Calendar className="h-3 w-3" /> {formatDate(a.publish_date || a.created_at)}
+                                                            </span>
                                                         </div>
-                                                        <h4 className="mt-2 text-xl font-bold text-slate-900">{a.announcement_title}</h4>
-                                                        <p className="mt-1 line-clamp-2 text-sm text-slate-500">{a.announcement_content}</p>
-                                                        <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-600">
-                                                            Read update <ArrowUpRight className="h-4 w-4" />
-                                                        </div>
+                                                        <h4 className="mt-1 line-clamp-1 text-lg font-black text-[#2d3436] group-hover:text-[#e17055]">
+                                                            {a.announcement_title}
+                                                        </h4>
+                                                        <p className="mt-1 line-clamp-2 text-xs font-medium text-[#636e72]">
+                                                            {a.announcement_content}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center justify-center self-center rounded-full bg-[#f1f2f6] p-2 text-[#b2bec3] transition-colors group-hover:bg-[#ffeaa7] group-hover:text-[#d35400]">
+                                                        <ArrowUpRight className="h-4 w-4" />
                                                     </div>
                                                 </div>
                                             ))}

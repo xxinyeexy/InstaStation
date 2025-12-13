@@ -62,56 +62,61 @@ class AnnouncementController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:200',
-            'content' => 'required|string',
-            'type' => 'nullable|string|max:50',
-            'status' => 'required|string|max:50',
-            'publish_date' => 'nullable|date',
-            'expiry_date' => 'nullable|date|after_or_equal:publish_date',
-            'image' => 'nullable|image|max:2048',
-        ]);
+        try {
+            $data = $request->validate([
+                'title' => 'required|string|max:200',
+                'content' => 'required|string',
+                'type' => 'nullable|string|max:50',
+                'status' => 'required|string|max:50',
+                'publish_date' => 'nullable|date',
+                'expiry_date' => 'nullable|date|after_or_equal:publish_date',
+                'image' => 'nullable|image|max:2048',
+            ]);
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('announcements', 'public');
-            $data['image_path'] = $path;
-        }
-
-        $incomingType = $data['type'] ?? 'General';
-        $data['created_by'] = optional($request->user())->id;
-        // Map status (UI uses Draft/Published or Active/Inactive) to DB
-        $status = $data['status'];
-        if (in_array($status, ['Active', 'Inactive'])) {
-            $status = $status === 'Active' ? 'Published' : 'Draft';
-        }
-
-        // Auto-set status to Published if publish_date is current timestamp or earlier
-        $publishDate = $data['publish_date'] ?? null;
-        $currentTime = now();
-
-        if ($publishDate && $status === 'Draft') {
-            $publishDateTime = \Carbon\Carbon::parse($publishDate);
-            if ($publishDateTime->lte($currentTime)) {
-                $status = 'Published';
+            if ($request->hasFile('image')) {
+                $path = $request->file('image')->store('announcements', 'public');
+                $data['image_path'] = $path;
             }
+
+            $incomingType = $data['type'] ?? 'General';
+            $data['created_by'] = optional($request->user())->id;
+            // Map status (UI uses Draft/Published or Active/Inactive) to DB
+            $status = $data['status'];
+            if (in_array($status, ['Active', 'Inactive'])) {
+                $status = $status === 'Active' ? 'Published' : 'Draft';
+            }
+
+            // Auto-set status to Published if publish_date is current timestamp or earlier
+            $publishDate = $data['publish_date'] ?? null;
+            $currentTime = now();
+
+            if ($publishDate && $status === 'Draft') {
+                $publishDateTime = \Carbon\Carbon::parse($publishDate);
+                if ($publishDateTime->lte($currentTime)) {
+                    $status = 'Published';
+                }
+            }
+
+            // Build payload matching existing columns (announcement_*)
+            $payload = [
+                'announcement_title' => $data['title'],
+                'announcement_content' => $data['content'],
+                'announcement_type' => $incomingType,
+                'announcement_status' => $status,
+                'publish_date' => $publishDate,
+                'expiry_date' => $data['expiry_date'] ?? null,
+            ];
+            if (!empty($data['image_path'])) {
+                $payload['announcement_image'] = $data['image_path'];
+            }
+
+            $ann = Announcement::create($payload);
+
+            return response()->json(['success' => true, 'announcement' => $ann]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Announcement store error: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return response()->json(['success' => false, 'message' => 'Server Error: ' . $e->getMessage()], 500);
         }
-
-        // Build payload matching existing columns (announcement_*)
-        $payload = [
-            'announcement_title' => $data['title'],
-            'announcement_content' => $data['content'],
-            'announcement_type' => $incomingType,
-            'announcement_status' => $status,
-            'publish_date' => $publishDate,
-            'expiry_date' => $data['expiry_date'] ?? null,
-        ];
-        if (!empty($data['image_path'])) {
-            $payload['announcement_image'] = $data['image_path'];
-        }
-
-        $ann = Announcement::create($payload);
-
-        return response()->json(['success' => true, 'announcement' => $ann]);
     }
 
     public function update(Request $request, Announcement $announcement)
