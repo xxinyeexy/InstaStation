@@ -22,6 +22,20 @@ export default function Welcome() {
 
     // Timeline State
     const [activeTimelineStep, setActiveTimelineStep] = useState(0);
+    const [isSpotlightVisible, setIsSpotlightVisible] = useState(false);
+
+    // Spotlight Observer
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsSpotlightVisible(entry.isIntersecting);
+            },
+            { threshold: 0.2 } // Trigger when 20% visible
+        );
+        const section = document.getElementById('spotlight-section');
+        if (section) observer.observe(section);
+        return () => observer.disconnect();
+    }, []);
 
     // Timeline Observer
     useEffect(() => {
@@ -395,179 +409,98 @@ export default function Welcome() {
                             </div>
                         </section>
 
-                        {/* Interactive Demo Section */}
-                        <div className="relative">
-                            <span id="how-it-works" className="absolute -top-20 left-0 h-px w-px opacity-0"></span>
+                        {/* Spotlight Section - Interactive Lamp Design */}
+                        <div className="relative z-20">
+                            <span id="how-it-works" className="absolute -top-32 left-0 h-px w-px opacity-0"></span>
+
                             <section
-                                className="my-20 duration-1000 animate-in fade-in slide-in-from-left-8"
-                                style={{ animationDelay: '800ms' }}
+                                id="spotlight-section"
+                                className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[#2c2c2c] py-32 min-h-[1200px] flex flex-col items-center mt-20 mb-32"
                             >
-                                <div className="border-gradient-to-br relative overflow-hidden rounded-3xl border-2 bg-white from-pink-200 to-purple-200 p-12 shadow-2xl">
-                                    {/* Animated background elements */}
-                                    <div
-                                        className="absolute -top-20 -left-20 h-40 w-40 animate-spin rounded-full bg-gradient-to-r from-pink-200 to-purple-200 opacity-30 blur-3xl"
-                                        style={{ animationDuration: '20s' }}
-                                    ></div>
-                                    <div
-                                        className="absolute -right-20 -bottom-20 h-40 w-40 animate-spin rounded-full bg-gradient-to-r from-blue-200 to-cyan-200 opacity-30 blur-3xl"
-                                        style={{ animationDuration: '15s', animationDirection: 'reverse' }}
-                                    ></div>
+                                {/* The Lamp - Swings in */}
+                                <div className={`absolute left-1/2 top-0 z-30 flex -translate-x-1/2 flex-col items-center transition-transform duration-[1500ms] ease-out ${isSpotlightVisible ? 'translate-y-0' : '-translate-y-40'}`}>
+                                    {/* Cord */}
+                                    <div className="h-40 w-1.5 bg-[#4a3b32]"></div>
+                                    {/* Shade */}
+                                    <div className="relative h-28 w-64">
+                                        {/* Shade Body */}
+                                        <div className="absolute inset-x-0 bottom-0 top-0 rounded-t-[4rem] rounded-b-xl bg-[#fbbf24] shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-20 overflow-hidden">
+                                            {/* Inner texture/shading */}
+                                            <div className="absolute inset-0 bg-gradient-to-r from-orange-400/30 to-yellow-300/30"></div>
+                                        </div>
+                                        {/* Bulb Glow Effect underneath */}
+                                        <div className={`absolute -bottom-12 left-1/2 h-32 w-48 -translate-x-1/2 rounded-full bg-yellow-200 blur-2xl transition-opacity duration-1000 ${isSpotlightVisible ? 'opacity-80' : 'opacity-0'}`}></div>
+                                    </div>
+                                </div>
 
-                                    <div className="relative grid gap-8 lg:grid-cols-2 ">
-                                        <div className="space-y-6">
-                                            <div className="inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-pink-50 px-4 py-2">
-                                                <Zap className="h-4 w-4 text-pink-600" />
-                                                <span className="text-sm font-bold text-pink-700">How It Works</span>
+                                {/* The Light Beam & Content Container */}
+                                <div
+                                    className="relative z-10 w-full max-w-6xl flex-1 bg-[#fffbf0] shadow-2xl transition-[clip-path] duration-[2500ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                    style={{
+                                        marginTop: '150px', // Start below the lamp
+                                        clipPath: isSpotlightVisible
+                                            ? 'polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)' // Wide beam
+                                            : 'polygon(48% 0%, 52% 0%, 55% 100%, 45% 100%)', // Closed/Narrow beam
+                                        paddingTop: '120px',
+                                        paddingBottom: '100px'
+                                    }}
+                                >
+                                    {/* Texture Overlay */}
+                                    <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }}></div>
+
+                                    {/* Helper to hide content when beam is closed */}
+                                    <div className={`transition-opacity duration-1000 delay-500 ${isSpotlightVisible ? 'opacity-100' : 'opacity-0'}`}>
+
+                                        {/* Title Area */}
+                                        <div className="text-center mb-16 px-6">
+                                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 animate-bounce">
+                                                <Zap className="h-8 w-8" />
                                             </div>
-                                            <h2 className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-3xl font-black text-transparent md:text-5xl">
-                                                Seamless Parcel Management
+                                            <h2 className="font-black text-[#4a3b32] text-5xl md:text-7xl mb-6 tracking-tight">
+                                                Seamless <br /> Management
                                             </h2>
-                                            <p className="text-lg leading-relaxed text-gray-600">
-                                                Our intelligent system automates every step of the parcel handling process, from arrival notification to
-                                                secure collection.
+                                            <p className="mx-auto max-w-2xl text-xl font-bold text-[#8d7f6d]">
+                                                We shine a light on where your package is. <br />
+                                                From arrival to collection, it's always visible.
                                             </p>
+                                        </div>
 
-                                            {/* Feature list with icons */}
-                                            <div className="space-y-4">
-                                                <div className="flex items-start gap-4 rounded-2xl border-2 border-orange-200 bg-orange-200 p-4 transition-all hover:scale-105">
-                                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-orange-600 shadow-lg">
-                                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M13 10V3L4 14h7v7l9-11h-7z"
-                                                            />
-                                                        </svg>
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-gray-900">Instant Notifications</h4>
-                                                        <p className="text-sm text-gray-600">Get real-time alerts when your parcel arrives</p>
-                                                    </div>
+                                        {/* Cute Feature Cards */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-8 md:px-16">
+                                            {/* Card 1 */}
+                                            <div className="group relative bg-white border-[3px] border-[#e6dcc6] rounded-[2rem] p-8 text-center transition-transform duration-300 hover:scale-105 hover:border-yellow-400 hover:shadow-xl hover:-rotate-1">
+                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm group-hover:bg-pink-200">
+                                                    <Bell className="h-6 w-6 text-pink-600" />
                                                 </div>
+                                                <h3 className="mt-4 font-black text-2xl text-[#594a3a]">Instant<br />Alerts</h3>
+                                                <p className="mt-2 text-sm font-bold text-[#9ca3af]">Ping! Updates sent straight to your phone.</p>
+                                            </div>
 
-                                                <div className="flex items-start gap-4 rounded-2xl border-2 border-blue-200 bg-blue-200 p-4 transition-all hover:scale-105">
-                                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-600 shadow-lg">
-                                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                                            />
-                                                        </svg>
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-gray-900">Secure Storage</h4>
-                                                        <p className="text-sm text-gray-600">Your parcels are safely stored until collection</p>
-                                                    </div>
+                                            {/* Card 2 */}
+                                            <div className="group relative bg-white border-[3px] border-[#e6dcc6] rounded-[2rem] p-8 text-center transition-transform duration-300 hover:scale-105 hover:border-blue-400 hover:shadow-xl hover:rotate-1">
+                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm group-hover:bg-blue-200">
+                                                    <Package className="h-6 w-6 text-blue-600" />
                                                 </div>
+                                                <h3 className="mt-4 font-black text-2xl text-[#594a3a]">Safe<br />Storage</h3>
+                                                <p className="mt-2 text-sm font-bold text-[#9ca3af]">Your parcels nap safely until you arrive.</p>
+                                            </div>
 
-                                                <div className="flex items-start gap-4 rounded-2xl border-2 border-green-200 bg-green-200 p-4 transition-all hover:scale-105">
-                                                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg">
-                                                        <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                            />
-                                                        </svg>
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="font-bold text-gray-900">Easy Payment</h4>
-                                                        <p className="text-sm text-gray-600">Quick and secure payment processing</p>
-                                                    </div>
+                                            {/* Card 3 */}
+                                            <div className="group relative bg-white border-[3px] border-[#e6dcc6] rounded-[2rem] p-8 text-center transition-transform duration-300 hover:scale-105 hover:border-green-400 hover:shadow-xl hover:-rotate-1">
+                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm group-hover:bg-green-200">
+                                                    <CreditCard className="h-6 w-6 text-green-600" />
                                                 </div>
+                                                <h3 className="mt-4 font-black text-2xl text-[#594a3a]">Easy<br />Payment</h3>
+                                                <p className="mt-2 text-sm font-bold text-[#9ca3af]">Pay fees in a snap with proof upload.</p>
                                             </div>
                                         </div>
 
-                                        {/* Animated Phone Mockup */}
-                                        <div className="relative flex items-center justify-center">
-                                            <div className="relative">
-                                                {/* Glowing ring animation */}
-                                                <div
-                                                    className="absolute inset-0 animate-ping rounded-3xl bg-gradient-to-r from-pink-400 to-purple-400 opacity-20"
-                                                    style={{ animationDuration: '3s' }}
-                                                ></div>
-
-                                                {/* Phone mockup */}
-                                                <div className="relative rounded-3xl border-8 border-gray-900 bg-white p-4 shadow-2xl">
-                                                    <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100">
-                                                        <div className="space-y-3 p-6">
-                                                            {/* Notification cards */}
-                                                            <div
-                                                                className="animate-slide-down rounded-2xl border-2 border-pink-200 bg-white p-4 shadow-lg"
-                                                                style={{ animationDelay: '0s' }}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-pink-700">
-                                                                        <Package className="h-6 w-6 text-white" />
-                                                                    </div>
-                                                                    <div className="flex-1">
-                                                                        <p className="text-sm font-bold text-gray-900">Parcel Arrived!</p>
-                                                                        <p className="text-xs text-gray-600">PCL2025110001</p>
-                                                                    </div>
-                                                                    <div className="h-2 w-2 animate-pulse rounded-full bg-pink-500"></div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div
-                                                                className="animate-slide-down rounded-2xl border-2 border-green-200 bg-white p-4 shadow-lg"
-                                                                style={{ animationDelay: '0.3s' }}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-600">
-                                                                        <CreditCard className="h-6 w-6 text-white" />
-                                                                    </div>
-                                                                    <div className="flex-1">
-                                                                        <p className="text-sm font-bold text-gray-900">Payment Verified</p>
-                                                                        <p className="text-xs text-gray-600">Schedule pickup time slot</p>
-                                                                    </div>
-                                                                    <svg
-                                                                        className="h-5 w-5 text-green-500"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        viewBox="0 0 24 24"
-                                                                    >
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M5 13l4 4L19 7"
-                                                                        />
-                                                                    </svg>
-                                                                </div>
-                                                            </div>
-
-                                                            <div
-                                                                className="animate-slide-down rounded-2xl border-2 border-purple-200 bg-white p-4 shadow-lg"
-                                                                style={{ animationDelay: '0.6s' }}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-700">
-                                                                        <svg
-                                                                            className="h-6 w-6 text-white"
-                                                                            fill="none"
-                                                                            stroke="currentColor"
-                                                                            viewBox="0 0 24 24"
-                                                                        >
-                                                                            <path
-                                                                                strokeLinecap="round"
-                                                                                strokeLinejoin="round"
-                                                                                strokeWidth={2}
-                                                                                d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                                                                            />
-                                                                        </svg>
-                                                                    </div>
-                                                                    <div className="flex-1">
-                                                                        <p className="text-sm font-bold text-gray-900">QR Code Ready</p>
-                                                                        <p className="text-xs text-gray-600">Scan to collect</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                        {/* Bottom Action */}
+                                        <div className="mt-16 text-center">
+                                            <div className="inline-block relative">
+                                                <div className="absolute inset-0 bg-yellow-200 rounded-full blur-xl opacity-50 animate-pulse"></div>
+                                                <div className="relative bg-white border-2 border-[#e6dcc6] px-6 py-2 rounded-full text-sm font-bold text-[#8d7f6d] shadow-sm">
+                                                    Currently automating 100% of campus workflow
                                                 </div>
                                             </div>
                                         </div>
@@ -654,7 +587,7 @@ export default function Welcome() {
                             <span id="process-timeline" className="absolute -top-20 left-0 h-px w-px opacity-0"></span>
                         </div>
 
-                        <section className="relative py-32">
+                        <section className="relative pt-32 pb-0">
                             {/* Cute Pattern Background */}
                             <div className="absolute inset-0 opacity-10" style={{
                                 backgroundImage: 'radial-gradient(#dccfb6 2px, transparent 2px)',
@@ -743,7 +676,7 @@ export default function Welcome() {
                                             {/* Connecting Line */}
                                             <div className="absolute left-8 lg:left-[-40px] top-0 bottom-0 w-1 bg-gradient-to-b from-pink-200 via-purple-200 to-green-200 hidden lg:block rounded-full"></div>
 
-                                            <div className="space-y-[30vh] md:space-y-[40vh] pb-[80vh] pt-[5vh]">
+                                            <div className="space-y-[30vh] md:space-y-[40vh] pb-0 pt-[5vh]">
                                                 {/* Step 1 */}
                                                 <div className={`timeline-step relative transition-all duration-700 ${activeTimelineStep === 0 ? 'opacity-100 scale-100' : 'opacity-40 scale-95 blur-[1px]'}`} data-step="0">
                                                     <div className="flex gap-6 md:gap-8">
@@ -835,7 +768,7 @@ export default function Welcome() {
                             <span id="newsletter" className="absolute -top-20 left-0 h-px w-px opacity-0"></span>
                         </div>
                         <div
-                            className="relative mt-20 duration-700 animate-in fade-in slide-in-from-left-8"
+                            className="relative mt-24 duration-700 animate-in fade-in slide-in-from-left-8"
                             style={{ animationDelay: '100ms' }}
                         >
                             <div className="relative overflow-hidden rounded-[40px] border-[8px] border-[#f2e8da] bg-[#fffbf0] p-10 shadow-[0_30px_60px_rgba(200,180,160,0.2)]">
@@ -965,20 +898,20 @@ export default function Welcome() {
                                 )}
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </div >
+                </div >
+            </div >
             {/* Footer - Premium Professional Design */}
-            <footer className="relative overflow-hidden bg-gradient-to-r from-[#f7d8ff] via-[#fee5d3] to-[#d3e7ff] duration-1000 animate-in fade-in slide-in-from-bottom-8">
+            < footer className="relative overflow-hidden bg-gradient-to-r from-[#f7d8ff] via-[#fee5d3] to-[#d3e7ff] duration-1000 animate-in fade-in slide-in-from-bottom-8" >
                 {/* Animated background decorations */}
-                <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                < div className="pointer-events-none absolute inset-0 overflow-hidden" >
                     <div className="absolute -top-40 -right-40 h-[600px] w-[600px] animate-pulse rounded-full bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-blue-500/10 blur-3xl"></div>
                     <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] animate-pulse rounded-full bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-teal-500/10 blur-3xl delay-1000"></div>
                     <div className="absolute top-1/2 left-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-lime-500/10 blur-3xl delay-500"></div>
-                </div>
+                </div >
 
                 {/* Grid pattern overlay */}
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+                < div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem]" ></div >
 
                 <div className="relative z-10 mx-auto max-w-7xl px-6 py-20">
                     {/* Main Footer Content */}
