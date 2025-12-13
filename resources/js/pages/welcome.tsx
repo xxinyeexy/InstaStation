@@ -626,7 +626,7 @@ export default function Welcome() {
                             className="relative mt-32 overflow-hidden rounded-3xl border-2 border-pink-200 bg-gradient-to-br from-white via-pink-50/30 to-purple-50/30 p-12 shadow-2xl duration-1000 animate-in fade-in zoom-in-95"
                             style={{ animationDelay: '100ms' }}
                         >
-                           
+
                             <div className="relative">
                                 <div
                                     className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4"
@@ -784,13 +784,13 @@ export default function Welcome() {
                                     <div className="absolute top-[-40px] -right-16 h-64 w-64 rounded-full bg-gradient-to-br from-pink-200/40 via-purple-200/30 to-blue-200/40 blur-[120px]"></div>
                                     <div className="absolute bottom-[-50px] -left-12 h-56 w-56 rounded-full bg-gradient-to-br from-emerald-200/40 via-cyan-200/30 to-pink-200/40 blur-[110px]"></div>
                                 </div>
-                                <div className="relative mb-10 flex flex-wrap items-center justify-between gap-4">
+                                <div className="relative mb-10 flex flex-wrap justify-between">
                                     <div>
-                                        <p className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-rose-50 px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4">
+                                        <p className="mb-6 ml-10 inline-flex gap-2 rounded-full border-2 border-pink-300 bg-rose-50 px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4">
                                             <Sparkles className="h-3.5 w-3.5 text-rose-500" /> Curated
                                         </p>
-                                        <h2 className="mb-4 mx-auto text-3xl font-black text-slate-900 md:text-4xl">Campus Dispatch</h2>
-                                        <p className="text-sm text-slate-500">
+                                        <h2 className="mb-4 text-left text-3xl font-black text-slate-900 md:text-4xl">Campus Dispatch</h2>
+                                        <p className="text-left text-sm text-slate-500">
                                             Hand-picked announcements and service notices from our postal studio.
                                         </p>
                                     </div>
@@ -827,9 +827,7 @@ export default function Welcome() {
                                                                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                             />
                                                             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60"></div>
-                                                            <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-1.5 text-xs font-semibold text-rose-500 shadow">
-                                                                <Package className="h-3.5 w-3.5" /> Featured Memo
-                                                            </div>
+
                                                         </div>
                                                     )}
                                                     <div className="flex items-center gap-3 text-xs tracking-[0.2em] text-slate-400 uppercase">
@@ -1080,7 +1078,7 @@ export default function Welcome() {
                                     </div>
                                 </div>
 
-                         
+
                             </div>
 
                             {/* Legal Section */}
@@ -1126,7 +1124,7 @@ export default function Welcome() {
                             <p className="text-sm text-gray-700">Universiti Malaysia Pahang Al-Sultan Abdullah</p>
                         </div>
 
-                       
+
                     </div>
                 </div>
             </footer >
