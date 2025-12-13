@@ -296,7 +296,7 @@ export default function Welcome() {
                         {/* Check for Unclaimed Parcels Button - Scale in */}
                         <div className="mb-16 duration-700 animate-in fade-in zoom-in-95" style={{ animationDelay: '600ms' }}>
                             <div className="relative mx-auto mb-8 w-70">
-                                <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-r from-pink-400 to-purple-400 opacity-20 blur-2xl"></div>
+                                <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-r from-pink-400 to-pink-500 opacity-20 blur-2xl"></div>
                                 <img src="/images/logo.png" alt="InstaStation" className="relative z-10 mx-auto w-70" />
                             </div>
                             <Link
@@ -382,7 +382,7 @@ export default function Welcome() {
                                         style={{ animationDuration: '15s', animationDirection: 'reverse' }}
                                     ></div>
 
-                                    <div className="relative grid gap-8 lg:grid-cols-2">
+                                    <div className="relative grid gap-8 lg:grid-cols-2 ">
                                         <div className="space-y-6">
                                             <div className="inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-pink-50 px-4 py-2">
                                                 <Zap className="h-4 w-4 text-pink-600" />
@@ -789,7 +789,7 @@ export default function Welcome() {
                                         <p className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-rose-50 px-6 py-2 text-sm font-bold text-pink-700 shadow-lg duration-700 animate-in fade-in slide-in-from-top-4">
                                             <Sparkles className="h-3.5 w-3.5 text-rose-500" /> Curated
                                         </p>
-                                        <h2 className="mt-4 text-3xl font-black text-slate-900 md:text-4xl">Campus Dispatch</h2>
+                                        <h2 className="mb-4 mx-auto text-3xl font-black text-slate-900 md:text-4xl">Campus Dispatch</h2>
                                         <p className="text-sm text-slate-500">
                                             Hand-picked announcements and service notices from our postal studio.
                                         </p>
