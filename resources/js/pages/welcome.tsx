@@ -411,58 +411,48 @@ export default function Welcome() {
 
                             <section
                                 id="spotlight-section"
-                                className="relative left-1/2 mt-20 mb-32 flex min-h-[1400px] w-screen -translate-x-1/2 flex-col items-center overflow-hidden bg-[#2c2c2c] py-32"
+                                className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[#2c2c2c] py-32 min-h-[1200px] flex flex-col items-center mt-20 mb-32"
                             >
                                 {/* The Lamp - Swings in */}
-                                <div
-                                    className={`absolute left-1/2 top-0 z-30 flex -translate-x-1/2 flex-col items-center transition-transform duration-[1500ms] ease-out ${isSpotlightVisible ? 'translate-y-0' : '-translate-y-40'}`}
-                                >
+                                <div className={`absolute left-1/2 top-0 z-30 flex -translate-x-1/2 flex-col items-center transition-transform duration-[1500ms] ease-out ${isSpotlightVisible ? 'translate-y-0' : '-translate-y-40'}`}>
                                     {/* Cord */}
                                     <div className="h-40 w-1.5 bg-[#4a3b32]"></div>
                                     {/* Shade */}
                                     <div className="relative h-28 w-64">
                                         {/* Shade Body */}
-                                        <div className="z-20 absolute inset-x-0 bottom-0 top-0 overflow-hidden rounded-t-[4rem] rounded-b-xl bg-[#fbbf24] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
+                                        <div className="absolute inset-x-0 bottom-0 top-0 rounded-t-[4rem] rounded-b-xl bg-[#fbbf24] shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-20 overflow-hidden">
                                             {/* Inner texture/shading */}
                                             <div className="absolute inset-0 bg-gradient-to-r from-orange-400/30 to-yellow-300/30"></div>
                                         </div>
                                         {/* Bulb Glow Effect underneath */}
-                                        <div
-                                            className={`absolute -bottom-12 left-1/2 h-32 w-48 -translate-x-1/2 rounded-full bg-yellow-200 blur-2xl transition-opacity duration-1000 ${isSpotlightVisible ? 'opacity-80' : 'opacity-0'}`}
-                                        ></div>
+                                        <div className={`absolute -bottom-12 left-1/2 h-32 w-48 -translate-x-1/2 rounded-full bg-yellow-200 blur-2xl transition-opacity duration-1000 ${isSpotlightVisible ? 'opacity-80' : 'opacity-0'}`}></div>
                                     </div>
                                 </div>
 
-                                {/* The Light Beam Container */}
+                                {/* The Light Beam & Content Container */}
                                 <div
-                                    className="relative z-10 flex w-full flex-1 flex-col items-center bg-[#fffbf0] shadow-2xl transition-[clip-path] duration-[2500ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                    className="relative z-10 w-full max-w-6xl flex-1 bg-[#fffbf0] shadow-2xl transition-[clip-path] duration-[2500ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
                                     style={{
                                         marginTop: '150px', // Start below the lamp
                                         clipPath: isSpotlightVisible
-                                            ? 'polygon(50% 0%, 150% 100%, -50% 100%)' // Very Wide Triangle (extends beyond screen edges for full floor coverage)
-                                            : 'polygon(50% 0%, 50% 0%, 50% 100%, 50% 100%)', // Closed point
-                                        paddingTop: '180px',
-                                        paddingBottom: '100px',
+                                            ? 'polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)' // Wide beam
+                                            : 'polygon(48% 0%, 52% 0%, 55% 100%, 45% 100%)', // Closed/Narrow beam
+                                        paddingTop: '120px',
+                                        paddingBottom: '100px'
                                     }}
                                 >
                                     {/* Texture Overlay */}
-                                    <div
-                                        className="pointer-events-none absolute inset-0 opacity-10"
-                                        style={{
-                                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")`,
-                                        }}
-                                    ></div>
+                                    <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }}></div>
 
-                                    {/* Content Container - Constrained Width */}
-                                    <div
-                                        className={`w-full max-w-5xl px-6 transition-opacity delay-500 duration-1000 ${isSpotlightVisible ? 'opacity-100' : 'opacity-0'}`}
-                                    >
+                                    {/* Helper to hide content when beam is closed */}
+                                    <div className={`transition-opacity duration-1000 delay-500 ${isSpotlightVisible ? 'opacity-100' : 'opacity-0'}`}>
+
                                         {/* Title Area */}
-                                        <div className="mb-16 text-center">
-                                            <div className="mx-auto mb-6 flex h-16 w-16 animate-bounce items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
+                                        <div className="text-center mb-16 px-6">
+                                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 animate-bounce">
                                                 <Zap className="h-8 w-8" />
                                             </div>
-                                            <h2 className="mb-6 text-5xl font-black tracking-tight text-[#4a3b32] md:text-7xl">
+                                            <h2 className="font-black text-[#4a3b32] text-5xl md:text-7xl mb-6 tracking-tight">
                                                 Seamless <br /> Management
                                             </h2>
                                             <p className="mx-auto max-w-2xl text-xl font-bold text-[#8d7f6d]">
@@ -471,51 +461,44 @@ export default function Welcome() {
                                             </p>
                                         </div>
 
-                                        {/* Visual Graphic Area (Mimicking the cute characters in reference) */}
-                                        <div className="relative mx-auto mb-16 max-w-3xl">
-                                            {/* Cute Feature Cards Row */}
-                                            <div className="grid grid-cols-1 justify-center gap-8 md:grid-cols-3">
-                                                {/* Card 1 - Left */}
-                                                <div className="group relativeRotate relative mt-12 rotate-[-5deg] rounded-[2rem] border-[3px] border-[#e6dcc6] bg-white p-6 text-center shadow-lg transition-transform hover:scale-105 hover:rotate-0 hover:border-pink-400">
-                                                    <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-pink-100 text-pink-600">
-                                                        <Bell className="h-8 w-8" />
-                                                    </div>
-                                                    <h3 className="text-xl font-black text-[#594a3a]">Instant<br />Alerts</h3>
+                                        {/* Cute Feature Cards */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-8 md:px-16">
+                                            {/* Card 1 */}
+                                            <div className="group relative bg-white border-[3px] border-[#e6dcc6] rounded-[2rem] p-8 text-center transition-transform duration-300 hover:scale-105 hover:border-yellow-400 hover:shadow-xl hover:-rotate-1">
+                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm group-hover:bg-pink-200">
+                                                    <Bell className="h-6 w-6 text-pink-600" />
                                                 </div>
+                                                <h3 className="mt-4 font-black text-2xl text-[#594a3a]">Instant<br />Alerts</h3>
+                                                <p className="mt-2 text-sm font-bold text-[#9ca3af]">Ping! Updates sent straight to your phone.</p>
+                                            </div>
 
-                                                {/* Card 2 - Center (Prominent) */}
-                                                <div className="group relative z-10 scale-110 rounded-[2.5rem] border-[3px] border-[#e6dcc6] bg-white p-8 text-center shadow-xl transition-transform hover:scale-125 hover:border-blue-400">
-                                                    <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                                                        <Package className="h-10 w-10" />
-                                                    </div>
-                                                    <h3 className="text-2xl font-black text-[#594a3a]">Safe<br />Storage</h3>
-                                                    <div className="mt-2 text-xs font-bold text-blue-500 bg-blue-50 py-1 px-3 rounded-full inline-block">Featured</div>
+                                            {/* Card 2 */}
+                                            <div className="group relative bg-white border-[3px] border-[#e6dcc6] rounded-[2rem] p-8 text-center transition-transform duration-300 hover:scale-105 hover:border-blue-400 hover:shadow-xl hover:rotate-1">
+                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm group-hover:bg-blue-200">
+                                                    <Package className="h-6 w-6 text-blue-600" />
                                                 </div>
+                                                <h3 className="mt-4 font-black text-2xl text-[#594a3a]">Safe<br />Storage</h3>
+                                                <p className="mt-2 text-sm font-bold text-[#9ca3af]">Your parcels nap safely until you arrive.</p>
+                                            </div>
 
-                                                {/* Card 3 - Right */}
-                                                <div className="group relative mt-12 rotate-[5deg] rounded-[2rem] border-[3px] border-[#e6dcc6] bg-white p-6 text-center shadow-lg transition-transform hover:scale-105 hover:rotate-0 hover:border-green-400">
-                                                    <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
-                                                        <CreditCard className="h-8 w-8" />
-                                                    </div>
-                                                    <h3 className="text-xl font-black text-[#594a3a]">Easy<br />Payment</h3>
+                                            {/* Card 3 */}
+                                            <div className="group relative bg-white border-[3px] border-[#e6dcc6] rounded-[2rem] p-8 text-center transition-transform duration-300 hover:scale-105 hover:border-green-400 hover:shadow-xl hover:-rotate-1">
+                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm group-hover:bg-green-200">
+                                                    <CreditCard className="h-6 w-6 text-green-600" />
                                                 </div>
+                                                <h3 className="mt-4 font-black text-2xl text-[#594a3a]">Easy<br />Payment</h3>
+                                                <p className="mt-2 text-sm font-bold text-[#9ca3af]">Pay fees in a snap with proof upload.</p>
                                             </div>
                                         </div>
 
-                                        {/* Bottom Action Button */}
-                                        <div className="text-center">
-                                            <Link
-                                                href={route('register')}
-                                                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[#fbbf24] px-10 py-4 text-xl font-black text-[#4a3b32] transition-transform hover:scale-110 hover:shadow-xl hover:ring-4 hover:ring-[#fcd34d]/50"
-                                            >
-                                                <span>Start Automating</span>
-                                                <ArrowUpRight className="h-6 w-6 transition-transform group-hover:rotate-45" />
-                                                <div className="absolute inset-0 bg-white/20 opacity-0 transition-opacity group-hover:opacity-100"></div>
-                                            </Link>
-
-                                            <p className="mt-6 text-sm font-bold tracking-widest text-[#8d7f6d] uppercase">
-                                                ★ Best Choice for Universities ★
-                                            </p>
+                                        {/* Bottom Action */}
+                                        <div className="mt-16 text-center">
+                                            <div className="inline-block relative">
+                                                <div className="absolute inset-0 bg-yellow-200 rounded-full blur-xl opacity-50 animate-pulse"></div>
+                                                <div className="relative bg-white border-2 border-[#e6dcc6] px-6 py-2 rounded-full text-sm font-bold text-[#8d7f6d] shadow-sm">
+                                                    Currently automating 100% of campus workflow
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -914,225 +897,125 @@ export default function Welcome() {
                     </div >
                 </div >
             </div >
-            {/* Footer - Premium Professional Design */}
-            < footer className="relative overflow-hidden bg-gradient-to-r from-[#f7d8ff] via-[#fee5d3] to-[#d3e7ff] duration-1000 animate-in fade-in slide-in-from-bottom-8" >
-                {/* Animated background decorations */}
-                < div className="pointer-events-none absolute inset-0 overflow-hidden" >
-                    <div className="absolute -top-40 -right-40 h-[600px] w-[600px] animate-pulse rounded-full bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-blue-500/10 blur-3xl"></div>
-                    <div className="absolute -bottom-40 -left-40 h-[500px] w-[500px] animate-pulse rounded-full bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-teal-500/10 blur-3xl delay-1000"></div>
-                    <div className="absolute top-1/2 left-1/2 h-[400px] w-[400px] -translate-x-1/2 -translate-y-1/2 animate-pulse rounded-full bg-gradient-to-br from-green-500/10 via-emerald-500/10 to-lime-500/10 blur-3xl delay-500"></div>
-                </div >
-
-                {/* Grid pattern overlay */}
-                < div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:4rem_4rem]" ></div >
-
-                <div className="relative z-10 mx-auto max-w-7xl px-6 py-20">
+            {/* Footer - Clean Modern Design */}
+            <footer className="relative overflow-hidden bg-gradient-to-br from-[#f5e6ff] via-[#ffe8f0] to-[#e6f3ff] py-16">
+                <div className="relative z-10 mx-auto max-w-7xl px-6">
                     {/* Main Footer Content */}
-                    <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
-                        {/* Brand Column - Enhanced */}
-                        <div className="lg:col-span-5">
-                            <div className="mb-8">
-                                {/* Logo with gradient */}
-                                <div className="mb-6 inline-flex items-center gap-3">
-                                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl">
+                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                        {/* Brand Column */}
+                        <div className="lg:col-span-1">
+                            <div className="mb-6 flex items-center gap-3">
+                                 <div className="flex h-20 w-20 items-center justify-center rounded-2xl">
                                         <img src="/images/parcel-logo.png" alt="InstaStation" className="relative z-10 mx-auto w-70" />
                                     </div>
-                                </div>
-                                <p className="max-w-md text-lg leading-relaxed text-gray-700">
+                            </div>
+                            <p className="max-w-md text-lg leading-relaxed text-gray-700">
                                     The smart way to track and manage campus deliveries. Get notified instantly when your parcels arrive and collect
                                     them hassle-free.
                                 </p>
-                            </div>
-
-                            {/* Feature Pills - Enhanced */}
-                            <div className="mb-8 flex flex-wrap gap-3">
-                                <div className="group relative overflow-hidden rounded-full border border-purple-300 bg-gradient-to-r from-purple-100 to-purple-200 px-5 py-2.5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-purple-400 hover:from-purple-200 hover:to-purple-300">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 to-purple-600/0 transition-all duration-300 group-hover:from-purple-500/10 group-hover:to-purple-600/10"></div>
-                                    <div className="relative flex items-center gap-2">
-                                        <Package className="h-4 w-4 text-purple-500" />
-                                        <span className="text-sm font-semibold">Smart Tracking</span>
-                                    </div>
+<br/>
+                            {/* Feature Pills */}
+                            <div className="flex flex-wrap gap-2">
+                                <div className="flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1.5 text-xs font-medium text-purple-700">
+                                    <Package className="h-3.5 w-3.5" />
+                                    Smart Tracking
                                 </div>
-                                <div className="group relative overflow-hidden rounded-full border border-pink-300 bg-gradient-to-r from-pink-100 to-pink-200 px-5 py-2.5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-pink-400 hover:from-pink-200 hover:to-pink-300">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 to-pink-600/0 transition-all duration-300 group-hover:from-pink-500/10 group-hover:to-pink-600/10"></div>
-                                    <div className="relative flex items-center gap-2">
-                                        <Bell className="h-4 w-4 text-pink-500" />
-                                        <span className="text-sm font-semibold">Instant Alerts</span>
-                                    </div>
+                                <div className="flex items-center gap-1.5 rounded-full bg-pink-100 px-3 py-1.5 text-xs font-medium text-pink-700">
+                                    <Bell className="h-3.5 w-3.5" />
+                                    Instant Alerts
                                 </div>
-                                <div className="group relative overflow-hidden rounded-full border border-blue-300 bg-gradient-to-r from-blue-100 to-blue-200 px-5 py-2.5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-blue-400 hover:from-blue-200 hover:to-blue-300">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-blue-600/0 transition-all duration-300 group-hover:from-blue-500/10 group-hover:to-blue-600/10"></div>
-                                    <div className="relative flex items-center gap-2">
-                                        <MapPin className="h-4 w-4 text-blue-500" />
-                                        <span className="text-sm font-semibold">Live Updates</span>
-                                    </div>
+                                <div className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700">
+                                    <MapPin className="h-3.5 w-3.5" />
+                                    Live Updates
                                 </div>
                             </div>
-
                         </div>
 
-                        {/* Quick Links Column - Enhanced */}
-                        <div className="lg:col-span-3">
-                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-pink-200 bg-gradient-to-r from-white to-pink-100 px-4 py-2 text-gray-700 backdrop-blur-sm">
-                                <Sparkles className="h-4 w-4 text-pink-500" />
-                                <h4 className="text-lg font-bold">Quick Links</h4>
+                        {/* Quick Links Card */}
+                        <div className="lg:col-span-1">
+                            <div className="rounded-3xl bg-white/60 p-6 backdrop-blur-sm">
+                                <div className="mb-4 flex items-center gap-2">
+                                    <Sparkles className="h-5 w-5 text-pink-500" />
+                                    <h4 className="text-base font-bold text-gray-800">Quick Links</h4>
+                                </div>
+                                <ul className="space-y-2.5">
+                                    <li>
+                                        <a href="#about" className="text-sm text-gray-700 transition-colors hover:text-pink-600">
+                                            About Us
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#how-it-works" className="text-sm text-gray-700 transition-colors hover:text-pink-600">
+                                            How It Works
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#process-timeline" className="text-sm text-gray-700 transition-colors hover:text-pink-600">
+                                            Process Timeline
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#newsletter" className="text-sm text-gray-700 transition-colors hover:text-pink-600">
+                                            Newsletter
+                                        </a>
+                                    </li>
+                                </ul>
                             </div>
-                            <ul className="space-y-4 text-gray-700">
-                                <li>
-                                    <a
-                                        href="#about"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white"
-                                    >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-white opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium text-gray-800">About Us</span>
-                                        <svg
-                                            className="h-4 w-4 text-white opacity-0 transition-all duration-300 group-hover:opacity-100"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#how-it-works"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white"
-                                    >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-white opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium text-gray-800">How It Works</span>
-                                        <svg
-                                            className="h-4 w-4 text-white opacity-0 transition-all duration-300 group-hover:opacity-100"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#process-timeline"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white"
-                                    >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-white opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium text-gray-800">Process Timeline</span>
-                                        <svg
-                                            className="h-4 w-4 text-white opacity-0 transition-all duration-300 group-hover:opacity-100"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#newsletter"
-                                        className="group relative inline-flex items-center gap-3 transition-all duration-300 hover:translate-x-2 hover:text-white"
-                                    >
-                                        <div className="absolute -left-8 h-1.5 w-1.5 rounded-full bg-white opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
-                                        <span className="text-base font-medium text-gray-800">Newsletter</span>
-                                        <svg
-                                            className="h-4 w-4 text-white opacity-0 transition-all duration-300 group-hover:opacity-100"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                        </svg>
-                                    </a>
-                                </li>
-
-                            </ul>
                         </div>
 
-                        {/* Contact & Legal Column - Enhanced */}
-                        <div id="contact" className="lg:col-span-4">
-                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-gradient-to-r from-white to-blue-100 px-4 py-2 text-gray-700 backdrop-blur-sm">
-                                <MapPin className="h-4 w-4 text-blue-500" />
-                                <h4 className="text-lg font-bold">Get in Touch</h4>
-                            </div>
+                        {/* Get in Touch Card */}
+                        <div id="contact" className="lg:col-span-1">
+                            <div className="rounded-3xl bg-white/60 p-6 backdrop-blur-sm">
+                                <div className="mb-4 flex items-center gap-2">
+                                    <MapPin className="h-5 w-5 text-blue-500" />
+                                    <h4 className="text-base font-bold text-gray-800">Get in Touch</h4>
+                                </div>
 
-                            {/* Contact Cards */}
-                            <div className="mb-8 space-y-4">
-                                <div className="group relative overflow-hidden rounded-2xl border border-pink-200 bg-gradient-to-r from-white to-pink-100 p-5 text-gray-700 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:border-pink-300 hover:from-pink-50 hover:to-pink-200 hover:shadow-lg hover:shadow-pink-200/50">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 to-pink-600/0 transition-all duration-300 group-hover:from-pink-500/10 group-hover:to-pink-600/10"></div>
-                                    <div className="relative flex items-start gap-4">
-                                        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-pink-200 to-pink-400 ring-2 ring-pink-200">
-                                            <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                                />
+                                {/* Email */}
+                                <div className="mb-6 rounded-2xl bg-pink-50 p-4">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-pink-200">
+                                            <svg className="h-5 w-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                             </svg>
                                         </div>
                                         <div>
-                                            <p className="mb-1 text-xs font-semibold tracking-wider text-gray-500 uppercase">Email</p>
-                                            <a
-                                                href="mailto:support@instastation.edu"
-                                                className="text-base font-semibold text-gray-800 transition-colors hover:text-pink-500"
-                                            >
+                                            <p className="mb-1 text-xs font-semibold text-gray-500 uppercase">Email</p>
+                                            <a href="mailto:support@instastation.edu" className="text-sm font-semibold text-gray-800 hover:text-pink-600">
                                                 support@instastation.edu
                                             </a>
                                         </div>
                                     </div>
                                 </div>
 
-
-                            </div>
-
-                            {/* Legal Section */}
-                            <div className="rounded-2xl border border-gray-200 bg-white/80 p-5 text-gray-700 shadow-lg backdrop-blur-sm">
-                                <h5 className="mb-4 text-sm font-bold tracking-wider text-gray-600 uppercase">Legal</h5>
-                                <ul className="space-y-3">
-                                    <li>
-                                        <a
-                                            href="#"
-                                            className="group inline-flex items-center gap-2 text-sm text-gray-600 transition-all duration-300 hover:text-pink-500"
-                                        >
-                                            <div className="h-1 w-1 rounded-full bg-pink-500 opacity-0 transition-opacity group-hover:opacity-100"></div>
-                                            Privacy Policy
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a
-                                            href="#"
-                                            className="group inline-flex items-center gap-2 text-sm text-gray-600 transition-all duration-300 hover:text-purple-500"
-                                        >
-                                            <div className="h-1 w-1 rounded-full bg-purple-500 opacity-0 transition-opacity group-hover:opacity-100"></div>
-                                            Terms of Service
-                                        </a>
-                                    </li>
-                                </ul>
+                                {/* Legal */}
+                                <div>
+                                    <h5 className="mb-3 text-xs font-bold uppercase tracking-wider text-gray-600">Legal</h5>
+                                    <ul className="space-y-2">
+                                        <li>
+                                            <a href="#" className="text-sm text-gray-600 transition-colors hover:text-pink-600">
+                                                Privacy Policy
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" className="text-sm text-gray-600 transition-colors hover:text-purple-600">
+                                                Terms of Service
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Enhanced Gradient Divider */}
-                    <div className="my-12">
-                        <div className="h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent"></div>
-                        <div className="mt-2 h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent"></div>
-                    </div>
-
-                    {/* Bottom Bar - Enhanced */}
-                    {/* Bottom Bar - Enhanced */}
-                    <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-                        <div className="flex flex-col items-center gap-2 text-gray-700 md:flex-row md:gap-6">
-                            <p className="text-sm">
-                                © {new Date().getFullYear()} <span className="font-bold text-gray-900">InstaStation</span>. All rights reserved.
-                            </p>
-                            <div className="hidden h-4 w-px bg-gray-700 md:block"></div>
-                            <p className="text-sm text-gray-700">Universiti Malaysia Pahang Al-Sultan Abdullah</p>
-                        </div>
+                    {/* Bottom Bar */}
+                    <div className="mt-12 border-t border-gray-300/50 pt-8 text-center">
+                        <p className="text-sm text-gray-600">
+                            © {new Date().getFullYear()} <span className="font-bold text-gray-800">InstaStation</span>. All rights reserved. | Universiti Malaysia Pahang Al-Sultan Abdullah
+                        </p>
                     </div>
                 </div>
-            </footer >
+            </footer>
 
             {/* Announcement Detail Modal - Wooden Menu Board Style */}
             {
