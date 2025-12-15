@@ -1,6 +1,6 @@
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, ArrowUpRight, Bell, Calendar, CreditCard, MapPin, Package, Sparkles, X, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Bell, Calendar, CreditCard, MapPin, Package, Sparkles, X, Zap, PackagePlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 type AnnouncementCard = {
@@ -212,14 +212,14 @@ export default function Welcome() {
                     style={{ animationDelay: '4s' }}
                 ></div>
 
-                <div className="relative z-10 p-6">
+                <div className="relative z-10 p-4 md:p-6">
                     {/* Header - Slide down from top */}
-                    <header className="mb-20 flex justify-end gap-4 duration-700 animate-in fade-in slide-in-from-top-4">
-                        <nav className="flex items-center justify-end gap-4">
+                    <header className="mb-12 md:mb-20 flex justify-end gap-2 md:gap-4 duration-700 animate-in fade-in slide-in-from-top-4">
+                        <nav className="flex items-center justify-end gap-2 md:gap-4">
                             {auth.user ? (
                                 <Link
                                     href={auth.user.type === 'staff' ? route('staff.dashboard') : route('student.parcel')}
-                                    className="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-gray-900 to-gray-800 px-8 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
+                                    className="group relative overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-r from-gray-900 to-gray-800 px-4 md:px-8 py-2 md:py-3 text-sm md:text-base font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
                                 >
                                     <span className="relative z-10">Dashboard</span>
                                     <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
@@ -228,13 +228,13 @@ export default function Welcome() {
                                 <>
                                     <Link
                                         href={route('login')}
-                                        className="rounded-lg bg-white px-4 py-2 text-black transition-colors hover:text-black"
+                                        className="rounded-lg bg-white px-3 md:px-4 py-2 text-sm md:text-base text-black transition-colors hover:text-black"
                                     >
                                         Login
                                     </Link>
                                     <Link
                                         href={route('register')}
-                                        className="rounded-lg bg-gray-900 px-6 py-2 text-white transition-colors hover:bg-black"
+                                        className="rounded-lg bg-gray-900 px-4 md:px-6 py-2 text-sm md:text-base text-white transition-colors hover:bg-black"
                                     >
                                         Get Started
                                     </Link>
@@ -244,32 +244,32 @@ export default function Welcome() {
                     </header>
 
                     {/* Main Content */}
-                    <div className="mx-auto max-w-4xl text-center">
+                    <div className="mx-auto max-w-4xl text-center px-2">
                         {/* Badge - Fade in and slide from top */}
                         <div
-                            className="mb-8 inline-flex items-center gap-3 rounded-full border-2 border-pink-300/50 bg-white/90 px-6 py-3 shadow-2xl ring-2 ring-pink-100/50 backdrop-blur-md duration-700 animate-in fade-in slide-in-from-top-4"
+                            className="mb-6 md:mb-8 inline-flex items-center gap-2 md:gap-3 rounded-full border-2 border-pink-300/50 bg-white/90 px-4 md:px-6 py-2 md:py-3 shadow-2xl ring-2 ring-pink-100/50 backdrop-blur-md duration-700 animate-in fade-in slide-in-from-top-4"
                             style={{ animationDelay: '100ms' }}
                         >
-                            <div className="rounded-full bg-gradient-to-br from-pink-500 to-purple-600 p-1.5">
-                                <Sparkles className="h-4 w-4 text-white" />
+                            <div className="rounded-full bg-gradient-to-br from-pink-500 to-purple-600 p-1 md:p-1.5">
+                                <Sparkles className="h-3 md:h-4 w-3 md:w-4 text-white" />
                             </div>
-                            <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-sm font-bold text-transparent">
+                            <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-xs md:text-sm font-bold text-transparent">
                                 Instant Parcel Tracking Dashboard
                             </span>
                         </div>
 
                         {/* Logo and Title - Scale up and fade in */}
-                        <div className="mb-8 duration-700 animate-in fade-in zoom-in-95" style={{ animationDelay: '200ms' }}>
+                        <div className="mb-6 md:mb-8 duration-700 animate-in fade-in zoom-in-95" style={{ animationDelay: '200ms' }}>
                             <h1 className="relative mb-4">
                                 <span className="block">
-                                    <span className="relative inline-block bg-gradient-to-r from-[#FF029A] via-pink-600 to-[#FF029A] bg-clip-text text-5xl font-black tracking-tight text-transparent md:text-7xl">
+                                    <span className="relative inline-block bg-gradient-to-r from-[#FF029A] via-pink-600 to-[#FF029A] bg-clip-text text-4xl sm:text-5xl md:text-7xl font-black tracking-tight text-transparent">
                                         Insta
                                         <span className="relative">
                                             <span className="relative z-10 bg-gradient-to-r from-gray-900 via-green-300 to-green-600 bg-clip-text text-transparent">
                                                 Station
                                             </span>
                                             {/* Underline decoration */}
-                                            <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
+                                            <svg className="absolute -bottom-1 md:-bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none">
                                                 <path
                                                     d="M1 5.5C50 2.5 100 2.5 199 5.5"
                                                     stroke="url(#gradient)"
@@ -291,11 +291,11 @@ export default function Welcome() {
 
                         {/* Animated Text - Fade in and slide from bottom */}
                         <div
-                            className="flex items-center justify-center gap-1 text-3xl font-bold duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-4xl"
+                            className="flex items-center justify-center gap-1 text-2xl sm:text-3xl md:text-4xl font-bold duration-700 animate-in fade-in slide-in-from-bottom-4"
                             style={{ animationDelay: '300ms' }}
                         >
                             <span className="text-gray-700">The</span>
-                            <div className="relative inline-block h-12 w-40 overflow-hidden">
+                            <div className="relative inline-block h-8 sm:h-10 md:h-12 w-28 sm:w-32 md:w-40 overflow-hidden">
                                 {words.map((word, index) => (
                                     <div
                                         key={word}
@@ -315,15 +315,15 @@ export default function Welcome() {
 
                         {/* Subtitle - Fade in */}
                         <p
-                            className="flex items-center justify-center gap-2 text-xl font-semibold text-gray-600 duration-700 animate-in fade-in slide-in-from-bottom-4 md:text-2xl"
+                            className="flex items-center justify-center gap-2 text-lg sm:text-xl md:text-2xl font-semibold text-gray-600 duration-700 animate-in fade-in slide-in-from-bottom-4"
                             style={{ animationDelay: '400ms' }}
                         >
                             to Track Campus Deliveries
                         </p>
 
                         {/* Description - Fade in and slide from bottom */}
-                        <div className="mb-16 mt-8 duration-1000 animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: '500ms' }}>
-                            <p className="mx-auto max-w-3xl text-xl font-medium leading-relaxed text-gray-600">
+                        <div className="mb-10 md:mb-16 mt-6 md:mt-8 duration-1000 animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: '500ms' }}>
+                            <p className="mx-auto max-w-3xl text-base sm:text-lg md:text-xl font-medium leading-relaxed text-gray-600 px-2">
                                 Streamline parcel management for your <span className="rounded-lg bg-pink-100 px-2 py-1 font-bold text-pink-700">university</span> with{' '}
                                 <span className="rounded-lg bg-purple-100 px-2 py-1 font-bold text-purple-700">smart matching</span>
                                 ,{' '}
@@ -335,17 +335,17 @@ export default function Welcome() {
                         </div>
 
                         {/* Check for Unclaimed Parcels Button - Scale in */}
-                        <div className="mb-16 duration-700 animate-in fade-in zoom-in-95" style={{ animationDelay: '600ms' }}>
-                            <div className="relative mx-auto mb-8 w-70">
+                        <div className="mb-10 md:mb-16 duration-700 animate-in fade-in zoom-in-95" style={{ animationDelay: '600ms' }}>
+                            <div className="relative mx-auto mb-6 md:mb-8 w-48 sm:w-56 md:w-70">
                                 <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-r from-pink-400 to-pink-500 opacity-20 blur-2xl"></div>
-                                <img src="/images/logo.png" alt="InstaStation" className="relative z-10 mx-auto w-70" />
+                                <img src="/images/logo.png" alt="InstaStation" className="relative z-10 mx-auto w-full" />
                             </div>
                             <Link
                                 href={route('public.unclaimed')}
-                                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-2xl border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 px-8 py-4 font-semibold text-green-700 shadow-lg transition-all duration-300 hover:scale-105 hover:border-green-400 hover:shadow-2xl"
+                                className="group relative inline-flex items-center gap-2 md:gap-3 overflow-hidden rounded-xl md:rounded-2xl border-2 border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-semibold text-green-700 shadow-lg transition-all duration-300 hover:scale-105 hover:border-green-400 hover:shadow-2xl"
                             >
-                                <div className="relative z-10 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 p-2 shadow-md transition-transform duration-300 group-hover:scale-90">
-                                    <Package className="h-5 w-5 text-white" />
+                                <div className="relative z-10 rounded-lg md:rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 p-1.5 md:p-2 shadow-md transition-transform duration-300 group-hover:scale-90">
+                                    <PackagePlus className="h-4 md:h-5 w-4 md:w-5 text-white" />
                                 </div>
                                 <span className="relative z-10">Grab Unclaimed Parcels</span>
                                 <div className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
@@ -353,8 +353,8 @@ export default function Welcome() {
                         </div>
 
                         {/* Stats Section with Animation */}
-                        <section className="my-20 duration-1000 animate-in fade-in zoom-in-95" style={{ animationDelay: '700ms' }}>
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                        <section className="my-12 md:my-20 duration-1000 animate-in fade-in zoom-in-95" style={{ animationDelay: '700ms' }}>
+                            <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-3">
                                 <div className="group relative overflow-hidden rounded-3xl border-2 border-pink-200/50 bg-gradient-to-br from-pink-50 to-purple-50 p-8 text-center transition-all duration-500 hover:scale-105 hover:shadow-2xl">
                                     <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-pink-300 opacity-20 blur-2xl transition-all duration-500 group-hover:scale-150"></div>
                                     <div className="relative">
@@ -412,16 +412,16 @@ export default function Welcome() {
 
                             <section
                                 id="spotlight-section"
-                                className="relative left-1/2 mt-20 mb-32 flex min-h-[1400px] w-screen -translate-x-1/2 flex-col items-center overflow-hidden bg-[#2c2c2c] py-32"
+                                className="relative left-1/2 mt-12 md:mt-20 mb-20 md:mb-32 flex min-h-[900px] md:min-h-[1400px] w-screen -translate-x-1/2 flex-col items-center overflow-hidden bg-[#2c2c2c] py-16 md:py-32"
                             >
                                 {/* The Lamp - Swings in */}
                                 <div
                                     className={`absolute left-1/2 top-0 z-30 flex -translate-x-1/2 flex-col items-center transition-transform duration-[1500ms] ease-out ${isSpotlightVisible ? 'translate-y-0' : '-translate-y-40'}`}
                                 >
                                     {/* Cord */}
-                                    <div className="h-40 w-1.5 bg-[#4a3b32]"></div>
+                                    <div className="h-24 md:h-40 w-1 md:w-1.5 bg-[#4a3b32]"></div>
                                     {/* Shade */}
-                                    <div className="relative h-28 w-64">
+                                    <div className="relative h-20 md:h-28 w-48 md:w-64">
                                         {/* Shade Body */}
                                         <div className="z-20 absolute inset-x-0 bottom-0 top-0 overflow-hidden rounded-t-[4rem] rounded-b-xl bg-[#fbbf24] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
                                             {/* Inner texture/shading */}
@@ -438,12 +438,12 @@ export default function Welcome() {
                                 <div
                                     className="relative z-10 flex w-full flex-1 flex-col items-center bg-[#fffbf0] shadow-2xl transition-[clip-path] duration-[2500ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
                                     style={{
-                                        marginTop: '150px', // Start below the lamp
+                                        marginTop: '100px', // Start below the lamp - reduced for mobile
                                         clipPath: isSpotlightVisible
                                             ? 'polygon(50% 0%, 150% 100%, -50% 100%)' // Very Wide Triangle (extends beyond screen edges for full floor coverage)
                                             : 'polygon(50% 0%, 50% 0%, 50% 100%, 50% 100%)', // Closed point
-                                        paddingTop: '180px',
-                                        paddingBottom: '100px',
+                                        paddingTop: '120px',
+                                        paddingBottom: '60px',
                                     }}
                                 >
                                     {/* Texture Overlay */}
@@ -456,53 +456,53 @@ export default function Welcome() {
 
                                     {/* Content Container - Constrained Width */}
                                     <div
-                                        className={`w-full max-w-5xl px-6 transition-opacity delay-500 duration-1000 ${isSpotlightVisible ? 'opacity-100' : 'opacity-0'}`}
+                                        className={`w-full max-w-5xl px-4 md:px-6 transition-opacity delay-500 duration-1000 ${isSpotlightVisible ? 'opacity-100' : 'opacity-0'}`}
                                     >
                                         {/* Title Area */}
-                                        <div className="mb-16 text-center">
-                                            <div className="mx-auto mb-6 flex h-16 w-16 animate-bounce items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
-                                                <Zap className="h-8 w-8" />
+                                        <div className="mb-10 md:mb-16 text-center">
+                                            <div className="mx-auto mb-4 md:mb-6 flex h-12 md:h-16 w-12 md:w-16 animate-bounce items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
+                                                <Zap className="h-6 md:h-8 w-6 md:w-8" />
                                             </div>
-                                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-6 py-2 text-sm font-bold text-pink-700 shadow-lg animate-in fade-in slide-in-from-top-4">
-                                        <Sparkles className="h-4 w-4" />
-                                        How It Works
-                                    </div>
-                                            <h2 className="mb-6 text-5xl font-black tracking-tight text-[#4a3b32] md:text-7xl">
+                                            <div className="mb-4 md:mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-4 md:px-6 py-1.5 md:py-2 text-xs md:text-sm font-bold text-pink-700 shadow-lg animate-in fade-in slide-in-from-top-4">
+                                                <Sparkles className="h-3 md:h-4 w-3 md:w-4" />
+                                                How It Works
+                                            </div>
+                                            <h2 className="mb-4 md:mb-6 text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black tracking-tight text-[#4a3b32]">
                                                 Seamless <br /> Management
                                             </h2>
-                                            <p className="mx-auto max-w-2xl text-xl font-bold text-[#8d7f6d]">
+                                            <p className="mx-auto max-w-2xl text-base md:text-lg lg:text-xl font-bold text-[#8d7f6d] px-2">
                                                 We shine a light on where your package is. <br />
                                                 From arrival to collection, it's always visible.
                                             </p>
                                         </div>
 
                                         {/* Visual Graphic Area (Mimicking the cute characters in reference) */}
-                                        <div className="relative mx-auto mb-16 max-w-3xl">
+                                        <div className="relative mx-auto mb-10 md:mb-16 max-w-3xl">
                                             {/* Cute Feature Cards Row */}
-                                            <div className="grid grid-cols-1 justify-center gap-8 md:grid-cols-3">
+                                            <div className="grid grid-cols-1 justify-center gap-6 md:gap-8 md:grid-cols-3">
                                                 {/* Card 1 - Left */}
-                                                <div className="group relativeRotate relative mt-12 rotate-[-5deg] rounded-[2rem] border-[3px] border-[#e6dcc6] bg-white p-6 text-center shadow-lg transition-transform hover:scale-105 hover:rotate-0 hover:border-pink-400">
-                                                    <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-pink-100 text-pink-600">
-                                                        <Bell className="h-8 w-8" />
+                                                <div className="group relativeRotate relative md:mt-12 md:rotate-[-5deg] rounded-[2rem] border-[3px] border-[#e6dcc6] bg-white p-5 md:p-6 text-center shadow-lg transition-transform hover:scale-105 md:hover:rotate-0 hover:border-pink-400">
+                                                    <div className="mx-auto mb-2 flex h-14 md:h-16 w-14 md:w-16 items-center justify-center rounded-full bg-pink-100 text-pink-600">
+                                                        <Bell className="h-7 md:h-8 w-7 md:w-8" />
                                                     </div>
-                                                    <h3 className="text-xl font-black text-[#594a3a]">Instant<br />Alerts</h3>
+                                                    <h3 className="text-lg md:text-xl font-black text-[#594a3a]">Instant<br />Alerts</h3>
                                                 </div>
 
                                                 {/* Card 2 - Center (Prominent) */}
-                                                <div className="group relative z-10 scale-110 rounded-[2.5rem] border-[3px] border-[#e6dcc6] bg-white p-8 text-center shadow-xl transition-transform hover:scale-125 hover:border-blue-400">
-                                                    <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                                                        <Package className="h-10 w-10" />
+                                                <div className="group relative z-10 md:scale-110 rounded-[2.5rem] border-[3px] border-[#e6dcc6] bg-white p-6 md:p-8 text-center shadow-xl transition-transform hover:scale-105 md:hover:scale-125 hover:border-blue-400">
+                                                    <div className="mx-auto mb-3 md:mb-4 flex h-16 md:h-20 w-16 md:w-20 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                                                        <Package className="h-8 md:h-10 w-8 md:w-10" />
                                                     </div>
-                                                    <h3 className="text-2xl font-black text-[#594a3a]">Safe<br />Storage</h3>
+                                                    <h3 className="text-xl md:text-2xl font-black text-[#594a3a]">Safe<br />Storage</h3>
                                                     <div className="mt-2 text-xs font-bold text-blue-500 bg-blue-50 py-1 px-3 rounded-full inline-block">Featured</div>
                                                 </div>
 
                                                 {/* Card 3 - Right */}
-                                                <div className="group relative mt-12 rotate-[5deg] rounded-[2rem] border-[3px] border-[#e6dcc6] bg-white p-6 text-center shadow-lg transition-transform hover:scale-105 hover:rotate-0 hover:border-green-400">
-                                                    <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
-                                                        <CreditCard className="h-8 w-8" />
+                                                <div className="group relative md:mt-12 md:rotate-[5deg] rounded-[2rem] border-[3px] border-[#e6dcc6] bg-white p-5 md:p-6 text-center shadow-lg transition-transform hover:scale-105 md:hover:rotate-0 hover:border-green-400">
+                                                    <div className="mx-auto mb-2 flex h-14 md:h-16 w-14 md:w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
+                                                        <CreditCard className="h-7 md:h-8 w-7 md:w-8" />
                                                     </div>
-                                                    <h3 className="text-xl font-black text-[#594a3a]">Easy<br />Payment</h3>
+                                                    <h3 className="text-lg md:text-xl font-black text-[#594a3a]">Easy<br />Payment</h3>
                                                 </div>
                                             </div>
                                         </div>
@@ -511,14 +511,14 @@ export default function Welcome() {
                                         <div className="text-center">
                                             <Link
                                                 href={route('register')}
-                                                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[#fbbf24] px-10 py-4 text-xl font-black text-[#4a3b32] transition-transform hover:scale-110 hover:shadow-xl hover:ring-4 hover:ring-[#fcd34d]/50"
+                                                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[#fbbf24] px-6 md:px-10 py-3 md:py-4 text-base md:text-xl font-black text-[#4a3b32] transition-transform hover:scale-110 hover:shadow-xl hover:ring-4 hover:ring-[#fcd34d]/50"
                                             >
                                                 <span>Start Automating</span>
-                                                <ArrowUpRight className="h-6 w-6 transition-transform group-hover:rotate-45" />
+                                                <ArrowUpRight className="h-5 md:h-6 w-5 md:w-6 transition-transform group-hover:rotate-45" />
                                                 <div className="absolute inset-0 bg-white/20 opacity-0 transition-opacity group-hover:opacity-100"></div>
                                             </Link>
 
-                                            <p className="mt-6 text-sm font-bold tracking-widest text-[#8d7f6d] uppercase">
+                                            <p className="mt-4 md:mt-6 text-xs md:text-sm font-bold tracking-widest text-[#8d7f6d] uppercase">
                                                 ★ Best Choice for Universities ★
                                             </p>
                                         </div>
@@ -798,17 +798,17 @@ export default function Welcome() {
                                 <div className="relative mb-12 text-center">
                                     <div className="mb-4 inline-flex -rotate-2 transform items-center gap-2 rounded-2xl bg-[#ffecb3] px-6 py-3 shadow-sm transition-transform hover:rotate-0">
                                         <Sparkles className="h-5 w-5 text-orange-400" />
-                                        <span className="font-black tracking-wide text-orange-900">Beaver's News!</span>
+                                        <span className="font-black tracking-wide text-orange-900">Newsletter!</span>
                                     </div>
 
-                                    <h2 className="relative z-10 font-black text-[#2c3e50] md:text-5xl">
+                                    <h2 className="relative z-10 text-3xl sm:text-4xl md:text-5xl font-black text-[#2c3e50]">
                                         Campus <span className="relative inline-block text-[#ff8e8e]">Dispatch
-                                            <svg className="absolute -bottom-2 -left-2 -z-10 h-4 w-full text-[#ffeb3b]" viewBox="0 0 100 10" preserveAspectRatio="none">
+                                            <svg className="absolute -bottom-1 md:-bottom-2 -left-2 -z-10 h-3 md:h-4 w-full text-[#ffeb3b]" viewBox="0 0 100 10" preserveAspectRatio="none">
                                                 <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
                                             </svg>
                                         </span>
                                     </h2>
-                                    <p className="mt-4 font-bold text-[#95a5a6]">
+                                    <p className="mt-3 md:mt-4 text-sm md:text-base font-bold text-[#95a5a6]">
                                         | Daily News | Cultural Express | Otter Knowledge |
                                     </p>
 
@@ -832,18 +832,18 @@ export default function Welcome() {
                                         <p className="text-lg font-semibold text-gray-500">No announcements yet.</p>
                                     </div>
                                 ) : (
-                                    <div className="grid gap-12 lg:grid-cols-2">
+                                    <div className="grid gap-6 md:gap-8 lg:gap-12 lg:grid-cols-2">
                                         {featuredAnnouncement && (
                                             <div
-                                                className="group relative rotate-1 transform overflow-hidden rounded-[30px] border-[6px] border-[#fff] bg-[#fdf2f8] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] transition-transform duration-300 hover:rotate-0 hover:scale-[1.02]"
+                                                className="group relative cursor-pointer md:rotate-1 transform overflow-hidden rounded-[24px] md:rounded-[30px] border-4 md:border-[6px] border-[#fff] bg-[#fdf2f8] p-3 md:p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] transition-all duration-300 hover:rotate-0 hover:scale-[1.02] hover:shadow-[0_15px_50px_rgba(0,0,0,0.12)]"
                                                 onClick={() => setSelectedAnnouncement(featuredAnnouncement)}
                                             >
                                                 {/* Decorative Tape */}
-                                                <div className="absolute top-2 left-1/2 h-8 w-24 -translate-x-1/2 -rotate-2 bg-[#ffeaa7]/50 shadow-sm backdrop-blur-sm"></div>
+                                                <div className="absolute top-2 left-1/2 h-6 md:h-8 w-20 md:w-24 -translate-x-1/2 -rotate-2 bg-[#ffeaa7]/50 shadow-sm backdrop-blur-sm"></div>
 
-                                                <div className="h-full rounded-[20px] bg-white p-6">
+                                                <div className="h-full rounded-[16px] md:rounded-[20px] bg-white p-4 md:p-6">
                                                     {featuredAnnouncement.announcement_image && (
-                                                        <div className="relative mb-6 aspect-[4/3] overflow-hidden rounded-[16px] border-4 border-[#fff0f6]">
+                                                        <div className="relative mb-4 md:mb-6 aspect-[4/3] overflow-hidden rounded-[12px] md:rounded-[16px] border-2 md:border-4 border-[#fff0f6]">
                                                             <img
                                                                 src={`/storage/${featuredAnnouncement.announcement_image}`}
                                                                 alt="announcement"
@@ -851,62 +851,62 @@ export default function Welcome() {
                                                             />
                                                         </div>
                                                     )}
-                                                    <div className="flex items-center gap-3 text-xs font-bold tracking-widest text-slate-400 uppercase">
-                                                        <span className="inline-flex items-center gap-2 rounded-full bg-[#fae3d9] px-3 py-1 text-[#e17055]">
-                                                            <Package className="h-3 w-3" /> FEATURED
+                                                    <div className="flex flex-wrap items-center gap-2 md:gap-3 text-[10px] md:text-xs font-bold tracking-widest text-slate-400 uppercase">
+                                                        <span className="inline-flex items-center gap-1.5 md:gap-2 rounded-full bg-[#fae3d9] px-2.5 md:px-3 py-0.5 md:py-1 text-[#e17055]">
+                                                            <Package className="h-2.5 md:h-3 w-2.5 md:w-3" /> FEATURED
                                                         </span>
-                                                        <span className="h-1.5 w-1.5 rounded-full bg-slate-300"></span>
-                                                        <span>
+                                                        <span className="h-1 md:h-1.5 w-1 md:w-1.5 rounded-full bg-slate-300"></span>
+                                                        <span className="text-[9px] md:text-[10px]">
                                                             {formatDate(featuredAnnouncement.publish_date || featuredAnnouncement.created_at)}
                                                         </span>
                                                     </div>
-                                                    <h3 className="mt-4 text-2xl font-black text-[#2d3436]">
+                                                    <h3 className="mt-3 md:mt-4 text-lg md:text-xl lg:text-2xl font-black text-[#2d3436] line-clamp-2">
                                                         {featuredAnnouncement.announcement_title}
                                                     </h3>
-                                                    <div className="mt-4 flex items-center justify-between">
-                                                        <span className="text-sm font-bold text-[#b2bec3]">Tap to read more...</span>
-                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#fab1a0] text-white transition-colors group-hover:bg-[#e17055]">
-                                                            <ArrowUpRight className="h-5 w-5" />
+                                                    <div className="mt-3 md:mt-4 flex items-center justify-between">
+                                                        <span className="text-xs md:text-sm font-bold text-[#b2bec3]">Tap to read more...</span>
+                                                        <div className="flex h-8 md:h-10 w-8 md:w-10 items-center justify-center rounded-full bg-[#fab1a0] text-white transition-all duration-300 group-hover:bg-[#e17055] group-hover:scale-110">
+                                                            <ArrowUpRight className="h-4 md:h-5 w-4 md:w-5" />
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
 
-                                        <div className="relative grid content-start gap-4">
+                                        <div className="relative grid content-start gap-3 md:gap-4">
                                             {/* Removed timeline line for cleaner blocky look */}
 
                                             {secondaryAnnouncements.map((a: AnnouncementCard, index: number) => (
                                                 <div
                                                     key={a.announcement_id}
-                                                    className="group relative flex cursor-pointer gap-5 rounded-[24px] border-2 border-[#eeebe6] bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ffeaa7] hover:shadow-[4px_4px_0px_#ffeaa7]"
+                                                    className="group relative flex cursor-pointer gap-3 md:gap-5 rounded-[18px] md:rounded-[24px] border-2 border-[#eeebe6] bg-white p-3 md:p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ffeaa7] hover:shadow-[4px_4px_0px_#ffeaa7]"
                                                     style={{ animationDelay: `${(index + 2) * 100}ms` }}
                                                     onClick={() => setSelectedAnnouncement(a)}
                                                 >
                                                     {a.announcement_image && (
-                                                        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[18px] border-2 border-[#f0f0f0]">
+                                                        <div className="relative h-20 md:h-24 w-20 md:w-24 shrink-0 overflow-hidden rounded-[14px] md:rounded-[18px] border-2 border-[#f0f0f0]">
                                                             <img
                                                                 src={`/storage/${a.announcement_image}`}
                                                                 alt="announcement"
-                                                                className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
+                                                                className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0 group-hover:scale-110"
                                                             />
                                                         </div>
                                                     )}
-                                                    <div className="flex flex-1 flex-col justify-center">
-                                                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold tracking-wider text-[#b2bec3] uppercase">
-                                                            <span className="flex items-center gap-1 rounded-md bg-[#f1f2f6] px-2 py-0.5 text-[#a4b0be]">
-                                                                <Calendar className="h-3 w-3" /> {formatDate(a.publish_date || a.created_at)}
+                                                    <div className="flex flex-1 flex-col justify-center min-w-0">
+                                                        <div className="flex flex-wrap items-center gap-1.5 md:gap-2 text-[9px] md:text-[10px] font-bold tracking-wider text-[#b2bec3] uppercase">
+                                                            <span className="flex items-center gap-1 rounded-md bg-[#f1f2f6] px-1.5 md:px-2 py-0.5 text-[#a4b0be]">
+                                                                <Calendar className="h-2.5 md:h-3 w-2.5 md:w-3" /> {formatDate(a.publish_date || a.created_at)}
                                                             </span>
                                                         </div>
-                                                        <h4 className="mt-1 line-clamp-1 text-lg font-black text-[#2d3436] group-hover:text-[#e17055]">
+                                                        <h4 className="mt-1 line-clamp-2 text-base md:text-lg font-black text-[#2d3436] transition-colors group-hover:text-[#e17055]">
                                                             {a.announcement_title}
                                                         </h4>
-                                                        <p className="mt-1 line-clamp-2 text-xs font-medium text-[#636e72]">
+                                                        <p className="mt-1 line-clamp-2 text-[10px] md:text-xs font-medium text-[#636e72]">
                                                             {a.announcement_content}
                                                         </p>
                                                     </div>
-                                                    <div className="flex items-center justify-center self-center rounded-full bg-[#f1f2f6] p-2 text-[#b2bec3] transition-colors group-hover:bg-[#ffeaa7] group-hover:text-[#d35400]">
-                                                        <ArrowUpRight className="h-4 w-4" />
+                                                    <div className="flex items-center justify-center self-center shrink-0 rounded-full bg-[#f1f2f6] p-1.5 md:p-2 text-[#b2bec3] transition-all duration-300 group-hover:bg-[#ffeaa7] group-hover:text-[#d35400] group-hover:scale-110">
+                                                        <ArrowUpRight className="h-3.5 md:h-4 w-3.5 md:w-4" />
                                                     </div>
                                                 </div>
                                             ))}
@@ -926,15 +926,15 @@ export default function Welcome() {
                         {/* Brand Column */}
                         <div className="lg:col-span-1">
                             <div className="mb-6 flex items-center gap-3">
-                                 <div className="flex h-20 w-20 items-center justify-center rounded-2xl">
-                                        <img src="/images/parcel-logo.png" alt="InstaStation" className="relative z-10 mx-auto w-70" />
-                                    </div>
+                                <div className="flex h-20 w-20 items-center justify-center rounded-2xl">
+                                    <img src="/images/parcel-logo.png" alt="InstaStation" className="relative z-10 mx-auto w-70" />
+                                </div>
                             </div>
                             <p className="max-w-md text-lg leading-relaxed text-gray-700">
-                                    The smart way to track and manage campus deliveries. Get notified instantly when your parcels arrive and collect
-                                    them hassle-free.
-                                </p>
-<br/>
+                                The smart way to track and manage campus deliveries. Get notified instantly when your parcels arrive and collect
+                                them hassle-free.
+                            </p>
+                            <br />
                             {/* Feature Pills */}
                             <div className="flex flex-wrap gap-2">
                                 <div className="flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1.5 text-xs font-medium text-purple-700">
