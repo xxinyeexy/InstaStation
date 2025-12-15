@@ -452,6 +452,10 @@ export default function Welcome() {
                                             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 animate-bounce">
                                                 <Zap className="h-8 w-8" />
                                             </div>
+                                              <div className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-6 py-2 text-sm font-bold text-pink-700 shadow-lg animate-in fade-in slide-in-from-top-4">
+                                        <Sparkles className="h-4 w-4" />
+                                        How It Works
+                                    </div>
                                             <h2 className="font-black text-[#4a3b32] text-5xl md:text-7xl mb-6 tracking-tight">
                                                 Seamless <br /> Management
                                             </h2>
@@ -578,7 +582,6 @@ export default function Welcome() {
                             </div>
                         </div>
 
-                        {/* How It Works Section - Redesigned Film Strip Style */}
                         <div className="relative h-0 w-0">
                             <span id="process-timeline" className="absolute -top-20 left-0 h-px w-px opacity-0"></span>
                         </div>
@@ -898,7 +901,7 @@ export default function Welcome() {
                 </div >
             </div >
             {/* Footer - Clean Modern Design */}
-            <footer className="relative overflow-hidden bg-gradient-to-br from-[#f5e6ff] via-[#ffe8f0] to-[#e6f3ff] py-16">
+            <footer className="relative overflow-hidden bg-gradient-to-br from-[#f7d8ff] via-[#fee5d3] to-[#d3e7ff] duration-1000 animate-in fade-in slide-in-from-bottom-8 py-16">
                 <div className="relative z-10 mx-auto max-w-7xl px-6">
                     {/* Main Footer Content */}
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -967,7 +970,7 @@ export default function Welcome() {
                         <div id="contact" className="lg:col-span-1">
                             <div className="rounded-3xl bg-white/60 p-6 backdrop-blur-sm">
                                 <div className="mb-4 flex items-center gap-2">
-                                    <MapPin className="h-5 w-5 text-blue-500" />
+                                    <MapPin className="h-5 w-5 text-pink-500" />
                                     <h4 className="text-base font-bold text-gray-800">Get in Touch</h4>
                                 </div>
 
