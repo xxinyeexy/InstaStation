@@ -406,57 +406,68 @@ export default function Welcome() {
                         </section>
 
                         {/* Spotlight Section - Interactive Lamp Design */}
+                        {/* Spotlight Section - Interactive Lamp Design */}
                         <div className="relative z-20">
                             <span id="how-it-works" className="absolute -top-32 left-0 h-px w-px opacity-0"></span>
 
                             <section
                                 id="spotlight-section"
-                                className="relative w-screen left-1/2 -translate-x-1/2 overflow-hidden bg-[#2c2c2c] py-32 min-h-[1200px] flex flex-col items-center mt-20 mb-32"
+                                className="relative left-1/2 mt-20 mb-32 flex min-h-[1400px] w-screen -translate-x-1/2 flex-col items-center overflow-hidden bg-[#2c2c2c] py-32"
                             >
                                 {/* The Lamp - Swings in */}
-                                <div className={`absolute left-1/2 top-0 z-30 flex -translate-x-1/2 flex-col items-center transition-transform duration-[1500ms] ease-out ${isSpotlightVisible ? 'translate-y-0' : '-translate-y-40'}`}>
+                                <div
+                                    className={`absolute left-1/2 top-0 z-30 flex -translate-x-1/2 flex-col items-center transition-transform duration-[1500ms] ease-out ${isSpotlightVisible ? 'translate-y-0' : '-translate-y-40'}`}
+                                >
                                     {/* Cord */}
                                     <div className="h-40 w-1.5 bg-[#4a3b32]"></div>
                                     {/* Shade */}
                                     <div className="relative h-28 w-64">
                                         {/* Shade Body */}
-                                        <div className="absolute inset-x-0 bottom-0 top-0 rounded-t-[4rem] rounded-b-xl bg-[#fbbf24] shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-20 overflow-hidden">
+                                        <div className="z-20 absolute inset-x-0 bottom-0 top-0 overflow-hidden rounded-t-[4rem] rounded-b-xl bg-[#fbbf24] shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
                                             {/* Inner texture/shading */}
                                             <div className="absolute inset-0 bg-gradient-to-r from-orange-400/30 to-yellow-300/30"></div>
                                         </div>
                                         {/* Bulb Glow Effect underneath */}
-                                        <div className={`absolute -bottom-12 left-1/2 h-32 w-48 -translate-x-1/2 rounded-full bg-yellow-200 blur-2xl transition-opacity duration-1000 ${isSpotlightVisible ? 'opacity-80' : 'opacity-0'}`}></div>
+                                        <div
+                                            className={`absolute -bottom-12 left-1/2 h-32 w-48 -translate-x-1/2 rounded-full bg-yellow-200 blur-2xl transition-opacity duration-1000 ${isSpotlightVisible ? 'opacity-80' : 'opacity-0'}`}
+                                        ></div>
                                     </div>
                                 </div>
 
-                                {/* The Light Beam & Content Container */}
+                                {/* The Light Beam Container */}
                                 <div
-                                    className="relative z-10 w-full max-w-6xl flex-1 bg-[#fffbf0] shadow-2xl transition-[clip-path] duration-[2500ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                    className="relative z-10 flex w-full flex-1 flex-col items-center bg-[#fffbf0] shadow-2xl transition-[clip-path] duration-[2500ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
                                     style={{
                                         marginTop: '150px', // Start below the lamp
                                         clipPath: isSpotlightVisible
-                                            ? 'polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%)' // Wide beam
-                                            : 'polygon(48% 0%, 52% 0%, 55% 100%, 45% 100%)', // Closed/Narrow beam
-                                        paddingTop: '120px',
-                                        paddingBottom: '100px'
+                                            ? 'polygon(50% 0%, 150% 100%, -50% 100%)' // Very Wide Triangle (extends beyond screen edges for full floor coverage)
+                                            : 'polygon(50% 0%, 50% 0%, 50% 100%, 50% 100%)', // Closed point
+                                        paddingTop: '180px',
+                                        paddingBottom: '100px',
                                     }}
                                 >
                                     {/* Texture Overlay */}
-                                    <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }}></div>
+                                    <div
+                                        className="pointer-events-none absolute inset-0 opacity-10"
+                                        style={{
+                                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")`,
+                                        }}
+                                    ></div>
 
-                                    {/* Helper to hide content when beam is closed */}
-                                    <div className={`transition-opacity duration-1000 delay-500 ${isSpotlightVisible ? 'opacity-100' : 'opacity-0'}`}>
-
+                                    {/* Content Container - Constrained Width */}
+                                    <div
+                                        className={`w-full max-w-5xl px-6 transition-opacity delay-500 duration-1000 ${isSpotlightVisible ? 'opacity-100' : 'opacity-0'}`}
+                                    >
                                         {/* Title Area */}
-                                        <div className="text-center mb-16 px-6">
-                                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 animate-bounce">
+                                        <div className="mb-16 text-center">
+                                            <div className="mx-auto mb-6 flex h-16 w-16 animate-bounce items-center justify-center rounded-full bg-yellow-100 text-yellow-600">
                                                 <Zap className="h-8 w-8" />
                                             </div>
-                                              <div className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-6 py-2 text-sm font-bold text-pink-700 shadow-lg animate-in fade-in slide-in-from-top-4">
+                                            <div className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300 bg-white px-6 py-2 text-sm font-bold text-pink-700 shadow-lg animate-in fade-in slide-in-from-top-4">
                                         <Sparkles className="h-4 w-4" />
                                         How It Works
                                     </div>
-                                            <h2 className="font-black text-[#4a3b32] text-5xl md:text-7xl mb-6 tracking-tight">
+                                            <h2 className="mb-6 text-5xl font-black tracking-tight text-[#4a3b32] md:text-7xl">
                                                 Seamless <br /> Management
                                             </h2>
                                             <p className="mx-auto max-w-2xl text-xl font-bold text-[#8d7f6d]">
@@ -465,44 +476,51 @@ export default function Welcome() {
                                             </p>
                                         </div>
 
-                                        {/* Cute Feature Cards */}
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-8 md:px-16">
-                                            {/* Card 1 */}
-                                            <div className="group relative bg-white border-[3px] border-[#e6dcc6] rounded-[2rem] p-8 text-center transition-transform duration-300 hover:scale-105 hover:border-yellow-400 hover:shadow-xl hover:-rotate-1">
-                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm group-hover:bg-pink-200">
-                                                    <Bell className="h-6 w-6 text-pink-600" />
+                                        {/* Visual Graphic Area (Mimicking the cute characters in reference) */}
+                                        <div className="relative mx-auto mb-16 max-w-3xl">
+                                            {/* Cute Feature Cards Row */}
+                                            <div className="grid grid-cols-1 justify-center gap-8 md:grid-cols-3">
+                                                {/* Card 1 - Left */}
+                                                <div className="group relativeRotate relative mt-12 rotate-[-5deg] rounded-[2rem] border-[3px] border-[#e6dcc6] bg-white p-6 text-center shadow-lg transition-transform hover:scale-105 hover:rotate-0 hover:border-pink-400">
+                                                    <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-pink-100 text-pink-600">
+                                                        <Bell className="h-8 w-8" />
+                                                    </div>
+                                                    <h3 className="text-xl font-black text-[#594a3a]">Instant<br />Alerts</h3>
                                                 </div>
-                                                <h3 className="mt-4 font-black text-2xl text-[#594a3a]">Instant<br />Alerts</h3>
-                                                <p className="mt-2 text-sm font-bold text-[#9ca3af]">Ping! Updates sent straight to your phone.</p>
-                                            </div>
 
-                                            {/* Card 2 */}
-                                            <div className="group relative bg-white border-[3px] border-[#e6dcc6] rounded-[2rem] p-8 text-center transition-transform duration-300 hover:scale-105 hover:border-blue-400 hover:shadow-xl hover:rotate-1">
-                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm group-hover:bg-blue-200">
-                                                    <Package className="h-6 w-6 text-blue-600" />
+                                                {/* Card 2 - Center (Prominent) */}
+                                                <div className="group relative z-10 scale-110 rounded-[2.5rem] border-[3px] border-[#e6dcc6] bg-white p-8 text-center shadow-xl transition-transform hover:scale-125 hover:border-blue-400">
+                                                    <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                                                        <Package className="h-10 w-10" />
+                                                    </div>
+                                                    <h3 className="text-2xl font-black text-[#594a3a]">Safe<br />Storage</h3>
+                                                    <div className="mt-2 text-xs font-bold text-blue-500 bg-blue-50 py-1 px-3 rounded-full inline-block">Featured</div>
                                                 </div>
-                                                <h3 className="mt-4 font-black text-2xl text-[#594a3a]">Safe<br />Storage</h3>
-                                                <p className="mt-2 text-sm font-bold text-[#9ca3af]">Your parcels nap safely until you arrive.</p>
-                                            </div>
 
-                                            {/* Card 3 */}
-                                            <div className="group relative bg-white border-[3px] border-[#e6dcc6] rounded-[2rem] p-8 text-center transition-transform duration-300 hover:scale-105 hover:border-green-400 hover:shadow-xl hover:-rotate-1">
-                                                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-green-100 rounded-full flex items-center justify-center border-4 border-white shadow-sm group-hover:bg-green-200">
-                                                    <CreditCard className="h-6 w-6 text-green-600" />
+                                                {/* Card 3 - Right */}
+                                                <div className="group relative mt-12 rotate-[5deg] rounded-[2rem] border-[3px] border-[#e6dcc6] bg-white p-6 text-center shadow-lg transition-transform hover:scale-105 hover:rotate-0 hover:border-green-400">
+                                                    <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
+                                                        <CreditCard className="h-8 w-8" />
+                                                    </div>
+                                                    <h3 className="text-xl font-black text-[#594a3a]">Easy<br />Payment</h3>
                                                 </div>
-                                                <h3 className="mt-4 font-black text-2xl text-[#594a3a]">Easy<br />Payment</h3>
-                                                <p className="mt-2 text-sm font-bold text-[#9ca3af]">Pay fees in a snap with proof upload.</p>
                                             </div>
                                         </div>
 
-                                        {/* Bottom Action */}
-                                        <div className="mt-16 text-center">
-                                            <div className="inline-block relative">
-                                                <div className="absolute inset-0 bg-yellow-200 rounded-full blur-xl opacity-50 animate-pulse"></div>
-                                                <div className="relative bg-white border-2 border-[#e6dcc6] px-6 py-2 rounded-full text-sm font-bold text-[#8d7f6d] shadow-sm">
-                                                    Currently automating 100% of campus workflow
-                                                </div>
-                                            </div>
+                                        {/* Bottom Action Button */}
+                                        <div className="text-center">
+                                            <Link
+                                                href={route('register')}
+                                                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[#fbbf24] px-10 py-4 text-xl font-black text-[#4a3b32] transition-transform hover:scale-110 hover:shadow-xl hover:ring-4 hover:ring-[#fcd34d]/50"
+                                            >
+                                                <span>Start Automating</span>
+                                                <ArrowUpRight className="h-6 w-6 transition-transform group-hover:rotate-45" />
+                                                <div className="absolute inset-0 bg-white/20 opacity-0 transition-opacity group-hover:opacity-100"></div>
+                                            </Link>
+
+                                            <p className="mt-6 text-sm font-bold tracking-widest text-[#8d7f6d] uppercase">
+                                                ★ Best Choice for Universities ★
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
