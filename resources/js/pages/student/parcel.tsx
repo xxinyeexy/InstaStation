@@ -127,89 +127,113 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
     const profilePhotoUrl = user?.profile_pic ? `/storage/${user.profile_pic}` : undefined;
 
     return (
-        <div className="mb-6 rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100 dark:bg-card dark:ring-border relative overflow-hidden transition-all hover:shadow-xl">
-            <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
-                <div className="flex items-start gap-5">
-                    <Avatar className="h-20 w-20 border-4 border-white shadow-lg ring-1 ring-gray-100 dark:border-gray-800 dark:ring-gray-800">
-                        <AvatarImage src={profilePhotoUrl} alt={user?.name} className="object-cover" />
-                        <AvatarFallback className="bg-emerald-100 text-emerald-700 text-3xl font-bold dark:bg-emerald-900 dark:text-emerald-300">
-                            {user?.name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="pt-1">
-                        <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold uppercase tracking-wider text-emerald-700 ring-1 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20">
-                            <span className="relative flex h-2 w-2">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+        <div className="mb-8 rounded-[3rem] bg-white/80 p-8 shadow-xl ring-4 ring-white backdrop-blur-md dark:bg-card/80 dark:ring-gray-800 relative overflow-hidden transition-all hover:shadow-2xl hover:ring-indigo-100">
+            {/* Background Decoration */}
+            <div className="absolute top-0 right-0 h-40 w-40 translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-indigo-200/40 to-pink-200/40 blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 h-40 w-40 -translate-x-1/2 translate-y-1/2 rounded-full bg-gradient-to-tr from-emerald-200/40 to-teal-200/40 blur-3xl"></div>
+
+            <div className="relative z-10 flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8">
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+                    <div className="relative group">
+                        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-70 blur transition duration-500 group-hover:opacity-100"></div>
+                        <Avatar className="relative h-24 w-24 border-[6px] border-white shadow-xl ring-1 ring-gray-100 dark:border-gray-800 dark:ring-gray-800">
+                            <AvatarImage src={profilePhotoUrl} alt={user?.name} className="object-cover" />
+                            <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-3xl font-black">
+                                {user?.name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                        </Avatar>
+                        {/* Status Dot */}
+                        <span className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-4 border-white bg-emerald-400 ring-1 ring-emerald-500/20"></span>
+                    </div>
+
+                    <div className="pt-2">
+                        <div className="mb-3 inline-flex -rotate-2 transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-yellow-300 to-amber-300 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-amber-900 shadow-md transition-transform hover:rotate-0 hover:scale-105">
+                            <span className="relative flex h-2.5 w-2.5">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75"></span>
+                                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
                             </span>
                             {t('welcomeBackBadge')}
                         </div>
-                        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-card-foreground">
-                            {getCurrentGreeting()}, {getDisplayName().toUpperCase()} <span className="inline-block animate-wave origin-bottom-right">👋🏻</span>
+                        <h1 className="text-4xl font-black tracking-tight text-gray-900 dark:text-card-foreground">
+                            {getCurrentGreeting()}, <br className="hidden sm:block" />
+                            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent decoration-4 underline-offset-4 hover:underline decoration-indigo-200">
+                                {getDisplayName()}
+                            </span>
+                            <span className="inline-block animate-bounce origin-bottom ml-2">👋🏻</span>
                         </h1>
-                        <p className="mt-1 text-base font-medium text-gray-500 dark:text-muted-foreground">{getUserIdentifier()}</p>
+                        <div className="mt-2 inline-flex items-center gap-2 rounded-lg bg-gray-100/80 px-3 py-1 text-sm font-bold text-gray-500 dark:text-muted-foreground backdrop-blur-sm">
+                            <div className="h-1.5 w-1.5 rounded-full bg-gray-400"></div>
+                            {getUserIdentifier()}
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-                    {/* Date/Time Widget - Glassmorphism */}
-                    {/* Date/Time Widget - Creative Design */}
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-teal-400 via-emerald-400 to-green-500 p-5 text-white shadow-lg shadow-emerald-200/50 w-full sm:w-auto min-w-[280px] group transition-all duration-300 hover:scale-[1.02] hover:shadow-emerald-300/50 dark:shadow-none">
-                        <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]"></div>
+                <div className="flex flex-col sm:flex-row items-stretch gap-5 w-full lg:w-auto">
+                    {/* Creative Date/Time Widget - "Cosmic Card" */}
+                    <div className="group relative min-w-[280px] w-full sm:w-auto overflow-hidden rounded-[2.5rem] p-[3px] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/20">
+                        {/* Animated Gradient Border Layer */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 animate-gradient-xy"></div>
 
-                        {/* Decorative animated elements */}
-                        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/20 blur-2xl transition-all duration-700 group-hover:bg-white/30 group-hover:scale-110 animate-pulse"></div>
-                        <div className="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-white/20 blur-2xl transition-all duration-700 group-hover:bg-white/30 group-hover:scale-110 animate-pulse" style={{ animationDelay: '1s' }}></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-32 w-32 rounded-full bg-white/5 blur-3xl"></div>
+                        {/* Inner Content Layer */}
+                        <div className="relative flex h-full flex-col justify-between rounded-[2.3rem] bg-[#1a1b26] p-6">
+                            {/* Decorative Blobs */}
+                            <div className="absolute top-0 right-0 -mt-8 -mr-8 h-24 w-24 rounded-full bg-purple-500/30 blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 -mb-8 -ml-8 h-24 w-24 rounded-full bg-indigo-500/30 blur-2xl"></div>
 
-                        <div className="relative z-10 flex flex-col gap-3">
-                            <div className="flex items-center gap-3 text-sm font-semibold text-white/90 tracking-wide">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 backdrop-blur-md shadow-sm ring-1 ring-white/30 transition-transform group-hover:scale-110">
-                                    <CalendarDays className="h-4 w-4 text-white stroke-[2]" />
+                            <div className="relative z-10 flex items-start justify-between mb-4">
+                                <div className="flex flex-col">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]"></div>
+                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300/80">Current Time</span>
+                                    </div>
+                                    <span className="text-sm font-bold text-gray-300">
+                                        {currentTime.toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'short' })}
+                                    </span>
                                 </div>
-                                <span className="drop-shadow-sm">
-                                    {currentTime.toLocaleDateString('en-MY', {
-                                        weekday: 'short',
-                                        day: 'numeric',
-                                        month: 'long',
-                                        year: 'numeric'
-                                    }).replace(/(\w+)\s(\d+)/, '$1, $2')}
-                                </span>
+                                <div className="rounded-xl bg-gray-800/80 p-2.5 text-indigo-300 shadow-inner ring-1 ring-white/5">
+                                    <CalendarDays className="h-5 w-5" />
+                                </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur-md shadow-sm ring-1 ring-white/30 transition-transform group-hover:scale-110">
-                                    <Timer className="h-6 w-6 text-white stroke-[2]" />
-                                </div>
-                                <span className="tabular-nums text-3xl font-black tracking-tight drop-shadow-md">
-                                    {currentTime.toLocaleTimeString('en-MY', {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                        second: '2-digit',
-                                        hour12: true
-                                    })}
+
+                            <div className="relative z-10 flex items-baseline gap-2">
+                                <span className="text-5xl font-black text-white tracking-tighter drop-shadow-lg font-sans">
+                                    {currentTime.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit', hour12: false })}
                                 </span>
+                                <div className="flex flex-col text-[10px] font-bold text-gray-500 uppercase leading-tight">
+                                    <span>{currentTime.getHours() >= 12 ? 'PM' : 'AM'}</span>
+                                    <span>MYS</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Active Parcels Count */}
-                    {/* Active Parcels Count - Professional Stat Card */}
-                    {/* Active Parcels Count - Creative Gradient Card */}
-                    <div className="relative flex items-center justify-between gap-4 rounded-2xl bg-gradient-to-br from-pink-500 to-green-500 p-5 shadow-lg shadow-pink-200/50 min-w-[220px] transition-all duration-300 hover:scale-[1.02] hover:shadow-pink-300/50 dark:shadow-none overflow-hidden group">
-                        {/* Background decorative elements */}
-                        <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-white/10 blur-2xl transition-transform group-hover:scale-110"></div>
-                        <div className="absolute bottom-0 left-0 -mb-4 -ml-4 h-24 w-24 rounded-full bg-white/10 blur-2xl transition-transform group-hover:scale-110"></div>
+                    {/* Active Parcels Widget - "Candy Pop" */}
+                    <div className="group relative min-w-[240px] w-full sm:w-auto cursor-pointer overflow-hidden rounded-[2.5rem] bg-[#FFDEE9] p-1 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-1 hover:shadow-pink-400/30">
+                        {/* Background Gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#FFDEE9] to-[#B5FFFC]"></div>
 
-                        <div className="relative z-10">
-                            <div className="text-xs font-bold uppercase tracking-wider text-pink-100 mb-0.5">{t('active')}</div>
-                            <div className="flex items-baseline gap-1.5">
-                                <span className="text-4xl font-black text-white tracking-tight leading-none">{activeParcelCount}</span>
-                                <span className="text-sm font-medium text-pink-100/80">parcels</span>
+                        {/* Content Container */}
+                        <div className="relative flex h-full flex-row items-center justify-between rounded-[2.3rem] bg-white/60 p-6 backdrop-blur-xl border border-white/40">
+                            <div>
+                                <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-2 py-0.5 border border-rose-200">
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
+                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
+                                    </span>
+                                    <span className="text-[9px] font-black uppercase tracking-wider text-rose-600">Active</span>
+                                </div>
+                                <div className="mt-2 flex flex-col">
+                                    <span className="text-5xl font-black text-gray-800 leading-[0.9] tracking-tight">
+                                        {activeParcelCount}
+                                    </span>
+                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wide ml-0.5">Parcels</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-pink-50 text-pink-500 dark:bg-pink-500/20 dark:text-pink-400 backdrop-blur-md shadow-inner ring-1 ring-white/30 transition-transform group-hover:rotate-6">
-                            <Package className="h-7 w-7 text-pink" />
+                            {/* Floating Icon */}
+                            <div className="flex h-16 w-16 items-center justify-center rounded-[1.2rem] bg-gradient-to-br from-white to-gray-50 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-[15deg]">
+                                <Package className="h-8 w-8 text-[#FF85A1] drop-shadow-sm" />
+                            </div>
                         </div>
                     </div>
                 </div>
