@@ -33,15 +33,27 @@ class Announcement extends Model
         parent::boot();
 
         // Automatically check and update status based on expiry date
+        // Only auto-expire if the announcement is ALREADY published and we're not explicitly setting the status
         static::saving(function ($announcement) {
             $now = now();
 
-            // If announcement is Published and has passed expiry date, set to Draft
+            // Only auto-expire if:
+            // 1. The announcement was already Published (checking original status)
+            // 2. Has an expiry date
+            // 3. The expiry date has passed
+            // 4. We're not explicitly changing the status (i.e., this is an auto-check, not a manual publish/unpublish)
             if (
-                $announcement->announcement_status === 'Published' &&
+                $announcement->exists && // Only for existing records
+                $announcement->getOriginal('announcement_status') === 'Published' && // Was already published
+                $announcement->announcement_status === 'Published' && // Still trying to be published
                 $announcement->expiry_date &&
-                $announcement->expiry_date->lt($now)
+                $announcement->expiry_date->lt($now) &&
+                !$announcement->isDirty('announcement_status') // Status is not being manually changed
             ) {
+                \Log::info('⏰ Auto-expiring announcement', [
+                    'announcement_id' => $announcement->announcement_id,
+                    'expiry_date' => $announcement->expiry_date,
+                ]);
                 $announcement->announcement_status = 'Draft';
             }
         });

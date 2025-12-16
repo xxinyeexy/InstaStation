@@ -182,11 +182,20 @@ class AnnouncementController extends Controller
         ]);
 
         $publishDate = $data['publish_date'] ?? ($announcement->publish_date ?: now()->toISOString());
-        $announcement->update([
+        
+        $updates = [
             'announcement_status' => 'Published',
             'publish_date' => $publishDate,
             'updated_at' => now(),
-        ]);
+        ];
+
+        // If expiry date is in the past, clear it to prevent immediate auto-expiry to Draft
+        if ($announcement->expiry_date && $announcement->expiry_date->isPast()) {
+            $updates['expiry_date'] = null;
+        }
+
+        $announcement->update($updates);
+        
         return response()->json(['success' => true, 'announcement' => $announcement->fresh()]);
     }
 
