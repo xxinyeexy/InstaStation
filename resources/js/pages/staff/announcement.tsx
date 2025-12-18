@@ -358,10 +358,10 @@ export default function StaffAnnouncements(props: {
                                                 </span>
                                             )}
                                     </div>
-                                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    <div className="text-lg font-semibold text-gray-900 dark:text-white break-words line-clamp-1">
                                         {(f as any).announcement_title || (f as any).faq_question}
                                     </div>
-                                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 break-all line-clamp-3">
                                         {(f as any).announcement_content || (f as any).faq_answer}
                                     </div>
                                     <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
@@ -638,7 +638,7 @@ export default function StaffAnnouncements(props: {
                                         if (editExpiryDate) form.append('expiry_date', toIsoStringFromLocal(editExpiryDate));
                                         if (editImageFile) form.append('image', editImageFile);
 
-                                        const res = await fetch(`/staff/announcements/${id}`, {
+                                        let res = await fetch(`/staff/announcements/${id}`, {
                                             method: 'POST', // Use POST for FormData with files
                                             headers: {
                                                 'X-Requested-With': 'XMLHttpRequest',
@@ -648,12 +648,36 @@ export default function StaffAnnouncements(props: {
                                             credentials: 'include',
                                         });
 
-                                        if (!res.ok) {
-                                            if (res.status === 419) {
-                                                showValidationError('Session expired. Reloading page...');
-                                                setTimeout(() => window.location.reload(), 1500);
-                                                return;
+                                        if (res.status === 419) {
+                                            try {
+                                                // Refresh CSRF token
+                                                const refreshRes = await fetch(window.location.href);
+                                                const html = await refreshRes.text();
+                                                const parser = new DOMParser();
+                                                const doc = parser.parseFromString(html, 'text/html');
+                                                const newToken = doc.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                                                if (newToken) {
+                                                    // Update meta tag for future requests
+                                                    document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', newToken);
+
+                                                    // Retry request with new token
+                                                    res = await fetch(`/staff/announcements/${id}`, {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'X-Requested-With': 'XMLHttpRequest',
+                                                            'X-CSRF-TOKEN': newToken,
+                                                        },
+                                                        body: form,
+                                                        credentials: 'include',
+                                                    });
+                                                }
+                                            } catch (refreshError) {
+                                                console.error('Session refresh failed:', refreshError);
                                             }
+                                        }
+
+                                        if (!res.ok) {
                                             const errorText = await res.text();
                                             console.error('Update announcement failed:', res.status, errorText);
                                             showValidationError(`Failed to update announcement: ${res.statusText}`);
@@ -685,7 +709,7 @@ export default function StaffAnnouncements(props: {
             {viewing && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
                     <div className="absolute inset-0 bg-black/30" onClick={() => setViewing(null)} />
-                    <div className="relative z-10 w-full max-w-2xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
+                    <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
                                 <div className="text-lg font-semibold text-gray-900 dark:text-white">Announcement Details</div>
@@ -705,19 +729,21 @@ export default function StaffAnnouncements(props: {
                             </button>
                         </div>
                         <div className="space-y-4">
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">{(viewing as any).announcement_title || (viewing as any).faq_question}</div>
+                            <div className="text-2xl font-bold text-gray-900 dark:text-white break-words">{(viewing as any).announcement_title || (viewing as any).faq_question}</div>
                             {(viewing as any).announcement_image && (
-                                <img
-                                    src={`/storage/${(viewing as any).announcement_image}`}
-                                    alt="announcement"
-                                    className="h-56 w-full rounded-md object-cover"
-                                />
+                                <div className="relative aspect-video w-full overflow-hidden rounded-md border border-gray-100 dark:border-gray-700">
+                                    <img
+                                        src={`/storage/${(viewing as any).announcement_image}`}
+                                        alt="announcement"
+                                        className="h-full w-full object-contain bg-gray-50 dark:bg-gray-900"
+                                    />
+                                </div>
                             )}
-                            <div className="prose max-w-none text-gray-700 dark:text-gray-300">
+                            <div className="prose max-w-none text-gray-700 dark:text-gray-300 break-words whitespace-pre-wrap">
                                 {(viewing as any).announcement_content || (viewing as any).faq_answer}
                             </div>
                             <hr className="dark:border-gray-700" />
-                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                            <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
                                 <div>
                                     <div className="font-medium">Created</div>
                                     <div>{(viewing as any).created_at ? new Date((viewing as any).created_at).toLocaleString() : 'N/A'}</div>
@@ -727,7 +753,7 @@ export default function StaffAnnouncements(props: {
                                     <div>{formatDateTime((viewing as any).publish_date)}</div>
                                 </div>
                                 <div>
-                                    <div className="font-medium">Expires</div>
+                                    <div className="font-medium">Expiry Date</div>
                                     <div>{formatDateTime((viewing as any).expiry_date)}</div>
                                 </div>
                             </div>
@@ -886,20 +912,40 @@ export default function StaffAnnouncements(props: {
                                             if (publishDate) form.append('publish_date', toIsoStringFromLocal(publishDate));
                                             if (expiryDate) form.append('expiry_date', toIsoStringFromLocal(expiryDate));
                                             if (imageFile) form.append('image', imageFile);
-                                            const res = await fetch('/staff/announcements', {
+                                            let res = await fetch('/staff/announcements', {
                                                 method: 'POST',
                                                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
                                                 body: form,
                                                 credentials: 'include', // Ensure cookies are sent
                                             });
 
-                                            if (!res.ok) {
-                                                if (res.status === 419) {
-                                                    showValidationError('Session expired. Reloading page...');
-                                                    setTimeout(() => window.location.reload(), 1500);
-                                                    return;
-                                                }
+                                            if (res.status === 419) {
+                                                try {
+                                                    // Refresh CSRF token
+                                                    const refreshRes = await fetch(window.location.href);
+                                                    const html = await refreshRes.text();
+                                                    const parser = new DOMParser();
+                                                    const doc = parser.parseFromString(html, 'text/html');
+                                                    const newToken = doc.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
+                                                    if (newToken) {
+                                                        // Update meta tag for future requests
+                                                        document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', newToken);
+
+                                                        // Retry request with new token
+                                                        res = await fetch('/staff/announcements', {
+                                                            method: 'POST',
+                                                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': newToken },
+                                                            body: form,
+                                                            credentials: 'include',
+                                                        });
+                                                    }
+                                                } catch (refreshError) {
+                                                    console.error('Session refresh failed:', refreshError);
+                                                }
+                                            }
+
+                                            if (!res.ok) {
                                                 const errorText = await res.text();
                                                 let errorMessage = res.statusText || 'Unknown error';
                                                 try {
@@ -943,7 +989,8 @@ export default function StaffAnnouncements(props: {
                         </div>
                     </div>
                 </div>
-            )}
-        </AppLayout>
+            )
+            }
+        </AppLayout >
     );
 }

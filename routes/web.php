@@ -20,13 +20,17 @@ Route::get('/linkstorage', function () {
 });
 
 Route::get('/', function () {
-    $today = now()->toDateString();
+    $now = now();
 
     $announcements = Announcement::query()
         ->where('announcement_status', 'Published')
-        ->where(function ($q) use ($today) {
+        ->where(function ($q) use ($now) {
+            $q->whereNull('publish_date')
+                ->orWhere('publish_date', '<=', $now);
+        })
+        ->where(function ($q) use ($now) {
             $q->whereNull('expiry_date')
-                ->orWhereDate('expiry_date', '>=', $today);
+                ->orWhere('expiry_date', '>', $now);
         })
         ->orderByDesc(DB::raw('COALESCE(publish_date, created_at)'))
         ->get([

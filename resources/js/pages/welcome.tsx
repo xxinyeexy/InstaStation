@@ -788,35 +788,32 @@ export default function Welcome() {
                             className="relative mt-24 duration-700 animate-in fade-in slide-in-from-left-8"
                             style={{ animationDelay: '100ms' }}
                         >
-                            <div className="relative overflow-hidden rounded-[40px] border-[8px] border-[#f2e8da] bg-[#fffbf0] p-10 shadow-[0_30px_60px_rgba(200,180,160,0.2)]">
-                                {/* Decorative elements mimicking the reference */}
-                                <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                                    {/* Top Tablet 'notch' or decorative bar */}
-                                    <div className="absolute top-0 left-1/2 h-6 w-32 -translate-x-1/2 rounded-b-xl bg-[#f2e8da]"></div>
-                                </div>
+                            <div className="relative overflow-hidden rounded-[48px] bg-[#FFFEFA] border-4 border-[#F3F0E6] p-8 md:p-12 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]">
+                                {/* Decorative elements */}
+                                <div className="absolute top-0 left-1/2 h-8 w-40 -translate-x-1/2 rounded-b-2xl bg-[#EFE9D9]"></div>
 
-                                <div className="relative mb-12 text-center">
-                                    <div className="mb-4 inline-flex -rotate-2 transform items-center gap-2 rounded-2xl bg-[#ffecb3] px-6 py-3 shadow-sm transition-transform hover:rotate-0">
-                                        <Sparkles className="h-5 w-5 text-orange-400" />
-                                        <span className="font-black tracking-wide text-orange-900">Newsletter!</span>
+                                <div className="relative mb-14 text-center">
+                                    <div className="mb-6 inline-flex rotate-[-2deg] transform items-center gap-2 rounded-2xl bg-[#FDE68A] px-6 py-2.5 shadow-sm transition-transform hover:rotate-0 border-2 border-[#FCD34D]">
+                                        <Sparkles className="h-5 w-5 text-[#B45309]" />
+                                        <span className="font-black tracking-wide text-[#92400E]">Newsletter!</span>
                                     </div>
 
-                                    <h2 className="relative z-10 text-3xl sm:text-4xl md:text-5xl font-black text-[#2c3e50]">
-                                        Campus <span className="relative inline-block text-[#ff8e8e]">Dispatch
-                                            <svg className="absolute -bottom-1 md:-bottom-2 -left-2 -z-10 h-3 md:h-4 w-full text-[#ffeb3b]" viewBox="0 0 100 10" preserveAspectRatio="none">
-                                                <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
+                                    <h2 className="relative z-10 text-4xl sm:text-5xl md:text-6xl font-black text-[#1E293B]">
+                                        Campus <span className="relative inline-block text-[#FB7185]">Dispatch
+                                            <svg className="absolute -bottom-2 md:-bottom-3 left-0 -z-10 h-3 md:h-5 w-full text-[#FDE047]" viewBox="0 0 100 10" preserveAspectRatio="none">
+                                                <path d="M0 5 Q 50 15 100 5" stroke="currentColor" strokeWidth="12" fill="none" opacity="0.8" />
                                             </svg>
                                         </span>
                                     </h2>
-                                    <p className="mt-3 md:mt-4 text-sm md:text-base font-bold text-[#95a5a6]">
+                                    <p className="mt-4 text-sm md:text-base font-bold text-[#94A3B8] tracking-widest uppercase">
                                         | Daily News | Cultural Express | Otter Knowledge |
                                     </p>
 
                                     {announcementsSorted.length > displayedAnnouncements.length && (
-                                        <div className="mt-6 flex justify-center">
+                                        <div className="mt-8 flex justify-center">
                                             <button
                                                 onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
-                                                className="group inline-flex items-center gap-2 rounded-full bg-[#81ecec] px-8 py-3 font-black text-[#00cec9] transition-all hover:-translate-y-1 hover:bg-[#4dd0e1] hover:text-white"
+                                                className="group inline-flex items-center gap-2 rounded-full bg-[#E0F2FE] px-8 py-3 font-black text-[#0EA5E9] transition-all hover:-translate-y-1 hover:bg-[#BAE6FD]"
                                             >
                                                 View More <ArrowUpRight className="h-5 w-5 transition-transform group-hover:rotate-45" />
                                             </button>
@@ -825,88 +822,99 @@ export default function Welcome() {
                                 </div>
 
                                 {announcements.length === 0 ? (
-                                    <div className="rounded-[32px] border border-dashed border-rose-200/80 bg-white/90 p-12 text-center shadow-inner">
-                                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200">
-                                            <Bell className="h-8 w-8 text-gray-400" />
+                                    <div className="rounded-[32px] border-2 border-dashed border-[#E2E8F0] bg-white p-16 text-center">
+                                        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#F1F5F9]">
+                                            <Bell className="h-10 w-10 text-[#CBD5E1]" />
                                         </div>
-                                        <p className="text-lg font-semibold text-gray-500">No announcements yet.</p>
+                                        <p className="text-xl font-bold text-[#94A3B8]">No announcements yet.</p>
                                     </div>
                                 ) : (
-                                    <div className="grid gap-6 md:gap-8 lg:gap-12 lg:grid-cols-2">
+                                    <div className="grid gap-6 md:gap-8 lg:gap-16 lg:grid-cols-2 lg:items-center">
+                                        {/* Featured Card - Polaroid Style */}
                                         {featuredAnnouncement && (
                                             <div
-                                                className="group relative cursor-pointer md:rotate-1 transform overflow-hidden rounded-[24px] md:rounded-[30px] border-4 md:border-[6px] border-[#fff] bg-[#fdf2f8] p-3 md:p-4 shadow-[0_10px_40px_rgba(0,0,0,0.08)] transition-all duration-300 hover:rotate-0 hover:scale-[1.02] hover:shadow-[0_15px_50px_rgba(0,0,0,0.12)]"
+                                                className="group relative cursor-pointer transform transition-all duration-300 hover:scale-[1.02]"
                                                 onClick={() => setSelectedAnnouncement(featuredAnnouncement)}
                                             >
-                                                {/* Decorative Tape */}
-                                                <div className="absolute top-2 left-1/2 h-6 md:h-8 w-20 md:w-24 -translate-x-1/2 -rotate-2 bg-[#ffeaa7]/50 shadow-sm backdrop-blur-sm"></div>
+                                                <div className="relative overflow-hidden rounded-[3rem] bg-white p-5 shadow-[0_30px_60px_-10px_rgba(0,0,0,0.08)] border border-gray-100/50">
+                                                    {/* Top Tape */}
+                                                    <div className="absolute top-0 left-1/2 h-8 w-24 -translate-y-1/2 -translate-x-1/2 rotate-[-2deg] bg-[#FEF3C7] shadow-sm"></div>
 
-                                                <div className="h-full rounded-[16px] md:rounded-[20px] bg-white p-4 md:p-6">
-                                                    {featuredAnnouncement.announcement_image && (
-                                                        <div className="relative mb-4 md:mb-6 aspect-[4/3] overflow-hidden rounded-[12px] md:rounded-[16px] border-2 md:border-4 border-[#fff0f6]">
-                                                            <img
-                                                                src={`/storage/${featuredAnnouncement.announcement_image}`}
-                                                                alt="announcement"
-                                                                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                                            />
+                                                    {/* Inner Frame */}
+                                                    <div className="relative overflow-hidden rounded-[2.5rem] border-[6px] border-[#FFF1F2] bg-white p-6 md:p-8">
+                                                        {featuredAnnouncement.announcement_image && (
+                                                            <div className="relative mb-6 aspect-square w-full overflow-hidden rounded-[2rem] border-4 border-[#FFF1F2] shadow-inner">
+                                                                <img
+                                                                    src={`/storage/${featuredAnnouncement.announcement_image}`}
+                                                                    alt="announcement"
+                                                                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                                />
+                                                            </div>
+                                                        )}
+
+                                                        <div className="mb-4 flex items-center gap-3">
+                                                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FFEDD5] px-3 py-1 text-[10px] font-black uppercase tracking-wider text-[#C2410C]">
+                                                                <Package className="h-3 w-3" /> FEATURED
+                                                            </span>
+                                                            <span className="h-1.5 w-1.5 rounded-full bg-[#CBD5E1]"></span>
+                                                            <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wide">
+                                                                {formatDate(featuredAnnouncement.publish_date || featuredAnnouncement.created_at)}
+                                                            </span>
                                                         </div>
-                                                    )}
-                                                    <div className="flex flex-wrap items-center gap-2 md:gap-3 text-[10px] md:text-xs font-bold tracking-widest text-slate-400 uppercase">
-                                                        <span className="inline-flex items-center gap-1.5 md:gap-2 rounded-full bg-[#fae3d9] px-2.5 md:px-3 py-0.5 md:py-1 text-[#e17055]">
-                                                            <Package className="h-2.5 md:h-3 w-2.5 md:w-3" /> FEATURED
-                                                        </span>
-                                                        <span className="h-1 md:h-1.5 w-1 md:w-1.5 rounded-full bg-slate-300"></span>
-                                                        <span className="text-[9px] md:text-[10px]">
-                                                            {formatDate(featuredAnnouncement.publish_date || featuredAnnouncement.created_at)}
-                                                        </span>
-                                                    </div>
-                                                    <h3 className="mt-3 md:mt-4 text-lg md:text-xl lg:text-2xl font-black text-[#2d3436] line-clamp-2">
-                                                        {featuredAnnouncement.announcement_title}
-                                                    </h3>
-                                                    <div className="mt-3 md:mt-4 flex items-center justify-between">
-                                                        <span className="text-xs md:text-sm font-bold text-[#b2bec3]">Tap to read more...</span>
-                                                        <div className="flex h-8 md:h-10 w-8 md:w-10 items-center justify-center rounded-full bg-[#fab1a0] text-white transition-all duration-300 group-hover:bg-[#e17055] group-hover:scale-110">
-                                                            <ArrowUpRight className="h-4 md:h-5 w-4 md:w-5" />
+
+                                                        <h3 className="mb-6 text-2xl md:text-3xl font-black text-[#1E293B] leading-tight line-clamp-2 group-hover:text-[#FB7185] transition-colors">
+                                                            {featuredAnnouncement.announcement_title}
+                                                        </h3>
+
+                                                        <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                                                            <span className="text-sm font-bold text-[#94A3B8] group-hover:text-[#64748B] transition-colors">Tap to read more...</span>
+                                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FCA5A5] text-white shadow-md transition-all duration-300 group-hover:bg-[#F87171] group-hover:scale-110 group-hover:rotate-45">
+                                                                <ArrowUpRight className="h-6 w-6" />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         )}
 
-                                        <div className="relative grid content-start gap-3 md:gap-4">
-                                            {/* Removed timeline line for cleaner blocky look */}
-
+                                        {/* Secondary List */}
+                                        <div className="flex flex-col gap-5">
                                             {secondaryAnnouncements.map((a: AnnouncementCard, index: number) => (
                                                 <div
                                                     key={a.announcement_id}
-                                                    className="group relative flex cursor-pointer gap-3 md:gap-5 rounded-[18px] md:rounded-[24px] border-2 border-[#eeebe6] bg-white p-3 md:p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ffeaa7] hover:shadow-[4px_4px_0px_#ffeaa7]"
+                                                    className="group relative flex cursor-pointer items-center gap-5 rounded-[2rem] border border-[#F1F5F9] bg-white p-4 pr-6 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:border-[#E2E8F0]"
                                                     style={{ animationDelay: `${(index + 2) * 100}ms` }}
                                                     onClick={() => setSelectedAnnouncement(a)}
                                                 >
-                                                    {a.announcement_image && (
-                                                        <div className="relative h-20 md:h-24 w-20 md:w-24 shrink-0 overflow-hidden rounded-[14px] md:rounded-[18px] border-2 border-[#f0f0f0]">
+                                                    {a.announcement_image ? (
+                                                        <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[1.5rem] border border-[#F1F5F9]">
                                                             <img
                                                                 src={`/storage/${a.announcement_image}`}
                                                                 alt="announcement"
-                                                                className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0 group-hover:scale-110"
+                                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                             />
                                                         </div>
+                                                    ) : (
+                                                        <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-[1.5rem] bg-[#F8FAFC] border border-[#F1F5F9]">
+                                                            <Package className="h-8 w-8 text-[#CBD5E1]" />
+                                                        </div>
                                                     )}
-                                                    <div className="flex flex-1 flex-col justify-center min-w-0">
-                                                        <div className="flex flex-wrap items-center gap-1.5 md:gap-2 text-[9px] md:text-[10px] font-bold tracking-wider text-[#b2bec3] uppercase">
-                                                            <span className="flex items-center gap-1 rounded-md bg-[#f1f2f6] px-1.5 md:px-2 py-0.5 text-[#a4b0be]">
-                                                                <Calendar className="h-2.5 md:h-3 w-2.5 md:w-3" /> {formatDate(a.publish_date || a.created_at)}
+
+                                                    <div className="flex flex-1 flex-col min-w-0 py-1">
+                                                        <div className="mb-1 flex items-center gap-2">
+                                                            <Calendar className="h-3 w-3 text-[#94A3B8]" />
+                                                            <span className="text-[10px] font-bold text-[#94A3B8] uppercase tracking-wide">
+                                                                {formatDate(a.publish_date || a.created_at)}
                                                             </span>
                                                         </div>
-                                                        <h4 className="mt-1 line-clamp-2 text-base md:text-lg font-black text-[#2d3436] transition-colors group-hover:text-[#e17055]">
+                                                        <h4 className="line-clamp-2 text-lg font-black text-[#334155] leading-snug group-hover:text-[#FB7185] transition-colors">
                                                             {a.announcement_title}
                                                         </h4>
-                                                        <p className="mt-1 line-clamp-2 text-[10px] md:text-xs font-medium text-[#636e72]">
-                                                            {a.announcement_content}
-                                                        </p>
+                                                        <div className="mt-1 h-1 w-8 rounded-full bg-[#F1F5F9] group-hover:bg-[#FB7185]/20 group-hover:w-12 transition-all"></div>
                                                     </div>
-                                                    <div className="flex items-center justify-center self-center shrink-0 rounded-full bg-[#f1f2f6] p-1.5 md:p-2 text-[#b2bec3] transition-all duration-300 group-hover:bg-[#ffeaa7] group-hover:text-[#d35400] group-hover:scale-110">
-                                                        <ArrowUpRight className="h-3.5 md:h-4 w-3.5 md:w-4" />
+
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#F1F5F9] text-[#94A3B8] transition-all duration-300 group-hover:bg-[#FFE4E6] group-hover:text-[#FB7185]">
+                                                        <ArrowUpRight className="h-5 w-5" />
                                                     </div>
                                                 </div>
                                             ))}
@@ -1038,123 +1046,100 @@ export default function Welcome() {
                 </div>
             </footer>
 
-            {/* Announcement Detail Modal - Wooden Menu Board Style */}
+            {/* Announcement Detail Modal - Reference Match */}
             {
                 selectedAnnouncement && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 duration-300 animate-in fade-in">
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSelectedAnnouncement(null)} />
 
-                        {/* Wrapper to control max height and ensure it fits */}
-                        <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col translate-y-8 duration-500 animate-in slide-in-from-bottom-8 zoom-in-95">
+                        {/* Wrapper */}
+                        <div className="relative z-10 flex max-h-[90vh] w-full max-w-xl flex-col translate-y-8 duration-500 animate-in slide-in-from-bottom-8 zoom-in-95">
 
-                            {/* Hanging String & Nail - Positioned absolutely relative to wrapper */}
-                            <div className="absolute -top-24 left-1/2 h-24 w-60 -translate-x-1/2 pointer-events-none">
+                            {/* Hanging String */}
+                            <div className="absolute -top-24 left-1/2 h-24 w-60 -translate-x-1/2 pointer-events-none z-0">
                                 <svg width="100%" height="100%" viewBox="0 0 240 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    {/* String */}
-                                    <path d="M120 10L20 90" stroke="#dcdde1" strokeWidth="4" strokeLinecap="round" />
-                                    <path d="M120 10L220 90" stroke="#dcdde1" strokeWidth="4" strokeLinecap="round" />
-                                    {/* Nail */}
-                                    <circle cx="120" cy="10" r="8" fill="#bdc3c7" stroke="#95a5a6" strokeWidth="2" />
-                                    <circle cx="120" cy="10" r="3" fill="#ecf0f1" className="opacity-50" />
+                                    <path d="M120 10L40 95" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round" />
+                                    <path d="M120 10L200 95" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round" />
+                                    <circle cx="120" cy="10" r="6" fill="#9CA3AF" />
+                                    <circle cx="120" cy="10" r="2" fill="#E5E7EB" />
                                 </svg>
                             </div>
 
-                            {/* Main Board Container */}
-                            <div className="relative flex flex-col overflow-hidden rounded-[48px] bg-[#dccfb6] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
-                                {/* Wood Texture/Frame Details */}
-                                <div className="absolute inset-0 pointer-events-none rounded-[48px] border-[12px] border-[#cbbca0]"></div>
+                            {/* Main Board */}
+                            <div className="relative z-10 flex flex-col overflow-hidden rounded-[2.5rem] bg-[#EBE6DE] border-[10px] border-[#DED6CA] shadow-2xl">
                                 {/* Corner Accents */}
-                                <div className="absolute top-6 left-6 h-8 w-1 rotate-45 rounded-full bg-[#b0a28a] pointer-events-none"></div>
-                                <div className="absolute top-6 right-6 h-8 w-1 -rotate-45 rounded-full bg-[#b0a28a] pointer-events-none"></div>
-                                <div className="absolute bottom-6 left-6 h-8 w-1 -rotate-45 rounded-full bg-[#b0a28a] pointer-events-none"></div>
-                                <div className="absolute bottom-6 right-6 h-8 w-1 rotate-45 rounded-full bg-[#b0a28a] pointer-events-none"></div>
+                                <div className="absolute top-4 left-4 h-6 w-6 border-t-[3px] border-l-[3px] border-[#CDC3B3] rounded-tl-2xl pointer-events-none"></div>
+                                <div className="absolute top-4 right-4 h-6 w-6 border-t-[3px] border-r-[3px] border-[#CDC3B3] rounded-tr-2xl pointer-events-none"></div>
+                                <div className="absolute bottom-4 left-4 h-6 w-6 border-b-[3px] border-l-[3px] border-[#CDC3B3] rounded-bl-2xl pointer-events-none"></div>
+                                <div className="absolute bottom-4 right-4 h-6 w-6 border-b-[3px] border-r-[3px] border-[#CDC3B3] rounded-br-2xl pointer-events-none"></div>
 
-                                {/* Inner Paper Content Area - Scrollable */}
-                                <div className="relative mx-3 my-3 flex flex-col overflow-y-auto rounded-[36px] bg-[#fbf9f5] px-6 pt-12 pb-10 shadow-inner md:px-8 custom-scrollbar">
-                                    {/* Close Button */}
-                                    <button
-                                        onClick={() => setSelectedAnnouncement(null)}
-                                        className="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#e3dad0] text-[#8d7f6d] transition-transform hover:rotate-90 hover:bg-[#d6c9bc]"
-                                    >
-                                        <X size={18} strokeWidth={3} />
-                                    </button>
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setSelectedAnnouncement(null)}
+                                    className="absolute top-4 right-4 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-[#DAD3C7] text-[#9CA3AF] hover:bg-[#CDC3B3] hover:text-white transition-colors"
+                                >
+                                    <X size={18} strokeWidth={2.5} />
+                                </button>
 
-                                    {/* Title Section with Organic Green Blob */}
-                                    <div className="relative mb-8 flex-shrink-0 text-center">
-                                        <div className="relative inline-block">
-                                            {/* Green Organic Background */}
-                                            <div className="absolute inset-0 -rotate-2 scale-110 transform rounded-[30%] bg-[#8bad6b] opacity-90 blur-[1px]"></div>
-                                            <h2 className="relative z-10 px-6 py-2 text-2xl font-black tracking-widest text-white">
+                                {/* Inner Content Paper */}
+                                <div className="m-3 sm:m-4 flex flex-col overflow-y-auto rounded-[2rem] bg-white px-6 py-8 sm:px-8 sm:py-10 shadow-inner custom-scrollbar">
+
+                                    {/* Header Badge */}
+                                    <div className="mb-6 flex justify-center">
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-[#88AB75] blur-md opacity-40 rounded-full"></div>
+                                            <span className="relative inline-block rounded-full bg-[#88AB75] px-8 py-1.5 text-xs font-black tracking-[0.2em] text-white shadow-sm uppercase transform -rotate-1">
                                                 ANNOUNCEMENT
-                                            </h2>
+                                            </span>
                                         </div>
                                     </div>
 
-                                    {/* Image Area */}
+                                    {/* Image */}
                                     {selectedAnnouncement.announcement_image && (
-                                        <div className="mb-6 w-full flex-shrink-0 overflow-hidden rounded-xl shadow-sm">
+                                        <div className="mb-6 w-full shrink-0 overflow-hidden rounded-xl border border-gray-100 shadow-sm">
                                             <img
                                                 src={`/storage/${selectedAnnouncement.announcement_image}`}
                                                 alt="announcement"
-                                                className="h-56 w-full object-cover"
+                                                className="w-full h-auto object-contain"
                                             />
                                         </div>
                                     )}
 
-                                    {/* Content Info */}
-                                    <div className="flex-1 text-center">
-                                        <h3 className="text-2xl font-black text-[#594a3a] md:text-3xl">
-                                            {selectedAnnouncement.announcement_title}
-                                        </h3>
+                                    {/* Title */}
+                                    <h2 className="mb-4 text-center text-2xl sm:text-3xl font-black text-[#594A3A] leading-tight break-words">
+                                        {selectedAnnouncement.announcement_title}
+                                    </h2>
 
-                                        {/* Meta Data Stickers */}
-                                        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-                                            <span className="relative z-0 inline-block">
-                                                <span className="absolute inset-0 top-1/2 h-3 w-full -translate-y-1/2 scale-110 -rotate-2 transform bg-[#ffeaa7]/60"></span>
-                                                <span className="relative z-10 text-xs font-bold text-[#8d7f6d] md:text-sm">
-                                                    {formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}
-                                                </span>
-                                            </span>
-                                            <span className="text-[#cbbca0]">●</span>
-                                            <span className="relative z-0 inline-block">
-                                                <span className="absolute inset-0 top-1/2 h-3 w-full -translate-y-1/2 scale-110 rotate-1 transform bg-[#fab1a0]/40"></span>
-                                                <span className="relative z-10 text-xs font-bold text-[#8d7f6d] md:text-sm">
-                                                    UMPSA Postal Hub
-                                                </span>
-                                            </span>
-                                        </div>
-
-                                        {/* Description - The scrolling part */}
-                                        <div className="relative mt-6 text-left">
-                                            <p className="whitespace-pre-line text-base font-bold leading-relaxed text-[#8d7f6d] md:text-lg">
-                                                {selectedAnnouncement.announcement_content}
-                                            </p>
-                                        </div>
+                                    {/* Metadata */}
+                                    <div className="flex flex-wrap items-center justify-center gap-2 mb-6 text-[11px] font-bold uppercase tracking-wider">
+                                        <span className="px-2 py-0.5 bg-[#FDF6C9] text-[#8D7F6D] rounded-sm transform -rotate-1">
+                                            {formatDate(selectedAnnouncement.publish_date || selectedAnnouncement.created_at)}
+                                        </span>
+                                        <span className="text-[#D1D5DB]">•</span>
+                                        <span className="px-2 py-0.5 bg-[#FCE4D6] text-[#8D7F6D] rounded-sm transform rotate-1">
+                                            UMPSA Postal Hub
+                                        </span>
                                     </div>
 
-                                    {/* Bottom Decorative Footer Text */}
-                                    <div className="mt-8 flex-shrink-0 text-center text-xs font-bold text-[#cbbca0]">
-                                        Always welcome to visit us! 🦦
+                                    {/* Body */}
+                                    <div className="prose prose-sm w-full max-w-none text-[#8D7F6D] font-medium leading-relaxed break-words whitespace-pre-wrap text-left">
+                                        {selectedAnnouncement.announcement_content}
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div className="mt-8 text-center text-[10px] font-bold text-[#CDC3B3] flex items-center justify-center gap-1.5">
+                                        Always welcome to visit us! <span className="text-sm grayscale opacity-70">🦦</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        {/* Style for custom scrollbar within this component */}
+
+                        {/* Scrollbar Styles */}
                         <style>{`
-                            .custom-scrollbar::-webkit-scrollbar {
-                                width: 8px;
-                            }
-                            .custom-scrollbar::-webkit-scrollbar-track {
-                                background: transparent;
-                            }
-                            .custom-scrollbar::-webkit-scrollbar-thumb {
-                                background-color: #e3dad0;
-                                border-radius: 20px;
-                                border: 2px solid #fbf9f5;
-                            }
-                            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                                background-color: #d6c9bc;
-                            }
+                            .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                            .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                            .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #E5E7EB; border-radius: 20px; }
+                            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #D1D5DB; }
                         `}</style>
                     </div>
                 )
