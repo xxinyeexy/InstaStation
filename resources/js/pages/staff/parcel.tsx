@@ -86,7 +86,8 @@ interface EditParcelForm {
     parcel_status: string;
     recipient_name: string;
     email: string;
-    student_id: string;
+    student_id: string; // This is matric ID
+    student_user_id?: number | null; // This is user ID
     fee: number;
     sender_name: string;
     sender_address: string;
@@ -107,7 +108,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedParcelId, setSelectedParcelId] = useState<number | null>(null);
     const [selectedTrackingNo, setSelectedTrackingNo] = useState<string | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
+
 
     // Parcel details modal states
     const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -123,6 +124,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         recipient_name: '',
         email: '',
         student_id: '',
+        student_user_id: null,
         fee: 1.0,
         sender_name: '',
         sender_address: '',
@@ -343,9 +345,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             setEditForm({
                 tracking_no: freshParcel.tracking_no || '',
                 parcel_status: freshParcel.parcel_status || '',
-                recipient_name: freshParcel.student_user?.name || '',
+                recipient_name: freshParcel.student_user?.name || freshParcel.recipient_name || '',
                 email: freshParcel.student_user?.email || '',
-                student_id: freshParcel.student_user?.matric || freshParcel.student_id?.toString() || '',
+                student_id: freshParcel.student_user?.matric || freshParcel.recipient_matric || freshParcel.student_id?.toString() || '',
+                student_user_id: freshParcel.student_user?.id || freshParcel.student_id || null,
                 fee: 1.0, // Default fee
                 sender_name: freshParcel.sender || '',
                 sender_address: 'N/A', // Not in database
@@ -360,12 +363,53 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         }
     };
 
+    // Debounce timer for student lookup
+    const lookupTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Lookup student by name or matric ID
+    const lookupStudent = async (query: string) => {
+        if (!query || query.length < 2) return;
+
+        try {
+            const response = await fetch(`/api/students/search?query=${encodeURIComponent(query)}`);
+            if (response.ok) {
+                const students = await response.json();
+                // If we find an exact match or a very close match (first result)
+                // we'll update the form. For now, let's take the first result if it exists.
+                if (students && students.length > 0) {
+                    const student = students[0];
+                    setEditForm((prev) => ({
+                        ...prev,
+                        recipient_name: student.student_name,
+                        student_id: student.matric_id,
+                        email: student.email,
+                        parcel_status: 'Pending Payment', // Auto update status as requested
+                        // Also update linked student ID if the data structure has it
+                        student_user_id: student.student_id,
+                    }));
+                }
+            }
+        } catch (error) {
+            console.error('Failed to lookup student:', error);
+        }
+    };
+
     // Handle form input changes
     const handleEditFormChange = (field: keyof EditParcelForm, value: string | number) => {
         setEditForm((prev) => ({
             ...prev,
             [field]: value,
         }));
+
+        // If updating student_id or recipient_name, trigger lookup
+        if (field === 'student_id' || field === 'recipient_name') {
+            if (lookupTimerRef.current) {
+                clearTimeout(lookupTimerRef.current);
+            }
+            lookupTimerRef.current = setTimeout(() => {
+                lookupStudent(value.toString());
+            }, 500);
+        }
     };
 
     // Handle form submission
@@ -427,6 +471,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     fee: editForm.fee,
                     description: editForm.description,
                     location: editingParcel.location,
+                    recipient_name: editForm.recipient_name,
+                    recipient_matric: editForm.student_id,
+                    student_id: editForm.student_user_id,
                 }),
             });
 
@@ -823,10 +870,20 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const handleDeleteConfirm = async () => {
         if (!selectedParcelId) return;
 
-        setIsDeleting(true);
+        // Capture required data before clearing state
+        const parcelIdToDelete = selectedParcelId;
+        const trackingNoToDelete = selectedTrackingNo;
+
+        // 1. Instant UI Feedback: Close modal and remove from list immediately
+        setShowDeleteModal(false);
+        setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== parcelIdToDelete));
+
+        // 2. Optimistic success notification
+        addNotification('success', t('parcelDeleted'), `The parcel ${trackingNoToDelete} has been successfully deleted`);
 
         try {
-            const response = await fetch(`/staff/parcel/${selectedParcelId}`, {
+            // 3. Background deletion request
+            const response = await fetch(`/staff/parcel/${parcelIdToDelete}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -836,24 +893,20 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             });
 
             if (!response.ok) {
+                // If the response failed, we need to throw to hit the catch block
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            // Remove parcel from local state
-            setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== selectedParcelId));
-            setShowDeleteModal(false);
-            setSelectedParcelId(null);
-            setSelectedTrackingNo(null);
-
-            // Show success notification
-            addNotification('success', t('parcelDeleted'), `${t('parcel')} ${selectedTrackingNo} ${t('parcelDeletedSuccess').toLowerCase()}`);
         } catch (error) {
             console.error('Failed to delete parcel:', error);
 
-            // Show error notification
-            addNotification('error', t('deleteFailed'), `${t('failedToDelete').replace('. Please try again.', '')} ${selectedTrackingNo}.`);
+            // 4. Revert: If deletion failed on server, reload the list to restore the item
+            router.reload({ only: ['parcels'] });
+
+            // Overwrite success notification with error
+            addNotification('error', t('deleteFailed'), `${t('failedToDelete').replace('. Please try again.', '')} ${trackingNoToDelete}.`);
         } finally {
-            setIsDeleting(false);
+            setSelectedParcelId(null);
+            setSelectedTrackingNo(null);
         }
     };
 
@@ -1155,13 +1208,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         {t('studentID')}
                                                     </label>
                                                     <p className="text-gray-900 dark:text-white">
-                                                        {parcelDetails.student_user?.matric || parcelDetails.student_id}
+                                                        {parcelDetails.student_user?.matric || parcelDetails.recipient_matric || parcelDetails.student_id || 'N/A'}
                                                     </p>
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">{t('name')}</label>
                                                     <p className="text-gray-900 dark:text-white">
-                                                        {parcelDetails.student_user?.name || 'N/A'}
+                                                        {parcelDetails.student_user?.name || parcelDetails.recipient_name || 'N/A'}
                                                     </p>
                                                 </div>
                                                 <div>
@@ -1600,24 +1653,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         <div className="flex justify-center gap-3">
                             <button
                                 onClick={handleDeleteCancel}
-                                disabled={isDeleting}
-                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
+                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600"
                             >
                                 {t('cancel')}
                             </button>
                             <button
                                 onClick={handleDeleteConfirm}
-                                disabled={isDeleting}
-                                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
                             >
-                                {isDeleting ? (
-                                    <>
-                                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                        {t('deleting')}
-                                    </>
-                                ) : (
-                                    t('deleteParcel')
-                                )}
+                                {t('deleteParcel')}
                             </button>
                         </div>
                     </div>

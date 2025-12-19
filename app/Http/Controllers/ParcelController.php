@@ -279,6 +279,8 @@ class ParcelController extends Controller
                     'matric' => $parcel->studentUser->matric,
                     'email' => $parcel->studentUser->email,
                 ] : null,
+                'recipient_name' => $parcel->recipient_name,
+                'recipient_matric' => $parcel->recipient_matric,
                 'weight' => 'N/A',
                 'dimensions' => $parcel->size ?? 'N/A',
                 'description' => 'N/A',
@@ -349,6 +351,8 @@ class ParcelController extends Controller
                         'matric' => $parcel->studentUser->matric,
                         'email' => $parcel->studentUser->email,
                     ] : null,
+                    'recipient_name' => $parcel->recipient_name,
+                    'recipient_matric' => $parcel->recipient_matric,
                 ],
             ]);
         } catch (\Exception $e) {
@@ -455,6 +459,9 @@ class ParcelController extends Controller
                 'dimensions' => 'sometimes|nullable|string',
                 'fee' => 'sometimes|numeric|min:0',
                 'description' => 'sometimes|nullable|string',
+                'recipient_name' => 'sometimes|nullable|string|max:150',
+                'recipient_matric' => 'sometimes|nullable|string|max:50',
+                'student_id' => 'sometimes|nullable|exists:users,id',
             ]);
 
             // Map form fields to database fields
@@ -471,6 +478,9 @@ class ParcelController extends Controller
             if (isset($validatedData['size'])) $updateData['size'] = $validatedData['size'];
             if (isset($validatedData['dimensions'])) $updateData['size'] = $validatedData['dimensions'];
             if (isset($validatedData['location'])) $updateData['location'] = $validatedData['location'];
+            if (isset($validatedData['recipient_name'])) $updateData['recipient_name'] = $validatedData['recipient_name'];
+            if (isset($validatedData['recipient_matric'])) $updateData['recipient_matric'] = $validatedData['recipient_matric'];
+            if (isset($validatedData['student_id'])) $updateData['student_id'] = $validatedData['student_id'];
 
             // Update the parcel
             $parcel->update($updateData);

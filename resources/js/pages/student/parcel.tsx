@@ -1579,6 +1579,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             if (selectedParcelId === null) return;
                                             setIsDeleting(true);
                                             try {
+                                                // Get the parcel to retrieve tracking number before deletion
+                                                const parcelToDelete = parcelList.find((p) => p.parcel_id === selectedParcelId);
+                                                const trackingNo = parcelToDelete?.tracking_no || selectedParcelCode || 'N/A';
+
                                                 const response = await fetch(`/staff/parcel/${selectedParcelId}`, {
                                                     method: 'DELETE',
                                                     headers: {
@@ -1593,7 +1597,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                 // Remove from local state
                                                 setParcelList((prev) => prev.filter((parcel) => parcel.parcel_id !== selectedParcelId));
 
-                                                addToastNotification('success', t('parcelDeleted'), t('parcelDeletedSuccess'));
+                                                addToastNotification('success', t('parcelDeleted'), `The parcel ${trackingNo} has been successfully deleted`);
                                                 setShowDeleteModal(false);
                                             } catch (error) {
                                                 console.error('Delete parcel error:', error);
