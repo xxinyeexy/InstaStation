@@ -239,7 +239,7 @@ class PaymentController extends Controller
                 'amount' => 1.00,
                 'method' => 'bank transfer',
                 'status' => $p->verified_by ? 'verified' : 'pending',
-                'submitted_at' => optional($p->created_at)?->format('d/m/Y, g:i:s A'),
+                'submitted_at_date' => optional($p->created_at)?->format('d/m/Y, g:i:s A'),
                 'created_at' => optional($p->created_at)?->toIso8601String(),
                 'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
             ];

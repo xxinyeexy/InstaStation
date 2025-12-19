@@ -20,7 +20,7 @@ type Row = {
     amount: number;
     method: string;
     status: 'pending' | 'verified';
-    submitted_at: string | null;
+    submitted_at_date: string | null;
     created_at?: string;
 };
 
@@ -408,9 +408,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                     <div className="font-medium text-foreground">{detail.student_matric ?? '—'}</div>
                                     <div className="mt-2 text-gray-500 dark:text-muted-foreground">{t('submitted')}</div>
                                     <div className="font-medium text-foreground">
-                                        {detail.submitted_at
-                                            ? new Date(detail.submitted_at).toLocaleDateString('en-GB')
-                                            : (detail.created_at ? new Date(detail.created_at).toLocaleDateString('en-GB') : '—')}
+                                        {detail.submitted_at_date || '—'}
                                     </div>
                                 </div>
                             </div>
