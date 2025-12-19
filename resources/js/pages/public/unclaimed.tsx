@@ -221,7 +221,7 @@ export default function Unclaimed({
                         </div>
                         <h2 className="text-lg font-bold text-gray-900">Search Unclaimed Parcels</h2>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row">
                         <input
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
@@ -302,7 +302,7 @@ export default function Unclaimed({
                                         </div>
                                     </div>
 
-                                    <div className="flex gap-2">
+                                    <div className="flex flex-col gap-2 sm:flex-row">
                                         {!(p.recipient_matric && !p.recipient_name) && (
                                             <button
                                                 disabled={processing}
