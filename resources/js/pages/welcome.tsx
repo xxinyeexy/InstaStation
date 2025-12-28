@@ -246,17 +246,7 @@ export default function Welcome() {
                     {/* Main Content */}
                     <div className="mx-auto max-w-4xl px-2 text-center">
                         {/* Badge - Fade in and slide from top */}
-                        <div
-                            className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-pink-300/50 bg-white/90 px-4 py-2 shadow-2xl ring-2 ring-pink-100/50 backdrop-blur-md duration-700 animate-in fade-in slide-in-from-top-4 md:mb-8 md:gap-3 md:px-6 md:py-3"
-                            style={{ animationDelay: '100ms' }}
-                        >
-                            <div className="rounded-full bg-gradient-to-br from-pink-500 to-purple-600 p-1 md:p-1.5">
-                                <Sparkles className="h-3 w-3 text-white md:h-4 md:w-4" />
-                            </div>
-                            <span className="bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-xs font-bold text-transparent md:text-sm">
-                                Instant Parcel Tracking Dashboard
-                            </span>
-                        </div>
+                     
 
                         {/* Logo and Title - Scale up and fade in */}
                         <div className="mb-6 duration-700 animate-in fade-in zoom-in-95 md:mb-8" style={{ animationDelay: '200ms' }}>

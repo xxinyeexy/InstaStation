@@ -20,6 +20,7 @@ export interface NavItem {
     href: string;
     icon?: LucideIcon | null;
     isActive?: boolean;
+    id?: string;
 }
 
 export interface SharedData {
@@ -58,5 +59,6 @@ export interface User {
     profile_pic?: string | null;
     phone_no?: string | null;
     room_no?: string | null;
+    has_completed_tour: boolean;
     [key: string]: unknown; // This allows for additional properties...
 }

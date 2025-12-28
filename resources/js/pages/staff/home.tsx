@@ -616,7 +616,7 @@ export default function StaffHome() {
                 )}
 
                 {/* Overview Cards */}
-                <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <div id="overview-stats" className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     <AnimatedChart delay={100}>
                         <OverviewCard
                             title={t('totalParcels')}
@@ -667,7 +667,7 @@ export default function StaffHome() {
                 <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
                     {/* Daily Operations Overview */}
                     <AnimatedChart delay={500}>
-                        <Card className="h-full">
+                        <Card id="daily-ops" className="h-full">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
                                 <CardTitle>{t('dailyOperations')}</CardTitle>
                                 <div className="flex gap-2">
@@ -735,7 +735,7 @@ export default function StaffHome() {
 
                     {/* Parcel Senders Distribution */}
                     <AnimatedChart delay={600}>
-                        <Card className="h-full">
+                        <Card id="parcel-senders" className="h-full">
                             <CardHeader>
                                 <CardTitle>{t('parcelSenders')}</CardTitle>
                             </CardHeader>
@@ -771,7 +771,7 @@ export default function StaffHome() {
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
                     {/* Parcel Size */}
                     <AnimatedChart delay={700}>
-                        <Card className="h-full">
+                        <Card id="parcel-size" className="h-full">
                             <CardHeader>
                                 <CardTitle>{t('parcelSize')}</CardTitle>
                             </CardHeader>
@@ -811,7 +811,7 @@ export default function StaffHome() {
 
                     {/* Parcel Status Distribution */}
                     <AnimatedChart delay={800}>
-                        <Card className="h-full">
+                        <Card id="parcel-status" className="h-full">
                             <CardHeader>
                                 <CardTitle>{t('parcelStatusDistribution')}</CardTitle>
                             </CardHeader>
@@ -850,7 +850,7 @@ export default function StaffHome() {
 
                     {/* Collection Time Distribution */}
                     <AnimatedChart delay={900}>
-                        <Card className="h-full">
+                        <Card id="collection-times" className="h-full">
                             <CardHeader>
                                 <CardTitle>{t('collectionTime')}</CardTitle>
                             </CardHeader>

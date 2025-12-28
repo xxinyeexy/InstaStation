@@ -1058,7 +1058,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     ))}
                 </div>
 
-                <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} t={t} />
+                <div id="welcome-header">
+                    <WelcomeHeader user={currentUser} activeParcelCount={activeParcelCount} t={t} />
+                </div>
 
                 {/* QR Code Modal */}
                 <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} isLoading={loadingQRParcels.size > 0} />
@@ -1121,7 +1123,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
                 <div className="min-h-screen bg-white p-4 sm:p-6 dark:bg-background">
                     {/* Header tiles matching screenshot */}
-                    <div className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-x-4 sm:gap-y-3">
+                    <div id="stats-tiles" className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-x-4 sm:gap-y-3">
                         {/* My Parcels - Purple (icon on right) */}
                         <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-violet-300 bg-violet-50 p-3 sm:p-4 dark:border-violet-500/50 dark:bg-violet-500/20">
                             <div className="flex items-start justify-between">
@@ -1183,7 +1185,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="lg:col-span-4 lg:col-start-11 h-28 sm:h-auto rounded-xl border-3 border-gray-100 bg-white p-3 sm:p-4 shadow-sm dark:border-border dark:bg-card">
+                        <div id="quick-actions" className="lg:col-span-4 lg:col-start-11 h-28 sm:h-auto rounded-xl border-3 border-gray-100 bg-white p-3 sm:p-4 shadow-sm dark:border-border dark:bg-card">
                             <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-card-foreground">{t('quickActions')}</div>
 
                             <button

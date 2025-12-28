@@ -28,6 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone_no',
         'room_no',
         'profile_pic',
+        'has_completed_tour',
     ];
     public function staff()
     {
@@ -59,6 +60,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_login_at' => 'datetime',
+            'has_completed_tour' => 'boolean',
         ];
     }
 

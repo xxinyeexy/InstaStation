@@ -63,6 +63,11 @@ Route::post('/register', [RegisteredUserController::class, 'store']);
 
 // Staff and Parcel routes - require authenticated and verified users
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('/user/complete-tour', function () {
+        auth()->user()->update(['has_completed_tour' => true]);
+        return back();
+    })->name('user.complete-tour');
+
     // Redirect /dashboard to appropriate page based on user type
     Route::get('dashboard', function () {
         $user = \Illuminate\Support\Facades\Auth::user();

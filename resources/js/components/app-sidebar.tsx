@@ -37,25 +37,25 @@ export function AppSidebar() {
     }, [userRole, updateRole]);
 
     const mainNavItems: NavItem[] = [
-        { title: t('myParcels'), href: '/student/parcel', icon: PackageOpen },
-        { title: t('payment'), href: '/student/payment', icon: WalletCards },
-        { title: t('history'), href: '/student/history', icon: ContactRound },
-        { title: t('faqs'), href: '/student/faq', icon: MessageCircleQuestion },
+        { id: 'nav-my-parcels', title: t('myParcels'), href: '/student/parcel', icon: PackageOpen },
+        { id: 'nav-payment', title: t('payment'), href: '/student/payment', icon: WalletCards },
+        { id: 'nav-history', title: t('history'), href: '/student/history', icon: ContactRound },
+        { id: 'nav-faqs', title: t('faqs'), href: '/student/faq', icon: MessageCircleQuestion },
     ];
 
     // Operations - General staff: Dashboard, Parcel, Payment
     const staffGeneralNavItems: NavItem[] = [
-        { title: t('dashboard'), href: '/staff/dashboard', icon: LayoutGrid },
-        { title: t('parcels'), href: '/staff/parcel', icon: PackageOpen },
-        { title: t('payment'), href: '/staff/payments', icon: WalletCards },
+        { id: 'nav-dashboard', title: t('dashboard'), href: '/staff/dashboard', icon: LayoutGrid },
+        { id: 'nav-parcels', title: t('parcels'), href: '/staff/parcel', icon: PackageOpen },
+        { id: 'nav-payment', title: t('payment'), href: '/staff/payments', icon: WalletCards },
     ];
 
     // Operations - Admin staff: Dashboard, Users, Announcements, FAQs
     const staffAdminNavItems: NavItem[] = [
-        { title: t('dashboard'), href: '/staff/dashboard', icon: LayoutGrid },
-        { title: t('users'), href: '/staff/manage-user', icon: ContactRound },
-        { title: t('announcements'), href: '/staff/announcements', icon: Megaphone },
-        { title: t('faqs'), href: '/staff/manage-faq', icon: MessageCircleQuestion },
+        { id: 'nav-dashboard', title: t('dashboard'), href: '/staff/dashboard', icon: LayoutGrid },
+        { id: 'nav-users', title: t('users'), href: '/staff/manage-user', icon: ContactRound },
+        { id: 'nav-announcements', title: t('announcements'), href: '/staff/announcements', icon: Megaphone },
+        { id: 'nav-faqs', title: t('faqs'), href: '/staff/manage-faq', icon: MessageCircleQuestion },
     ];
 
     // Determine which nav items to show based on role and department
@@ -82,7 +82,7 @@ export function AppSidebar() {
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" className="h-40 w-full hover:bg-transparent" asChild>
+                        <SidebarMenuButton id="nav-dashboard" size="lg" className="h-40 w-full hover:bg-transparent" asChild>
                             <Link href="/dashboard" prefetch>
                                 <AppLogo />
                             </Link>
@@ -94,7 +94,9 @@ export function AppSidebar() {
                 <NavMain items={roleBasedNavItems} />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser />
+                <div id="nav-user">
+                    <NavUser />
+                </div>
             </SidebarFooter>
         </Sidebar>
     );
