@@ -246,7 +246,7 @@ export default function Welcome() {
                     {/* Main Content */}
                     <div className="mx-auto max-w-4xl px-2 text-center">
                         {/* Badge - Fade in and slide from top */}
-                     
+
 
                         {/* Logo and Title - Scale up and fade in */}
                         <div className="mb-6 duration-700 animate-in fade-in zoom-in-95 md:mb-8" style={{ animationDelay: '200ms' }}>
@@ -289,13 +289,12 @@ export default function Welcome() {
                                 {words.map((word, index) => (
                                     <div
                                         key={word}
-                                        className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${
-                                            index === currentWord
+                                        className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${index === currentWord
                                                 ? 'translate-y-0 opacity-100'
                                                 : index < currentWord
-                                                  ? '-translate-y-full opacity-0'
-                                                  : 'translate-y-full opacity-0'
-                                        }`}
+                                                    ? '-translate-y-full opacity-0'
+                                                    : 'translate-y-full opacity-0'
+                                            }`}
                                     >
                                         <span className="bg-gradient-to-r from-[#FF029A] to-[#16A34A] bg-clip-text text-transparent">{word}</span>
                                     </div>

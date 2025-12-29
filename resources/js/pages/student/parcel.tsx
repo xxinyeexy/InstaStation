@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Head, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, CalendarDays, CheckCircle, MapPin, Package, Sparkles, Timer, Upload, X, XCircle } from 'lucide-react';
+import { AlertCircle, Bell, CalendarDays, CheckCircle, ChevronRight, MapPin, Package, PackageOpen, Sparkles, Clock, Upload, X, XCircle } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Define the Parcel interface based on your database structure
@@ -127,112 +127,122 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
     const profilePhotoUrl = user?.profile_pic ? `/storage/${user.profile_pic}` : undefined;
 
     return (
-        <div className="mb-8 rounded-[3rem] bg-white/80 p-8 shadow-xl ring-4 ring-white backdrop-blur-md dark:bg-card/80 dark:ring-gray-800 relative overflow-hidden transition-all hover:shadow-2xl hover:ring-indigo-100">
-            {/* Background Decoration */}
-            <div className="absolute top-0 right-0 h-40 w-40 translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-indigo-200/40 to-pink-200/40 blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 h-40 w-40 -translate-x-1/2 translate-y-1/2 rounded-full bg-gradient-to-tr from-emerald-200/40 to-teal-200/40 blur-3xl"></div>
+        <div className="mb-8 rounded-[3.5rem] bg-white p-8 shadow-[0_10px_50px_rgba(0,0,0,0.03)] border border-slate-50 relative overflow-hidden transition-all hover:shadow-[0_20px_70px_rgba(0,0,0,0.05)]">
+            {/* background blurs for atmosphere */}
+            <div className="absolute top-0 right-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-100/40 blur-[100px]"></div>
+            <div className="absolute bottom-0 left-0 h-48 w-48 -translate-x-1/2 translate-y-1/2 rounded-full bg-rose-100/30 blur-[80px]"></div>
 
-            <div className="relative z-10 flex flex-col lg:flex-row items-center lg:items-start justify-between gap-8">
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+            <div className="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-12">
+                {/* User Info Section */}
+                <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left flex-1">
                     <div className="relative group">
-                        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 opacity-70 blur transition duration-500 group-hover:opacity-100"></div>
-                        <Avatar className="relative h-24 w-24 border-[6px] border-white shadow-xl ring-1 ring-gray-100 dark:border-gray-800 dark:ring-gray-800">
+                        {/* Multi-layered glow */}
+                        <div className="absolute -inset-4 rounded-full bg-gradient-to-tr from-[#9b6dff] via-[#ff6ac1] to-[#6ae1ff] opacity-20 blur-2xl group-hover:opacity-40 transition-opacity duration-700"></div>
+                        <div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#9b6dff] via-[#ff6ac1] to-[#6ae1ff] opacity-40 blur-md"></div>
+
+                        <Avatar className="relative h-32 w-32 border-[6px] border-white shadow-2xl ring-1 ring-slate-100 transition-transform duration-500 group-hover:scale-105">
                             <AvatarImage src={profilePhotoUrl} alt={user?.name} className="object-cover" />
-                            <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-3xl font-black">
+                            <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-4xl font-black">
                                 {user?.name?.charAt(0) || 'U'}
                             </AvatarFallback>
                         </Avatar>
-                        {/* Status Dot */}
-                        <span className="absolute bottom-1 right-1 h-5 w-5 rounded-full border-4 border-white bg-emerald-400 ring-1 ring-emerald-500/20"></span>
+                        {/* Status ring */}
+                        <div className="absolute bottom-2 right-2 h-7 w-7 rounded-full border-[4px] border-white bg-emerald-400 shadow-xl flex items-center justify-center">
+                            <div className="h-2 w-2 rounded-full bg-white animate-pulse"></div>
+                        </div>
                     </div>
 
-                    <div className="pt-2">
-                        <div className="mb-3 inline-flex -rotate-2 transform items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-yellow-300 to-amber-300 px-4 py-1.5 text-xs font-black uppercase tracking-wider text-amber-900 shadow-md transition-transform hover:rotate-0 hover:scale-105">
-                            <span className="relative flex h-2.5 w-2.5">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-500 opacity-75"></span>
-                                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
-                            </span>
+                    <div className="flex flex-col space-y-3">
+                        <div className="inline-flex items-center gap-3 rounded-full bg-slate-50 border border-slate-100 px-5 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 shadow-sm self-center md:self-start">
+                            <Sparkles className="h-3 w-3 text-[#FFD747] fill-[#FFD747]" />
                             {t('welcomeBackBadge')}
                         </div>
-                        <h1 className="text-4xl font-black tracking-tight text-gray-900 dark:text-card-foreground">
-                            {getCurrentGreeting()}, <br className="hidden sm:block" />
-                            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent decoration-4 underline-offset-4 hover:underline decoration-indigo-200">
-                                {getDisplayName()}
+
+                        <h1 className="text-4xl font-black tracking-tight text-slate-800 ">
+                            {getCurrentGreeting()},<br />
+                            <span className="relative inline-block pb-1">
+                                <span className="absolute bottom-0 left-0 w-full h-3 bg-indigo-100/60 -rotate-1 -z-10"></span>
+                                <span className="bg-gradient-to-r from-[#7042FF] via-[#9B6DFF] to-[#D46DFF] bg-clip-text text-transparent">
+                                    {getDisplayName().toUpperCase()}
+                                </span>
                             </span>
-                            <span className="inline-block animate-bounce origin-bottom ml-2">👋🏻</span>
                         </h1>
-                        <div className="mt-2 inline-flex items-center gap-2 rounded-lg bg-gray-100/80 px-3 py-1 text-sm font-bold text-gray-500 dark:text-muted-foreground backdrop-blur-sm">
-                            <div className="h-1.5 w-1.5 rounded-full bg-gray-400"></div>
-                            {getUserIdentifier()}
+
+                        <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start pt-2">
+                            <div className="inline-flex items-center gap-2 rounded-2xl bg-indigo-50/50 border border-indigo-100/50 px-4 py-2 text-[11px] font-black text-indigo-500 uppercase tracking-widest">
+                                <MapPin className="h-3.5 w-3.5" />
+                                Matric: {user?.matric || 'AS1111'}
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-stretch gap-5 w-full lg:w-auto">
-                    {/* Creative Date/Time Widget - "Cosmic Card" */}
-                    <div className="group relative min-w-[280px] w-full sm:w-auto overflow-hidden rounded-[2.5rem] p-[3px] shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/20">
-                        {/* Animated Gradient Border Layer */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-400 via-purple-400 to-pink-400 animate-gradient-xy"></div>
+                {/* Creative Card Stack Section (Referring to Photo 2 Style) */}
+                <div className="relative h-[240px] w-full xl:w-[500px] flex items-center justify-center perspective-[1500px]">
+                    {/* Shadow Layer for Depth */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[180px] bg-slate-900/10 blur-[80px] rounded-full -rotate-12 translate-y-12 shrink-0 pointer-events-none"></div>
 
-                        {/* Inner Content Layer */}
-                        <div className="relative flex h-full flex-col justify-between rounded-[2.3rem] bg-[#1a1b26] p-6">
-                            {/* Decorative Blobs */}
-                            <div className="absolute top-0 right-0 -mt-8 -mr-8 h-24 w-24 rounded-full bg-purple-500/30 blur-2xl"></div>
-                            <div className="absolute bottom-0 left-0 -mb-8 -ml-8 h-24 w-24 rounded-full bg-indigo-500/30 blur-2xl"></div>
+                    {/* Back Card (Active Parcels Decoration) */}
+                    <div className="absolute w-[280px] h-[160px] rounded-[3rem] bg-white border border-slate-100 shadow-lg rotate-[-12deg] -translate-x-12 translate-y-4 transition-transform duration-700 hover:rotate-[-8deg] pointer-events-none">
+                        <div className="h-full w-full rounded-[2.8rem] bg-gradient-to-br from-indigo-50 to-transparent p-6 flex flex-col justify-end opacity-40">
+                            <div className="h-8 w-24 bg-slate-100 rounded-full mb-2"></div>
+                            <div className="h-4 w-32 bg-slate-100 rounded-full"></div>
+                        </div>
+                    </div>
 
-                            <div className="relative z-10 flex items-start justify-between mb-4">
-                                <div className="flex flex-col">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]"></div>
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300/80">Current Time</span>
-                                    </div>
-                                    <span className="text-sm font-bold text-gray-300">
-                                        {currentTime.toLocaleDateString('en-MY', { weekday: 'long', day: 'numeric', month: 'short' })}
-                                    </span>
+                    {/* Middle Card (Active Parcels Information) */}
+                    <div className="absolute w-[300px] h-[160px] rounded-[3rem] bg-gradient-to-tr from-[#9b6dff]/10 via-[#ff6ac1]/10 to-[#6ae1ff]/10 border border-white shadow-xl rotate-[6deg] translate-x-10 -translate-y-2 transition-transform duration-700 hover:rotate-[3deg]">
+                        <div className="h-full w-full rounded-[2.8rem] bg-white/40 backdrop-blur-md p-6 flex flex-col justify-between">
+                            <div className="flex justify-between items-start">
+                                <div className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-3 py-1 border border-rose-100">
+                                    <div className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse"></div>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-rose-600">Active</span>
                                 </div>
-                                <div className="rounded-xl bg-gray-800/80 p-2.5 text-indigo-300 shadow-inner ring-1 ring-white/5">
-                                    <CalendarDays className="h-5 w-5" />
+                                <div className="p-3 bg-rose-50 rounded-2xl">
+                                    <Package className="h-5 w-5 text-rose-400" />
                                 </div>
                             </div>
-
-                            <div className="relative z-10 flex items-baseline gap-2">
-                                <span className="text-5xl font-black text-white tracking-tighter drop-shadow-lg font-sans">
-                                    {currentTime.toLocaleTimeString('en-MY', { hour: '2-digit', minute: '2-digit', hour12: false })}
-                                </span>
-                                <div className="flex flex-col text-[10px] font-bold text-gray-500 uppercase leading-tight">
-                                    <span>{currentTime.getHours() >= 12 ? 'PM' : 'AM'}</span>
-                                    <span>MYS</span>
-                                </div>
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-6xl font-black text-slate-800 tracking-tighter">{activeParcelCount}</span>
+                                <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">PARCELS IN HUB</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Active Parcels Widget - "Candy Pop" */}
-                    <div className="group relative min-w-[240px] w-full sm:w-auto cursor-pointer overflow-hidden rounded-[2.5rem] bg-[#FFDEE9] p-1 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:rotate-1 hover:shadow-pink-400/30">
-                        {/* Background Gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#FFDEE9] to-[#B5FFFC]"></div>
+                    {/* Top Main Card (Current Time / Dashboard Control - Inspired by Iridescent Style) */}
+                    <div className="absolute w-[320px] h-[180px] rounded-[3rem] p-[2px] bg-gradient-to-tr from-[#9b6dff] via-[#ff6ac1] to-[#6ae1ff] shadow-[0_30px_60px_-15px_rgba(112,66,255,0.3)] transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 cursor-pointer -rotate-1">
+                        <div className="relative h-full w-full rounded-[2.9rem] bg-[#ffc6f1] overflow-hidden p-6 flex flex-col justify-between">
+                            {/* Glossy Overlay */}
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 blur-[50px] -translate-x-10 -translate-y-10 rounded-full"></div>
+                            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-green-500/20 blur-[40px] rounded-full"></div>
 
-                        {/* Content Container */}
-                        <div className="relative flex h-full flex-row items-center justify-between rounded-[2.3rem] bg-white/60 p-6 backdrop-blur-xl border border-white/40">
-                            <div>
-                                <div className="inline-flex items-center gap-1.5 rounded-full bg-rose-100 px-2 py-0.5 border border-rose-200">
-                                    <span className="relative flex h-2 w-2">
-                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-400 opacity-75"></span>
-                                        <span className="relative inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
-                                    </span>
-                                    <span className="text-[9px] font-black uppercase tracking-wider text-rose-600">Active</span>
+                            <div className="relative z-10 flex justify-between items-start">
+                                <div className="space-y-1">
+                                   
+                                    <div className="text-sm font-bold text-black-100 flex items-center gap-2">
+                                        <CalendarDays className="h-4 w-4 text-[#ff139d]" />
+                                        {currentTime.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' })}
+                                    </div>
                                 </div>
-                                <div className="mt-2 flex flex-col">
-                                    <span className="text-5xl font-black text-gray-800 leading-[0.9] tracking-tight">
-                                        {activeParcelCount}
-                                    </span>
-                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-wide ml-0.5">Parcels</span>
+                                <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner">
+                                    <Sparkles className="h-5 w-5 text-[#ff139d]" />
                                 </div>
                             </div>
 
-                            {/* Floating Icon */}
-                            <div className="flex h-16 w-16 items-center justify-center rounded-[1.2rem] bg-gradient-to-br from-white to-gray-50 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-[15deg]">
-                                <Package className="h-8 w-8 text-[#FF85A1] drop-shadow-sm" />
+                            <div className="relative z-10 flex items-end justify-between">
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-6xl font-black text-white tracking-tighter">
+                                        {currentTime.getHours().toString().padStart(2, '0')}:{currentTime.getMinutes().toString().padStart(2, '0')}
+                                    </span>
+                                    <span className="text-3xl font-black text-[#ff139d] tracking-tighter ml-1 opacity-80">
+                                        :{currentTime.getSeconds().toString().padStart(2, '0')}
+                                    </span>
+                                    <div className="text-[10px] font-black text-slate-500 uppercase flex flex-col leading-none pb-2 ml-2">
+                                        <span>{currentTime.getHours() >= 12 ? 'PM' : 'AM'}</span>
+                                      
+                                    </div>
+                                </div>
+                               
                             </div>
                         </div>
                     </div>
@@ -1121,256 +1131,215 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
                 )}
 
-                <div className="min-h-screen bg-white p-4 sm:p-6 dark:bg-background">
-                    {/* Header tiles matching screenshot */}
-                    <div id="stats-tiles" className="mb-4 sm:mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-x-4 sm:gap-y-3">
-                        {/* My Parcels - Purple (icon on right) */}
-                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-violet-300 bg-violet-50 p-3 sm:p-4 dark:border-violet-500/50 dark:bg-violet-500/20">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <div className="text-xs sm:text-xs text-gray-600 dark:text-violet-400">{t('myParcels')}</div>
-                                    <div className="mt-1 text-2xl sm:text-3xl font-bold text-violet-700 dark:text-violet-300">{tileCounts.myParcels}</div>
+                <div className="bg-slate-50/50 rounded-[3rem] p-4 sm:p-8">
+                    {/* Stats Grid matching screenshot */}
+                    <div id="stats-tiles" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-start">
+                        {/* Top Group (8 cols) */}
+                        <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {/* My Parcels Card */}
+                            <div className="h-36 rounded-3xl bg-[#F5F1FF] border-2 border-[#EBE3FF] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-indigo-500/5 transition-all">
+                                <div className="flex flex-col justify-between h-full relative z-10">
+                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('myParcels')}</span>
+                                    <span className="text-5xl font-black text-[#7042FF] tracking-tighter">{tileCounts.myParcels}</span>
                                 </div>
-                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-violet-100 text-violet-600 dark:bg-violet-500/30 dark:text-violet-300">
-                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                        />
-                                    </svg>
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#EBE3FF] flex items-center justify-center text-[#7042FF] group-hover:scale-110 transition-transform">
+                                    <PackageOpen className="w-8 h-8" />
+                                </div>
+                            </div>
+
+                            {/* Pending Payment Card */}
+                            <div className="h-36 rounded-3xl bg-[#FFFBF0] border-2 border-[#FFF2C2] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-amber-500/5 transition-all">
+                                <div className="flex flex-col justify-between h-full relative z-10">
+                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('pendingPayment')}</span>
+                                    <span className="text-5xl font-black text-[#D4A017] tracking-tighter">{tileCounts.pendingPayment}</span>
+                                </div>
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#FFF2C2] flex items-center justify-center text-[#D4A017] group-hover:scale-110 transition-transform">
+                                    <Clock className="w-8 h-8" />
+                                </div>
+                            </div>
+
+                            {/* Approved Card */}
+                            <div className="h-36 rounded-3xl bg-[#FFF6F1] border-2 border-[#FFE8DA] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-orange-500/5 transition-all">
+                                <div className="flex flex-col justify-between h-full relative z-10">
+                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('approved')}</span>
+                                    <span className="text-5xl font-black text-[#FF7A30] tracking-tighter">{tileCounts.approved}</span>
+                                </div>
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#FFE8DA] flex items-center justify-center text-[#FF7A30] group-hover:scale-110 transition-transform">
+                                    <CheckCircle className="w-8 h-8" />
+                                </div>
+                            </div>
+
+                            {/* Ready for Collection Card */}
+                            <div className="h-36 rounded-3xl bg-[#F1FDF6] border-2 border-[#D7F7E5] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-emerald-500/5 transition-all">
+                                <div className="flex flex-col justify-between h-full relative z-10">
+                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('readyForCollection')}</span>
+                                    <span className="text-5xl font-black text-[#10B981] tracking-tighter">{tileCounts.readyForCollection}</span>
+                                </div>
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#D7F7E5] flex items-center justify-center text-[#10B981] group-hover:scale-110 transition-transform">
+                                    <CheckCircle className="w-8 h-8" />
+                                </div>
+                            </div>
+
+                            {/* Collected Card */}
+                            <div className="h-36 rounded-3xl bg-[#F1F7FF] border-2 border-[#D7E8FF] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-blue-500/5 transition-all">
+                                <div className="flex flex-col justify-between h-full relative z-10">
+                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('collected')}</span>
+                                    <span className="text-5xl font-black text-[#3B82F6] tracking-tighter">{tileCounts.collected}</span>
+                                </div>
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#D7E8FF] flex items-center justify-center text-[#3B82F6] group-hover:scale-110 transition-transform">
+                                    <Package className="w-8 h-8" />
                                 </div>
                             </div>
                         </div>
 
-                        {/* Pending Payment - Yellow (icon on right) */}
-                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-yellow-200 bg-yellow-50 p-3 sm:p-4 dark:border-yellow-500/50 dark:bg-yellow-500/20">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <div className="text-xs sm:text-xs text-gray-600 dark:text-yellow-400">{t('pendingPayment')}</div>
-                                    <div className="mt-1 text-2xl sm:text-3xl font-bold text-yellow-700 dark:text-yellow-300">{tileCounts.pendingPayment}</div>
-                                </div>
-                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-yellow-100 text-yellow-600 dark:bg-yellow-500/30 dark:text-yellow-300">
-                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Approved - Orange (icon on right) */}
-                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-amber-200 bg-amber-50 p-3 sm:p-4 dark:border-amber-500/50 dark:bg-amber-500/20">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <div className="text-xs sm:text-xs text-gray-600 dark:text-amber-400">{t('approved')}</div>
-                                    <div className="mt-1 text-2xl sm:text-3xl font-bold text-amber-700 dark:text-amber-300">{tileCounts.approved}</div>
-                                </div>
-                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-500/30 dark:text-amber-300">
-                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Quick Actions */}
-                        <div id="quick-actions" className="lg:col-span-4 lg:col-start-11 h-28 sm:h-auto rounded-xl border-3 border-gray-100 bg-white p-3 sm:p-4 shadow-sm dark:border-border dark:bg-card">
-                            <div className="mb-3 text-sm font-semibold text-gray-700 dark:text-card-foreground">{t('quickActions')}</div>
+                        {/* Quick Actions Group (4 cols) */}
+                        <div id="quick-actions" className="lg:col-span-4 h-full rounded-3xl bg-white border border-slate-100 p-8 shadow-sm hover:shadow-md transition-all">
+                            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-6">{t('quickActions')}</h3>
 
                             <button
                                 onClick={() => {
                                     setSelectedHub(hubs[0]);
                                     setShowLocations(true);
                                 }}
-                                className="flex w-full items-center justify-between rounded-lg bg-orange-50 px-4 py-2 text-sm font-medium text-orange-700 hover:bg-orange-100 dark:bg-orange-500/20 dark:text-orange-300 dark:hover:bg-orange-500/30"
+                                className="flex w-full items-center justify-between rounded-2xl bg-[#FFF6F1] px-6 py-4 text-sm font-black text-[#FF7A30] hover:bg-[#FFE8DA] transition-colors border border-[#FFE8DA]/30"
                             >
-                                <span>{t('locations')}</span>
+                                <span className="flex items-center gap-3">
+                                    <MapPin className="w-5 h-5" />
+                                    {t('locations')}
+                                </span>
+                                <ChevronRight className="w-4 h-4" />
                             </button>
-                        </div>
 
-                        {/* Ready for Collection - Green (icon on right) */}
-                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-green-200 bg-green-50 p-3 sm:p-4 dark:border-green-500/50 dark:bg-green-500/20">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <div className="text-xs text-gray-600 dark:text-green-400">{t('readyForCollection')}</div>
-                                    <div className="mt-1 text-3xl font-bold text-green-700 dark:text-green-300">{tileCounts.readyForCollection}</div>
-                                </div>
-                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-500/30 dark:text-green-300">
-                                    <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                    </svg>
-                                </div>
+                            <p className="mt-6 text-[11px] font-bold text-slate-400 text-center leading-relaxed">
+                                Quickly find pickup points and operating hours across campus.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Locations Modal */}
+                {showLocations && (
+                    <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
+                        <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-card">
+                            <div className="mb-4 flex items-center justify-between border-b pb-4">
+                                <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-card-foreground">
+                                    <MapPin className="h-5 w-5" /> Parcel Locations
+                                </h2>
+                                <button
+                                    onClick={() => {
+                                        setShowLocations(false);
+                                        setSelectedHub(null);
+                                    }}
+                                    className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
                             </div>
-                        </div>
-
-                        {/* Locations Modal */}
-                        {showLocations && (
-                            <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
-                                <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl dark:bg-card">
-                                    <div className="mb-4 flex items-center justify-between border-b pb-4">
-                                        <h2 className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-card-foreground">
-                                            <MapPin className="h-5 w-5" /> Parcel Locations
-                                        </h2>
-                                        <button
-                                            onClick={() => {
-                                                setShowLocations(false);
-                                                setSelectedHub(null);
-                                            }}
-                                            className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
+                            <div className="max-h-[60vh] space-y-4 overflow-y-auto">
+                                {hubs.map((hub) => {
+                                    const open = isHubOpenNow(hub);
+                                    return (
+                                        <div
+                                            key={hub.name}
+                                            className={`rounded-lg border p-4 transition-colors ${selectedHub?.name === hub.name
+                                                ? 'border-blue-300 bg-blue-50 dark:border-blue-500/50 dark:bg-blue-500/20'
+                                                : 'border-gray-200 bg-gray-50 dark:border-border dark:bg-muted/30'
+                                                }`}
                                         >
-                                            <X className="h-5 w-5" />
-                                        </button>
-                                    </div>
-                                    <div className="max-h-[60vh] space-y-4 overflow-y-auto">
-                                        {hubs.map((hub) => {
-                                            const open = isHubOpenNow(hub);
-                                            return (
-                                                <div
-                                                    key={hub.name}
-                                                    className={`rounded-lg border p-4 transition-colors ${selectedHub?.name === hub.name
-                                                        ? 'border-blue-300 bg-blue-50 dark:border-blue-500/50 dark:bg-blue-500/20'
-                                                        : 'border-gray-200 bg-gray-50 dark:border-border dark:bg-muted/30'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-start justify-between">
-                                                        <div>
-                                                            <h3 className="text-sm font-semibold text-gray-900 dark:text-card-foreground">
-                                                                {hub.name}
-                                                            </h3>
-                                                            <p className="mt-1 text-xs text-gray-600 dark:text-muted-foreground">
-                                                                Operating time: {toAmPm(hub.operating.start)} to {toAmPm(hub.operating.end)}
-                                                            </p>
-                                                            <p className="mt-1 text-xs">
-                                                                Status:{' '}
-                                                                <span
-                                                                    className={`font-semibold ${open
-                                                                        ? 'text-emerald-600 dark:text-emerald-400'
-                                                                        : 'text-red-600 dark:text-red-400'
-                                                                        }`}
-                                                                >
-                                                                    {open ? 'OPEN' : 'CLOSE'}
-                                                                </span>
-                                                            </p>
-                                                        </div>
-                                                        <button
-                                                            onClick={() => setSelectedHub(hub)}
-                                                            className="rounded-md px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/20"
+                                            <div className="flex items-start justify-between">
+                                                <div>
+                                                    <h3 className="text-sm font-semibold text-gray-900 dark:text-card-foreground">
+                                                        {hub.name}
+                                                    </h3>
+                                                    <p className="mt-1 text-xs text-gray-600 dark:text-muted-foreground">
+                                                        Operating time: {toAmPm(hub.operating.start)} to {toAmPm(hub.operating.end)}
+                                                    </p>
+                                                    <p className="mt-1 text-xs">
+                                                        Status:{' '}
+                                                        <span
+                                                            className={`font-semibold ${open
+                                                                ? 'text-emerald-600 dark:text-emerald-400'
+                                                                : 'text-red-600 dark:text-red-400'
+                                                                }`}
                                                         >
-                                                            {selectedHub?.name === hub.name ? 'Selected' : 'Select'}
+                                                            {open ? 'OPEN' : 'CLOSE'}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={() => setSelectedHub(hub)}
+                                                    className="rounded-md px-3 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/20"
+                                                >
+                                                    {selectedHub?.name === hub.name ? 'Selected' : 'Select'}
+                                                </button>
+                                            </div>
+                                            {selectedHub?.name === hub.name && (
+                                                <div className="mt-3 space-y-3">
+                                                    <div className="rounded-md border bg-white p-2 text-center text-xs dark:border-border dark:bg-card">
+                                                        {/* Keyless Google Maps embed using q + output=embed (no API key needed) */}
+                                                        <iframe
+                                                            title={`Map-${hub.name}`}
+                                                            src={`https://www.google.com/maps?q=${encodeURIComponent(hub.addressQuery)}&output=embed`}
+                                                            className="h-64 w-full rounded-md border"
+                                                            loading="lazy"
+                                                            referrerPolicy="no-referrer-when-downgrade"
+                                                        />
+                                                        <p className="mt-2 text-[10px] text-gray-500 dark:text-muted-foreground">
+                                                            Map view via Google Maps (embedded search).
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex justify-end gap-2">
+                                                        <button
+                                                            onClick={() => openMaps(hub.addressQuery)}
+                                                            className="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+                                                        >
+                                                            Open in Google Maps
                                                         </button>
                                                     </div>
-                                                    {selectedHub?.name === hub.name && (
-                                                        <div className="mt-3 space-y-3">
-                                                            <div className="rounded-md border bg-white p-2 text-center text-xs dark:border-border dark:bg-card">
-                                                                {/* Keyless Google Maps embed using q + output=embed (no API key needed) */}
-                                                                <iframe
-                                                                    title={`Map-${hub.name}`}
-                                                                    src={`https://www.google.com/maps?q=${encodeURIComponent(hub.addressQuery)}&output=embed`}
-                                                                    className="h-64 w-full rounded-md border"
-                                                                    loading="lazy"
-                                                                    referrerPolicy="no-referrer-when-downgrade"
-                                                                />
-                                                                <p className="mt-2 text-[10px] text-gray-500 dark:text-muted-foreground">
-                                                                    Map view via Google Maps (embedded search).
-                                                                </p>
-                                                            </div>
-                                                            <div className="flex justify-end gap-2">
-                                                                <button
-                                                                    onClick={() => openMaps(hub.addressQuery)}
-                                                                    className="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
-                                                                >
-                                                                    Open in Google Maps
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    )}
                                                 </div>
-                                            );
-                                        })}
-                                        {hubs.length === 0 && (
-                                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500 dark:border-border dark:bg-muted/30 dark:text-muted-foreground">
-                                                No locations available.
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                                {hubs.length === 0 && (
+                                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500 dark:border-border dark:bg-muted/30 dark:text-muted-foreground">
+                                        No locations available.
                                     </div>
-                                </div>
-                            </div>
-                        )}
-                        {/* Collected - Light Blue (icon on right) */}
-                        <div className="lg:col-span-3 h-28 sm:h-30 rounded-xl border-3 border-blue-200 bg-blue-50 p-3 sm:p-4 dark:border-blue-500/50 dark:bg-blue-500/20">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <div className="text-xs sm:text-xs text-gray-600 dark:text-blue-400">{t('collected')}</div>
-                                    <div className="mt-1 text-2xl sm:text-3xl font-bold text-blue-700 dark:text-blue-300">{tileCounts.collected}</div>
-                                </div>
-                                <div className="flex h-13 w-13 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-500/30 dark:text-blue-300">
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="24"
-                                        height="24"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        className="lucide lucide-package-open-icon lucide-package-open"
-                                    >
-                                        <path d="M12 22v-9" />
-                                        <path d="M15.17 2.21a1.67 1.67 0 0 1 1.63 0L21 4.57a1.93 1.93 0 0 1 0 3.36L8.82 14.79a1.655 1.655 0 0 1-1.64 0L3 12.43a1.93 1.93 0 0 1 0-3.36z" />
-                                        <path d="M20 13v3.87a2.06 2.06 0 0 1-1.11 1.83l-6 3.08a1.93 1.93 0 0 1-1.78 0l-6-3.08A2.06 2.06 0 0 1 4 16.87V13" />
-                                        <path d="M21 12.43a1.93 1.93 0 0 0 0-3.36L8.83 2.2a1.64 1.64 0 0 0-1.63 0L3 4.57a1.93 1.93 0 0 0 0 3.36l12.18 6.86a1.636 1.636 0 0 0 1.63 0z" />
-                                    </svg>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>
+                )}
 
-                    {/* Parcel cards grid */}
-                    {displayParcels.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center text-gray-500 dark:border-border dark:bg-card dark:text-muted-foreground">
-                            {t('noParcelsFound')}
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                            {displayParcels.map((parcel) => {
-                                const status = parcel.parcel_status?.toLowerCase();
-                                const isApproved = status === 'approved';
-                                const isPendingPayment = status === 'pending payment';
-                                const isReady = status === 'ready for collection' || status === 'ready to collect';
-                                const isCollected = status === 'collected';
-                                const scheduledDateStr = parcel.schedule
-                                    ? new Date(parcel.schedule).toLocaleDateString('en-MY', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                    })
-                                    : '';
-                                return (
-                                    <div
-                                        key={parcel.parcel_id}
-                                        className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-border dark:bg-card"
-                                    >
-                                        <div className="mb-3 flex items-start justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-50 text-pink-500 dark:bg-pink-500/20 dark:text-pink-400">
-                                                    {/* <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {/* Parcel cards grid */}
+                {displayParcels.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center text-gray-500 dark:border-border dark:bg-card dark:text-muted-foreground">
+                        {t('noParcelsFound')}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        {displayParcels.map((parcel) => {
+                            const status = parcel.parcel_status?.toLowerCase();
+                            const isApproved = status === 'approved';
+                            const isPendingPayment = status === 'pending payment';
+                            const isReady = status === 'ready for collection' || status === 'ready to collect';
+                            const isCollected = status === 'collected';
+                            const scheduledDateStr = parcel.schedule
+                                ? new Date(parcel.schedule).toLocaleDateString('en-MY', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                })
+                                : '';
+                            return (
+                                <div
+                                    key={parcel.parcel_id}
+                                    className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-border dark:bg-card"
+                                >
+                                    <div className="mb-3 flex items-start justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-50 text-pink-500 dark:bg-pink-500/20 dark:text-pink-400">
+                                                {/* <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path
                                                             strokeLinecap="round"
                                                             strokeLinejoin="round"
@@ -1379,171 +1348,170 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         />
                                                         
                                                     </svg> */}
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        width="24"
-                                                        height="24"
-                                                        viewBox="0 0 24 24"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        stroke-width="2.5"
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                    >
-                                                        <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
-                                                        <path d="M12 22V12" />
-                                                        <polyline points="3.29 7 12 12 20.71 7" />
-                                                        <path d="m7.5 4.27 9 5.15" />
-                                                    </svg>
-                                                </div>
-                                                <div className="font-['Consolas'] text-sm font-semibold text-gray-900 dark:text-card-foreground">
-                                                    {parcel.parcel_code || 'N/A'}
-                                                </div>
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    width="24"
+                                                    height="24"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    stroke-width="2.5"
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                >
+                                                    <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" />
+                                                    <path d="M12 22V12" />
+                                                    <polyline points="3.29 7 12 12 20.71 7" />
+                                                    <path d="m7.5 4.27 9 5.15" />
+                                                </svg>
                                             </div>
-                                            <span
-                                                className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
-                                            >
-                                                {getTranslatedStatus(parcel.parcel_status)}
+                                            <div className="font-['Consolas'] text-sm font-semibold text-gray-900 dark:text-card-foreground">
+                                                {parcel.parcel_code || 'N/A'}
+                                            </div>
+                                        </div>
+                                        <span
+                                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
+                                        >
+                                            {getTranslatedStatus(parcel.parcel_status)}
+                                        </span>
+                                    </div>
+
+                                    <div className="mb-2 flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                                        <svg
+                                            className="h-4 w-4 text-gray-400 dark:text-muted-foreground"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                        </svg>
+                                        <span>
+                                            {t('arrived')}: {formatDate(parcel.created_at)}
+                                        </span>
+                                    </div>
+
+                                    <div className="mb-4 text-sm">
+                                        <span className="mr-2 text-gray-600 dark:text-muted-foreground">{t('payment')}:</span>
+                                        {parcel.payment_verified || isApproved || isReady ? (
+                                            <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
+                                                {t('verified')}
                                             </span>
-                                        </div>
-
-                                        <div className="mb-2 flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
-                                            <svg
-                                                className="h-4 w-4 text-gray-400 dark:text-muted-foreground"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                />
-                                            </svg>
-                                            <span>
-                                                {t('arrived')}: {formatDate(parcel.created_at)}
+                                        ) : (
+                                            <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
+                                                {t('pending')}
                                             </span>
-                                        </div>
+                                        )}
+                                    </div>
 
-                                        <div className="mb-4 text-sm">
-                                            <span className="mr-2 text-gray-600 dark:text-muted-foreground">{t('payment')}:</span>
-                                            {parcel.payment_verified || isApproved || isReady ? (
-                                                <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
-                                                    {t('verified')}
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
-                                                    {t('pending')}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            {isPendingPayment && (
-                                                <button
-                                                    onClick={() => handlePayNow(parcel.parcel_id)}
-                                                    className="flex-1 rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-600"
-                                                >
-                                                    {t('payNow')}
-                                                </button>
-                                            )}
-                                            {isApproved && (
-                                                <button
-                                                    onClick={() => handleMarkAsCollected(parcel.parcel_id)}
-                                                    className="flex-1 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700"
-                                                >
-                                                    <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                                    </svg>
-                                                    {t('collect')}
-                                                </button>
-                                            )}
-                                            {isReady && (
-                                                <div className="w-full space-y-2">
-                                                    {/* Row 1: QR Code and View Details */}
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <button
-                                                            onClick={() => handleShowQRCode(parcel.parcel_id)}
-                                                            disabled={loadingQRParcels.has(parcel.parcel_id)}
-                                                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
-                                                        >
-                                                            {loadingQRParcels.has(parcel.parcel_id) ? (
-                                                                <div className="flex items-center justify-center">
-                                                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
-                                                                </div>
-                                                            ) : (
-                                                                <>
-                                                                    <svg
-                                                                        className="mr-1 inline h-4 w-4"
-                                                                        fill="none"
-                                                                        stroke="currentColor"
-                                                                        viewBox="0 0 24 24"
-                                                                    >
-                                                                        <path
-                                                                            strokeLinecap="round"
-                                                                            strokeLinejoin="round"
-                                                                            strokeWidth={2}
-                                                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
-                                                                        />
-                                                                    </svg>
-                                                                    {t('showQRCode')}
-                                                                </>
-                                                            )}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleViewParcel(parcel.parcel_id)}
-                                                            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
-                                                        >
-                                                            {t('viewDetails')}
-                                                        </button>
-                                                    </div>
-
-                                                    {/* Row 2: Scheduled full-width */}
-                                                    <button className="w-full rounded-xl bg-gray-50 px-4 py-3 text-gray-700 shadow-sm transition-colors hover:bg-gray-100 dark:bg-muted dark:text-foreground dark:hover:bg-accent">
-                                                        <div className="flex items-center gap-3">
-                                                            <svg
-                                                                className="h-4 w-4 text-gray-600 opacity-90 dark:text-muted-foreground"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                            >
-                                                                <path
-                                                                    strokeLinecap="round"
-                                                                    strokeLinejoin="round"
-                                                                    strokeWidth={2}
-                                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                                />
-                                                            </svg>
-                                                            <div className="flex flex-col text-left leading-tight">
-                                                                <span className="text-sm font-semibold text-gray-900 dark:text-foreground">
-                                                                    {t('scheduled')}
-                                                                </span>
-                                                                <span className="text-xs text-gray-700 dark:text-muted-foreground">
-                                                                    {scheduledDateStr && parcel.time_slot
-                                                                        ? `${scheduledDateStr} • ${parcel.time_slot}`
-                                                                        : parcel.time_slot || scheduledDateStr || ''}
-                                                                </span>
+                                    <div className="flex items-center gap-2">
+                                        {isPendingPayment && (
+                                            <button
+                                                onClick={() => handlePayNow(parcel.parcel_id)}
+                                                className="flex-1 rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-600"
+                                            >
+                                                {t('payNow')}
+                                            </button>
+                                        )}
+                                        {isApproved && (
+                                            <button
+                                                onClick={() => handleMarkAsCollected(parcel.parcel_id)}
+                                                className="flex-1 rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white hover:bg-green-700"
+                                            >
+                                                <svg className="mr-1 inline h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                {t('collect')}
+                                            </button>
+                                        )}
+                                        {isReady && (
+                                            <div className="w-full space-y-2">
+                                                {/* Row 1: QR Code and View Details */}
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <button
+                                                        onClick={() => handleShowQRCode(parcel.parcel_id)}
+                                                        disabled={loadingQRParcels.has(parcel.parcel_id)}
+                                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
+                                                    >
+                                                        {loadingQRParcels.has(parcel.parcel_id) ? (
+                                                            <div className="flex items-center justify-center">
+                                                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
                                                             </div>
-                                                        </div>
+                                                        ) : (
+                                                            <>
+                                                                <svg
+                                                                    className="mr-1 inline h-4 w-4"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V6a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1zM5 20h2a1 1 0 001-1v-1a1 1 0 00-1-1H5a1 1 0 00-1 1v1a1 1 0 001 1z"
+                                                                    />
+                                                                </svg>
+                                                                {t('showQRCode')}
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleViewParcel(parcel.parcel_id)}
+                                                        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
+                                                    >
+                                                        {t('viewDetails')}
                                                     </button>
                                                 </div>
-                                            )}
-                                            {!isReady && (
-                                                <button
-                                                    onClick={() => handleViewParcel(parcel.parcel_id)}
-                                                    className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
-                                                >
-                                                    {t('viewDetails')}
+
+                                                {/* Row 2: Scheduled full-width */}
+                                                <button className="w-full rounded-xl bg-gray-50 px-4 py-3 text-gray-700 shadow-sm transition-colors hover:bg-gray-100 dark:bg-muted dark:text-foreground dark:hover:bg-accent">
+                                                    <div className="flex items-center gap-3">
+                                                        <svg
+                                                            className="h-4 w-4 text-gray-600 opacity-90 dark:text-muted-foreground"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                            />
+                                                        </svg>
+                                                        <div className="flex flex-col text-left leading-tight">
+                                                            <span className="text-sm font-semibold text-gray-900 dark:text-foreground">
+                                                                {t('scheduled')}
+                                                            </span>
+                                                            <span className="text-xs text-gray-700 dark:text-muted-foreground">
+                                                                {scheduledDateStr && parcel.time_slot
+                                                                    ? `${scheduledDateStr} • ${parcel.time_slot}`
+                                                                    : parcel.time_slot || scheduledDateStr || ''}
+                                                            </span>
+                                                        </div>
+                                                    </div>
                                                 </button>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
+                                        {!isReady && (
+                                            <button
+                                                onClick={() => handleViewParcel(parcel.parcel_id)}
+                                                className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-border dark:bg-background dark:text-foreground dark:hover:bg-accent"
+                                            >
+                                                {t('viewDetails')}
+                                            </button>
+                                        )}
                                     </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
 
             {/* Delete Confirmation Modal */}
