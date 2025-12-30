@@ -33,20 +33,19 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
     const [processingPayments, setProcessingPayments] = useState<Set<number>>(new Set());
     const [rejectModalPaymentId, setRejectModalPaymentId] = useState<number | null>(null);
     // Toast state for approve/reject success notifications
-    const [showSuccessToast, setShowSuccessToast] = useState<{ show: boolean; message: string }>({ show: false, message: '' });
+    const [showSuccessToast, setShowSuccessToast] = useState<{ show: boolean; message: string; id: number }>({ show: false, message: '', id: 0 });
     const toastTimerRef = useRef<number | null>(null);
-    const triggerSuccessToast = (message: string) => {
-        // Deduplicate same message while it's already showing
-        if (showSuccessToast.show && showSuccessToast.message === message) return;
 
-        setShowSuccessToast({ show: true, message });
+    const triggerSuccessToast = (message: string) => {
+        // Always show the toast, using unique ID to force re-render and restart animation
+        setShowSuccessToast({ show: true, message, id: Date.now() });
 
         if (toastTimerRef.current) {
             window.clearTimeout(toastTimerRef.current);
         }
 
         toastTimerRef.current = window.setTimeout(() => {
-            setShowSuccessToast({ show: false, message: '' });
+            setShowSuccessToast({ show: false, message: '', id: 0 });
             toastTimerRef.current = null;
         }, 3000);
     };
@@ -59,6 +58,14 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
             }
         };
     }, []);
+
+    // Also watch for flash success messages from server redirects/refreshes
+    useEffect(() => {
+        if (flashSuccessFromServer) {
+            triggerSuccessToast(flashSuccessFromServer);
+        }
+    }, [flashSuccessFromServer]);
+
     const searchInputRef = useRef<HTMLInputElement | null>(null);
     const typingTimerRef = useRef<number | null>(null);
 
@@ -85,8 +92,9 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                 `/staff/payments/${paymentId}/approve`,
                 {},
                 {
-                    onSuccess: () => {
-                        // Do not show local toast; rely on server flash for success notification
+                    onSuccess: (page) => {
+                        const flashMessage = (page.props as any).flash?.success;
+                        triggerSuccessToast(flashMessage || 'Payment approved successfully');
                     },
                     onError: (errors) => {
                         console.error('Approve payment error:', errors);
@@ -126,14 +134,15 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                 `/staff/payments/${paymentId}/reject`,
                 {},
                 {
-                    onSuccess: () => {
+                    onSuccess: (page) => {
                         // Remove from list after successful rejection
                         setList((prev) => prev.filter((x) => x.payment_id !== paymentId));
                         if (detail && detail.payment_id === paymentId) {
                             setDetail(null);
                         }
                         setRejectModalPaymentId(null); // Close modal
-                        // Do not show local toast; rely on server flash for success notification
+                        const flashMessage = (page.props as any).flash?.success;
+                        triggerSuccessToast(flashMessage || 'Payment rejected successfully');
                     },
                     onError: (errors) => {
                         console.error('Reject payment error:', errors);
@@ -207,14 +216,15 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Payment" />
-            {/* Toast for approve/reject success */}
+
+
+            {/* Local Toast for immediate feedback */}
             {showSuccessToast.show && (
-                <div className="fixed top-6 left-1/2 z-[100] -translate-x-1/2 animate-fade-in rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 shadow-lg flex items-center gap-2">
-                    <CircleCheck className="h-5 w-5 text-emerald-600" />
-                    <span className="text-sm font-semibold">{showSuccessToast.message}</span>
+                <div key={showSuccessToast.id} className="fixed top-8 left-1/2 z-[250] -translate-x-1/2 animate-in fade-in slide-in-from-top-2 duration-300 rounded-2xl bg-[#f0fdf4] px-5 py-2.5 shadow-sm border border-emerald-100 flex items-center gap-2.5">
+                    <CircleCheck className="h-4 w-4 text-[#065f46]" strokeWidth={2.5} />
+                    <span className="text-[14px] font-medium text-[#065f46] tracking-tight">{showSuccessToast.message}</span>
                 </div>
             )}
-
             <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                 <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-foreground">{t('paymentVerification')}</h1>
                 <p className="text-xs sm:text-sm text-gray-600 dark:text-muted-foreground">{t('reviewVerifyPayments')}</p>
@@ -312,7 +322,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                     <div className="col-span-2 font-medium text-foreground">RM{r.amount.toFixed(2)}</div>
                                     <div className="col-span-2">
                                         <span
-                                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${r.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-500/20 dark:text-green-400 dark:ring-green-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
+                                            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${r.status === 'verified' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:ring-emerald-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
                                         >
                                             {r.status === 'verified' ? <CircleCheck className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
                                             {getTranslatedStatus(r.status)}
@@ -395,7 +405,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                     <div className="font-medium text-foreground">RM{detail.amount.toFixed(2)}</div>
                                     <div className="mt-2 text-gray-500 dark:text-muted-foreground">{t('status')}</div>
                                     <span
-                                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${detail.status === 'verified' ? 'bg-green-50 text-green-700 ring-green-200 dark:bg-green-500/20 dark:text-green-400 dark:ring-green-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
+                                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs ring-1 ${detail.status === 'verified' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:ring-emerald-500/50' : 'bg-yellow-50 text-yellow-700 ring-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-400 dark:ring-yellow-500/50'}`}
                                     >
                                         {detail.status === 'verified' ? <CircleCheck className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
                                         {getTranslatedStatus(detail.status)}

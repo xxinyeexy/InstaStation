@@ -17,37 +17,47 @@ const ParcelRegistrationForm = () => {
         matricId: '',
     });
 
-    const Toast = ({ type, message }: { type: 'success' | 'error' | 'warning'; message: string }) => {
+    const Toast = ({ type, message, id }: { type: 'success' | 'error' | 'warning'; message: string; id: number }) => {
         const iconMap = {
-            success: <CircleCheck className="h-5 w-5 text-green-600" />,
-            error: <XCircle className="h-5 w-5 text-red-600" />,
-            warning: <AlertTriangle className="h-5 w-5 text-yellow-500" />,
+            success: <CircleCheck className="h-4 w-4 text-[#065f46]" strokeWidth={2.5} />,
+            error: <XCircle className="h-4 w-4 text-red-600" strokeWidth={2.5} />,
+            warning: <AlertTriangle className="h-4 w-4 text-yellow-600" strokeWidth={2.5} />,
         };
 
         const bgMap = {
-            success: 'bg-green-100 dark:bg-green-500/20 border-green-300 dark:border-green-500/50 text-green-800 dark:text-green-300',
-            error: 'bg-red-100 dark:bg-red-500/20 border-red-300 dark:border-red-500/50 text-red-800 dark:text-red-300',
-            warning: 'bg-yellow-100 dark:bg-yellow-500/20 border-yellow-300 dark:border-yellow-500/50 text-yellow-800 dark:text-yellow-300',
+            success: 'bg-[#f0fdf4] border-emerald-100 text-[#065f46]',
+            error: 'bg-red-50 border-red-100 text-red-800',
+            warning: 'bg-yellow-50 border-yellow-100 text-yellow-800',
         };
 
         return (
             <div
-                className={`animate-fade-in fixed top-6 left-1/2 z-50 flex w-fit -translate-x-1/2 items-center gap-2 rounded-md border px-4 py-2 shadow-md ${bgMap[type]}`}
+                key={id}
+                className={`fixed top-8 left-1/2 z-[250] flex -translate-x-1/2 items-center gap-2.5 rounded-2xl border px-5 py-2.5 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300 ${bgMap[type]}`}
             >
                 {iconMap[type]}
-                <span className="text-sm font-medium">{message}</span>
+                <span className="text-[14px] font-medium tracking-tight">{message}</span>
             </div>
         );
     };
-    const [errorToast, setErrorToast] = useState<{ show: boolean; message: string }>({
+    const [errorToast, setErrorToast] = useState<{ show: boolean; message: string; id: number }>({
         show: false,
         message: '',
+        id: 0,
     });
     const showErrorToast = (message: string) => {
-        setErrorToast({ show: true, message });
-        setTimeout(() => setErrorToast({ show: false, message: '' }), 3000);
+        setErrorToast({ show: true, message, id: Date.now() });
+        setTimeout(() => setErrorToast((prev) => ({ ...prev, show: false })), 3000);
     };
-    const [showRegisterToast, setShowRegisterToast] = useState(false);
+    const [successToast, setSuccessToast] = useState<{ show: boolean; message: string; id: number }>({
+        show: false,
+        message: '',
+        id: 0,
+    });
+    const showSuccessToast = (message: string) => {
+        setSuccessToast({ show: true, message, id: Date.now() });
+        setTimeout(() => setSuccessToast((prev) => ({ ...prev, show: false })), 3000);
+    };
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [isScanning, setIsScanning] = useState(false);
@@ -212,8 +222,7 @@ const ParcelRegistrationForm = () => {
         axios.post('/parcels', requestData)
             .then((response) => {
                 // Show success message
-                setShowRegisterToast(true);
-                setTimeout(() => setShowRegisterToast(false), 3000);
+                showSuccessToast('Parcel registered successfully!');
 
                 // Clear form
                 handleCancel();
@@ -368,8 +377,8 @@ const ParcelRegistrationForm = () => {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={t('registerParcel')} />
-            {showRegisterToast && <Toast type="success" message=" Parcel registered successfully!" />}
-            {errorToast.show && <Toast type="error" message={errorToast.message} />}
+            {successToast.show && <Toast type="success" message={successToast.message} id={successToast.id} />}
+            {errorToast.show && <Toast type="error" message={errorToast.message} id={errorToast.id} />}
 
             <div className="min-h-screen bg-gray-50 p-4 sm:p-6 dark:bg-background">
                 <style>{`
@@ -407,7 +416,7 @@ const ParcelRegistrationForm = () => {
                     {/* QR Scanner Area */}
                     <div className="mb-4 sm:mb-6 px-4 sm:px-6">
                         {/* Toast Notification */}
-                        {showToast && <Toast type="success" message={t('trackingNumberFilled')} />}
+                        {showToast && <Toast type="success" message={t('trackingNumberFilled')} id={Date.now()} />}
 
                         {/* Pink Modern QR Scanner Section */}
                         <div className="flex justify-center">

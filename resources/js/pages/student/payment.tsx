@@ -317,23 +317,12 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
 
             {/* Success Toast Notification */}
             {showSuccessToast && (
-                <div className="fixed right-4 bottom-4 z-50">
-                    <div className="max-w-96 min-w-80 rounded-lg border border-emerald-200 bg-emerald-50/95 p-4 text-emerald-800 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out">
-                        <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex-shrink-0">
-                                <CheckCircle className="h-5 w-5 text-emerald-600" />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-semibold">Payment Submitted Successfully!</h4>
-                                <p className="mt-1 text-sm opacity-90">Your payment proof has been uploaded. Staff will verify within 24 hours.</p>
-                            </div>
-                            <button
-                                onClick={() => setShowSuccessToast(false)}
-                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        </div>
+                <div className="fixed top-8 left-1/2 z-[250] -translate-x-1/2">
+                    <div className="flex min-w-[320px] items-center justify-center gap-2 rounded-2xl bg-[#f0fdf4] px-5 py-2.5 text-[#065f46] shadow-sm animate-in fade-in slide-in-from-top-4">
+                        <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                        <span className="text-[14px] font-medium tracking-tight whitespace-nowrap">
+                            Payment proof uploaded successfully! Staff will verify within 24 hours.
+                        </span>
                     </div>
                 </div>
             )}

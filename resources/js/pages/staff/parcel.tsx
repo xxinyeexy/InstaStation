@@ -1048,104 +1048,96 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             <Head title="Parcels" />
 
             {/* Notification Container */}
-            <div className="fixed right-4 bottom-4 z-50 space-y-3">
+            <div className="fixed top-8 left-1/2 z-[250] -translate-x-1/2 space-y-3">
                 {notifications.map((notification) => (
                     <div
                         key={notification.id}
-                        className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${notification.type === 'success'
-                            ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800'
-                            : 'border-red-200 bg-red-50/95 text-red-800'
-                            } `}
+                        className={`flex min-w-[320px] items-center justify-center gap-2 rounded-2xl px-5 py-2.5 shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-top-4 ${notification.type === 'success'
+                            ? 'bg-[#f0fdf4] text-[#065f46]'
+                            : 'bg-[#fef2f2] text-[#991b1b]'
+                            }`}
                     >
-                        <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex-shrink-0">
-                                {notification.type === 'success' ? (
-                                    <CircleCheck className="h-5 w-5 text-emerald-600" />
-                                ) : (
-                                    <XCircle className="h-5 w-5 text-red-600" />
-                                )}
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-semibold">{notification.title}</h4>
-                                <p className="mt-1 text-sm opacity-90">{notification.message}</p>
-                            </div>
-                            <button
-                                onClick={() => removeNotification(notification.id)}
-                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        </div>
-                        {/* Calendar Modal */}
-                        {calendarOpen && (
-                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                                <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="text-lg font-semibold dark:text-white">Collections for date</h3>
-                                        <button onClick={() => setCalendarOpen(false)} className="text-sm text-gray-500">
-                                            Close
-                                        </button>
-                                    </div>
-                                    <div className="mt-4 flex items-center gap-4">
-                                        <label className="text-sm text-gray-600 dark:text-gray-400">Select date</label>
-                                        <input
-                                            type="date"
-                                            value={selectedDate}
-                                            onChange={(e) => setSelectedDate(e.target.value)}
-                                            className="rounded-md border px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        />
-                                        <div className="ml-auto text-sm text-gray-600 dark:text-gray-400">Found: {groupedCollections.length}</div>
-                                    </div>
-                                    <div className="mt-4 max-h-[60vh] space-y-3 overflow-y-auto">
-                                        {groupedCollections.length === 0 ? (
-                                            <div className="text-sm text-gray-500 dark:text-gray-400">No parcels scheduled on this date.</div>
-                                        ) : (
-                                            groupedCollections.map((g) => (
-                                                <div key={g.key} className="rounded-xl border border-gray-100 p-4 dark:border-gray-700">
-                                                    <div className="flex items-start gap-4">
-                                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 font-semibold text-purple-600">
-                                                            <span className="text-sm">{g.time_slot ? g.time_slot.split(' - ')[0] : ''}</span>
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="flex items-center gap-2">
-                                                                <p className="text-sm font-semibold text-gray-900 dark:text-white">{g.student_name}</p>
-                                                                {g.student_matric && <p className="text-xs text-gray-500">({g.student_matric})</p>}
-                                                            </div>
-                                                            <div className="mt-1 text-sm text-gray-700 dark:text-gray-300">Parcels: {g.parcels.length}</div>
-                                                            <div className="mt-1 truncate text-sm text-gray-700 dark:text-gray-300">
-                                                                Codes:{' '}
-                                                                <span className="font-mono">
-                                                                    {g.parcels.map((pp) => pp.parcel_code || pp.tracking_no).join(', ')}
-                                                                </span>
-                                                            </div>
-                                                            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                                Timeslot: {g.time_slot || formatScheduledDate(g.schedule || '')}
-                                                            </div>
-                                                            {(() => {
-                                                                const statuses = Array.from(
-                                                                    new Set(g.parcels.map((pp) => (pp.parcel_status || '').toString())),
-                                                                );
-                                                                return (
-                                                                    <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                                        Status:{' '}
-                                                                        <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                                                                            {statuses.length === 1 ? statuses[0] : 'Multiple'}
-                                                                        </span>
-                                                                    </div>
-                                                                );
-                                                            })()}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                        {notification.type === 'success' ? (
+                            <CircleCheck className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110" strokeWidth={2.5} />
+                        ) : (
+                            <XCircle className="h-4 w-4 shrink-0" strokeWidth={2.5} />
                         )}
+                        <span className="text-[14px] font-medium tracking-tight whitespace-nowrap">
+                            {notification.message}
+                        </span>
                     </div>
                 ))}
             </div>
+
+            {/* Calendar Modal */}
+            {calendarOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold dark:text-white">Collections for date</h3>
+                            <button onClick={() => setCalendarOpen(false)} className="text-sm text-gray-500">
+                                Close
+                            </button>
+                        </div>
+                        <div className="mt-4 flex items-center gap-4">
+                            <label className="text-sm text-gray-600 dark:text-gray-400">Select date</label>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                className="rounded-md border px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                            />
+                            <div className="ml-auto text-sm text-gray-600 dark:text-gray-400">Found: {groupedCollections.length}</div>
+                        </div>
+                        <div className="mt-4 max-h-[60vh] space-y-3 overflow-y-auto">
+                            {groupedCollections.length === 0 ? (
+                                <div className="text-sm text-gray-500 dark:text-gray-400">No parcels scheduled on this date.</div>
+                            ) : (
+                                groupedCollections.map((g) => (
+                                    <div key={g.key} className="rounded-xl border border-gray-100 p-4 dark:border-gray-700">
+                                        <div className="flex items-start gap-4">
+                                            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 font-semibold text-purple-600">
+                                                <span className="text-sm">{g.time_slot ? g.time_slot.split(' - ')[0] : ''}</span>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">{g.student_name}</p>
+                                                    {g.student_matric && <p className="text-xs text-gray-500">({g.student_matric})</p>}
+                                                </div>
+                                                <div className="mt-1 text-sm text-gray-700 dark:text-gray-300">Parcels: {g.parcels.length}</div>
+                                                <div className="mt-1 truncate text-sm text-gray-700 dark:text-gray-300">
+                                                    Codes:{' '}
+                                                    <span className="font-mono">
+                                                        {g.parcels.map((pp) => pp.parcel_code || pp.tracking_no).join(', ')}
+                                                    </span>
+                                                </div>
+                                                <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                    Timeslot: {g.time_slot || formatScheduledDate(g.schedule || '')}
+                                                </div>
+                                                {(() => {
+                                                    const statuses = Array.from(
+                                                        new Set(g.parcels.map((pp) => (pp.parcel_status || '').toString())),
+                                                    );
+                                                    return (
+                                                        <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                                            Status:{' '}
+                                                            <span className="inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                                                                {statuses.length === 1 ? statuses[0] : 'Multiple'}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })()}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
 
             {/* Parcel Details Modal */}
             {showDetailsModal && (

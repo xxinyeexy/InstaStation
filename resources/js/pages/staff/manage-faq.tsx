@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { Edit2, Plus, Search, Trash2, X } from 'lucide-react';
+import { CircleCheck, Edit2, Plus, Search, Trash2, X, XCircle } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -141,26 +141,22 @@ export default function ManageFaq({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manage FAQs" />
             {validationError && (
-                <div className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
-                    <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 shadow-lg">
-                        <div className="flex items-center gap-3">
-                            <svg className="h-5 w-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                            </svg>
-                            <span className="text-sm font-medium text-red-800">{validationError}</span>
-                        </div>
+                <div className="fixed top-8 left-1/2 z-[150] -translate-x-1/2">
+                    <div className="flex min-w-[320px] items-center justify-center gap-2 rounded-2xl bg-[#fef2f2] px-5 py-2.5 text-[#991b1b] shadow-sm animate-in fade-in slide-in-from-top-4">
+                        <XCircle className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                        <span className="text-[14px] font-medium tracking-tight whitespace-nowrap">
+                            {validationError}
+                        </span>
                     </div>
                 </div>
             )}
             {successMessage && (
-                <div className="fixed top-4 left-1/2 z-[100] -translate-x-1/2 animate-fade-in">
-                    <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 shadow-lg">
-                        <div className="flex items-center gap-3">
-                            <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            <span className="text-sm font-medium text-green-800">{successMessage}</span>
-                        </div>
+                <div className="fixed top-8 left-1/2 z-[150] -translate-x-1/2">
+                    <div className="flex min-w-[320px] items-center justify-center gap-2 rounded-2xl bg-[#f0fdf4] px-5 py-2.5 text-[#065f46] shadow-sm animate-in fade-in slide-in-from-top-4">
+                        <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                        <span className="text-[14px] font-medium tracking-tight whitespace-nowrap">
+                            {successMessage}
+                        </span>
                     </div>
                 </div>
             )}

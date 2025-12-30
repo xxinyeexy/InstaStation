@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Head, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, CalendarDays, CheckCircle, ChevronRight, MapPin, Package, PackageOpen, Sparkles, Clock, Upload, X, XCircle } from 'lucide-react';
+import { AlertCircle, Bell, CalendarDays, CheckCircle, ChevronRight, MapPin, Package, PackageOpen, Sparkles, Clock, Upload, X, XCircle, TrendingUp } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Define the Parcel interface based on your database structure
@@ -127,7 +127,7 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
     const profilePhotoUrl = user?.profile_pic ? `/storage/${user.profile_pic}` : undefined;
 
     return (
-        <div className="mb-8 rounded-[3.5rem] bg-white p-8 shadow-[0_10px_50px_rgba(0,0,0,0.03)] border border-slate-50 relative overflow-hidden transition-all hover:shadow-[0_20px_70px_rgba(0,0,0,0.05)]">
+        <div className="mb-8 rounded-[3.5rem] bg-white p-8 shadow-[0_10px_50px_rgba(0,0,0,0.03)] border border-slate-50 relative overflow-hidden transition-all hover:shadow-[0_20px_70px_rgba(0,0,0,0.05)]" style={{ fontFamily: "'Inter', sans-serif" }}>
             {/* background blurs for atmosphere */}
             <div className="absolute top-0 right-0 h-64 w-64 translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-100/40 blur-[100px]"></div>
             <div className="absolute bottom-0 left-0 h-48 w-48 -translate-x-1/2 translate-y-1/2 rounded-full bg-rose-100/30 blur-[80px]"></div>
@@ -153,10 +153,7 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
                     </div>
 
                     <div className="flex flex-col space-y-3">
-                        <div className="inline-flex items-center gap-3 rounded-full bg-slate-50 border border-slate-100 px-5 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 shadow-sm self-center md:self-start">
-                            <Sparkles className="h-3 w-3 text-[#FFD747] fill-[#FFD747]" />
-                            {t('welcomeBackBadge')}
-                        </div>
+
 
                         <h1 className="text-4xl font-black tracking-tight text-slate-800 ">
                             {getCurrentGreeting()},<br />
@@ -171,7 +168,7 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
                         <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start pt-2">
                             <div className="inline-flex items-center gap-2 rounded-2xl bg-indigo-50/50 border border-indigo-100/50 px-4 py-2 text-[11px] font-black text-indigo-500 uppercase tracking-widest">
                                 <MapPin className="h-3.5 w-3.5" />
-                                Matric: {user?.matric || 'AS1111'}
+                                Matric ID: {user?.matric || 'AS1111'}
                             </div>
                         </div>
                     </div>
@@ -218,31 +215,30 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
 
                             <div className="relative z-10 flex justify-between items-start">
                                 <div className="space-y-1">
-                                   
-                                    <div className="text-sm font-bold text-black-100 flex items-center gap-2">
+
+                                    <div className="text-sm font-bold text-slate-700 flex items-center gap-2">
                                         <CalendarDays className="h-4 w-4 text-[#ff139d]" />
                                         {currentTime.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' })}
                                     </div>
                                 </div>
-                                <div className="bg-white/10 p-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner">
+                                <div className="bg-white/40 p-3 rounded-2xl backdrop-blur-md border border-white/20 shadow-inner">
                                     <Sparkles className="h-5 w-5 text-[#ff139d]" />
                                 </div>
                             </div>
 
                             <div className="relative z-10 flex items-end justify-between">
                                 <div className="flex items-baseline gap-1">
-                                    <span className="text-6xl font-black text-white tracking-tighter">
+                                    <span className="text-6xl font-black text-white tracking-tighter drop-shadow-sm">
                                         {currentTime.getHours().toString().padStart(2, '0')}:{currentTime.getMinutes().toString().padStart(2, '0')}
                                     </span>
-                                    <span className="text-3xl font-black text-[#ff139d] tracking-tighter ml-1 opacity-80">
+                                    <span className="text-3xl font-black text-[#ff139d] tracking-tighter ml-1 drop-shadow-sm">
                                         :{currentTime.getSeconds().toString().padStart(2, '0')}
                                     </span>
-                                    <div className="text-[10px] font-black text-slate-500 uppercase flex flex-col leading-none pb-2 ml-2">
+                                    <div className="text-[10px] font-black text-[#ff139d]/70 uppercase flex flex-col leading-none pb-2 ml-2 tracking-widest">
                                         <span>{currentTime.getHours() >= 12 ? 'PM' : 'AM'}</span>
-                                      
                                     </div>
                                 </div>
-                               
+
                             </div>
                         </div>
                     </div>
@@ -1032,38 +1028,30 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs} headerAction={headerAction}>
-            <Head title="My Parcels" />
+            <Head title="My Parcels">
+                <link rel="preconnect" href="https://fonts.googleapis.com" />
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+                <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+            </Head>
 
-            <div className="space-y-6 p-6">
-                {/* Toast Notification Container */}
-                <div className="fixed right-4 bottom-4 z-50 space-y-3">
+            <div className="space-y-6 p-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+                <div className="fixed top-8 left-1/2 z-[100] -translate-x-1/2 space-y-3">
                     {toastNotifications.map((notification) => (
                         <div
                             key={notification.id}
-                            className={`max-w-96 min-w-80 rounded-lg border p-4 shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out ${notification.type === 'success'
-                                ? 'border-emerald-200 bg-emerald-50/95 text-emerald-800 dark:border-emerald-500/50 dark:bg-emerald-500/20 dark:text-emerald-300'
-                                : 'border-red-200 bg-red-50/95 text-red-800 dark:border-red-500/50 dark:bg-red-500/20 dark:text-red-300'
-                                } `}
+                            className={`flex min-w-[320px] items-center justify-center gap-2 rounded-2xl px-5 py-2.5 shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-top-4 ${notification.type === 'success'
+                                ? 'bg-[#f0fdf4] text-[#065f46]'
+                                : 'bg-[#fef2f2] text-[#991b1b]'
+                                }`}
                         >
-                            <div className="flex items-start gap-3">
-                                <div className="mt-0.5 flex-shrink-0">
-                                    {notification.type === 'success' ? (
-                                        <CheckCircle className="h-5 w-5 text-emerald-600" />
-                                    ) : (
-                                        <XCircle className="h-5 w-5 text-red-600" />
-                                    )}
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className="text-sm font-semibold">{notification.title}</h4>
-                                    <p className="mt-1 text-sm opacity-90">{notification.message}</p>
-                                </div>
-                                <button
-                                    onClick={() => removeToastNotification(notification.id)}
-                                    className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10 dark:hover:bg-white/10"
-                                >
-                                    <X className="h-4 w-4" />
-                                </button>
-                            </div>
+                            {notification.type === 'success' ? (
+                                <CheckCircle className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                            ) : (
+                                <XCircle className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                            )}
+                            <span className="text-[14px] font-medium tracking-tight whitespace-nowrap">
+                                {notification.message}
+                            </span>
                         </div>
                     ))}
                 </div>
@@ -1131,86 +1119,85 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
                 )}
 
-                <div className="bg-slate-50/50 rounded-[3rem] p-4 sm:p-8">
+                <div className="bg-slate-50/50 rounded-[3rem] p-4 sm:p-8" style={{ fontFamily: "'Inter', sans-serif" }}>
                     {/* Stats Grid matching screenshot */}
                     <div id="stats-tiles" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-start">
                         {/* Top Group (8 cols) */}
                         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* My Parcels Card */}
-                            <div className="h-36 rounded-3xl bg-[#F5F1FF] border-2 border-[#EBE3FF] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-indigo-500/5 transition-all">
+                            <div className="h-32 rounded-2xl bg-[#f5f3ff] border border-[#e5e7eb]/50 p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('myParcels')}</span>
-                                    <span className="text-5xl font-black text-[#7042FF] tracking-tighter">{tileCounts.myParcels}</span>
+                                    <span className="text-[13px] font-medium text-slate-500">{t('myParcels')}</span>
+                                    <span className="text-4xl font-bold text-[#7c3aed]">{tileCounts.myParcels}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#EBE3FF] flex items-center justify-center text-[#7042FF] group-hover:scale-110 transition-transform">
-                                    <PackageOpen className="w-8 h-8" />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#f3f0ff] flex items-center justify-center text-[#7c3aed]">
+                                    <Package className="w-8 h-8" strokeWidth={2.5} />
                                 </div>
                             </div>
 
                             {/* Pending Payment Card */}
-                            <div className="h-36 rounded-3xl bg-[#FFFBF0] border-2 border-[#FFF2C2] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-amber-500/5 transition-all">
+                            <div className="h-32 rounded-2xl bg-[#fffcf0] border border-[#fef3c7] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('pendingPayment')}</span>
-                                    <span className="text-5xl font-black text-[#D4A017] tracking-tighter">{tileCounts.pendingPayment}</span>
+                                    <span className="text-sm font-semibold text-slate-600">{t('pendingPayment')}</span>
+                                    <span className="text-4xl font-bold text-[#b45309]">{tileCounts.pendingPayment}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#FFF2C2] flex items-center justify-center text-[#D4A017] group-hover:scale-110 transition-transform">
-                                    <Clock className="w-8 h-8" />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#fef3c7] flex items-center justify-center text-[#b45309]">
+                                    <Clock className="w-7 h-7" />
                                 </div>
                             </div>
 
                             {/* Approved Card */}
-                            <div className="h-36 rounded-3xl bg-[#FFF6F1] border-2 border-[#FFE8DA] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-orange-500/5 transition-all">
+                            <div className="h-32 rounded-2xl bg-[#fff7ed] border border-[#ffedd5] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('approved')}</span>
-                                    <span className="text-5xl font-black text-[#FF7A30] tracking-tighter">{tileCounts.approved}</span>
+                                    <span className="text-sm font-semibold text-slate-600">{t('approved')}</span>
+                                    <span className="text-4xl font-bold text-[#ea580c]">{tileCounts.approved}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#FFE8DA] flex items-center justify-center text-[#FF7A30] group-hover:scale-110 transition-transform">
-                                    <CheckCircle className="w-8 h-8" />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#ffedd5] flex items-center justify-center text-[#ea580c]">
+                                    <CheckCircle className="w-7 h-7" />
                                 </div>
                             </div>
 
                             {/* Ready for Collection Card */}
-                            <div className="h-36 rounded-3xl bg-[#F1FDF6] border-2 border-[#D7F7E5] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-emerald-500/5 transition-all">
+                            <div className="h-32 rounded-2xl bg-[#f0fdf4] border border-[#dcfce7] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('readyForCollection')}</span>
-                                    <span className="text-5xl font-black text-[#10B981] tracking-tighter">{tileCounts.readyForCollection}</span>
+                                    <span className="text-sm font-semibold text-slate-600">{t('readyForCollection')}</span>
+                                    <span className="text-4xl font-bold text-[#16a34a]">{tileCounts.readyForCollection}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#D7F7E5] flex items-center justify-center text-[#10B981] group-hover:scale-110 transition-transform">
-                                    <CheckCircle className="w-8 h-8" />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#dcfce7] flex items-center justify-center text-[#16a34a]">
+                                    <CheckCircle className="w-7 h-7" />
                                 </div>
                             </div>
 
                             {/* Collected Card */}
-                            <div className="h-36 rounded-3xl bg-[#F1F7FF] border-2 border-[#D7E8FF] p-6 relative overflow-hidden group hover:shadow-xl hover:shadow-blue-500/5 transition-all">
+                            <div className="h-32 rounded-2xl bg-[#f0f9ff] border border-[#e2e8f0]/50 p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{t('collected')}</span>
-                                    <span className="text-5xl font-black text-[#3B82F6] tracking-tighter">{tileCounts.collected}</span>
+                                    <span className="text-[13px] font-medium text-slate-500">{t('collected')}</span>
+                                    <span className="text-4xl font-bold text-[#2563eb]">{tileCounts.collected}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#D7E8FF] flex items-center justify-center text-[#3B82F6] group-hover:scale-110 transition-transform">
-                                    <Package className="w-8 h-8" />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#eff6ff] flex items-center justify-center text-[#2563eb]">
+                                    <PackageOpen className="w-8 h-8" strokeWidth={2.5} />
                                 </div>
                             </div>
                         </div>
 
                         {/* Quick Actions Group (4 cols) */}
-                        <div id="quick-actions" className="lg:col-span-4 h-full rounded-3xl bg-white border border-slate-100 p-8 shadow-sm hover:shadow-md transition-all">
-                            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-6">{t('quickActions')}</h3>
+                        <div id="quick-actions" className="lg:col-span-4 h-full rounded-2xl bg-white border border-slate-100 p-8 shadow-sm transition-all" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            <h3 className="text-[14px] font-bold text-slate-800 mb-6">{t('quickActions')}</h3>
 
                             <button
                                 onClick={() => {
                                     setSelectedHub(hubs[0]);
                                     setShowLocations(true);
                                 }}
-                                className="flex w-full items-center justify-between rounded-2xl bg-[#FFF6F1] px-6 py-4 text-sm font-black text-[#FF7A30] hover:bg-[#FFE8DA] transition-colors border border-[#FFE8DA]/30"
+                                className="flex w-full items-center justify-start gap-3 rounded-xl bg-[#fff7ed] px-5 py-3 text-sm font-bold text-[#c2410c] hover:bg-[#ffedd5] transition-colors"
                             >
-                                <span className="flex items-center gap-3">
-                                    <MapPin className="w-5 h-5" />
-                                    {t('locations')}
-                                </span>
-                                <ChevronRight className="w-4 h-4" />
+                                <div className="p-1 rounded-md bg-white/50">
+                                    <MapPin className="w-4 h-4 text-[#ea580c]" />
+                                </div>
+                                <span>{t('locations')}</span>
                             </button>
 
-                            <p className="mt-6 text-[11px] font-bold text-slate-400 text-center leading-relaxed">
+                            <p className="mt-6 text-[11px] font-medium text-slate-400 text-center leading-relaxed">
                                 Quickly find pickup points and operating hours across campus.
                             </p>
                         </div>

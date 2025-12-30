@@ -371,49 +371,24 @@ const SchedulePickup = ({ parcel }: Props) => {
             <Head title="Schedule Pickup" />
             {/* Success Toast Notification */}
             {showSuccessToast && (
-                <div className="fixed top-4 right-4 z-50 duration-300 animate-in fade-in slide-in-from-top-4">
-                    <div className="max-w-96 min-w-80 rounded-lg border border-emerald-200 bg-emerald-50/95 p-4 text-emerald-800 shadow-lg backdrop-blur-sm">
-                        <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex-shrink-0">
-                                <CircleCheck className="h-5 w-5 text-emerald-600" />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-semibold">Collection Scheduled Successfully!</h4>
-                                <p className="mt-1 text-sm opacity-90">
-                                    Your pickup has been scheduled for {selectedDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}{' '}
-                                    at {timeSlots.find((slot) => slot.id === selectedTimeSlot)?.label}
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => setShowSuccessToast(false)}
-                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        </div>
+                <div className="fixed top-8 left-1/2 z-[250] -translate-x-1/2">
+                    <div className="flex min-w-[320px] items-center justify-center gap-2 rounded-2xl bg-[#f0fdf4] px-5 py-2.5 text-[#065f46] shadow-sm animate-in fade-in slide-in-from-top-4">
+                        <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                        <span className="text-[14px] font-medium tracking-tight whitespace-nowrap">
+                            Collection Scheduled Successfully!
+                        </span>
                     </div>
                 </div>
             )}
 
             {/* Error Toast Notification */}
             {showErrorToast && (
-                <div className="fixed top-4 right-4 z-50 duration-300 animate-in fade-in slide-in-from-top-4">
-                    <div className="max-w-96 min-w-80 rounded-lg border border-red-200 bg-red-50/95 p-4 text-red-800 shadow-lg backdrop-blur-sm">
-                        <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex-shrink-0">
-                                <AlertCircle className="h-5 w-5 text-red-600" />
-                            </div>
-                            <div className="flex-1">
-                                <h4 className="text-sm font-semibold">Scheduling Failed</h4>
-                                <p className="mt-1 text-sm opacity-90">{errorMessage}</p>
-                            </div>
-                            <button
-                                onClick={() => setShowErrorToast(false)}
-                                className="flex-shrink-0 rounded-full p-1 transition-colors hover:bg-black/10"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
-                        </div>
+                <div className="fixed top-8 left-1/2 z-[250] -translate-x-1/2">
+                    <div className="flex min-w-[320px] items-center justify-center gap-2 rounded-2xl bg-[#fef2f2] px-5 py-2.5 text-[#991b1b] shadow-sm animate-in fade-in slide-in-from-top-4">
+                        <AlertCircle className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+                        <span className="text-[14px] font-medium tracking-tight whitespace-nowrap">
+                            {errorMessage}
+                        </span>
                     </div>
                 </div>
             )}

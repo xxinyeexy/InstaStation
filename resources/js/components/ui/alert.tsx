@@ -43,13 +43,13 @@ export default function Alert({
       </svg>
     );
   } else if (type === 'success') {
-    iconColor = 'text-green-800 dark:text-green-400';
-    bg = 'bg-green-50 dark:bg-green-500/10';
-    text = 'text-green-800 dark:text-green-400';
+    iconColor = 'text-emerald-600 dark:text-emerald-400';
+    bg = 'bg-emerald-50/90 border border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20';
+    text = 'text-emerald-800 dark:text-emerald-300';
     icon = (
-      <svg xmlns="http://www.w3.org/2000/svg" className={`shrink-0 inline w-4 h-4 me-3 ${iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <circle cx="12" cy="12" r="10" strokeWidth="2" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4" />
+      <svg xmlns="http://www.w3.org/2000/svg" className={`shrink-0 inline w-5 h-5 me-3 ${iconColor}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <circle cx="12" cy="12" r="10" strokeWidth="2.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12l2 2 4-4" />
       </svg>
     );
   } else if (type === 'warning') {
@@ -72,10 +72,12 @@ export default function Alert({
   }
 
   return (
-    <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 ${classes} ${bg} ${text} min-w-[320px] max-w-xl`} role="alert">
-      {icon}
-      <div>
-        <span className="font-medium">{label}</span>{subtext && <span> {subtext}</span>}
+    <div className={`fixed top-8 left-1/2 -translate-x-1/2 z-[250] ${classes} ${bg} ${text} shadow-sm rounded-2xl px-5 py-2.5 animate-in fade-in slide-in-from-top-2 duration-300`} role="alert">
+      <div className="flex items-center gap-2.5 justify-center w-full">
+        {icon}
+        <div className="text-[14px] font-medium tracking-tight">
+          <span className="font-medium">{label}</span>{subtext && <span> {subtext}</span>}
+        </div>
       </div>
     </div>
   );
