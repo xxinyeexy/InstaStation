@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Head, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, Calendar, CalendarDays, CheckCircle, ChevronRight, Info, MapPin, Package, PackageOpen, Sparkles, Clock, Upload, X, XCircle, TrendingUp, IdCard } from 'lucide-react';
+import { AlertCircle, Bell, Calendar, CalendarDays, CheckCircle, ChevronRight, Info, MapPin, Package, PackageOpen, Sparkles, Clock, Upload, X, XCircle, TrendingUp, IdCard, WalletCards, CircleCheck } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Define the Parcel interface based on your database structure
@@ -1099,7 +1099,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <span className="text-4xl font-bold text-[#ea580c]">{tileCounts.approved}</span>
                                 </div>
                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#ffedd5]/80 flex items-center justify-center text-[#ea580c]">
-                                    <CheckCircle className="w-8 h-8" strokeWidth={2.4} />
+                                    <WalletCards className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
@@ -1110,7 +1110,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <span className="text-4xl font-bold text-[#16a34a]">{tileCounts.readyForCollection}</span>
                                 </div>
                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#dcfce7]/80 flex items-center justify-center text-[#16a34a]">
-                                    <CheckCircle className="w-8 h-8" strokeWidth={2.4} />
+                                    <PackageOpen className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
@@ -1121,7 +1121,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <span className="text-4xl font-bold text-[#2563eb]">{tileCounts.collected}</span>
                                 </div>
                                 <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#dbeafe]/80 flex items-center justify-center text-[#2563eb]">
-                                    <PackageOpen className="w-8 h-8" strokeWidth={2.4} />
+                                    <CircleCheck className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
                         </div>
