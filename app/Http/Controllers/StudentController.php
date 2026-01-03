@@ -63,7 +63,7 @@ class StudentController extends Controller
             ->where('student_id', optional($user)->id)
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function (Parcel $parcel) {
+            ->map(function (Parcel $parcel) use ($user) {
                 return [
                     'parcel_id' => $parcel->parcel_id,
                     'parcel_code' => $parcel->parcel_code,
@@ -103,6 +103,45 @@ class StudentController extends Controller
                             return $p && !empty($p->verified_by);
                         } catch (\Exception $e) {
                             return false;
+                        }
+                    })(),
+                    'payment_rejected' => (function () use ($parcel, $user) {
+                        try {
+                            return \App\Models\Notification::where('notifiable_id', $user->id)
+                                ->where('type', 'payment_rejected')
+                                ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
+                                ->exists();
+                        } catch (\Exception $e) {
+                            return false;
+                        }
+                    })(),
+                    'rejection_details' => (function () use ($parcel, $user) {
+                        try {
+                            $notification = \App\Models\Notification::where('notifiable_id', $user->id)
+                                ->where('type', 'payment_rejected')
+                                ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
+                                ->orderByDesc('created_at')
+                                ->first();
+                            if (!$notification) return null;
+                            $data = is_array($notification->data) ? $notification->data : json_decode($notification->data, true);
+                            return [
+                                'reason' => $data['reason'] ?? null,
+                                'date' => $notification->created_at->format('d/m/Y, g:i A'),
+                            ];
+                        } catch (\Exception $e) {
+                            return null;
+                        }
+                    })(),
+                    'latest_payment' => (function () use ($parcel) {
+                        try {
+                            $p = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)->orderByDesc('created_at')->first();
+                            if (!$p) return null;
+                            return [
+                                'proof_url' => Storage::url($p->file_path),
+                                'submitted_at' => $p->created_at->format('d/m/Y, g:i A'),
+                            ];
+                        } catch (\Exception $e) {
+                            return null;
                         }
                     })(),
                     // include latest payment proof url for quick thumbnail in parcel list
@@ -154,7 +193,7 @@ class StudentController extends Controller
             'tracking_no' => $parcel->tracking_no,
             'status' => $parcel->parcel_status,
             'arrivalDate' => $parcel->created_at->format('d/m/Y'),
-            'paymentStatus' => $this->getPaymentStatus($parcel->parcel_status),
+            'paymentStatus' => $this->getPaymentStatus($parcel->parcel_status, $parcel->parcel_id),
             'size' => $parcel->size ?? 'N/A',
             'sender' => $parcel->sender ?? 'N/A',
             'location' => $parcel->location ?? 'N/A',
@@ -317,13 +356,24 @@ class StudentController extends Controller
     /**
      * Get payment status based on parcel status.
      */
-    private function getPaymentStatus($parcelStatus): string
+    private function getPaymentStatus($parcelStatus, $parcelId = null): string
     {
         $status = strtolower($parcelStatus);
 
         if (in_array($status, ['ready for collection', 'collected', 'approved'])) {
             return 'Verified';
         } elseif ($status === 'pending payment') {
+            // Check if there is a rejection notification for this parcel
+            if ($parcelId) {
+                $isRejected = \App\Models\Notification::where('notifiable_id', Auth::id())
+                    ->where('type', 'payment_rejected')
+                    ->whereJsonContains('data->parcel_id', (int)$parcelId)
+                    ->exists();
+                
+                if ($isRejected) {
+                    return 'Rejected';
+                }
+            }
             return 'Pending';
         } else {
             return 'Unknown';
@@ -419,7 +469,7 @@ class StudentController extends Controller
             'status' => $parcel->parcel_status,
             'collection_code' => $collectionCode,
             'sender' => $parcel->sender ?? 'N/A',
-            'payment_status' => $this->getPaymentStatus($parcel->parcel_status),
+            'payment_status' => $this->getPaymentStatus($parcel->parcel_status, $parcel->parcel_id),
             'student_user' => $parcel->studentUser ? [
                 'id' => $parcel->studentUser->id,
                 'name' => $parcel->studentUser->name,

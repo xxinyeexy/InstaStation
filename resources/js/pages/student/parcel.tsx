@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Head, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, CalendarDays, CheckCircle, ChevronRight, MapPin, Package, PackageOpen, Sparkles, Clock, Upload, X, XCircle, TrendingUp } from 'lucide-react';
+import { AlertCircle, Bell, Calendar, CalendarDays, CheckCircle, ChevronRight, Info, MapPin, Package, PackageOpen, Sparkles, Clock, Upload, X, XCircle, TrendingUp, IdCard } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Define the Parcel interface based on your database structure
@@ -47,6 +47,15 @@ interface Parcel {
     };
     payment_proof_url?: string | null;
     payment_verified?: boolean;
+    payment_rejected?: boolean;
+    rejection_details?: {
+        reason: string | null;
+        date: string;
+    } | null;
+    latest_payment?: {
+        proof_url: string;
+        submitted_at: string;
+    } | null;
 }
 
 // Extended interface for detailed parcel view
@@ -167,7 +176,7 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
 
                         <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start pt-2">
                             <div className="inline-flex items-center gap-2 rounded-2xl bg-indigo-50/50 border border-indigo-100/50 px-4 py-2 text-[11px] font-black text-indigo-500 uppercase tracking-widest">
-                                <MapPin className="h-3.5 w-3.5" />
+                                <IdCard className="h-3.5 w-3.5" />
                                 Matric ID: {user?.matric || 'AS1111'}
                             </div>
                         </div>
@@ -206,23 +215,22 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
                         </div>
                     </div>
 
-                    {/* Top Main Card (Current Time / Dashboard Control - Inspired by Iridescent Style) */}
-                    <div className="absolute w-[320px] h-[180px] rounded-[3rem] p-[2px] bg-gradient-to-tr from-[#9b6dff] via-[#ff6ac1] to-[#6ae1ff] shadow-[0_30px_60px_-15px_rgba(112,66,255,0.3)] transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 cursor-pointer -rotate-1">
-                        <div className="relative h-full w-full rounded-[2.9rem] bg-[#ffc6f1] overflow-hidden p-6 flex flex-col justify-between">
-                            {/* Glossy Overlay */}
-                            <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 blur-[50px] -translate-x-10 -translate-y-10 rounded-full"></div>
-                            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-green-500/20 blur-[40px] rounded-full"></div>
+                    {/* Top Main Card (Current Time / Dashboard Control - Inspired by Obsidian Glass) */}
+                    <div className="absolute w-[320px] h-[180px] rounded-[3rem] p-[1.5px] bg-gradient-to-br from-slate-200 via-indigo-500 to-slate-200 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.4)] transition-all duration-500 hover:scale-[1.02] hover:-translate-y-2 cursor-pointer -rotate-1">
+                        <div className="relative h-full w-full rounded-[2.9rem] bg-slate-950 overflow-hidden p-6 flex flex-col justify-between">
+                            {/* Sophisticated Blurs */}
+                            <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/10 blur-[60px] -translate-x-10 -translate-y-10 rounded-full"></div>
+                            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-slate-500/10 blur-[40px] rounded-full"></div>
 
                             <div className="relative z-10 flex justify-between items-start">
                                 <div className="space-y-1">
-
-                                    <div className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                        <CalendarDays className="h-4 w-4 text-[#ff139d]" />
+                                    <div className="text-sm font-bold text-slate-400 flex items-center gap-2">
+                                        <CalendarDays className="h-4 w-4 text-indigo-400" />
                                         {currentTime.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' })}
                                     </div>
                                 </div>
-                                <div className="bg-white/40 p-3 rounded-2xl backdrop-blur-md border border-white/20 shadow-inner">
-                                    <Sparkles className="h-5 w-5 text-[#ff139d]" />
+                                <div className="bg-white/5 p-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-inner group/sparkle">
+                                    <Sparkles className="h-5 w-5 text-indigo-400 group-hover/sparkle:text-indigo-300 transition-colors" />
                                 </div>
                             </div>
 
@@ -231,14 +239,13 @@ const WelcomeHeader = ({ user, activeParcelCount, t }: { user: any; activeParcel
                                     <span className="text-6xl font-black text-white tracking-tighter drop-shadow-sm">
                                         {currentTime.getHours().toString().padStart(2, '0')}:{currentTime.getMinutes().toString().padStart(2, '0')}
                                     </span>
-                                    <span className="text-3xl font-black text-[#ff139d] tracking-tighter ml-1 drop-shadow-sm">
+                                    <span className="text-3xl font-black text-indigo-500 tracking-tighter ml-1 drop-shadow-sm">
                                         :{currentTime.getSeconds().toString().padStart(2, '0')}
                                     </span>
-                                    <div className="text-[10px] font-black text-[#ff139d]/70 uppercase flex flex-col leading-none pb-2 ml-2 tracking-widest">
+                                    <div className="text-[10px] font-black text-slate-500 uppercase flex flex-col leading-none pb-2 ml-2 tracking-widest">
                                         <span>{currentTime.getHours() >= 12 ? 'PM' : 'AM'}</span>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -417,8 +424,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
         // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
-            console.log('Navigating to payment submit page (sticky notification retained)');
-            router.visit(`/student/payment/submit/${notification.parcel_id}`);
+            console.log('Opening payment modal for rejected parcel (sticky notification retained)');
+            handlePayNow(notification.parcel_id);
         } else if (notification.parcel_id) {
             console.log('Navigating to parcel detail page');
             router.visit(`/student/parcel/${notification.parcel_id}`);
@@ -442,7 +449,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [showPayModal, setShowPayModal] = useState(false);
     const [payParcelId, setPayParcelId] = useState<number | null>(null);
     const [isUploadingProof, setIsUploadingProof] = useState(false);
-    const proofInputRef = useRef<HTMLInputElement | null>(null);
+    const proofInputRef = useRef<HTMLInputElement>(null);
+
+    const currentPayParcel = parcels.find((p) => p.parcel_id === payParcelId);
 
     // Removed notification dropdown state and handlers
 
@@ -756,42 +765,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     });
 
     const handlePayNow = (parcelId: number) => {
-        setPayParcelId(parcelId);
-        setShowPayModal(true);
-    };
-
-    const handleProofSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || payParcelId == null) return;
-        setIsUploadingProof(true);
-
-        // Use Inertia router to post FormData with proper CSRF/session handling to avoid 419
-        router.post(
-            `/student/payment/submit/${payParcelId}`,
-            { proof: file },
-            {
-                forceFormData: true,
-                onSuccess: () => {
-                    // Close modal and show success notification
-                    setShowPayModal(false);
-                    setPayParcelId(null);
-                    addToastNotification('success', t('paymentUploaded'), t('paymentProofUploaded'));
-
-                    // Reload only parcels and notifications data
-                    router.reload({
-                        only: ['parcels', 'notifications'],
-                    });
-                },
-                onError: (errors) => {
-                    const firstError = typeof errors === 'object' ? Object.values(errors)[0] : null;
-                    addToastNotification('error', t('uploadFailed'), (firstError as string) || t('failedToUploadProof'));
-                },
-                onFinish: () => {
-                    setIsUploadingProof(false);
-                    if (proofInputRef.current) proofInputRef.current.value = '';
-                },
-            },
-        );
+        router.visit(`/student/payment/submit/${parcelId}`);
     };
 
     // Calculate percentage changes (mock calculation for demo purposes)
@@ -814,7 +788,9 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             case 'unclaimed':
                 return 'bg-gray-100 text-gray-800 border-gray-200';
             case 'approved':
-                return 'bg-red-100 text-red-800 border-red-200';
+                return 'bg-orange-100 text-orange-800 border-orange-200';
+            case 'rejected':
+                return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400';
             default:
                 return 'bg-gray-100 text-gray-600 border-gray-200';
         }
@@ -891,6 +867,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 return t('approved');
             case 'unclaimed':
                 return t('unclaimed');
+            case 'rejected':
+                return t('rejected');
             default:
                 return status;
         }
@@ -947,6 +925,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 return 'bg-gradient-to-r from-gray-400 to-gray-500';
             case 'approved':
                 return 'bg-gradient-to-r from-green-400 to-green-500';
+            case 'rejected':
+                return 'bg-gradient-to-r from-red-500 to-rose-600';
             default:
                 return 'bg-gradient-to-r from-gray-400 to-gray-500';
         }
@@ -961,7 +941,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // Prevent body scroll when any modal is open
     useEffect(() => {
-        if (showPayModal || showDetailsModal || showDeleteModal || showQRModal || showLocations) {
+        if (showDetailsModal || showDeleteModal || showQRModal || showLocations) {
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = '';
@@ -970,7 +950,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         return () => {
             document.body.style.overflow = '';
         };
-    }, [showPayModal, showDetailsModal, showDeleteModal, showQRModal, showLocations]);
+    }, [showDetailsModal, showDeleteModal, showQRModal, showLocations]);
 
     const headerAction = (
         <div className="relative">
@@ -1063,40 +1043,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 {/* QR Code Modal */}
                 <QRCodeModal isOpen={showQRModal} onClose={handleCloseQRModal} qrCodeData={qrCodeData} isLoading={loadingQRParcels.size > 0} />
 
-                {/* Quick Pay Modal */}
-                {showPayModal && (
-                    <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
-                        <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl dark:bg-card">
-                            <div className="flex items-center justify-between border-b border-gray-200 p-6">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-card-foreground">{t('paymentQRScanner')}</h2>
-                                    <p className="mt-1 text-xs text-gray-600 dark:text-muted-foreground">{t('scanPaymentQRAndUpload')}</p>
-                                </div>
-                                <button
-                                    onClick={() => setShowPayModal(false)}
-                                    className="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
-                                >
-                                    <X className="h-5 w-5" />
-                                </button>
-                            </div>
-                            <div className="p-6">
-                                <div className="mb-4 flex h-35 w-full items-center justify-center rounded-xl border border-dashed border-gray-300 dark:border-border">
-                                    <img src="/images/qrpayment.png" alt="DuitNow QR" className="h-40 w-40 object-contain" />
-                                </div>
-                                <input ref={proofInputRef} type="file" accept="image/*" onChange={handleProofSelected} className="hidden" />
-                                <button
-                                    onClick={() => proofInputRef.current?.click()}
-                                    disabled={isUploadingProof}
-                                    className="flex w-full items-center justify-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-60 dark:border-border dark:bg-muted dark:text-foreground dark:hover:bg-accent"
-                                >
-                                    <Upload className="h-4 w-4" />
-                                    {isUploadingProof ? t('uploading') : t('uploadPaymentProof')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 {/* Parcel Details Modal */}
                 {showDetailsModal && (
                     <div className="fixed inset-0 z-50 flex min-h-screen w-full items-center justify-center bg-black/70 p-4">
@@ -1125,57 +1071,57 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         {/* Top Group (8 cols) */}
                         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* My Parcels Card */}
-                            <div className="h-32 rounded-2xl bg-[#f5f3ff] border border-[#e5e7eb]/50 p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#f5f3ff] border border-[#ddd6fe] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-[13px] font-medium text-slate-500">{t('myParcels')}</span>
+                                    <span className="text-sm font-semibold text-slate-600">{t('myParcels')}</span>
                                     <span className="text-4xl font-bold text-[#7c3aed]">{tileCounts.myParcels}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#f3f0ff] flex items-center justify-center text-[#7c3aed]">
-                                    <Package className="w-8 h-8" strokeWidth={2.5} />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#ede9fe]/80 flex items-center justify-center text-[#7c3aed]">
+                                    <Package className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
                             {/* Pending Payment Card */}
-                            <div className="h-32 rounded-2xl bg-[#fffcf0] border border-[#fef3c7] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#fffdfa] border border-[#fef3c7] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
                                     <span className="text-sm font-semibold text-slate-600">{t('pendingPayment')}</span>
                                     <span className="text-4xl font-bold text-[#b45309]">{tileCounts.pendingPayment}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#fef3c7] flex items-center justify-center text-[#b45309]">
-                                    <Clock className="w-7 h-7" />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#fef3c7]/80 flex items-center justify-center text-[#b45309]">
+                                    <Clock className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
                             {/* Approved Card */}
-                            <div className="h-32 rounded-2xl bg-[#fff7ed] border border-[#ffedd5] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#fffaf5] border border-[#fed7aa] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
                                     <span className="text-sm font-semibold text-slate-600">{t('approved')}</span>
                                     <span className="text-4xl font-bold text-[#ea580c]">{tileCounts.approved}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#ffedd5] flex items-center justify-center text-[#ea580c]">
-                                    <CheckCircle className="w-7 h-7" />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#ffedd5]/80 flex items-center justify-center text-[#ea580c]">
+                                    <CheckCircle className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
                             {/* Ready for Collection Card */}
-                            <div className="h-32 rounded-2xl bg-[#f0fdf4] border border-[#dcfce7] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#f0fdf4] border border-[#bbf7d0] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
                                     <span className="text-sm font-semibold text-slate-600">{t('readyForCollection')}</span>
                                     <span className="text-4xl font-bold text-[#16a34a]">{tileCounts.readyForCollection}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#dcfce7] flex items-center justify-center text-[#16a34a]">
-                                    <CheckCircle className="w-7 h-7" />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#dcfce7]/80 flex items-center justify-center text-[#16a34a]">
+                                    <CheckCircle className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
                             {/* Collected Card */}
-                            <div className="h-32 rounded-2xl bg-[#f0f9ff] border border-[#e2e8f0]/50 p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#f0f9ff] border border-[#e0f2fe] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-[13px] font-medium text-slate-500">{t('collected')}</span>
+                                    <span className="text-sm font-semibold text-slate-600">{t('collected')}</span>
                                     <span className="text-4xl font-bold text-[#2563eb]">{tileCounts.collected}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-[#eff6ff] flex items-center justify-center text-[#2563eb]">
-                                    <PackageOpen className="w-8 h-8" strokeWidth={2.5} />
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#dbeafe]/80 flex items-center justify-center text-[#2563eb]">
+                                    <PackageOpen className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
                         </div>
@@ -1325,7 +1271,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 >
                                     <div className="mb-3 flex items-start justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-50 text-pink-500 dark:bg-pink-500/20 dark:text-pink-400">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-50 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400">
                                                 {/* <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path
                                                             strokeLinecap="round"
@@ -1387,6 +1333,10 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         {parcel.payment_verified || isApproved || isReady ? (
                                             <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
                                                 {t('verified')}
+                                            </span>
+                                        ) : parcel.payment_rejected ? (
+                                            <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
+                                                {t('rejected')}
                                             </span>
                                         ) : (
                                             <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">

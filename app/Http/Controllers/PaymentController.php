@@ -26,7 +26,7 @@ class PaymentController extends Controller
         $parcels = Parcel::where('student_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get()
-            ->map(function (Parcel $p) {
+            ->map(function (Parcel $p) use ($user) {
                 $arrival = $p->created_at ?? now();
                 $daysSince = $arrival->diffInDays(now());
                 $status = strtolower($p->parcel_status);
@@ -36,11 +36,34 @@ class PaymentController extends Controller
                     ->orderBy('created_at', 'desc')
                     ->first();
 
+                // Determine if there's an active rejection notification for this parcel
+                $rejectionNotification = \App\Models\Notification::where('notifiable_id', $user->id)
+                    ->where('type', 'payment_rejected')
+                    ->whereJsonContains('data->parcel_id', $p->parcel_id)
+                    ->orderByDesc('created_at')
+                    ->first();
+
+                $isRejected = $rejectionNotification !== null;
+
+                $rejectionReason = null;
+                $rejectionDate = null;
+                if ($rejectionNotification) {
+                    $data = is_array($rejectionNotification->data) ? $rejectionNotification->data : json_decode($rejectionNotification->data, true);
+                    $rejectionReason = $data['reason'] ?? null;
+                    $rejectionDate = $rejectionNotification->created_at->format('d/m/Y, g:i A');
+                }
+
                 // Payment state rules (priority: approved/verified payment -> Verified)
                 $paymentState = 'Pending';
                 if (($latestPayment && !empty($latestPayment->verified_by)) || in_array($status, ['approved', 'collected'])) {
                     $paymentState = 'Verified';
+                } elseif ($isRejected) {
+                    $paymentState = 'Rejected';
+                } elseif ($latestPayment && empty($latestPayment->verified_by)) {
+                    // Has a submission waiting for verification
+                    $paymentState = 'Pending';
                 } elseif ($status === 'pending payment') {
+                    // No submission yet, check if it's already overdue
                     $paymentState = $daysSince >= 7 ? 'Overdue' : 'Pending';
                 } else {
                     // For other statuses without verified payment, fall back to Pending
@@ -50,22 +73,27 @@ class PaymentController extends Controller
                 return [
                     'parcel_id' => $p->parcel_id,
                     'parcel_code' => $p->parcel_code,
+                    'tracking_no' => $p->tracking_no,
                     'sender' => $p->sender,
                     'amount' => 1.00,
                     'arrival' => $arrival->format('d/m/Y'),
                     'payment_state' => $paymentState,
+                    'rejection_reason' => $rejectionReason,
+                    'rejection_date' => $rejectionDate,
+                    'proof_url' => $latestPayment ? Storage::url($latestPayment->file_path) : null,
+                    'submitted_at' => $latestPayment ? $latestPayment->created_at->format('d/m/Y, g:i A') : null,
                 ];
             })->toArray();
 
         // Summary tiles
         $overdue = collect($parcels)->where('payment_state', 'Overdue')->count();
-        $pending = collect($parcels)->where('payment_state', 'Pending')->count();
+        $pending = collect($parcels)->whereIn('payment_state', ['Pending', 'Rejected'])->count();
         $verified = collect($parcels)->where('payment_state', 'Verified')->count();
         $totalPaid = $verified * 1.00; // RM1 each
 
         // Filter rows to only show parcels requiring payment (exclude Verified)
         $rowsRequiringPayment = collect($parcels)
-            ->whereIn('payment_state', ['Pending', 'Overdue'])
+            ->whereIn('payment_state', ['Pending', 'Overdue', 'Rejected'])
             ->values()
             ->toArray();
 
@@ -77,18 +105,52 @@ class PaymentController extends Controller
             ->with('parcel')
             ->orderByDesc('created_at')
             ->get()
-            ->unique('parcel_id')
             ->map(function (Payment $p) {
                 return [
                     'payment_id' => $p->payment_id,
                     'parcel_code' => optional($p->parcel)->parcel_code,
                     'amount' => 1.00,
                     'status' => $p->verified_by ? 'Verified' : 'Pending',
-                    'submitted_at' => optional($p->created_at)?->format('d/m/Y, g:i:s A'),
-                    'verified_at' => $p->verified_by ? optional($p->updated_at)?->format('d/m/Y, g:i:s A') : null,
+                    'submitted_at' => optional($p->created_at)->format('Y-m-d H:i:s'),
+                    'submitted_at_formatted' => optional($p->created_at)->format('d/m/Y, g:i:s A'),
+                    'verified_at' => $p->verified_by ? optional($p->updated_at)->format('d/m/Y, g:i:s A') : null,
                     'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
+                    'parcel_id' => $p->parcel_id,
                 ];
-            })->toArray();
+            });
+
+        // Fetch rejections from notifications to show in history
+        $rejectionHistory = \App\Models\Notification::where('notifiable_id', $user->id)
+            ->where('type', 'payment_rejected')
+            ->get()
+            ->map(function ($n) use ($payments) {
+                $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
+                $parcel = Parcel::find($data['parcel_id'] ?? null);
+                return [
+                    'payment_id' => 'rej_' . $n->id,
+                    'parcel_code' => $parcel?->parcel_code ?? 'N/A',
+                    'amount' => 1.00,
+                    'status' => 'Rejected',
+                    'submitted_at' => $n->created_at->format('Y-m-d H:i:s'),
+                    'submitted_at_formatted' => $n->created_at->format('d/m/Y, g:i:s A'),
+                    'verified_at' => null,
+                    'proof_url' => isset($data['file_path']) ? Storage::url($data['file_path']) : ($payments->firstWhere('parcel_id', $data['parcel_id'] ?? null)['proof_url'] ?? null),
+                    'parcel_id' => $data['parcel_id'] ?? null,
+                    'reason' => $data['reason'] ?? null,
+                ];
+            });
+
+        $payments = $payments->concat($rejectionHistory)
+            ->sortByDesc('submitted_at')
+            ->unique('parcel_id') // Keeps only the latest status for each parcel in the quick history
+            ->map(function ($p) {
+                // Ensure we return the formatted date as submitted_at for the frontend
+                $p['submitted_at'] = $p['submitted_at_formatted'];
+                unset($p['submitted_at_formatted']);
+                return $p;
+            })
+            ->values()
+            ->toArray();
 
         // Notifications are now provided globally via HandleInertiaRequests middleware
         return Inertia::render('student/payment', [
@@ -120,11 +182,41 @@ class PaymentController extends Controller
                     'parcel_code' => optional($p->parcel)->parcel_code,
                     'amount' => 1.00,
                     'status' => $p->verified_by ? 'Verified' : 'Pending',
-                    'submitted_at' => optional($p->created_at)?->format('d/m/Y, g:i:s A'),
-                    'verified_at' => $p->verified_by ? optional($p->updated_at)?->format('d/m/Y, g:i:s A') : null,
+                    'submitted_at' => optional($p->created_at)->format('Y-m-d H:i:s'),
+                    'submitted_at_formatted' => optional($p->created_at)->format('d/m/Y, g:i:s A'),
+                    'verified_at' => $p->verified_by ? optional($p->updated_at)->format('d/m/Y, g:i:s A') : null,
                     'proof_url' => $p->file_path ? Storage::url($p->file_path) : null,
                 ];
-            })->toArray();
+            });
+
+        $rejectionHistory = \App\Models\Notification::where('notifiable_id', $user->id)
+            ->where('type', 'payment_rejected')
+            ->get()
+            ->map(function ($n) use ($payments) {
+                $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
+                $parcel = Parcel::find($data['parcel_id'] ?? null);
+                return [
+                    'payment_id' => 'rej_' . $n->id,
+                    'parcel_code' => $parcel?->parcel_code ?? 'N/A',
+                    'amount' => 1.00,
+                    'status' => 'Rejected',
+                    'submitted_at' => $n->created_at->format('Y-m-d H:i:s'),
+                    'submitted_at_formatted' => $n->created_at->format('d/m/Y, g:i:s A'),
+                    'verified_at' => null,
+                    'proof_url' => isset($data['file_path']) ? Storage::url($data['file_path']) : ($payments->firstWhere('parcel_code', $parcel?->parcel_code)['proof_url'] ?? null),
+                    'reason' => $data['reason'] ?? null,
+                ];
+            });
+
+        $payments = $payments->concat($rejectionHistory)
+            ->sortByDesc('submitted_at')
+            ->map(function ($p) {
+                $p['submitted_at'] = $p['submitted_at_formatted'];
+                unset($p['submitted_at_formatted']);
+                return $p;
+            })
+            ->values()
+            ->toArray();
 
         return Inertia::render('student/payment-history', [
             'payments' => $payments,
@@ -145,6 +237,28 @@ class PaymentController extends Controller
                 'arrival' => optional($parcel->created_at)?->format('d/m/Y'),
                 'fee' => 1.00,
             ],
+            'existing_payment' => (function () use ($parcel, $userId) {
+                $p = Payment::where('parcel_id', $parcel->parcel_id)->orderByDesc('created_at')->first();
+                if (!$p) return null;
+
+                $notification = \App\Models\Notification::where('notifiable_id', $userId)
+                    ->where('type', 'payment_rejected')
+                    ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
+                    ->orderByDesc('created_at')
+                    ->first();
+
+                $reason = null;
+                if ($notification) {
+                    $data = is_array($notification->data) ? $notification->data : json_decode($notification->data, true);
+                    $reason = $data['reason'] ?? null;
+                }
+
+                return [
+                    'proof_url' => Storage::url($p->file_path),
+                    'submitted_at' => $p->created_at->format('d/m/Y, g:i A'),
+                    'rejection_reason' => $reason,
+                ];
+            })(),
         ]);
     }
 
@@ -175,6 +289,7 @@ class PaymentController extends Controller
             $existing->payment = $originalFileName;
             $existing->file_path = $path;
             $existing->payment_date = now()->format('Y-m-d');
+            $existing->created_at = now(); // Reset timestamp to now so history reflects latest submission
             $existing->verified_by = null; // reset verification on resubmission
             $existing->save();
         } else {
@@ -188,14 +303,19 @@ class PaymentController extends Controller
         }
 
         // Remove any payment rejection notifications for this parcel when resubmitting
+        // We fetch and filter in PHP to ensure compatibility with different DB drivers (text vs json columns)
         \App\Models\Notification::where('notifiable_id', $userId)
             ->where('notifiable_type', 'App\Models\User')
             ->where('type', 'payment_rejected')
-            ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
-            ->delete();
+            ->get()
+            ->filter(function ($n) use ($parcel) {
+                $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
+                return ($data['parcel_id'] ?? null) == $parcel->parcel_id;
+            })
+            ->each->delete();
 
-        // Return success - let the frontend decide where to navigate
-        return back();
+        // Return success and redirect back
+        return back()->with('success', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
     }
 
     public function staffIndex(Request $request): Response
@@ -209,6 +329,29 @@ class PaymentController extends Controller
             ->get()
             ->unique('parcel_id')
             ->values();
+
+        // Get latest rejection date for each parcel to determine if it should be hidden from staff
+        $latestRejections = \App\Models\Notification::where('type', 'payment_rejected')
+            ->get()
+            ->groupBy(function ($n) {
+                $data = is_array($n->data) ? $n->data : json_decode($n->data, true);
+                return $data['parcel_id'] ?? null;
+            })
+            ->map(fn($group) => $group->max('created_at'));
+
+        // Filter out rejected payments until they are resubmitted.
+        // A payment is considered "rejected and hidden" only if the rejection notification
+        // is newer than the latest submission timestamp.
+        $latest = $latest->reject(function ($p) use ($latestRejections) {
+            if ($p->verified_by) return false;
+
+            $rejectionDate = $latestRejections->get($p->parcel_id);
+            if (!$rejectionDate) return false;
+
+            // If the rejection happened AFTER this submission, it's still rejected.
+            // If this submission is NEWER than the rejection, it's a resubmission and should be shown.
+            return $rejectionDate->gt($p->created_at);
+        });
 
         // Summary based on latest entries
         $pendingCount = $latest->whereNull('verified_by')->count();
@@ -304,11 +447,12 @@ class PaymentController extends Controller
         }
     }
 
-    public function rejectPayment(int $id)
+    public function rejectPayment(Request $request, int $id)
     {
         try {
             $payment = Payment::findOrFail($id);
             $parcelId = $payment->parcel_id;
+            $reason = trim($request->input('reason', 'None provided.'));
 
             // Get the parcel and student info before deleting the payment
             $parcel = null;
@@ -318,7 +462,8 @@ class PaymentController extends Controller
                 $student = $parcel?->studentUser;
             }
 
-            $payment->delete();
+            // We no longer delete the payment record so that the history and file path are preserved.
+            // $payment->delete();
 
             // Keep parcel in Pending Payment so student can resubmit
             if ($parcel) {
@@ -337,17 +482,20 @@ class PaymentController extends Controller
                     $notification->data = json_encode([
                         'title' => 'Payment Proof Rejected',
                         'message' => "Your payment proof for parcel {$parcel->parcel_code} has been rejected. Please resubmit a valid payment proof.",
+                        'reason' => $reason,
                         'parcel_code' => $parcel->parcel_code,
                         'parcel_id' => $parcel->parcel_id,
                         'rejected_by' => Auth::user()->name,
                         'rejected_at' => now()->toDateTimeString(),
+                        'file_path' => $payment->file_path,
+                        'original_filename' => $payment->payment,
                     ]);
                     $notification->read_at = null; // Mark as unread
                     $notification->save();
                 }
             }
 
-            return back()->with('success', 'Payment rejected and removed.');
+            return back()->with('success', 'Payment rejected. Student will need to resubmit a new proof.');
         } catch (\Exception $e) {
             Log::error('Error rejecting payment: ' . $e->getMessage());
             return back()->with('error', 'Failed to reject payment. Please try again.');

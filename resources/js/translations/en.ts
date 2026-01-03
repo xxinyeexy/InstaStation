@@ -97,6 +97,7 @@ export const en = {
     approved: 'Approved',
     scheduled: 'Scheduled',
     arrived: 'Arrived',
+    rejected: 'Rejected',
 
     // Overview & Statistics
     totalParcels: 'Total Parcels',
@@ -518,6 +519,20 @@ export const en = {
     collectionQRCode: 'Collection QR Code',
     showThisQRCode: 'Show this QR code to collect your parcel',
     uploading: 'Uploading...',
+    attentionRequired: 'Attention Required',
+    previousSubmissionDeclined: 'Your previous submission was declined',
+    previousSubmission: 'Previous Submission',
+    viewFull: 'View Full Image',
+    staffFeedback: 'Staff Feedback',
+    officialStaffFeedback: 'Official Staff Feedback',
+    resubmissionGuidance: 'Resubmission Guidance',
+    resubmissionNotes: 'Please ensure your new upload is high resolution, shows the full official receipt, and the amount matches RM {amount} precisely.',
+    noSpecificReasonProvided: 'No specific reason provided.',
+    pleaseUploadProof: 'Please upload your payment proof to continue.',
+    clickToUpload: 'Click to upload',
+    maxSize: 'PNG, JPG or JPEG (Max 10MB)',
+    important: 'IMPORTANT',
+    makeSureReceiptClear: 'Please ensure your receipt is clearly visible and includes the transaction date and amount.',
 
     // Profile Page
     profileSettings: 'Profile settings',

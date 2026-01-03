@@ -1,8 +1,9 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { type BreadcrumbItem, type SharedData } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { AlertCircle, Calendar, Info, Maximize2, Sparkles, Upload, X } from 'lucide-react';
 
 type Parcel = {
     parcel_id: number;
@@ -13,8 +14,13 @@ type Parcel = {
     fee: number;
 };
 
+type ExistingPayment = {
+    proof_url: string;
+    submitted_at: string;
+    rejection_reason?: string | null;
+};
 
-export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
+export default function PaymentSubmit({ parcel, existing_payment }: { parcel: Parcel; existing_payment?: ExistingPayment }) {
     const { t } = useLanguage();
     const { data, setData, post, processing, errors } = useForm<{ proof: File | null }>({ proof: null });
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -32,23 +38,14 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
     }, [data.proof]);
 
     const validateFile = (file: File): string | null => {
-        // Check file type - must be image
         const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         if (!validTypes.includes(file.type)) {
             return 'Invalid file type. Please upload an image file (PNG, JPG, JPEG, GIF, or WEBP).';
         }
-
-        // Check file size - max 10MB
-        const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+        const maxSize = 10 * 1024 * 1024; // 10MB
         if (file.size > maxSize) {
             return 'File size exceeds 10MB. Please upload a smaller file.';
         }
-
-        // Check if file is corrupted by trying to read it
-        if (file.size === 0) {
-            return 'The file appears to be empty or corrupted. Please upload a valid image.';
-        }
-
         return null;
     };
 
@@ -58,243 +55,237 @@ export default function PaymentSubmit({ parcel }: { parcel: Parcel }) {
             setValidationError('');
             return;
         }
-
         const error = validateFile(file);
         if (error) {
             setValidationError(error);
             setData('proof', null);
             return;
         }
-
         setValidationError('');
         setData('proof', file);
     };
 
-    const handleDragEnter = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(true);
-    };
-
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
-    };
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setIsDragging(false);
-
-        const files = e.dataTransfer.files;
-        if (files && files.length > 0) {
-            handleFileSelect(files[0]);
-        }
-    };
-
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Validate that a file is selected
         if (!data.proof) {
             setValidationError('Please upload a payment proof before submitting.');
             return;
         }
-
-        // Double-check file validity before submission
-        const error = validateFile(data.proof);
-        if (error) {
-            setValidationError(error);
-            return;
-        }
-
-        setValidationError('');
-
-        // useForm already tracks `data`; just force FormData for file upload
         post(`/student/payment/submit/${parcel.parcel_id}`, {
             forceFormData: true,
             onSuccess: () => {
-                // Navigate back to payment page with success indicator
-                router.visit('/student/payment?payment_submitted=true', {
-                    only: ['summary', 'rows', 'payments', 'notifications'],
-                    preserveState: false,
-                    preserveScroll: false,
-                });
+                router.visit('/student/payment');
             },
         });
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'payment', href: '/student/payment' },
-        { title: 'submitPayment', href: `/student/payment/submit/${parcel.parcel_id}` },
+        { title: 'Payment', href: '/student/payment' },
+        { title: 'Submit Payment', href: `/student/payment/submit/${parcel.parcel_id}` },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Payment for ${parcel.parcel_code}`} />
-            <div className="p-4 sm:p-6">
-                <div className="mx-auto max-w-xl rounded-2xl border bg-white p-4 sm:p-6 shadow-sm dark:bg-gray-800 dark:border-gray-700">
-                    <div className="mb-4 flex items-center justify-between">
-                        <h1 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-                            {t('paymentFor')} <span className="text-green-600">{parcel.parcel_code}</span>
+            <Head title={`Submit Payment - ${parcel.parcel_code}`} />
+
+            <div className="flex min-h-[calc(100vh-200px)] items-start justify-center p-4 sm:p-8 lg:p-12">
+                <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-100 dark:bg-zinc-900 dark:border-zinc-800">
+
+                    {/* Header Section from Photo */}
+                    <div className="flex items-center justify-between p-8 sm:p-10 border-b border-slate-100 dark:border-zinc-800/50">
+                        <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                            {t('paymentFor')} <span className="text-green-500">{parcel.parcel_code}</span>
                         </h1>
-                        <Link href={route('student.payment')} className="text-sm text-gray-400 hover:text-gray-600">
-                            ×
+                        <Link
+                            href="/student/payment"
+                            className="text-2xl text-slate-300 hover:text-slate-500 transition-colors"
+                        >
+                            <X className="h-6 w-6" />
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-sm text-gray-700 dark:text-gray-300">
-                        <div>
-                            <div className="text-gray-500 dark:text-gray-400">{t('trackingID')}:</div>
-                            <div className="font-medium">{parcel.tracking_no}</div>
-                        </div>
-                        <div>
-                            <div className="text-gray-500 dark:text-gray-400">{t('sender')}:</div>
-                            <div className="font-medium">{parcel.sender}</div>
-                        </div>
-                        <div>
-                            <div className="text-gray-500 dark:text-gray-400">{t('arrivalDate')}:</div>
-                            <div className="font-medium">{parcel.arrival}</div>
-                        </div>
-                        <div>
-                            <div className="text-gray-500 dark:text-gray-400">{t('collectionFee')}:</div>
-                            <div className="font-medium">RM {parcel.fee.toFixed(2)}</div>
-                        </div>
-                    </div>
-
-                    <div className="my-4 h-px w-full bg-gray-200 dark:bg-gray-700" />
-
-                    <button className="mb-4 w-full rounded-md border border-gray-200 bg-gray-50 py-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
-                        {t('qrPayment')}
-                    </button>
-
-                    <div className="mb-2 text-sm font-semibold text-gray-800 dark:text-gray-200">{t('scanToPay')}</div>
-                    <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">{t('scanQRWithBankingApp')}</p>
-                    <div className="mb-6 flex justify-center">
-                        <div className="flex items-center justify-center rounded-md border border-dashed border-gray-300 p-2 dark:border-gray-600">
-                            <img src="/images/qrpayment.png" alt="DuitNow QR" className="h-40 w-40 object-contain" />
-                        </div>
-                    </div>
-                    <div className="mb-6 text-center text-xs text-gray-600 dark:text-gray-400">{t('amount')}: RM {parcel.fee.toFixed(2)}</div>
-
-                    <form onSubmit={onSubmit} className="space-y-4">
-                        <div>
-                            <div className="mb-2 flex items-center gap-2">
-                                <svg className="h-5 w-5 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">{t('uploadPaymentProof')}</span>
+                    <div className="p-8 sm:p-10 space-y-10">
+                        {/* Information Grid from Photo */}
+                        <div className="grid grid-cols-2 gap-y-6">
+                            <div className="space-y-1">
+                                <div className="text-xs text-slate-400 font-medium">{t('trackingID')}:</div>
+                                <div className="text-sm font-bold text-slate-900 dark:text-white">{parcel.tracking_no}</div>
                             </div>
-                            <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">{t('uploadScreenshotOrPhoto')}</p>
-                            <label
-                                className={`group relative flex h-48 w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed text-center transition-all duration-200 ${isDragging
-                                    ? 'scale-[1.02] border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg'
-                                    : validationError || errors.proof
-                                        ? 'border-red-400 bg-red-50/50'
-                                        : 'border-gray-300 bg-gradient-to-br from-gray-50 to-white hover:border-green-400 hover:shadow-md dark:border-gray-600 dark:from-gray-800 dark:to-gray-900'
-                                    }`}
-                                onDragEnter={handleDragEnter}
-                                onDragLeave={handleDragLeave}
-                                onDragOver={handleDragOver}
-                                onDrop={handleDrop}
-                            >
-                                <input
-                                    type="file"
-                                    accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-                                    className="hidden"
-                                    onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
-                                />
-                                {previewUrl ? (
-                                    <div className="relative h-full w-full animate-in fade-in zoom-in duration-200">
-                                        <img src={previewUrl} alt="Payment Proof Preview" className="h-full w-full object-contain p-3" />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                handleFileSelect(null);
-                                            }}
-                                            className="absolute top-3 right-3 rounded-full bg-red-500 p-2 text-white shadow-lg transition-all hover:scale-110 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
-                                            aria-label="Remove file"
-                                        >
-                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                        <div className="absolute bottom-3 left-3 right-3 rounded-lg bg-white/90 px-3 py-2 shadow-md backdrop-blur-sm">
-                                            <div className="flex items-center gap-2">
-                                                <svg className="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                </svg>
-                                                <span className="text-xs font-medium text-gray-700 truncate">{data.proof?.name}</span>
+                            <div className="space-y-1">
+                                <div className="text-xs text-slate-400 font-medium">{t('sender')}:</div>
+                                <div className="text-sm font-bold text-slate-900 dark:text-white">{parcel.sender}</div>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="text-xs text-slate-400 font-medium">{t('arrivalDate')}:</div>
+                                <div className="text-sm font-bold text-slate-900 dark:text-white">{parcel.arrival}</div>
+                            </div>
+                            <div className="space-y-1">
+                                <div className="text-xs text-slate-400 font-medium">{t('collectionFee')}:</div>
+                                <div className="text-sm font-bold text-slate-900 dark:text-white">RM {parcel.fee.toFixed(2)}</div>
+                            </div>
+                        </div>
+
+                        <div className="h-px bg-slate-100 dark:bg-zinc-800" />
+
+                        {/* QR Payment Header from Photo */}
+                      
+
+                       
+                          <div className="w-full py-2.5 rounded-lg border border-slate-200 flex items-center justify-center dark:bg-zinc-800/50 dark:border-zinc-800">
+                            <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('qrPayment')}</span>
+                        </div>
+
+                        <div className="flex flex-col items-center gap-6 mt-6">
+                            <div className="w-full text-left space-y-1">
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white">{t('scanToPay')}</h3>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{t('scanQRWithBankingApp')}</p>
+                            </div>
+
+                            <div className="p-4 rounded-xl border border-dashed border-slate-300 dark:border-zinc-700 bg-slate-50/50 dark:bg-zinc-800/30">
+                                <div className="bg-white p-2 rounded-lg shadow-sm">
+                                    <img src="/images/qrpayment.png" alt="DuitNow QR" className="h-44 w-44 object-contain" />
+                                </div>
+                            </div>
+
+                            <div className="text-center">
+                                <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Amount: RM {parcel.fee.toFixed(2)}</div>
+                            </div>
+                        </div>
+                         {/* Rejection Feedback (If resubmitting) */}
+                        {existing_payment && !previewUrl && (
+                            <div className="overflow-hidden rounded-[2rem] border border-red-200/50 bg-white shadow-xl dark:border-red-500/10 dark:bg-zinc-900/40 animate-in fade-in slide-in-from-top-4 duration-500">
+                                <div className="bg-gradient-to-r from-red-50/80 via-white to-red-50/80 px-6 py-4 dark:from-red-950/20 dark:via-zinc-900/40 dark:to-red-950/20 border-b border-red-50 dark:border-red-900/10 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 shadow-lg shadow-red-200 dark:shadow-red-900/20">
+                                            <AlertCircle className="h-5 w-5 text-white" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-[15px] font-black tracking-tight text-red-900 dark:text-red-300 uppercase">{t('attentionRequired')}</h3>
+                                            <p className="text-[11px] font-medium text-red-600/70 dark:text-red-400/50">{t('previousSubmissionDeclined')}</p>
+                                        </div>
+                                    </div>
+                                    <div className="hidden sm:flex items-center gap-2 rounded-full bg-red-100/50 px-3 py-1 dark:bg-red-900/30">
+                                        <Calendar className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                                        <span className="text-[10px] font-bold text-red-700 dark:text-red-300 uppercase tracking-wider">{t('previousSubmission')}: {existing_payment.submitted_at}</span>
+                                    </div>
+                                </div>
+                                <div className="p-6">
+                                    <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+                                        {existing_payment.proof_url && (
+                                            <div className="relative shrink-0 mx-auto sm:mx-0">
+                                                <div className="group relative overflow-hidden rounded-[1.5rem] bg-slate-100 p-2 ring-1 ring-slate-200 dark:bg-zinc-800 dark:ring-zinc-700">
+                                                    <img src={existing_payment.proof_url} className="h-32 w-28 object-cover rounded-[1rem]" alt="Rejected proof" />
+                                                    <div className="absolute top-4 right-4">
+                                                        <div className="rounded-full bg-red-500 px-2 py-0.5 text-[8px] font-black text-white uppercase tracking-widest shadow-lg">{t('rejected')}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <div className="flex-1 space-y-4">
+                                            <div className="relative group overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-red-50/40 to-white p-5 dark:from-red-950/10 dark:to-transparent border border-red-100/50 dark:border-red-900/10">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <div className="h-1.5 w-1.5 rounded-full bg-red-500"></div>
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-800 dark:text-red-400">{t('officialStaffFeedback')}</span>
+                                                </div>
+                                                <p className="text-[13px] leading-relaxed text-slate-800 dark:text-slate-200 font-medium italic">
+                                                    "{existing_payment.rejection_reason || t('noSpecificReasonProvided')}"
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Upload Section Improved */}
+                        <form onSubmit={onSubmit} className="space-y-6 pt-10">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="h-8 w-8 rounded-xl bg-green-100 flex items-center justify-center text-green-600 dark:bg-green-500/20 dark:text-green-400">
+                                    <Upload className="h-4 w-4" />
+                                </div>
+                                <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">{t('uploadPaymentProof')}</h3>
+                            </div>
+
+                            <label
+                                className={`group relative flex flex-col items-center justify-center h-56 w-full cursor-pointer rounded-[2.5rem] border-2 border-dashed transition-all duration-300 ${isDragging
+                                    ? 'border-green-500 bg-green-50/50'
+                                    : validationError || errors.proof
+                                        ? 'border-red-400 bg-red-50/50'
+                                        : 'border-slate-200 bg-slate-50/50 hover:border-green-400 hover:bg-white dark:border-zinc-800 dark:hover:border-green-500/50'
+                                    }`}
+                                onDragEnter={() => setIsDragging(true)}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDragOver={(e) => e.preventDefault()}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    setIsDragging(false);
+                                    if (e.dataTransfer.files?.[0]) handleFileSelect(e.dataTransfer.files[0]);
+                                }}
+                            >
+                                <input
+                                    type="file"
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)}
+                                />
+                                {previewUrl ? (
+                                    <div className="relative h-full w-full p-4">
+                                        <img src={previewUrl} className="h-full w-full object-contain rounded-2xl" alt="Preview" />
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.preventDefault(); handleFileSelect(null); }}
+                                            className="absolute top-4 right-4 h-8 w-8 rounded-full bg-red-500 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    </div>
                                 ) : (
-                                    <div className={`space-y-3 px-6 transition-all duration-200 ${isDragging ? 'scale-105 text-green-600' : 'text-gray-500 group-hover:text-green-600 dark:text-gray-400'}`}>
-                                        <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full transition-all duration-200 ${isDragging
-                                            ? 'bg-green-100 ring-4 ring-green-200'
-                                            : 'bg-gray-100 group-hover:bg-green-50 group-hover:ring-2 group-hover:ring-green-200 dark:bg-gray-800 dark:group-hover:bg-gray-700'
-                                            }`}>
-                                            <svg className={`h-8 w-8 transition-transform duration-200 ${isDragging ? 'scale-110' : 'group-hover:scale-110'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                            </svg>
+                                    <div className="flex flex-col items-center gap-4 text-slate-400 group-hover:text-green-500 transition-colors">
+                                        <div className="h-16 w-16 rounded-[1.5rem] bg-white shadow-sm flex items-center justify-center ring-1 ring-slate-100 dark:bg-zinc-800 dark:ring-zinc-700">
+                                            <Upload className="h-7 w-7 transition-transform group-hover:-translate-y-1" />
                                         </div>
-                                        <div className="space-y-1">
-                                            <p className="text-sm font-semibold">
-                                                {isDragging ? (
-                                                    <span className="flex items-center justify-center gap-2">
-                                                        <span className="animate-pulse">Drop your file here</span>
-                                                    </span>
-                                                ) : (
-                                                    <>
-                                                        <span className="text-green-600">Click to upload</span>
-                                                        <span className="text-gray-500 dark:text-gray-400"> or drag and drop</span>
-                                                    </>
-                                                )}
-                                            </p>
-                                            <p className="text-xs text-gray-400 dark:text-gray-500">PNG, JPG, GIF or WEBP</p>
-                                            <p className="text-xs text-gray-400 font-medium dark:text-gray-500">(Maximum size: 10MB)</p>
+                                        <div className="text-center">
+                                            <p className="text-sm font-black uppercase tracking-widest">{t('clickToUpload')}</p>
+                                            <p className="text-[10px] font-bold mt-1 uppercase opacity-60">PNG, JPG or WebP (Max 10MB)</p>
                                         </div>
                                     </div>
                                 )}
                             </label>
-                            {validationError && (
-                                <div className="mt-3 flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 p-3 animate-in slide-in-from-top-2 duration-200">
-                                    <svg className="h-5 w-5 flex-shrink-0 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="text-xs text-red-700 font-medium">{validationError}</span>
-                                </div>
-                            )}
-                            {errors.proof && (
-                                <div className="mt-3 flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 p-3">
-                                    <svg className="h-5 w-5 flex-shrink-0 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                    </svg>
-                                    <span className="text-xs text-red-700 font-medium">{errors.proof}</span>
-                                </div>
-                            )}
-                        </div>
 
-                        <div className="flex flex-col sm:flex-row items-center justify-end gap-2 sm:gap-2">
-                            <Link href={route('student.payment')} className="rounded-md border px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-800">
-                                {t('cancel')}
-                            </Link>
-                            <button
-                                disabled={processing}
-                                className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
-                            >
-                                {t('submitPayment')}
-                            </button>
-                        </div>
-                    </form>
+                            {(validationError || errors.proof) && (
+                                <div className="flex items-center gap-2 text-red-500 text-xs font-bold uppercase tracking-widest px-2">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <span>{validationError || errors.proof}</span>
+                                </div>
+                            )}
+
+                            <div className="flex gap-4 p-5 rounded-2xl bg-amber-50/50 border border-amber-100 dark:bg-amber-500/5 dark:border-amber-500/10">
+                                <Info className="h-5 w-5 text-amber-600 shrink-0" />
+                                <p className="text-[11px] leading-relaxed text-amber-800/80 dark:text-amber-400/80 font-medium">
+                                    <span className="font-black uppercase tracking-[0.2em] mr-2">{t('important')}:</span>
+                                    {t('makeSureReceiptClear')}
+                                </p>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                                <Link
+                                    href="/student/payment"
+                                    className="flex-1 flex items-center justify-center px-8 py-4 rounded-2xl bg-white border border-slate-200 text-sm font-black text-slate-600 uppercase tracking-widest transition-all hover:bg-slate-50 dark:bg-zinc-900 dark:border-zinc-800 dark:text-slate-400 dark:hover:bg-zinc-800"
+                                >
+                                    {t('cancel')}
+                                </Link>
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="flex-[2] relative group overflow-hidden px-8 py-4 rounded-2xl bg-slate-900 text-sm font-black text-white uppercase tracking-[0.2em] shadow-2xl transition-all hover:bg-black active:scale-[0.98] disabled:opacity-50"
+                                >
+                                    <span className="relative z-10 flex items-center justify-center gap-2">
+                                        {processing ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" /> : t('submitPayment')}
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </AppLayout>

@@ -1,8 +1,8 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X, Upload, Info, Calendar, Sparkles } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 type Summary = {
@@ -15,20 +15,26 @@ type Summary = {
 type Row = {
     parcel_id: number;
     parcel_code: string;
+    tracking_no: string;
     sender: string;
     amount: number;
     arrival: string;
-    payment_state: 'Pending' | 'Overdue' | 'Verified';
+    payment_state: 'Pending' | 'Overdue' | 'Verified' | 'Rejected';
+    rejection_reason?: string | null;
+    rejection_date?: string | null;
+    proof_url?: string | null;
+    submitted_at?: string | null;
 };
 
 type PaymentRow = {
     payment_id: number;
     parcel_code: string | null;
     amount: number;
-    status: 'Verified' | 'Pending';
+    status: 'Verified' | 'Pending' | 'Rejected';
     submitted_at: string | null;
     verified_at: string | null;
     proof_url: string | null;
+    reason?: string | null;
 };
 
 // Notification interface
@@ -41,6 +47,7 @@ interface Notification {
     parcel_id?: number;
     rejected_by?: string;
     rejected_at?: string;
+    reason?: string;
     created_at: string;
     read_at?: string | null;
     is_read: boolean;
@@ -57,6 +64,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
     ];
     const badge = (state: Row['payment_state']) => {
         if (state === 'Overdue') return 'text-destructive bg-destructive/10 border-destructive/20';
+        if (state === 'Rejected') return 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20';
         if (state === 'Verified')
             return 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20';
         return 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20';
@@ -81,8 +89,12 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
     const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(new Set());
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
-    const [paymentFilter, setPaymentFilter] = useState<'all' | 'verified' | 'pending'>('all');
+    const [paymentFilter, setPaymentFilter] = useState<'all' | 'verified' | 'pending' | 'rejected'>('all');
     const [paymentSort, setPaymentSort] = useState<'newest' | 'oldest'>('newest');
+
+    const handlePayNow = (parcelId: number) => {
+        router.visit(`/student/payment/submit/${parcelId}`);
+    };
 
     // Get flash messages from the page props
     const { flash } = usePage().props as any;
@@ -93,6 +105,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
             if (paymentFilter === 'all') return true;
             if (paymentFilter === 'verified') return p.status === 'Verified';
             if (paymentFilter === 'pending') return p.status === 'Pending';
+            if (paymentFilter === 'rejected') return p.status === 'Rejected';
             return true;
         })
         .sort((a, b) => {
@@ -122,6 +135,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
         if (normalized === 'verified') return t('verified');
         if (normalized === 'pending') return t('pending');
         if (normalized === 'overdue') return t('overdue');
+        if (normalized === 'rejected') return t('rejected');
         return state;
     };
 
@@ -138,25 +152,31 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
 
     // Refresh data when component mounts (e.g., returning from payment submission)
     useEffect(() => {
-        // Check if we're returning from a payment submission
+        // Check if there's a flash message
+        if (flash.success) {
+            setShowSuccessToast(true);
+            setTimeout(() => setShowSuccessToast(false), 5000);
+        }
+
+        // Cleanup any legacy URL params if present
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('payment_submitted') === 'true') {
-            // Remove the parameter from URL
             urlParams.delete('payment_submitted');
             const clearedParcel = urlParams.get('cleared_parcel');
             if (clearedParcel) {
-                // Remove sticky rejection notifications for this parcel from UI if still present (backend already deleted DB rows)
                 setNotificationList((prev) => prev.filter((n) => String(n.parcel_id) !== clearedParcel || n.type !== 'payment_rejected'));
                 urlParams.delete('cleared_parcel');
             }
             const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
             window.history.replaceState({}, '', newUrl);
 
-            // Show success toast
-            setShowSuccessToast(true);
-            setTimeout(() => setShowSuccessToast(false), 5000);
+            // Still show toast if coming from legacy link
+            if (!flash.success) {
+                setShowSuccessToast(true);
+                setTimeout(() => setShowSuccessToast(false), 5000);
+            }
         }
-    }, []);
+    }, [flash.success]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -297,6 +317,17 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                         <div className="flex-1">
                                             <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
                                             <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
+                                            {notification.reason && (
+                                                <div className="mt-3 group overflow-hidden rounded-xl border border-red-100 bg-red-50/30 p-3 dark:border-red-900/30 dark:bg-red-900/10 transition-all hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                        <span className="text-[10px] font-black uppercase tracking-wider text-red-800 dark:text-red-300">{t('staffFeedback')}</span>
+                                                    </div>
+                                                    <p className="pl-3.5 text-xs italic leading-relaxed text-red-700 dark:text-red-400">
+                                                        "{notification.reason}"
+                                                    </p>
+                                                </div>
+                                            )}
                                             <p className="mt-1 text-xs text-muted-foreground">
                                                 {formatDate(notification.created_at)}
                                             </p>
@@ -321,7 +352,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                     <div className="flex min-w-[320px] items-center justify-center gap-2 rounded-2xl bg-[#f0fdf4] px-5 py-2.5 text-[#065f46] shadow-sm animate-in fade-in slide-in-from-top-4">
                         <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={2.5} />
                         <span className="text-[14px] font-medium tracking-tight whitespace-nowrap">
-                            Payment proof uploaded successfully! Staff will verify within 24 hours.
+                            {flash.success || 'Payment proof uploaded successfully! Staff will verify within 24 hours.'}
                         </span>
                     </div>
                 </div>
@@ -409,10 +440,10 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                         <div className="flex justify-between items-start">
                                             <div>
                                                 <div className="font-semibold text-card-foreground">
-                                                    {r.payment_state === 'Pending' || r.payment_state === 'Overdue' ? (
-                                                        <Link href={`/student/payment/${r.parcel_id}`} className="underline decoration-dotted">
+                                                    {r.payment_state === 'Pending' || r.payment_state === 'Overdue' || r.payment_state === 'Rejected' ? (
+                                                        <button onClick={() => handlePayNow(r.parcel_id)} className="underline decoration-dotted text-left">
                                                             {r.parcel_code}
-                                                        </Link>
+                                                        </button>
                                                     ) : (
                                                         r.parcel_code
                                                     )}
@@ -440,6 +471,9 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                                 )}
                                                 {r.payment_state === 'Verified' && (
                                                     <WalletCards className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></WalletCards>
+                                                )}
+                                                {r.payment_state === 'Rejected' && (
+                                                    <X className="h-3.5 w-3.5" />
                                                 )}
                                                 {getPaymentStateTranslation(r.payment_state)}
                                             </span>
@@ -477,18 +511,21 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                             {r.payment_state === 'Verified' && (
                                                 <WalletCards className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></WalletCards>
                                             )}
+                                            {r.payment_state === 'Rejected' && (
+                                                <X className="h-3.5 w-3.5" />
+                                            )}
                                             {getPaymentStateTranslation(r.payment_state)}
                                         </span>
                                     </div>
                                     <div>
                                         {r.payment_state !== 'Verified' ? (
-                                            <Link
-                                                href={`/student/payment/submit/${r.parcel_id}`}
+                                            <button
+                                                onClick={() => handlePayNow(r.parcel_id)}
                                                 className="inline-flex items-center gap-1 rounded-md bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700"
                                             >
                                                 <CreditCard className="h-4 w-4" />
                                                 {t('payNow')}
-                                            </Link>
+                                            </button>
                                         ) : (
                                             <span className="text-xs text-muted-foreground">{t('paid')}</span>
                                         )}
@@ -510,12 +547,13 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                             {/* Filter Dropdown */}
                             <select
                                 value={paymentFilter}
-                                onChange={(e) => setPaymentFilter(e.target.value as 'all' | 'verified' | 'pending')}
+                                onChange={(e) => setPaymentFilter(e.target.value as 'all' | 'verified' | 'pending' | 'rejected')}
                                 className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             >
                                 <option value="all">{t('allStatus')}</option>
                                 <option value="verified">{t('verified')}</option>
                                 <option value="pending">{t('pending')}</option>
+                                <option value="rejected">{t('rejected')}</option>
                             </select>
                             {/* Sort Dropdown */}
                             <select
@@ -539,11 +577,16 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                     {/* Left: code + status */}
                                     <div className="flex items-center gap-2">
                                         <span
-                                            className={`rounded-full p-1 ${p.status === 'Verified' ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'}`}
+                                            className={`rounded-full p-1 ${p.status === 'Verified'
+                                                ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                                                : p.status === 'Rejected'
+                                                    ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                                                    : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'
+                                                }`}
                                         >
-                                            {p.status === 'Verified' ? (
-                                                <WalletCards className="h-4 w-4" />
-                                            ) : (
+                                            {p.status === 'Verified' && <WalletCards className="h-4 w-4" />}
+                                            {p.status === 'Rejected' && <X className="h-4 w-4" />}
+                                            {p.status === 'Pending' && (
                                                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                                     <path
                                                         strokeLinecap="round"
@@ -556,11 +599,16 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                         </span>
                                         <span className="font-medium text-card-foreground">{p.parcel_code ?? '—'}</span>
                                         <span
-                                            className={`ml-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${p.status === 'Verified' ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400' : 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400'}`}
+                                            className={`ml-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${p.status === 'Verified'
+                                                ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400'
+                                                : p.status === 'Rejected'
+                                                    ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400'
+                                                    : 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400'
+                                                }`}
                                         >
-                                            {p.status === 'Verified' ? (
-                                                <WalletCards className="h-3 w-3" />
-                                            ) : (
+                                            {p.status === 'Verified' && <WalletCards className="h-3 w-3" />}
+                                            {p.status === 'Rejected' && <X className="h-3 w-3" />}
+                                            {p.status === 'Pending' && (
                                                 <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                                     <path
                                                         strokeLinecap="round"
@@ -606,16 +654,17 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                         </ul>
                     )}
                 </div>
+                {/* Proof Viewer Modal */}
                 {viewerUrl && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={() => setViewerUrl(null)}>
-                        <div className="relative" onClick={(e) => e.stopPropagation()}>
-                            <img src={viewerUrl} alt="Payment Proof" className="max-h-[80vh] max-w-[90vw] rounded-lg shadow-2xl" />
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in duration-300">
+                        <div className="relative max-w-4xl w-full animate-in zoom-in-95 duration-300">
                             <button
                                 onClick={() => setViewerUrl(null)}
-                                className="absolute -top-3 -right-3 rounded-full border border-border bg-background/90 px-2 py-1 text-sm font-medium text-foreground shadow hover:bg-background"
+                                className="absolute -top-12 right-0 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
                             >
-                                Close
+                                <X className="h-6 w-6" />
                             </button>
+                            <img src={viewerUrl} alt="Payment Proof" className="h-full w-full rounded-2xl object-contain shadow-2xl" />
                         </div>
                     </div>
                 )}

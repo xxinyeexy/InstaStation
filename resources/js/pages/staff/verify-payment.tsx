@@ -32,6 +32,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
     const [list, setList] = useState<Row[]>(rows);
     const [processingPayments, setProcessingPayments] = useState<Set<number>>(new Set());
     const [rejectModalPaymentId, setRejectModalPaymentId] = useState<number | null>(null);
+    const [rejectionReason, setRejectionReason] = useState<string>('');
     // Toast state for approve/reject success notifications
     const [showSuccessToast, setShowSuccessToast] = useState<{ show: boolean; message: string; id: number }>({ show: false, message: '', id: 0 });
     const toastTimerRef = useRef<number | null>(null);
@@ -126,31 +127,37 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
     const handleRejectPayment = async (paymentId: number) => {
         if (processingPayments.has(paymentId)) return; // Prevent multiple clicks
 
+        const originalList = [...list];
         setProcessingPayments((prev) => new Set(prev).add(paymentId));
+
+        // Optimistically remove from list
+        setList((prev) => prev.filter((x) => x.payment_id !== paymentId));
+        if (detail && detail.payment_id === paymentId) {
+            setDetail(null);
+        }
 
         try {
             // Make API call
             await router.post(
                 `/staff/payments/${paymentId}/reject`,
-                {},
+                { reason: rejectionReason },
                 {
                     onSuccess: (page) => {
-                        // Remove from list after successful rejection
-                        setList((prev) => prev.filter((x) => x.payment_id !== paymentId));
-                        if (detail && detail.payment_id === paymentId) {
-                            setDetail(null);
-                        }
                         setRejectModalPaymentId(null); // Close modal
                         const flashMessage = (page.props as any).flash?.success;
                         triggerSuccessToast(flashMessage || 'Payment rejected successfully');
                     },
                     onError: (errors) => {
                         console.error('Reject payment error:', errors);
+                        // Revert optimistic update on error
+                        setList(originalList);
                     },
                 },
             );
         } catch (error) {
             console.error('Reject payment error:', error);
+            // Revert optimistic update on error
+            setList(originalList);
         } finally {
             setProcessingPayments((prev) => {
                 const newSet = new Set(prev);
@@ -163,6 +170,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
     // Open reject confirmation modal
     const openRejectModal = (paymentId: number) => {
         setRejectModalPaymentId(paymentId);
+        setRejectionReason(''); // Reset reason
     };
 
     // Confirm rejection
@@ -452,8 +460,25 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
 
                             <div className="mb-6 rounded-md bg-red-50 p-3 dark:bg-red-500/10">
                                 <p className="text-sm text-red-800 dark:text-red-400">
-                                    This action cannot be undone. The payment will be permanently rejected and removed from the verification queue.
+                                    The payment will be rejected. The student will be notified and asked to resubmit.
                                 </p>
+                            </div>
+
+                            <div className="mb-6">
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-card-foreground">
+                                    Reason for Rejection <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    className="w-full rounded-md border border-border bg-background p-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-red-500/20"
+                                    rows={3}
+                                    placeholder="e.g. Reference number missing, wrong amount, blurry photo..."
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                    required
+                                ></textarea>
+                                {rejectionReason.length === 0 && (
+                                    <p className="mt-1 text-xs text-red-500">Please provide a reason for the student.</p>
+                                )}
                             </div>
 
                             <div className="flex justify-end gap-3">
@@ -466,7 +491,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                 </button>
                                 <button
                                     onClick={confirmReject}
-                                    disabled={processingPayments.has(rejectModalPaymentId)}
+                                    disabled={processingPayments.has(rejectModalPaymentId) || !rejectionReason.trim()}
                                     className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                     {processingPayments.has(rejectModalPaymentId) ? 'Rejecting...' : 'Reject Payment'}

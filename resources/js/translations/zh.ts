@@ -16,7 +16,7 @@ export const zh = {
     back: '返回',
     next: '下一步',
     previous: '上一步',
-    
+
     // Auth Pages
     createAccount: '创建账户',
     joinInstaStation: '加入InstaStation管理您的大学包裹',
@@ -52,7 +52,7 @@ export const zh = {
     noMatricID: '无学号',
     noStudentsFound: '未找到学生',
     registering: '注册中...',
-    
+
     // Navigation
     dashboard: '仪表板',
     parcels: '包裹',
@@ -63,7 +63,7 @@ export const zh = {
     settings: '设置',
     logout: '登出',
     home: '主页',
-    
+
     // Settings
     profile: '个人资料',
     password: '密码',
@@ -80,7 +80,7 @@ export const zh = {
     themeDescription: '选择您偏好的主题模式',
     languageDescription: '选择您偏好的界面语言',
     languageSelection: '语言选择',
-    
+
     // Parcel Status
     pending: '待处理',
     pendingPayment: '待付款',
@@ -90,13 +90,14 @@ export const zh = {
     approved: '已批准',
     scheduled: '已预约',
     arrived: '已到达',
-    
+    rejected: '已拒绝',
+
     // Overview & Statistics
     totalParcels: '总包裹数',
     newlyArrived: '新到达',
     readyToCollect: '待取件',
     unclaimedParcels: '未领取',
-    
+
     // Dashboard
     overview: '概览',
     dailyArrivals: '每日到达',
@@ -105,14 +106,14 @@ export const zh = {
     parcelsBySender: '主要寄件人',
     parcelStatus: '包裹状态',
     collectionTimeDistribution: '取件时间分布',
-    
+
     // Parcel Actions
     markAsCollected: '标记为已取件',
     schedulePickup: '预约取件',
     viewDetails: '查看详情',
     viewQRCode: '查看二维码',
     downloadQR: '下载二维码',
-    
+
     // Parcel Details
     parcelCode: '包裹编号',
     trackingNumber: '跟踪号码',
@@ -130,7 +131,7 @@ export const zh = {
     collectionCode: '取件码',
     size: '尺寸',
     weight: '重量',
-    
+
     // Time & Date
     today: '今天',
     thisWeek: '本周',
@@ -138,7 +139,7 @@ export const zh = {
     last30Days: '过去30天',
     selectDate: '选择日期',
     selectTime: '选择时间段',
-    
+
     // Messages & Notifications
     success: '成功',
     error: '错误',
@@ -173,7 +174,7 @@ export const zh = {
     reminderFailed: '提醒失败',
     failedToQueueReminder: '提醒排队失败',
     failedToSendReminder: '发送提醒失败',
-    
+
     // Forms
     name: '姓名',
     email: '电子邮件',
@@ -181,7 +182,7 @@ export const zh = {
     address: '地址',
     room: '房间',
     department: '部门',
-    
+
     // Buttons
     apply: '应用',
     reset: '重置',
@@ -189,18 +190,18 @@ export const zh = {
     refresh: '刷新',
     download: '下载',
     upload: '上传',
-    
+
     // Theme Options
     light: '浅色',
     dark: '深色',
     system: '系统',
-    
+
     // Size Options
     small: '小',
     medium: '中',
     large: '大',
     extraLarge: '特大',
-    
+
     // Password Page
     updatePassword: '更新密码',
     passwordDescription: '确保您的账户使用长的随机密码以保持安全',
@@ -209,13 +210,13 @@ export const zh = {
     confirmPassword: '确认密码',
     savePassword: '保存密码',
     passwordSettings: '密码设置',
-    
+
     // Sidebar Navigation
     platform: '平台',
     users: '用户',
     announcements: '公告',
     faqs: '常见问题',
-    
+
     // Dashboard Page
     welcomeBack: '欢迎回来！这是您今天包裹的最新情况。',
     dailyOperations: '每日操作概览',
@@ -224,7 +225,7 @@ export const zh = {
     parcelSize: '包裹尺寸',
     parcelStatusDistribution: '包裹状态分布',
     collectionTime: '取件时间分布',
-    
+
     // User Management Page
     userManagement: '用户管理',
     manageStudents: '管理学生账户并生成报告',
@@ -257,7 +258,7 @@ export const zh = {
     deleteOldRecordsConfirm: '您确定要删除所有超过10天的学生取件历史（包裹）吗？',
     actionCannotBeUndone: '此操作无法撤销。',
     deleteRecords: '删除记录',
-    
+
     // Announcements Page
     manageAnnouncements: '管理学生的公告和通知',
     totalAnnouncements: '公告总数',
@@ -278,7 +279,7 @@ export const zh = {
     thisAnnouncement: '此公告',
     cannotBeUndone: '此操作无法撤销，将永久删除此公告。',
     deleting: '删除中...',
-    
+
     // FAQs Page
     manageFaqs: '管理学生常见问题',
     totalFAQs: '常见问题总数',
@@ -290,7 +291,7 @@ export const zh = {
     thisFAQ: '此常见问题',
     cannotBeUndoneFAQ: '此操作无法撤销，将永久删除此常见问题。',
     collection: '取件',
-    
+
     // Export Modal
     exportParcels: '导出包裹',
     selectDateRange: '选择日期范围',
@@ -316,7 +317,7 @@ export const zh = {
     exportCSV: '导出CSV',
     verified: '已验证',
     unverified: '未验证',
-    
+
     // Announcement Modals
     createAnnouncement: '创建公告',
     createAnnouncementDesc: '为学生创建新公告',
@@ -335,7 +336,7 @@ export const zh = {
     noFileChosen: '未选择文件',
     noImage: '无图片',
     changeImage: '更改图片',
-    
+
     // FAQ Modals
     editFAQ: '编辑常见问题',
     updateFAQInfo: '更新常见问题信息',
@@ -348,7 +349,7 @@ export const zh = {
     enterQuestion: '输入问题...',
     enterAnswer: '输入答案...',
     chooseCategory: '选择类别',
-    
+
     // Payment Verification Page (NEW)
     paymentVerification: '支付验证',
     reviewVerifyPayments: '审查和验证学生支付提交',
@@ -357,7 +358,7 @@ export const zh = {
     searchParcels: '搜索包裹...',
     amount: '金额',
     actions: '操作',
-    
+
     // Parcel Management Page (NEW)
     todayCollection: '今天取件',
     paymentVerified: '支付已验证',
@@ -373,7 +374,7 @@ export const zh = {
     allParcels: '全部包裹',
     location: '位置',
     days: '天',
-    
+
     // Add Parcel Page (NEW)
     scanParcelQR: '扫描包裹二维码以自动填写详细信息',
     tapToScanQR: '点击扫描二维码',
@@ -492,7 +493,7 @@ export const zh = {
     notifications: '通知',
     noNotifications: '没有通知',
     paid: '已付款',
-    
+
     // Payment Submit Page
     paymentFor: '付款',
     collectionFee: '领取费用',
@@ -512,7 +513,16 @@ export const zh = {
     collectionQRCode: '取件二维码',
     showThisQRCode: '出示此二维码以领取您的包裹',
     uploading: '上传中...',
-    
+    attentionRequired: '需要注意',
+    previousSubmissionDeclined: '您之前的提交已被拒绝',
+    previousSubmission: '之前的提交',
+    viewFull: '查看全文',
+    staffFeedback: '员工反馈',
+    officialStaffFeedback: '官方员工反馈',
+    resubmissionGuidance: '重新提交指南',
+    resubmissionNotes: '请确保您新上传的照片清晰（高分辨率），显示完整的官方收据，且金额精确匹配 RM {amount}。',
+    noSpecificReasonProvided: '未提供具体原因。',
+
     // Profile Page
     profileSettings: '个人资料设置',
     manageProfile: '管理您的个人资料和账户设置',
@@ -525,7 +535,7 @@ export const zh = {
     deleteAccount: '删除账户',
     deleteAccountDescription: '删除您的账户及其所有资源',
     deleteWarning: '请谨慎操作，此操作不可撤销。',
-    
+
     // Student Parcel Page Greetings
     goodMorning: '早上好',
     goodAfternoon: '下午好',

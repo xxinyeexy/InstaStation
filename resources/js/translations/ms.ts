@@ -90,6 +90,7 @@ export const ms = {
     approved: 'Diluluskan',
     scheduled: 'Dijadualkan',
     arrived: 'Tiba',
+    rejected: 'Ditolak',
 
     // Overview & Statistics
     totalParcels: 'Jumlah Bungkusan',
@@ -508,6 +509,15 @@ export const ms = {
     collectionQRCode: 'Kod QR Pengambilan',
     showThisQRCode: 'Tunjukkan kod QR ini untuk mengambil parsel anda',
     uploading: 'Memuat naik...',
+    attentionRequired: 'Perhatian Diperlukan',
+    previousSubmissionDeclined: 'Penyerahan anda sebelum ini telah ditolak',
+    previousSubmission: 'Penyerahan Terdahulu',
+    viewFull: 'Lihat Penuh',
+    staffFeedback: 'Maklum Balas Kakitangan',
+    officialStaffFeedback: 'Maklum Balas Rasmi Kakitangan',
+    resubmissionGuidance: 'Panduan Penyerahan Semula',
+    resubmissionNotes: 'Sila pastikan muat naik baru anda jelas (resolusi tinggi), menunjukkan resit rasmi penuh, dan jumlahnya sepadan dengan RM {amount} dengan tepat.',
+    noSpecificReasonProvided: 'Tiada alasan khusus diberikan.',
 
     // Profile Page
     profileSettings: 'Tetapan profil',
