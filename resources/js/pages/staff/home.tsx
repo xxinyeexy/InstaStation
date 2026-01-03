@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { AlertCircle, CheckCircle, Clock, Download, Package, TrendingDown, TrendingUp, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, Download, Package, PackageOpen, PackagePlus, TrendingDown, TrendingUp, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -621,33 +621,27 @@ export default function StaffHome() {
                         <OverviewCard
                             title={t('totalParcels')}
                             value={data.overview.totalParcels}
-                            icon={Package}
-                            bgColor="bg-blue-100 dark:bg-blue-500/20"
-                            iconColor="text-blue-600 dark:text-blue-400"
-                            trend="up"
-                            trendValue="+12%"
+                            icon={PackagePlus}
+                            bgColor="bg-green-100 dark:bg-green-500/20"
+                            iconColor="text-green-600 dark:text-green-400"
                         />
                     </AnimatedChart>
                     <AnimatedChart delay={200}>
                         <OverviewCard
                             title={t('newlyArrived')}
                             value={data.overview.newlyArrived}
-                            icon={Clock}
-                            bgColor="bg-yellow-100 dark:bg-yellow-500/20"
-                            iconColor="text-yellow-600 dark:text-yellow-400"
-                            trend="up"
-                            trendValue="+8%"
+                            icon={Package}
+                            bgColor="bg-pink-100 dark:bg-pink-500/20"
+                            iconColor="text-pink-600 dark:text-pink-400"
                         />
                     </AnimatedChart>
                     <AnimatedChart delay={300}>
                         <OverviewCard
                             title={t('readyToCollect')}
                             value={data.overview.readyForCollection}
-                            icon={CheckCircle}
-                            bgColor="bg-green-100 dark:bg-green-500/20"
-                            iconColor="text-green-600 dark:text-green-400"
-                            trend="down"
-                            trendValue="-3%"
+                            icon={PackageOpen}
+                            bgColor="bg-purple-100 dark:bg-purple-500/20"
+                            iconColor="text-purple-600 dark:text-purple-400"
                         />
                     </AnimatedChart>
                     <AnimatedChart delay={400}>
@@ -657,8 +651,6 @@ export default function StaffHome() {
                             icon={AlertCircle}
                             bgColor="bg-red-100 dark:bg-red-500/20"
                             iconColor="text-red-600 dark:text-red-400"
-                            trend="down"
-                            trendValue="-15%"
                         />
                     </AnimatedChart>
                 </div>
