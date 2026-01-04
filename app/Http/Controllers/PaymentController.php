@@ -64,7 +64,7 @@ class PaymentController extends Controller
                     $paymentState = 'Pending';
                 } elseif ($status === 'pending payment') {
                     // No submission yet, check if it's already overdue
-                    $paymentState = $daysSince >= 7 ? 'Overdue' : 'Pending';
+                    $paymentState = $daysSince >= 3 ? 'Overdue' : 'Pending';
                 } else {
                     // For other statuses without verified payment, fall back to Pending
                     $paymentState = 'Pending';

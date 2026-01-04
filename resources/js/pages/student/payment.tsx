@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X, Upload, Info, Calendar, Sparkles } from 'lucide-react';
+import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X, Upload, Info, Calendar, Sparkles, HandCoins } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -64,7 +64,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
     ];
     const badge = (state: Row['payment_state']) => {
         if (state === 'Overdue') return 'text-destructive bg-destructive/10 border-destructive/20';
-        if (state === 'Rejected') return 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20';
+        if (state === 'Rejected') return 'text-gray-700 dark:text-gray-400 bg-gray-50 dark:bg-gray-500/10 border-gray-200 dark:border-gray-500/20';
         if (state === 'Verified')
             return 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20';
         return 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20';
@@ -405,7 +405,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                             <div className="mt-1 text-xs text-muted-foreground">{t('receivedPayments')}</div>
                         </div>
                         <div className="rounded-full bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400">
-                            <WalletCards className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"></WalletCards>
+                            <HandCoins className="h-5 w-5" strokeWidth={2.5} />
                         </div>
                     </div>
                 </div>
@@ -580,7 +580,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                             className={`rounded-full p-1 ${p.status === 'Verified'
                                                 ? 'bg-green-500/10 text-green-600 dark:text-green-400'
                                                 : p.status === 'Rejected'
-                                                    ? 'bg-red-500/10 text-red-600 dark:text-red-400'
+                                                    ? 'bg-gray-500/10 text-gray-600 dark:text-gray-400'
                                                     : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'
                                                 }`}
                                         >
@@ -602,7 +602,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                             className={`ml-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${p.status === 'Verified'
                                                 ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400'
                                                 : p.status === 'Rejected'
-                                                    ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400'
+                                                    ? 'border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-500/20 dark:bg-gray-500/10 dark:text-gray-400'
                                                     : 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400'
                                                 }`}
                                         >

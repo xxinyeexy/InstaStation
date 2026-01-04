@@ -79,6 +79,7 @@ const ParcelRegistrationForm = () => {
     const [highlightMatric, setHighlightMatric] = useState(false);
     const searchContainerRef = useRef<HTMLDivElement>(null);
     const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const searchCache = useRef<Record<string, Student[]>>({});
 
     const handleInputChange = (field: keyof typeof formData, value: string) => {
         if (field === 'studentName' && isSelectingStudent) {
@@ -97,9 +98,23 @@ const ParcelRegistrationForm = () => {
             setShowSearchResults(true);
 
             if (value.length >= 1) {
+                // Instant Feedback: Try to filter from cache or current results while waiting
+                const lowerValue = value.toLowerCase();
+                const cachedResults = Object.values(searchCache.current).flat();
+                const localMatches = Array.from(new Set([...searchResults, ...cachedResults]))
+                    .filter(s =>
+                        s.student_name.toLowerCase().includes(lowerValue) ||
+                        (s.matric_id && s.matric_id.toLowerCase().includes(lowerValue))
+                    )
+                    .slice(0, 10);
+
+                if (localMatches.length > 0) {
+                    setSearchResults(localMatches);
+                }
+
                 searchTimeoutRef.current = setTimeout(() => {
                     handleSearch(value);
-                }, 300);
+                }, 100);
             } else {
                 setSearchResults([]);
                 setShowSearchResults(false);
@@ -130,6 +145,14 @@ const ParcelRegistrationForm = () => {
             return;
         }
 
+        // Check cache first for instant results
+        if (searchCache.current[query]) {
+            setSearchResults(searchCache.current[query]);
+            setIsSearching(false);
+            setShowSearchResults(true);
+            return;
+        }
+
         setIsSearching(true);
         setShowSearchResults(true);
         setSearchError('');
@@ -140,10 +163,12 @@ const ParcelRegistrationForm = () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
+
+            // Update results and cache
             setSearchResults(data);
+            searchCache.current[query] = data;
         } catch (error) {
             console.error('Error searching students:', error);
-            setSearchResults([]);
             setSearchError('Failed to search students. Please try again.');
         } finally {
             setIsSearching(false);
@@ -409,7 +434,7 @@ const ParcelRegistrationForm = () => {
 
                     {/* Title */}
                     <div className="px-4 sm:px-6 py-3 sm:py-4">
-                        <h1 className="mb-2 text-lg sm:text-xl font-semibold text-gray-900 dark:text-card-foreground">📦 {t('registerNewParcel')}</h1>
+                        <h1 className="mb-2 text-lg sm:text-xl font-semibold text-gray-900 dark:text-card-foreground"> {t('registerNewParcel')}</h1>
                         <p className="text-xs sm:text-sm text-gray-600 dark:text-muted-foreground">{t('scanQRToAutoFill')}</p>
                     </div>
 

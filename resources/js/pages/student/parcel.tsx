@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Head, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, Calendar, CalendarDays, CheckCircle, ChevronRight, Info, MapPin, Package, PackageOpen, Sparkles, Clock, Upload, X, XCircle, TrendingUp, IdCard, WalletCards, CircleCheck } from 'lucide-react';
+import { AlertCircle, Bell, Calendar, CalendarDays, CheckCircle, ChevronRight, Info, MapPin, Package, PackageOpen, Sparkles, Clock, Upload, X, XCircle, TrendingUp, IdCard, WalletCards, CircleCheck, AlarmClock } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Define the Parcel interface based on your database structure
@@ -765,7 +765,43 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     });
 
     const handlePayNow = (parcelId: number) => {
-        router.visit(`/student/payment/submit/${parcelId}`);
+        setPayParcelId(parcelId);
+        setShowPayModal(true);
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !payParcelId) return;
+
+        setIsUploadingProof(true);
+        const formData = new FormData();
+        formData.append('proof', file);
+
+        fetch(`/student/payment/submit/${payParcelId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+            },
+            body: formData
+        })
+            .then(async (response) => {
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Upload failed');
+                }
+                addToastNotification('success', t('success'), t('paymentProofUploaded') || 'Payment proof uploaded successfully!');
+                setShowPayModal(false);
+                // Update local state to show it's now pending validation
+                setParcelList(prev => prev.map(p => p.parcel_id === payParcelId ? { ...p, payment_verified: false, payment_rejected: false, payment_proof_url: 'uploaded' } : p));
+            })
+            .catch(err => {
+                console.error('Upload error:', err);
+                addToastNotification('error', t('error'), t('failedToUploadProof') || 'Failed to upload payment proof. Please try again.');
+            })
+            .finally(() => {
+                setIsUploadingProof(false);
+            });
     };
 
     // Calculate percentage changes (mock calculation for demo purposes)
@@ -790,7 +826,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             case 'approved':
                 return 'bg-orange-100 text-orange-800 border-orange-200';
             case 'rejected':
-                return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400';
+                return 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-500/10 dark:text-gray-400';
             default:
                 return 'bg-gray-100 text-gray-600 border-gray-200';
         }
@@ -1135,17 +1171,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     setSelectedHub(hubs[0]);
                                     setShowLocations(true);
                                 }}
-                                className="flex w-full items-center justify-start gap-3 rounded-xl bg-[#fff7ed] px-5 py-3 text-sm font-bold text-[#c2410c] hover:bg-[#ffedd5] transition-colors"
+                                className="flex w-full items-center justify-start gap-3 rounded-xl bg-pink-50 px-5 py-3 text-sm font-bold text-pink-700 hover:bg-pink-100 transition-colors"
                             >
                                 <div className="p-1 rounded-md bg-white/50">
-                                    <MapPin className="w-4 h-4 text-[#ea580c]" />
+                                    <MapPin className="w-4 h-4 text-pink-500" />
                                 </div>
                                 <span>{t('locations')}</span>
                             </button>
 
-                            <p className="mt-6 text-[11px] font-medium text-slate-400 text-center leading-relaxed">
-                                Quickly find pickup points and operating hours across campus.
-                            </p>
+
                         </div>
                     </div>
                 </div>
@@ -1310,36 +1344,29 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     </div>
 
                                     <div className="mb-2 flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
-                                        <svg
-                                            className="h-4 w-4 text-gray-400 dark:text-muted-foreground"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                        </svg>
+                                        <AlarmClock className="h-4 w-4 text-gray-400 dark:text-muted-foreground" />
                                         <span>
                                             {t('arrived')}: {formatDate(parcel.created_at)}
                                         </span>
                                     </div>
 
-                                    <div className="mb-4 text-sm">
-                                        <span className="mr-2 text-gray-600 dark:text-muted-foreground">{t('payment')}:</span>
+                                    <div className="mb-4 flex items-center gap-2 text-sm">
+                                        <WalletCards className="h-4 w-4 text-gray-400 dark:text-muted-foreground" />
+                                        <span className="text-gray-600 dark:text-muted-foreground">{t('payment')}:</span>
                                         {parcel.payment_verified || isApproved || isReady ? (
                                             <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
                                                 {t('verified')}
                                             </span>
                                         ) : parcel.payment_rejected ? (
-                                            <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
+                                            <span className="inline-flex rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200">
                                                 {t('rejected')}
                                             </span>
-                                        ) : (
+                                        ) : parcel.days >= 3 ? (
                                             <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
+                                                {t('overdue')}
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-yellow-200">
                                                 {t('pending')}
                                             </span>
                                         )}
@@ -1529,6 +1556,61 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     </div>
                 )
             }
+
+            {/* Payment Proof Modal - Exact Match with Reference Photo */}
+            {showPayModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+                    <div className="w-full max-w-lg overflow-hidden rounded-[1.5rem] bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 tracking-tight">Payment QR Scanner</h3>
+                                <p className="mt-0.5 text-xs text-gray-500">Scan payment QR code and upload payment proof</p>
+                            </div>
+                            <button
+                                onClick={() => setShowPayModal(false)}
+                                className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-400"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="p-6 pt-8">
+                            {/* QR Container with Dashed Border */}
+                            <div className="relative mb-6 w-full rounded-2xl border-2 border-dashed border-gray-200 bg-white p-10 flex items-center justify-center group">
+                                <img
+                                    src="/images/qrpayment.png"
+                                    alt="Payment QR"
+                                    className="h-44 w-44 object-contain"
+                                />
+                            </div>
+
+                            <input
+                                type="file"
+                                ref={proofInputRef}
+                                onChange={handleFileChange}
+                                className="hidden"
+                                accept="image/*"
+                            />
+
+                            {/* Action Button */}
+                            <button
+                                onClick={() => proofInputRef.current?.click()}
+                                disabled={isUploadingProof}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-50 border border-gray-200 py-3 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-100 disabled:opacity-50"
+                            >
+                                {isUploadingProof ? (
+                                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                                ) : (
+                                    <Upload className="h-4 w-4 text-gray-400" />
+                                )}
+                                <span>{isUploadingProof ? 'Uploading...' : 'Upload Payment Proof'}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AppLayout >
     );
 }
