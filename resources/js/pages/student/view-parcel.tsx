@@ -118,6 +118,7 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
         const normalized = status?.toLowerCase();
         if (normalized === 'verified') return t('verified');
         if (normalized === 'pending') return t('pending');
+        if (normalized === 'rejected') return t('rejected');
         return status;
     };
 
@@ -162,7 +163,7 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
         const normalizedStatus = status.toLowerCase();
         switch (normalizedStatus) {
             case 'pending payment':
-                return 'bg-orange-100 text-orange-800';
+                return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
             case 'ready for collection':
                 return 'bg-green-100 text-green-800';
             case 'collected':
@@ -180,7 +181,9 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
             case 'verified':
                 return 'bg-green-100 text-green-800';
             case 'pending':
-                return 'bg-orange-100 text-orange-800';
+                return 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200';
+            case 'rejected':
+                return 'bg-gray-100 text-gray-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }

@@ -24,6 +24,7 @@ interface Notification {
     parcel_id?: number;
     created_at: string;
     read_at?: string | null;
+    reason?: string | null;
 }
 
 export default function StudentFaq({
@@ -78,14 +79,18 @@ export default function StudentFaq({
     const handleNotificationClick = async (notification: Notification) => {
         setShowNotificationDropdown(false);
 
-        // Track as dismissed immediately so it won't reappear from props refresh
-        setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
+        // Keep payment_rejected visible until resubmission; others can be dismissed immediately
+        const isStickyRejection = notification.type === 'payment_rejected';
+        if (!isStickyRejection) {
+            // Track as dismissed immediately so it won't reappear from props refresh
+            setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
 
-        // Optimistically remove from UI
-        setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+            // Optimistically remove from UI
+            setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
+        }
 
-        // Mark as read on the server
-        if (notification.id) {
+        // Mark as read on the server unless it is sticky (payment_rejected)
+        if (notification.id && !isStickyRejection) {
             try {
                 const response = await fetch(`/student/notifications/${notification.id}/mark-read`, {
                     method: 'POST',
@@ -99,13 +104,11 @@ export default function StudentFaq({
                 });
 
                 if (!response.ok) {
-                    // If already read or minor error, keep UI updated
                     return;
                 }
 
-                await response.json().catch(() => ({}));
+                await response.json();
             } catch (e) {
-                // Network error - keep UI updated
             }
         }
 
@@ -115,7 +118,6 @@ export default function StudentFaq({
 
         // Check if it's a "Parcel Collected" notification - just mark as read and don't navigate
         if (title.includes('parcel collected') || message.includes('successfully collected')) {
-            // Just remove from list, no navigation
             return;
         }
 
@@ -182,11 +184,11 @@ export default function StudentFaq({
             {showNotificationDropdown && (
                 <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
                     <div className="border-b border-border p-4">
-                        <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
+                        <h3 className="text-lg font-semibold text-popover-foreground">{t('notifications')}</h3>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                         {notificationList.length === 0 ? (
-                            <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
+                            <div className="p-8 text-center text-sm text-muted-foreground">{t('noNotifications')}</div>
                         ) : (
                             notificationList.map((notification) => (
                                 <div
@@ -201,11 +203,26 @@ export default function StudentFaq({
                                         <div className="flex-1">
                                             <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
                                             <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
-                                            {notification.parcel_code && (
-                                                <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
+                                            {notification.reason && (
+                                                <div className="mt-3 group overflow-hidden rounded-xl border border-red-100 bg-red-50/30 p-3 dark:border-red-900/30 dark:bg-red-900/10 transition-all hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                        <span className="text-[10px] font-black uppercase tracking-wider text-red-800 dark:text-red-300">{t('staffFeedback')}</span>
+                                                    </div>
+                                                    <p className="pl-3.5 text-xs italic leading-relaxed text-red-700 dark:text-red-400">
+                                                        "{notification.reason}"
+                                                    </p>
+                                                </div>
                                             )}
                                             <p className="mt-1 text-xs text-muted-foreground">
-                                                {new Date(notification.created_at).toLocaleString()}
+                                                {new Date(notification.created_at).toLocaleString('en-GB', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    hour12: true
+                                                })}
                                             </p>
                                         </div>
                                     </div>

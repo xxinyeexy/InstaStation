@@ -204,7 +204,7 @@ export default function Welcome() {
                 {/* Animated background blobs */}
                 <div className="absolute -top-40 -right-40 h-96 w-96 animate-pulse rounded-full bg-gradient-to-br from-pink-300 to-purple-400 opacity-20 blur-3xl"></div>
                 <div
-                    className="absolute -bottom-40 -left-40 h-96 w-96 animate-pulse rounded-full bg-gradient-to-br from-blue-300 to-cyan-400 opacity-20 blur-3xl"
+                    className="absolute -bottom-40 -left-40 h-96 w-96 animate-pulse rounded-full bg-gradient-to-br from-pink-300 to-rose-400 opacity-20 blur-3xl"
                     style={{ animationDelay: '2s' }}
                 ></div>
                 <div
@@ -290,10 +290,10 @@ export default function Welcome() {
                                     <div
                                         key={word}
                                         className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${index === currentWord
-                                                ? 'translate-y-0 opacity-100'
-                                                : index < currentWord
-                                                    ? '-translate-y-full opacity-0'
-                                                    : 'translate-y-full opacity-0'
+                                            ? 'translate-y-0 opacity-100'
+                                            : index < currentWord
+                                                ? '-translate-y-full opacity-0'
+                                                : 'translate-y-full opacity-0'
                                             }`}
                                     >
                                         <span className="bg-gradient-to-r from-[#FF029A] to-[#16A34A] bg-clip-text text-transparent">{word}</span>
@@ -484,8 +484,8 @@ export default function Welcome() {
                                                 </div>
 
                                                 {/* Card 2 - Center (Prominent) */}
-                                                <div className="group relative z-10 rounded-[2.5rem] border-[3px] border-[#e6dcc6] bg-white p-6 text-center shadow-xl transition-transform hover:scale-105 hover:border-blue-400 md:scale-110 md:p-8 md:hover:scale-125">
-                                                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600 md:mb-4 md:h-20 md:w-20">
+                                                <div className="group relative z-10 rounded-[2.5rem] border-[3px] border-[#e6dcc6] bg-white p-6 text-center shadow-xl transition-transform hover:scale-105 hover:border-purple-400 md:scale-110 md:p-8 md:hover:scale-125">
+                                                    <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-purple-100 text-purple-600 md:mb-4 md:h-20 md:w-20">
                                                         <Package className="h-8 w-8 md:h-10 md:w-10" />
                                                     </div>
                                                     <h3 className="text-xl font-black text-[#594a3a] md:text-2xl">
@@ -493,7 +493,7 @@ export default function Welcome() {
                                                         <br />
                                                         Storage
                                                     </h3>
-                                                    <div className="mt-2 inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-500">
+                                                    <div className="mt-2 inline-block rounded-full bg-purple-50 px-3 py-1 text-xs font-bold text-purple-500">
                                                         Featured
                                                     </div>
                                                 </div>
@@ -589,12 +589,12 @@ export default function Welcome() {
 
                             {/* Parcel Tracking */}
                             <div
-                                className="group relative overflow-hidden rounded-3xl bg-[#DBEAFE] p-8 shadow-xl transition-all duration-700 animate-in fade-in slide-in-from-bottom-4 hover:scale-105 hover:shadow-2xl"
+                                className="group relative overflow-hidden rounded-3xl bg-pink-50 p-8 shadow-xl transition-all duration-700 animate-in fade-in slide-in-from-bottom-4 hover:scale-105 hover:shadow-2xl"
                                 style={{ animationDelay: '400ms' }}
                             >
-                                <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-blue-300 opacity-30 blur-2xl transition-opacity duration-300 group-hover:opacity-50"></div>
+                                <div className="absolute -top-4 -right-4 h-24 w-24 rounded-full bg-pink-200 opacity-30 blur-2xl transition-opacity duration-300 group-hover:opacity-50"></div>
                                 <div className="relative z-10">
-                                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+                                    <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-pink-600 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:shadow-2xl">
                                         <MapPin className="h-8 w-8 text-white" />
                                     </div>
                                     <h3 className="mb-3 text-xl font-bold text-gray-900">Parcel Tracking</h3>
@@ -670,11 +670,11 @@ export default function Welcome() {
                                                         </div>
 
                                                         {/* Scene 3: Payment */}
-                                                        <div className="flex h-full w-full flex-shrink-0 flex-col items-center justify-center bg-blue-50 p-6 text-center">
-                                                            <div className="mb-6 flex h-32 w-32 rotate-3 transform items-center justify-center rounded-full bg-blue-200 shadow-lg">
-                                                                <CreditCard className="h-16 w-16 text-blue-600" />
+                                                        <div className="flex h-full w-full flex-shrink-0 flex-col items-center justify-center bg-purple-50 p-6 text-center">
+                                                            <div className="mb-6 flex h-32 w-32 rotate-3 transform items-center justify-center rounded-full bg-purple-200 shadow-lg">
+                                                                <CreditCard className="h-16 w-16 text-purple-600" />
                                                             </div>
-                                                            <div className="text-2xl font-black text-blue-400 opacity-20">STEP 03</div>
+                                                            <div className="text-2xl font-black text-purple-400 opacity-20">STEP 03</div>
                                                         </div>
 
                                                         {/* Scene 4: Collection */}
@@ -859,7 +859,7 @@ export default function Welcome() {
                                             <div className="mt-8 flex justify-center md:justify-end">
                                                 <button
                                                     onClick={() => setVisibleCount((c) => Math.min(c + 4, announcementsSorted.length))}
-                                                    className="group inline-flex items-center gap-2 rounded-full bg-[#E0F2FE] px-8 py-3 text-xs font-black tracking-widest text-[#0EA5E9] uppercase transition-all hover:-translate-y-1 hover:bg-[#BAE6FD]"
+                                                    className="group inline-flex items-center gap-2 rounded-full bg-rose-50 px-8 py-3 text-xs font-black tracking-widest text-rose-500 uppercase transition-all hover:-translate-y-1 hover:bg-rose-100"
                                                 >
                                                     View More <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
                                                 </button>
@@ -1009,7 +1009,7 @@ export default function Welcome() {
                 </div>
             </div>
             {/* Footer - Clean Modern Design */}
-            <footer className="relative overflow-hidden bg-gradient-to-br from-[#f7d8ff] via-[#fee5d3] to-[#d3e7ff] py-16 duration-1000 animate-in fade-in slide-in-from-bottom-8">
+            <footer className="relative overflow-hidden bg-gradient-to-br from-[#f7d8ff] via-[#fee5d3] to-[#ffe4e6] py-16 duration-1000 animate-in fade-in slide-in-from-bottom-8">
                 <div className="relative z-10 mx-auto max-w-7xl px-6">
                     {/* Main Footer Content */}
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -1035,7 +1035,7 @@ export default function Welcome() {
                                     <Bell className="h-3.5 w-3.5" />
                                     Instant Alerts
                                 </div>
-                                <div className="flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-700">
+                                <div className="flex items-center gap-1.5 rounded-full bg-rose-100 px-3 py-1.5 text-xs font-medium text-rose-700">
                                     <MapPin className="h-3.5 w-3.5" />
                                     Live Updates
                                 </div>

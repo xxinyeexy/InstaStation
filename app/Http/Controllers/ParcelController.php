@@ -449,7 +449,7 @@ class ParcelController extends Controller
             // Validate the request
             $validatedData = $request->validate([
                 'tracking_no' => 'sometimes|string|max:50',
-                'parcel_status' => 'sometimes|string|in:Pending Payment,Ready for Collection,Collected,Unclaimed',
+                'parcel_status' => 'sometimes|string|in:Pending Payment,Approved,Ready For Collection,Collected,Unclaimed',
                 'sender' => 'sometimes|string|max:50',
                 'size' => 'sometimes|nullable|string',
                 'location' => 'sometimes|nullable|string|max:100',

@@ -365,13 +365,23 @@ class StudentController extends Controller
         } elseif ($status === 'pending payment') {
             // Check if there is a rejection notification for this parcel
             if ($parcelId) {
-                $isRejected = \App\Models\Notification::where('notifiable_id', Auth::id())
+                $userId = Auth::id();
+                $isRejected = \App\Models\Notification::where('notifiable_id', $userId)
                     ->where('type', 'payment_rejected')
                     ->whereJsonContains('data->parcel_id', (int)$parcelId)
                     ->exists();
                 
                 if ($isRejected) {
                     return 'Rejected';
+                }
+
+                // Check for existing payment that is not verified
+                $hasPayment = \App\Models\Payment::where('parcel_id', (int)$parcelId)
+                    ->whereNull('verified_by')
+                    ->exists();
+                
+                if ($hasPayment) {
+                    return 'Pending';
                 }
             }
             return 'Pending';
@@ -550,7 +560,7 @@ class StudentController extends Controller
         ]);
     }
 
-    public function storeSchedule(Request $request, $id): JsonResponse
+    public function storeSchedule(Request $request, $id)
     {
         $user = Auth::user();
 
@@ -728,13 +738,15 @@ class StudentController extends Controller
                 ]
             ]);
         } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'message' => 'Parcel not found or access denied'
-            ], 404);
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Parcel not found or access denied'], 404);
+            }
+            return redirect()->back()->withErrors(['error' => 'Parcel not found or access denied']);
         } catch (Exception $e) {
-            return response()->json([
-                'message' => 'Failed to schedule pickup. Please try again.'
-            ], 500);
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Failed to schedule pickup. Please try again.'], 500);
+            }
+            return redirect()->back()->withErrors(['error' => 'Failed to schedule pickup. Please try again.']);
         }
     }
 

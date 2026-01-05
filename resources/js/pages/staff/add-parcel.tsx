@@ -100,8 +100,9 @@ const ParcelRegistrationForm = () => {
             if (value.length >= 1) {
                 // Instant Feedback: Try to filter from cache or current results while waiting
                 const lowerValue = value.toLowerCase();
-                const cachedResults = Object.values(searchCache.current).flat();
-                const localMatches = Array.from(new Set([...searchResults, ...cachedResults]))
+                const combined = [...searchResults, ...Object.values(searchCache.current).flat()];
+                const uniqueStudents = Array.from(new Map(combined.map(s => [s.student_id, s])).values());
+                const localMatches = uniqueStudents
                     .filter(s =>
                         s.student_name.toLowerCase().includes(lowerValue) ||
                         (s.matric_id && s.matric_id.toLowerCase().includes(lowerValue))
@@ -164,9 +165,12 @@ const ParcelRegistrationForm = () => {
             }
             const data = await response.json();
 
+            // Deduplicate results by student_id
+            const uniqueData = Array.from(new Map(data.map((s: Student) => [s.student_id, s])).values()) as Student[];
+
             // Update results and cache
-            setSearchResults(data);
-            searchCache.current[query] = data;
+            setSearchResults(uniqueData);
+            searchCache.current[query] = uniqueData;
         } catch (error) {
             console.error('Error searching students:', error);
             setSearchError('Failed to search students. Please try again.');

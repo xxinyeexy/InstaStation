@@ -91,6 +91,7 @@ export const zh = {
     scheduled: '已预约',
     arrived: '已到达',
     rejected: '已拒绝',
+    processing: '处理中',
 
     // Overview & Statistics
     totalParcels: '总包裹数',
@@ -522,6 +523,14 @@ export const zh = {
     resubmissionGuidance: '重新提交指南',
     resubmissionNotes: '请确保您新上传的照片清晰（高分辨率），显示完整的官方收据，且金额精确匹配 RM {amount}。',
     noSpecificReasonProvided: '未提供具体原因。',
+    pleaseUploadProof: '请上传您的付款凭据以继续。',
+    clickToUpload: '点击上传',
+    maxSize: 'PNG, JPG 或 JPEG (最大 10MB)',
+    important: '重要提示',
+    makeSureReceiptClear: '请确保您的收据清晰可见，并包含交易日期和金额。',
+    amountLabel: '金额',
+    invalidFileType: '无效的文件类型。请上传图像文件（PNG、JPG、JPEG、GIF 或 WEBP）。',
+    fileTooLarge: '文件大小超过 10MB。请上传较小的文件。',
 
     // Profile Page
     profileSettings: '个人资料设置',

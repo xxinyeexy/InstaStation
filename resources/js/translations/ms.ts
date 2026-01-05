@@ -91,6 +91,7 @@ export const ms = {
     scheduled: 'Dijadualkan',
     arrived: 'Tiba',
     rejected: 'Ditolak',
+    processing: 'Sedang Diproses',
 
     // Overview & Statistics
     totalParcels: 'Jumlah Bungkusan',
@@ -518,6 +519,14 @@ export const ms = {
     resubmissionGuidance: 'Panduan Penyerahan Semula',
     resubmissionNotes: 'Sila pastikan muat naik baru anda jelas (resolusi tinggi), menunjukkan resit rasmi penuh, dan jumlahnya sepadan dengan RM {amount} dengan tepat.',
     noSpecificReasonProvided: 'Tiada alasan khusus diberikan.',
+    pleaseUploadProof: 'Sila muat naik bukti pembayaran anda untuk meneruskan.',
+    clickToUpload: 'Klik untuk muat naik',
+    maxSize: 'PNG, JPG atau JPEG (Maks 10MB)',
+    important: 'PENTING',
+    makeSureReceiptClear: 'Sila pastikan resit anda jelas kelihatan dan termasuk tarikh transaksi serta jumlah.',
+    amountLabel: 'Jumlah',
+    invalidFileType: 'Jenis fail tidak sah. Sila muat naik fail imej (PNG, JPG, JPEG, GIF, atau WEBP).',
+    fileTooLarge: 'Saiz fail melebihi 10MB. Sila muat naik fail yang lebih kecil.',
 
     // Profile Page
     profileSettings: 'Tetapan profil',

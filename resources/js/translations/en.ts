@@ -98,6 +98,7 @@ export const en = {
     scheduled: 'Scheduled',
     arrived: 'Arrived',
     rejected: 'Rejected',
+    processing: 'Processing',
 
     // Overview & Statistics
     totalParcels: 'Total Parcels',
@@ -533,6 +534,9 @@ export const en = {
     maxSize: 'PNG, JPG or JPEG (Max 10MB)',
     important: 'IMPORTANT',
     makeSureReceiptClear: 'Please ensure your receipt is clearly visible and includes the transaction date and amount.',
+    amountLabel: 'Amount',
+    invalidFileType: 'Invalid file type. Please upload an image file (PNG, JPG, JPEG, GIF, or WEBP).',
+    fileTooLarge: 'File size exceeds 10MB. Please upload a smaller file.',
 
     // Profile Page
     profileSettings: 'Profile settings',

@@ -61,7 +61,7 @@ class PaymentController extends Controller
                     $paymentState = 'Rejected';
                 } elseif ($latestPayment && empty($latestPayment->verified_by)) {
                     // Has a submission waiting for verification
-                    $paymentState = 'Pending';
+                    $paymentState = 'Processing';
                 } elseif ($status === 'pending payment') {
                     // No submission yet, check if it's already overdue
                     $paymentState = $daysSince >= 3 ? 'Overdue' : 'Pending';
@@ -423,7 +423,7 @@ class PaymentController extends Controller
                     // If parcel already has a schedule, mark as Ready for Collection
                     // Otherwise, mark as Approved (payment verified, but no schedule yet)
                     if ($parcel->schedule) {
-                        $parcel->parcel_status = 'Ready for Collection';
+                        $parcel->parcel_status = 'Ready For Collection';
                     } else {
                         $parcel->parcel_status = 'Approved';
                     }

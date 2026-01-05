@@ -64,7 +64,7 @@ const studentSteps: Step[] = [
     },
     {
         title: 'Collection History',
-        description: 'Look back at your past collections and successful deliveries anytime for reference.',
+        description: 'Look back at your past collections anytime for reference.',
         anchorId: 'nav-history',
         icon: Clock,
     },
@@ -170,6 +170,22 @@ export default function ProductTour({ isOpen: forceOpen, onClose }: { isOpen: bo
     const [currentStep, setCurrentStep] = useState(-1); // -1 for Intro
     const [isFinishing, setIsFinishing] = useState(false);
     const [isOpen, setIsOpen] = useState(forceOpen);
+    const [windowSize, setWindowSize] = useState({
+        width: typeof window !== 'undefined' ? window.innerWidth : 1024,
+        height: typeof window !== 'undefined' ? window.innerHeight : 768
+    });
+
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const [coords, setCoords] = useState<{ top: number; left: number; width: number; height: number; isCentered: boolean }>({
         top: 0,
         left: 0,
@@ -210,12 +226,28 @@ export default function ProductTour({ isOpen: forceOpen, onClose }: { isOpen: bo
     useEffect(() => {
         updatePosition();
         window.addEventListener('resize', updatePosition);
-        return () => window.removeEventListener('resize', updatePosition);
+        window.addEventListener('scroll', updatePosition, true);
+        return () => {
+            window.removeEventListener('resize', updatePosition);
+            window.removeEventListener('scroll', updatePosition, true);
+        };
     }, [updatePosition]);
 
     const handleNext = () => {
         if (currentStep < steps.length - 1) {
-            setCurrentStep(currentStep + 1);
+            const nextIndex = currentStep + 1;
+            setCurrentStep(nextIndex);
+
+            // 🎯 Smooth scroll to the next anchor
+            setTimeout(() => {
+                const anchorId = steps[nextIndex]?.anchorId;
+                if (anchorId) {
+                    const element = document.getElementById(anchorId);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }, 100);
         } else {
             handleFinish();
         }
@@ -223,7 +255,19 @@ export default function ProductTour({ isOpen: forceOpen, onClose }: { isOpen: bo
 
     const handleBack = () => {
         if (currentStep > 0) {
-            setCurrentStep(currentStep - 1);
+            const prevIndex = currentStep - 1;
+            setCurrentStep(prevIndex);
+
+            // 🔙 Smooth scroll to the previous anchor
+            setTimeout(() => {
+                const anchorId = steps[prevIndex]?.anchorId;
+                if (anchorId) {
+                    const element = document.getElementById(anchorId);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }, 100);
         } else if (currentStep === 0) {
             setCurrentStep(-1);
         }
@@ -258,7 +302,6 @@ export default function ProductTour({ isOpen: forceOpen, onClose }: { isOpen: bo
                         ? `polygon(0% 0%, 0% 100%, ${coords.left - 8}px 100%, ${coords.left - 8}px ${coords.top - 8}px, ${coords.left + coords.width + 8}px ${coords.top - 8}px, ${coords.left + coords.width + 8}px ${coords.top + coords.height + 8}px, ${coords.left - 8}px ${coords.top + coords.height + 8}px, ${coords.left - 8}px 100%, 100% 100%, 100% 0%)`
                         : 'none',
                 }}
-                onClick={handleFinish}
             />
 
             {/* Target Highlight Effect (Border Only) */}
@@ -281,38 +324,59 @@ export default function ProductTour({ isOpen: forceOpen, onClose }: { isOpen: bo
             <div
                 className={cn(
                     "absolute z-[120] pointer-events-auto transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1.1)]",
-                    coords.isCentered ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px]" : "w-[400px]",
-                    !coords.isCentered && (coords.top + coords.height + 24 > window.innerHeight - 350) && "-translate-y-full"
+                    coords.isCentered
+                        ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-32px)] sm:w-[500px]"
+                        : "w-[calc(100vw-32px)] md:w-[400px]",
+                    !coords.isCentered && (coords.top + coords.height + 24 > windowSize.height - 350) && "md:-translate-y-full"
                 )}
-                style={!coords.isCentered ? {
-                    top: `${coords.top + coords.height + 24 > window.innerHeight - 350 ? coords.top - 24 : coords.top + coords.height + 24}px`,
-                    left: `${Math.max(24, Math.min(window.innerWidth - 424, coords.left + coords.width / 2 - 200))}px`,
-                } : {}}
+                style={!coords.isCentered ? (
+                    windowSize.width < 768
+                        ? { bottom: '16px', left: '16px', right: '16px', top: 'auto', width: 'auto' } // Docked to bottom on mobile
+                        : {
+                            top: `${coords.top + coords.height + 24 > windowSize.height - 350 ? coords.top - 24 : coords.top + coords.height + 24}px`,
+                            left: `${Math.max(24, Math.min(windowSize.width - 424, coords.left + coords.width / 2 - 200))}px`,
+                        }
+                ) : {}}
             >
                 {currentStep === -1 ? (
                     /* Intro View */
-                    <div className="bg-white rounded-[2rem] p-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.15)] animate-in zoom-in-95 duration-500 border border-slate-100">
-                        <div className="flex justify-center mb-8">
-                            <div className={cn("w-20 h-20 rounded-full flex items-center justify-center text-white ring-8 shadow-xl", roleColor, isStudent ? "ring-emerald-50" : "ring-pink-50")}>
-                                <Sparkles className="w-10 h-10" />
+                    <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] p-6 sm:p-12 text-center shadow-[0_20px_60px_rgba(0,0,0,0.2)] animate-in zoom-in-95 duration-500 border border-white/20 relative overflow-hidden group">
+                        {/* Background Decor */}
+                        <div className={cn("absolute -top-24 -right-24 w-48 h-48 rounded-full opacity-[0.03] transition-transform duration-700 group-hover:scale-110", roleColor)} />
+
+                        <div className="flex justify-center mb-6 sm:mb-10">
+                            <div className={cn("w-16 h-16 sm:w-24 sm:h-24 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-center text-white rotate-3 shadow-2xl transition-transform hover:rotate-6 duration-300", roleColor)}>
+                                <Sparkles className="w-8 h-8 sm:w-12 sm:h-12" />
                             </div>
                         </div>
-                        <h2 className="text-3xl font-black text-slate-900 mb-4 tracking-tight leading-tight">
+
+                        <h2 className="text-2xl sm:text-4xl font-black text-slate-900 mb-4 tracking-tight leading-tight">
                             {step.title}
                         </h2>
-                        <p className="text-slate-500 text-lg leading-relaxed mb-10 max-w-[90%] mx-auto">
+
+                        <p className="text-slate-500 text-base sm:text-xl leading-relaxed mb-8 sm:mb-12 max-w-[95%] sm:max-w-[85%] mx-auto font-medium">
                             {step.description}
                         </p>
-                        <div className="flex flex-col gap-3">
+
+                        <div className="flex flex-col gap-4">
                             <Button
-                                className={cn("h-14 rounded-2xl text-white font-black text-lg shadow-xl hover:opacity-90 transition-all", roleColor)}
-                                onClick={() => setCurrentStep(0)}
+                                className={cn("h-14 sm:h-16 rounded-2xl text-white font-black text-lg sm:text-xl shadow-xl hover:opacity-90 transform active:scale-95 transition-all", roleColor)}
+                                onClick={() => {
+                                    setCurrentStep(0);
+                                    setTimeout(() => {
+                                        const anchorId = steps[0]?.anchorId;
+                                        if (anchorId) {
+                                            document.getElementById(anchorId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        }
+                                    }, 100);
+                                }}
                             >
                                 Get Started
-                                <ArrowRight className="w-5 h-5 ml-2" />
+                                <ArrowRight className="w-6 h-6 ml-2" />
                             </Button>
+
                             <button
-                                className="h-10 text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors"
+                                className="h-10 text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors tracking-wide uppercase"
                                 onClick={handleFinish}
                             >
                                 Skip Tour
@@ -332,19 +396,19 @@ export default function ProductTour({ isOpen: forceOpen, onClose }: { isOpen: bo
                             <X className="w-5 h-5" />
                         </button>
 
-                        <div className="p-8">
-                            <div className="flex items-start gap-4 mb-5">
-                                <div className={cn("w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-black text-lg shadow-sm border", roleColorLight, roleTextColor, isStudent ? "border-emerald-100" : "border-pink-100")}>
+                        <div className="p-5 sm:p-8">
+                            <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-5">
+                                <div className={cn("w-8 h-8 sm:w-10 sm:h-10 shrink-0 rounded-full flex items-center justify-center font-black text-base sm:text-lg shadow-sm border", roleColorLight, roleTextColor, isStudent ? "border-emerald-100" : "border-pink-100")}>
                                     {currentStep + 1}
                                 </div>
-                                <div className="pt-1.5 flex-1">
-                                    <h3 className="text-xl font-black text-slate-900 leading-tight">
+                                <div className="pt-1 sm:pt-1.5 flex-1">
+                                    <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
                                         {step.title}
                                     </h3>
                                 </div>
                             </div>
 
-                            <p className="text-slate-500 text-[15px] leading-relaxed mb-10 font-medium">
+                            <p className="text-slate-500 text-[14px] sm:text-[15px] leading-relaxed mb-8 sm:mb-10 font-medium">
                                 {step.description}
                             </p>
 
@@ -383,7 +447,7 @@ export default function ProductTour({ isOpen: forceOpen, onClose }: { isOpen: bo
                                     size="sm"
                                     onClick={handleNext}
                                     disabled={isFinishing}
-                                    className={cn("h-11 px-8 rounded-xl text-white font-black shadow-lg hover:opacity-90 hover:scale-105 transition-all text-sm", roleColor)}
+                                    className={cn("h-10 sm:h-11 px-6 sm:px-8 rounded-xl text-white font-black shadow-lg hover:opacity-90 hover:scale-105 transition-all text-sm", roleColor)}
                                 >
                                     {isFinishing ? '...' : (currentStep === steps.length - 1 ? 'Finish' : 'Next')}
                                 </Button>
@@ -391,11 +455,11 @@ export default function ProductTour({ isOpen: forceOpen, onClose }: { isOpen: bo
                         </div>
 
                         {/* Speech Bubble Arrow */}
-                        {!coords.isCentered && (
+                        {!coords.isCentered && windowSize.width >= 768 && (
                             <div
                                 className={cn(
                                     "absolute w-6 h-6 bg-white rotate-45 border-slate-50 shadow-[-5px_-5px_10px_rgba(0,0,0,0.02)]",
-                                    coords.top + coords.height + 24 > window.innerHeight - 350
+                                    coords.top + coords.height + 24 > windowSize.height - 350
                                         ? "bottom-[-12px] left-1/2 -translate-x-1/2 border-b border-r" // top pointing
                                         : "top-[-12px] left-1/2 -translate-x-1/2 border-t border-l" // bottom pointing
                                 )}

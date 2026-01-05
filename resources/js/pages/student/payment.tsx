@@ -19,7 +19,7 @@ type Row = {
     sender: string;
     amount: number;
     arrival: string;
-    payment_state: 'Pending' | 'Overdue' | 'Verified' | 'Rejected';
+    payment_state: 'Pending' | 'Overdue' | 'Verified' | 'Rejected' | 'Processing';
     rejection_reason?: string | null;
     rejection_date?: string | null;
     proof_url?: string | null;
@@ -67,6 +67,8 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
         if (state === 'Rejected') return 'text-gray-700 dark:text-gray-400 bg-gray-50 dark:bg-gray-500/10 border-gray-200 dark:border-gray-500/20';
         if (state === 'Verified')
             return 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20';
+        if (state === 'Processing')
+            return 'text-indigo-700 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20';
         return 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20';
     };
 
@@ -136,6 +138,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
         if (normalized === 'pending') return t('pending');
         if (normalized === 'overdue') return t('overdue');
         if (normalized === 'rejected') return t('rejected');
+        if (normalized === 'processing') return t('processing');
         return state;
     };
 

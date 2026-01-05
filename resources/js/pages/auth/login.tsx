@@ -112,7 +112,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                 <div className="w-full max-w-lg rounded-xl bg-white p-8 shadow-md dark:bg-card">
                     <div className="mb-6 text-center">
                         <div className="mb-2 flex justify-center">
-                                         <AppLogoIcon className="h-30 w-30 object-contain" />
+                            <AppLogoIcon className="h-30 w-30 object-contain" />
 
                         </div>
                         <h2 className="text-xl font-semibold text-gray-900 dark:text-card-foreground">Welcome to InstaStation</h2>
@@ -228,8 +228,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                         </TextLink>
                     </div>
 
-                    {/* Status Message */}
-                    {status && <div className="mt-2 text-center text-sm font-medium text-green-600">{status}</div>}
+
                 </div>
             </div>
         </>

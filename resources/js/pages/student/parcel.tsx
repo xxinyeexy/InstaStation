@@ -311,6 +311,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(new Set());
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
 
+    // Update parcel list when prop changes
+    useEffect(() => {
+        setParcelList(parcels);
+    }, [parcels]);
+
     // Update notification list when server-sent notifications change, filtering out dismissed ones
     useEffect(() => {
         console.log('Parcel page - Server notifications changed:', serverNotifications);
@@ -344,37 +349,26 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     }, [showNotificationDropdown]);
 
     const handleNotificationClick = async (notification: any) => {
-        console.log('=== NOTIFICATION CLICK START ===');
-        console.log('Full notification object:', JSON.stringify(notification, null, 2));
-        console.log('Notification ID:', notification.id);
-        console.log('Notification title:', notification.title);
-        console.log('Current notification list length:', notificationList.length);
+        console.log('Notification clicked - Full object:', notification);
+        console.log('Notification clicked - ID:', notification.id);
 
+        // Close dropdown after clicking
         setShowNotificationDropdown(false);
 
-        // If this is a payment_rejected notification, do NOT dismiss/read yet.
-        // Student must resubmit proof; keep it visible.
+        // Keep payment_rejected visible until resubmission; others can be dismissed immediately
         const isStickyRejection = notification.type === 'payment_rejected';
         if (!isStickyRejection) {
             // Add to dismissed list so it won't come back even if props refresh
             setDismissedNotificationIds((prev) => new Set(prev).add(notification.id));
 
             // Optimistically remove from UI immediately for better UX
-            console.log('Optimistically removing notification from list');
-            setNotificationList((prev) => {
-                const filtered = prev.filter((n) => n.id !== notification.id);
-                console.log('New list length:', filtered.length);
-                return filtered;
-            });
-        } else {
-            console.log('Sticky payment_rejected notification - keeping visible until resubmission.');
+            setNotificationList((prev) => prev.filter((n) => n.id !== notification.id));
         }
 
-        // Mark as read on the server ONLY if not sticky
+        // Mark as read on the server unless it is sticky (payment_rejected)
         if (notification.id && !isStickyRejection) {
             try {
-                console.log('Sending POST to:', `/student/notifications/${notification.id}/mark-read`);
-
+                console.log('Attempting to mark notification as read:', notification.id);
                 const response = await fetch(`/student/notifications/${notification.id}/mark-read`, {
                     method: 'POST',
                     headers: {
@@ -386,55 +380,39 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                     credentials: 'same-origin',
                 });
 
-                console.log('Response status:', response.status);
-                console.log('Response ok:', response.ok);
-
-                if (!response.ok) {
-                    console.log('Server returned non-OK status (notification may already be read):', response.status);
-                    // Don't throw error - the notification is removed from UI which is what matters
+                if (response.status === 419) {
+                    window.location.reload();
                     return;
                 }
 
-                const result = await response.json();
-                console.log('Response JSON:', result);
+                if (!response.ok) {
+                    return;
+                }
+
+                await response.json();
             } catch (e) {
-                console.log('Network error marking notification as read (UI already updated):', e);
-                // Don't restore notification to list - better UX to keep it removed
+                console.error('Exception marking notification as read:', e);
             }
-        } else {
-            console.error('No notification ID found!');
         }
 
         // Handle different notification types
         const title = notification.title?.toLowerCase() || '';
         const message = notification.message?.toLowerCase() || '';
 
-        console.log('Checking notification type...');
-        console.log('Title includes "parcel collected"?', title.includes('parcel collected'));
-        console.log('Message includes "successfully collected"?', message.includes('successfully collected'));
-
         // Check if it's a "Parcel Collected" notification - just mark as read and don't navigate
         if (title.includes('parcel collected') || message.includes('successfully collected')) {
-            console.log('This is a Parcel Collected notification - not navigating');
-            // Just remove from list, no navigation
             return;
         }
 
-        console.log('Not a parcel collected notification - checking navigation...');
-
         // For other notifications, navigate as usual
         if (notification.type === 'payment_rejected' && notification.parcel_id) {
-            console.log('Opening payment modal for rejected parcel (sticky notification retained)');
-            handlePayNow(notification.parcel_id);
+            // Navigate but keep the notification visible (will be cleared after resubmission by backend)
+            router.visit(`/student/payment/submit/${notification.parcel_id}`);
         } else if (notification.parcel_id) {
-            console.log('Navigating to parcel detail page');
             router.visit(`/student/parcel/${notification.parcel_id}`);
         } else if (notification.type === 'payment_verified') {
-            console.log('Navigating to payment page');
             router.visit('/student/payment');
         }
-
-        console.log('=== NOTIFICATION CLICK END ===');
     };
 
     // QR Code Modal state
@@ -777,31 +755,24 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         const formData = new FormData();
         formData.append('proof', file);
 
-        fetch(`/student/payment/submit/${payParcelId}`, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-            },
-            body: formData
-        })
-            .then(async (response) => {
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.message || 'Upload failed');
-                }
-                addToastNotification('success', t('success'), t('paymentProofUploaded') || 'Payment proof uploaded successfully!');
+        router.post(`/student/payment/submit/${payParcelId}`, formData, {
+            onSuccess: () => {
                 setShowPayModal(false);
-                // Update local state to show it's now pending validation
-                setParcelList(prev => prev.map(p => p.parcel_id === payParcelId ? { ...p, payment_verified: false, payment_rejected: false, payment_proof_url: 'uploaded' } : p));
-            })
-            .catch(err => {
-                console.error('Upload error:', err);
-                addToastNotification('error', t('error'), t('failedToUploadProof') || 'Failed to upload payment proof. Please try again.');
-            })
-            .finally(() => {
-                setIsUploadingProof(false);
-            });
+                addToastNotification('success', t('success'), t('paymentProofUploaded') || 'Payment proof uploaded successfully!');
+                // Reset file input
+                if (proofInputRef.current) {
+                    proofInputRef.current.value = '';
+                }
+            },
+            onError: (errors) => {
+                console.error('Upload error:', errors);
+                const firstError = Object.values(errors)[0];
+                addToastNotification('error', t('error'), firstError || t('failedToUploadProof') || 'Failed to upload payment proof. Please try again.');
+            },
+            onFinish: () => setIsUploadingProof(false),
+            preserveState: true,
+            preserveScroll: true,
+        });
     };
 
     // Calculate percentage changes (mock calculation for demo purposes)
@@ -991,7 +962,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const headerAction = (
         <div className="relative">
             <button
-                onClick={() => setShowNotificationDropdown((s) => !s)}
+                onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
                 className="notification-bell relative rounded-full border border-border bg-background p-2.5 shadow-sm hover:bg-accent"
             >
                 <Bell className="h-5 w-5 text-foreground" />
@@ -1006,11 +977,11 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
             {showNotificationDropdown && (
                 <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
                     <div className="border-b border-border p-4">
-                        <h3 className="text-lg font-semibold text-popover-foreground">Notifications</h3>
+                        <h3 className="text-lg font-semibold text-popover-foreground">{t('notifications')}</h3>
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                         {visibleNotifications.length === 0 ? (
-                            <div className="p-8 text-center text-sm text-muted-foreground">No notifications</div>
+                            <div className="p-8 text-center text-sm text-muted-foreground">{t('noNotifications')}</div>
                         ) : (
                             visibleNotifications.map((notification) => (
                                 <div
@@ -1025,11 +996,26 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         <div className="flex-1">
                                             <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
                                             <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
-                                            {notification.parcel_code && (
-                                                <p className="mt-1 text-xs text-muted-foreground">Parcel: {notification.parcel_code}</p>
+                                            {notification.reason && (
+                                                <div className="mt-3 group overflow-hidden rounded-xl border border-red-100 bg-red-50/30 p-3 dark:border-red-900/30 dark:bg-red-900/10 transition-all hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                    <div className="flex items-center gap-2 mb-1.5">
+                                                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                        <span className="text-[10px] font-black uppercase tracking-wider text-red-800 dark:text-red-300">{t('staffFeedback')}</span>
+                                                    </div>
+                                                    <p className="pl-3.5 text-xs italic leading-relaxed text-red-700 dark:text-red-400">
+                                                        "{notification.reason}"
+                                                    </p>
+                                                </div>
                                             )}
                                             <p className="mt-1 text-xs text-muted-foreground">
-                                                {new Date(notification.created_at).toLocaleString()}
+                                                {new Date(notification.created_at).toLocaleString('en-GB', {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    hour12: true
+                                                })}
                                             </p>
                                         </div>
                                     </div>
@@ -1373,7 +1359,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        {isPendingPayment && (
+                                        {isPendingPayment && (!parcel.latest_payment || parcel.payment_rejected) && (
                                             <button
                                                 onClick={() => handlePayNow(parcel.parcel_id)}
                                                 className="flex-1 rounded-md bg-yellow-500 px-3 py-2 text-sm font-semibold text-white hover:bg-yellow-600"

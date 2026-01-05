@@ -23,7 +23,8 @@ return new class extends Migration
             $table->string('room_no', 12)->nullable();
             $table->string('phone_no', 15)->nullable();
             $table->string('profile_pic', 500)->nullable();
-            $table->enum('status', ['Active', 'Inactive'])->default('Active');;
+            $table->boolean('has_completed_tour')->default(false);
+            $table->enum('status', ['Active', 'Inactive'])->default('Active');
             $table->string('department')->nullable();
             $table->string('password');
             $table->rememberToken();
@@ -78,6 +79,8 @@ return new class extends Migration
             $table->id('parcel_id');
             $table->string('parcel_code', 20)->unique();
             $table->foreignId('student_id')->nullable()->constrained('users', 'id')->onDelete('set null');
+            $table->string('recipient_name', 150)->nullable();
+            $table->string('recipient_matric', 50)->nullable();
             $table->string('tracking_no', 50)->unique();
             $table->enum('parcel_status', ['Pending Payment', 'Approved', 'Ready For Collection', 'Collected', 'Unclaimed'])->default('Pending Payment');
             $table->integer('days')->nullable();
@@ -91,6 +94,7 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users', 'id')->onDelete('set null');
             $table->foreignId('last_edited_by')->nullable()->constrained('users', 'id')->onDelete('set null');
             $table->timestamp('report_at')->useCurrent();
+            $table->timestamp('reminder_sent_at')->nullable()->index();
             $table->timestamps();
         });
 
@@ -134,6 +138,8 @@ return new class extends Migration
         Schema::dropIfExists('reports');
         Schema::dropIfExists('payments');
         Schema::dropIfExists('parcels');
+        Schema::dropIfExists('announcements');
+
         Schema::dropIfExists('faqs');
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('password_reset_tokens');

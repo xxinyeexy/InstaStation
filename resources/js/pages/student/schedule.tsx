@@ -48,149 +48,66 @@ const SchedulePickup = ({ parcel }: Props) => {
 
         setIsSubmitting(true);
 
+        // Convert selected date and time to a proper datetime string
+        const selectedTimeSlotData = timeSlots.find((slot) => slot.id === selectedTimeSlot);
+        if (!selectedTimeSlotData) {
+            setIsSubmitting(false);
+            return;
+        }
+
         try {
-            // Get CSRF token from meta tag
-            const getCsrfToken = () => {
-                const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                if (metaToken) return metaToken;
-
-                // Fallback: try to get from cookie
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name === 'XSRF-TOKEN') {
-                        return decodeURIComponent(value);
-                    }
-                }
-
-                // Last resort: check if it's in the page
-                return document.head.querySelector('[name="csrf-token"]')?.getAttribute('content') || '';
-            };
-
-            const csrfToken = getCsrfToken();
-            console.log('CSRF Token found:', csrfToken ? 'Yes' : 'No');
-
-            if (!csrfToken) {
-                setErrorMessage('Session expired. Please refresh the page and try again.');
-                setShowErrorToast(true);
-                setTimeout(() => setShowErrorToast(false), 5000);
-                return;
-            }
-
-            // Convert selected date and time to a proper datetime string
-            const selectedTimeSlotData = timeSlots.find((slot) => slot.id === selectedTimeSlot);
-            if (!selectedTimeSlotData) {
-                throw new Error('Invalid time slot selected');
-            }
-
             // Parse the time slot to get start time (e.g., "9:00 AM - 10:00 AM" -> "09:00")
             const timeMatch = selectedTimeSlotData.label.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
-            if (!timeMatch) {
-                throw new Error('Invalid time format');
-            }
+            if (!timeMatch) throw new Error('Invalid time format');
 
             let hour = parseInt(timeMatch[1]);
             const minute = parseInt(timeMatch[2]);
             const period = timeMatch[3];
 
-            // Convert to 24-hour format
-            if (period === 'PM' && hour !== 12) {
-                hour += 12;
-            } else if (period === 'AM' && hour === 12) {
-                hour = 0;
-            }
+            if (period === 'PM' && hour !== 12) hour += 12;
+            else if (period === 'AM' && hour === 12) hour = 0;
 
-            // Validate hour and minute
-            if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-                throw new Error('Invalid time values');
-            }
-
-            // Create the scheduled datetime
             const scheduledDate = new Date(selectedDate);
             scheduledDate.setHours(hour, minute, 0, 0);
 
             // Ensure we're working with the correct timezone
             const localScheduledDate = new Date(scheduledDate.getTime() - scheduledDate.getTimezoneOffset() * 60000);
 
-            // Debug logging
-            console.log('Selected date:', selectedDate);
-            console.log('Selected time slot:', selectedTimeSlotData);
-            console.log('Parsed hour:', hour, 'minute:', minute, 'period:', period);
-            console.log('Final scheduled date:', scheduledDate);
-            console.log('Local scheduled date:', localScheduledDate);
-            console.log('ISO string:', localScheduledDate.toISOString());
-
-            // Prepare the request data
-            const requestData = {
-                parcel_id: parcel.id,
-                scheduled_datetime: localScheduledDate.toISOString(),
-                time_slot: selectedTimeSlotData.label, // Store the complete time slot range
-            };
-
-            console.log('Scheduling pickup with data:', requestData);
-
             const response = await fetch(`/student/schedule/${parcel.id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Accept: 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                     'X-Requested-With': 'XMLHttpRequest',
                 },
-                credentials: 'include',
-                body: JSON.stringify(requestData),
+                body: JSON.stringify({
+                    parcel_id: parcel.id,
+                    scheduled_datetime: localScheduledDate.toISOString(),
+                    time_slot: selectedTimeSlotData.label,
+                }),
             });
 
-            console.log('Response status:', response.status);
-
-            if (!response.ok) {
-                let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-
-                try {
-                    const errorData = await response.json();
-                    console.log('Error response:', errorData);
-
-                    // Handle CSRF token mismatch specifically
-                    if (response.status === 419 || (errorData.message && errorData.message.includes('CSRF'))) {
-                        errorMessage = 'Your session has expired. Please refresh the page and try again.';
-                    } else if (errorData.message) {
-                        errorMessage = errorData.message;
-                    } else if (errorData.errors) {
-                        const validationErrors = Object.entries(errorData.errors)
-                            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-                            .join('\n');
-                        errorMessage = `Validation errors:\n${validationErrors}`;
-                    }
-                } catch (parseError) {
-                    console.log('Could not parse error response as JSON');
-                    const errorText = await response.text();
-                    console.log('Error response text:', errorText);
-                    errorMessage += `\n\nResponse: ${errorText}`;
-                }
-
-                throw new Error(errorMessage);
+            if (response.status === 419) {
+                window.location.reload();
+                return;
             }
 
             const result = await response.json();
-            console.log('Success response:', result);
 
-            // Show success toast notification
-            setShowSuccessToast(true);
-            setTimeout(() => setShowSuccessToast(false), 7000);
-
-            // Navigate immediately with Inertia for smooth transition
-            router.visit('/student/parcel', {
-                only: ['parcels', 'notifications'],
-                preserveState: false,
-                preserveScroll: false,
-            });
-        } catch (error) {
-            console.error('Scheduling error:', error);
-            if (error instanceof Error) {
-                setErrorMessage(error.message);
-            } else {
-                setErrorMessage('An unexpected error occurred. Please try again.');
+            if (!response.ok) {
+                throw new Error(result.message || 'Failed to schedule pickup');
             }
+
+            // Show success toast notification locally
+            setShowSuccessToast(true);
+
+            // Wait 2 seconds so the user sees the success message on THIS page
+            setTimeout(() => {
+                router.visit('/student/parcel');
+            }, 2000);
+        } catch (error) {
+            setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred');
             setShowErrorToast(true);
             setTimeout(() => setShowErrorToast(false), 5000);
         } finally {
@@ -257,8 +174,11 @@ const SchedulePickup = ({ parcel }: Props) => {
             const dateStr = `${yyyy}-${mm}-${dd}`;
             const res = await fetch(`/student/schedule/${parcel.id}/availability?date=${encodeURIComponent(dateStr)}`, {
                 headers: { Accept: 'application/json' },
-                credentials: 'same-origin',
             });
+            if (res.status === 419 || res.status === 401) {
+                window.location.reload();
+                return;
+            }
             if (!res.ok) throw new Error(`Failed to load availability (${res.status})`);
             const data = await res.json();
             const map: Record<string, { count: number; full: boolean; recommended: boolean }> = {};
@@ -375,7 +295,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                     <div className="flex min-w-[320px] items-center justify-center gap-2 rounded-2xl bg-[#f0fdf4] px-5 py-2.5 text-[#065f46] shadow-sm animate-in fade-in slide-in-from-top-4">
                         <CircleCheck className="h-4 w-4 shrink-0" strokeWidth={2.5} />
                         <span className="text-[14px] font-medium tracking-tight whitespace-nowrap">
-                            Collection Scheduled Successfully!
+                            Pickup scheduled successfully
                         </span>
                     </div>
                 </div>

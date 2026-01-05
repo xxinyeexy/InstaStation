@@ -489,11 +489,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 setEditingParcel(null);
                 addNotification('success', 'Success!', 'Parcel updated successfully!');
             } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorData = await response.json().catch(() => ({}));
+                const message = errorData.message || `HTTP error! status: ${response.status}`;
+                throw new Error(message);
             }
         } catch (error) {
             console.error('Failed to update parcel:', error);
-            addNotification('error', 'Error!', 'Failed to update parcel. Please try again.');
+            const errorMessage = error instanceof Error ? error.message : 'Failed to update parcel. Please try again.';
+            addNotification('error', 'Error!', errorMessage);
         } finally {
             setIsUpdating(false);
         }

@@ -40,11 +40,11 @@ export default function PaymentSubmit({ parcel, existing_payment }: { parcel: Pa
     const validateFile = (file: File): string | null => {
         const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         if (!validTypes.includes(file.type)) {
-            return 'Invalid file type. Please upload an image file (PNG, JPG, JPEG, GIF, or WEBP).';
+            return t('invalidFileType');
         }
         const maxSize = 10 * 1024 * 1024; // 10MB
         if (file.size > maxSize) {
-            return 'File size exceeds 10MB. Please upload a smaller file.';
+            return t('fileTooLarge');
         }
         return null;
     };
@@ -68,7 +68,7 @@ export default function PaymentSubmit({ parcel, existing_payment }: { parcel: Pa
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!data.proof) {
-            setValidationError('Please upload a payment proof before submitting.');
+            setValidationError(t('pleaseUploadProof'));
             return;
         }
         post(`/student/payment/submit/${parcel.parcel_id}`, {
@@ -80,13 +80,13 @@ export default function PaymentSubmit({ parcel, existing_payment }: { parcel: Pa
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Payment', href: '/student/payment' },
-        { title: 'Submit Payment', href: `/student/payment/submit/${parcel.parcel_id}` },
+        { title: t('payment'), href: '/student/payment' },
+        { title: t('submitPayment'), href: `/student/payment/submit/${parcel.parcel_id}` },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Submit Payment - ${parcel.parcel_code}`} />
+            <Head title={`${t('submitPayment')} - ${parcel.parcel_code}`} />
 
             <div className="flex min-h-[calc(100vh-200px)] items-start justify-center p-4 sm:p-8 lg:p-12">
                 <div className="w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-100 dark:bg-zinc-900 dark:border-zinc-800">
@@ -128,10 +128,10 @@ export default function PaymentSubmit({ parcel, existing_payment }: { parcel: Pa
                         <div className="h-px bg-slate-100 dark:bg-zinc-800" />
 
                         {/* QR Payment Header from Photo */}
-                      
 
-                       
-                          <div className="w-full py-2.5 rounded-lg border border-slate-200 flex items-center justify-center dark:bg-zinc-800/50 dark:border-zinc-800">
+
+
+                        <div className="w-full py-2.5 rounded-lg border border-slate-200 flex items-center justify-center dark:bg-zinc-800/50 dark:border-zinc-800">
                             <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{t('qrPayment')}</span>
                         </div>
 
@@ -148,10 +148,10 @@ export default function PaymentSubmit({ parcel, existing_payment }: { parcel: Pa
                             </div>
 
                             <div className="text-center">
-                                <div className="text-xs font-medium text-slate-600 dark:text-slate-400">Amount: RM {parcel.fee.toFixed(2)}</div>
+                                <div className="text-xs font-medium text-slate-600 dark:text-slate-400">{t('amountLabel')}: RM {parcel.fee.toFixed(2)}</div>
                             </div>
                         </div>
-                         {/* Rejection Feedback (If resubmitting) */}
+                        {/* Rejection Feedback (If resubmitting) */}
                         {existing_payment && !previewUrl && (
                             <div className="overflow-hidden rounded-[2rem] border border-red-200/50 bg-white shadow-xl dark:border-red-500/10 dark:bg-zinc-900/40 animate-in fade-in slide-in-from-top-4 duration-500">
                                 <div className="bg-gradient-to-r from-red-50/80 via-white to-red-50/80 px-6 py-4 dark:from-red-950/20 dark:via-zinc-900/40 dark:to-red-950/20 border-b border-red-50 dark:border-red-900/10 flex items-center justify-between">
@@ -246,7 +246,7 @@ export default function PaymentSubmit({ parcel, existing_payment }: { parcel: Pa
                                         </div>
                                         <div className="text-center">
                                             <p className="text-sm font-black uppercase tracking-widest">{t('clickToUpload')}</p>
-                                            <p className="text-[10px] font-bold mt-1 uppercase opacity-60">PNG, JPG or WebP (Max 10MB)</p>
+                                            <p className="text-[10px] font-bold mt-1 uppercase opacity-60">{t('maxSize')}</p>
                                         </div>
                                     </div>
                                 )}
