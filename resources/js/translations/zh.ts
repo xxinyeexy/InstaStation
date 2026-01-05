@@ -140,6 +140,7 @@ export const zh = {
     last30Days: '过去30天',
     selectDate: '选择日期',
     selectTime: '选择时间段',
+    announcementDetails: '公告详情',
 
     // Messages & Notifications
     success: '成功',
@@ -172,6 +173,7 @@ export const zh = {
     deleteFailed: '删除失败',
     failedToDelete: '删除包裹失败。请重试。',
     reminderProcessed: '提醒已处理',
+    reminderSent: '提醒发送成功！',
     reminderFailed: '提醒失败',
     failedToQueueReminder: '提醒排队失败',
     failedToSendReminder: '发送提醒失败',
@@ -256,8 +258,10 @@ export const zh = {
     parcelsTotal: '包裹总数',
     parcelsPending: '待处理包裹',
     deleteOldRecords: '删除旧记录？',
-    deleteOldRecordsConfirm: '您确定要删除所有超过10天的学生取件历史（包裹）吗？',
-    actionCannotBeUndone: '此操作无法撤销。',
+    deleteOldRecordsTitle: '删除旧记录？',
+    deleteOldRecordsConfirm: '您确定要删除所有超过',
+    tenDays: '10天',
+    thisActionCannotBeUndone: '此操作无法撤销。',
     deleteRecords: '删除记录',
 
     // Announcements Page
@@ -510,6 +514,7 @@ export const zh = {
     collect: '领取',
     confirmDeletion: '确认删除',
     paymentQRScanner: '付款二维码扫描器',
+    scanPaymentQRDescription: '扫描付款二维码并上传付款凭证',
     scanPaymentQRAndUpload: '扫描付款二维码并上传付款凭证',
     collectionQRCode: '取件二维码',
     showThisQRCode: '出示此二维码以领取您的包裹',
@@ -539,8 +544,10 @@ export const zh = {
     updateProfile: '更新您的姓名和电子邮件地址',
     profilePicture: '个人头像',
     choosePhoto: '选择照片',
+    photoRequirements: 'JPG、PNG 或 GIF（最大 2MB）',
     emailAddress: '电子邮件地址',
     phoneNumber: '电话号码',
+    phonePlaceholder: '例如：0123456789',
     deleteAccount: '删除账户',
     deleteAccountDescription: '删除您的账户及其所有资源',
     deleteWarning: '请谨慎操作，此操作不可撤销。',

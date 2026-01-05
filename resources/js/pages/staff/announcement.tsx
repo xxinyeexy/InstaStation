@@ -429,7 +429,7 @@ export default function StaffAnnouncements(props: {
 
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/30" onClick={handleDeleteCancel} />
+                    <div className="absolute inset-0 bg-black/30" />
                     <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl dark:bg-gray-800">
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
                             <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
@@ -474,7 +474,7 @@ export default function StaffAnnouncements(props: {
 
             {editing && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-                    <div className="absolute inset-0 bg-black/30" onClick={() => setEditing(null)} />
+                    <div className="absolute inset-0 bg-black/30" />
                     <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
@@ -704,11 +704,11 @@ export default function StaffAnnouncements(props: {
 
             {viewing && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-                    <div className="absolute inset-0 bg-black/30" onClick={() => setViewing(null)} />
+                    <div className="absolute inset-0 bg-black/30" />
                     <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
-                                <div className="text-lg font-semibold text-gray-900 dark:text-white">Announcement Details</div>
+                                <div className="text-lg font-semibold text-gray-900 dark:text-white">{t('announcementDetails')}</div>
                                 <div className="mt-2 flex items-center gap-2">
                                     <span
                                         className={`rounded-full px-2 py-0.5 ${categoryClasses((viewing as any).announcement_type || (viewing as any).category)}`}
@@ -741,15 +741,15 @@ export default function StaffAnnouncements(props: {
                             <hr className="dark:border-gray-700" />
                             <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
                                 <div>
-                                    <div className="font-medium">Created</div>
+                                    <div className="font-medium">{t('created')}</div>
                                     <div>{(viewing as any).created_at ? new Date((viewing as any).created_at).toLocaleString() : 'N/A'}</div>
                                 </div>
                                 <div>
-                                    <div className="font-medium">Publish Date</div>
+                                    <div className="font-medium">{t('publishDate')}</div>
                                     <div>{formatDateTime((viewing as any).publish_date)}</div>
                                 </div>
                                 <div>
-                                    <div className="font-medium">Expiry Date</div>
+                                    <div className="font-medium">{t('expiryDate')}</div>
                                     <div>{formatDateTime((viewing as any).expiry_date)}</div>
                                 </div>
                             </div>
@@ -760,7 +760,7 @@ export default function StaffAnnouncements(props: {
 
             {adding && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-                    <div className="absolute inset-0 bg-black/30" onClick={() => setAdding(false)} />
+                    <div className="absolute inset-0 bg-black/30" />
                     <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>

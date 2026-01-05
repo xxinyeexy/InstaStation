@@ -619,11 +619,13 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
         setIsUpdating(true);
         try {
-            const response = await fetch(`/staff/parcel/${editingParcel.parcel_id}`, {
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+            let response = await fetch(`/staff/parcel/${editingParcel.parcel_id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-CSRF-TOKEN': csrf,
                 },
                 body: JSON.stringify({
                     parcel_code: editForm.parcel_code,
@@ -638,6 +640,48 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 }),
             });
 
+            // Handle CSRF token expiration
+            if (response.status === 419) {
+                try {
+                    // Refresh CSRF token
+                    const refreshRes = await fetch(window.location.href);
+                    const html = await refreshRes.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newToken = doc.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                    if (newToken) {
+                        // Update meta tag for future requests
+                        document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', newToken);
+
+                        // Retry request with new token
+                        response = await fetch(`/staff/parcel/${editingParcel.parcel_id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': newToken,
+                            },
+                            body: JSON.stringify({
+                                parcel_code: editForm.parcel_code,
+                                parcel_status: editForm.parcel_status,
+                                sender_name: editForm.sender_name,
+                                sender_address: editForm.sender_address,
+                                dimensions: editForm.dimensions,
+                                weight: editForm.weight,
+                                fee: editForm.fee,
+                                description: editForm.description,
+                                location: editingParcel.location,
+                            }),
+                        });
+                    }
+                } catch (refreshError) {
+                    console.error('Session refresh failed:', refreshError);
+                    addToastNotification('error', t('error'), 'Session expired. Please refresh the page and try again.');
+                    setIsUpdating(false);
+                    return;
+                }
+            }
+
             if (response.ok) {
                 const result = await response.json();
 
@@ -650,6 +694,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                 setEditingParcel(null);
                 addToastNotification('success', t('success'), t('parcelUpdatedSuccess'));
             } else {
+                const errorText = await response.text();
+                console.error('Update parcel failed:', response.status, errorText);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
         } catch (error) {
@@ -1550,8 +1596,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         {/* Header */}
                         <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
                             <div>
-                                <h3 className="text-xl font-bold text-gray-900 tracking-tight">Payment QR Scanner</h3>
-                                <p className="mt-0.5 text-xs text-gray-500">Scan payment QR code and upload payment proof</p>
+                                <h3 className="text-xl font-bold text-gray-900 tracking-tight">{t('paymentQRScanner')}</h3>
+                                <p className="mt-0.5 text-xs text-gray-500">{t('scanPaymentQRDescription')}</p>
                             </div>
                             <button
                                 onClick={() => setShowPayModal(false)}
@@ -1591,7 +1637,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                 ) : (
                                     <Upload className="h-4 w-4 text-gray-400" />
                                 )}
-                                <span>{isUploadingProof ? 'Uploading...' : 'Upload Payment Proof'}</span>
+                                <span>{isUploadingProof ? t('uploading') : t('uploadPaymentProof')}</span>
                             </button>
                         </div>
                     </div>

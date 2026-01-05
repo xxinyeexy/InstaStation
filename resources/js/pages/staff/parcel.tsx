@@ -2205,39 +2205,6 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         </svg>
                                     </div>
                                 </button>
-
-                                {/* Cleanup Old Records Button - Only for Operations/Admin */}
-                                {((currentUser?.department as string)?.trim() === 'Operations' ||
-                                    (currentUser?.department as string)?.trim() === 'Operations - Admin' ||
-                                    (currentUser?.department as string)?.trim() === 'Admin' ||
-                                    currentUser?.type === 'admin') && (
-                                        <button
-                                            onClick={() => {
-                                                if (window.confirm('Are you sure you want to delete all student collection history (parcels) older than 10 days? This action cannot be undone.')) {
-                                                    router.post('/staff/parcels/cleanup-old', {}, {
-                                                        preserveScroll: true,
-                                                        onSuccess: () => {
-                                                            router.reload();
-                                                        },
-                                                    });
-                                                }
-                                            }}
-                                            className="group flex w-full items-center gap-4 rounded-2xl border-2 border-red-100 bg-gradient-to-r from-red-50 via-white to-red-50 p-5 text-left transition-all duration-300 hover:scale-[1.02] hover:border-red-300 hover:shadow-xl hover:from-red-100 hover:to-red-50 dark:border-red-900/50 dark:from-red-900/20 dark:via-gray-800 dark:to-red-900/10"
-                                        >
-                                            <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-red-400 to-red-600 shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
-                                                <Trash2 className="h-7 w-7 text-white" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <span className="block text-base font-bold text-gray-900 group-hover:text-red-700 dark:text-gray-100 dark:group-hover:text-red-400">Cleanup Old Records</span>
-                                                <p className="mt-1 text-xs text-gray-500 group-hover:text-red-600 dark:text-gray-400 dark:group-hover:text-red-300">Remove parcels older than 10 days</p>
-                                            </div>
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-600 transition-all duration-300 group-hover:bg-red-600 group-hover:text-white">
-                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                                                </svg>
-                                            </div>
-                                        </button>
-                                    )}
                             </div>
                         </div>
 

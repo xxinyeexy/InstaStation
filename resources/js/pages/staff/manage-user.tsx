@@ -263,14 +263,14 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                             {/* Content */}
                             <div className="mt-4 text-center">
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                                    Delete Old Records?
+                                    {t('deleteOldRecordsTitle')}
                                 </h3>
                                 <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                                    Are you sure you want to delete all student collection history (parcels) older than{' '}
-                                    <span className="font-semibold text-red-600 dark:text-red-500">10 days</span>?
+                                    {t('deleteOldRecordsConfirm')}{' '}
+                                    <span className="font-semibold text-red-600 dark:text-red-500">{t('tenDays')}</span>?
                                     <br />
                                     <span className="mt-2 inline-block font-medium text-red-700 dark:text-red-400">
-                                        This action cannot be undone.
+                                        {t('thisActionCannotBeUndone')}
                                     </span>
                                 </p>
                             </div>
@@ -281,7 +281,7 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                                     onClick={() => setShowCleanupModal(false)}
                                     className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all hover:bg-gray-50 active:scale-95 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                                 >
-                                    Cancel
+                                    {t('cancel')}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -295,7 +295,7 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                                     }}
                                     className="flex-1 rounded-lg bg-gradient-to-r from-red-600 to-red-700 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:from-red-700 hover:to-red-800 hover:shadow-lg active:scale-95"
                                 >
-                                    Delete Records
+                                    {t('deleteRecords')}
                                 </button>
                             </div>
                         </div>

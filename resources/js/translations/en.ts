@@ -150,6 +150,7 @@ export const en = {
     last30Days: 'Last 30 Days',
     selectDate: 'Select Date',
     selectTime: 'Select Time Slot',
+    announcementDetails: 'Announcement Details',
 
     // Messages & Notifications
     success: 'Success',
@@ -182,6 +183,7 @@ export const en = {
     deleteFailed: 'Delete Failed',
     failedToDelete: 'Failed to delete parcel. Please try again.',
     reminderProcessed: 'Reminder Processed',
+    reminderSent: 'Reminder sent successfully!',
     reminderFailed: 'Reminder Failed',
     failedToQueueReminder: 'Failed to queue reminder',
     failedToSendReminder: 'Failed to send reminder',
@@ -265,6 +267,11 @@ export const en = {
     total: 'total',
     active: 'Active',
     inactive: 'Inactive',
+    deleteOldRecordsTitle: 'Delete Old Records?',
+    deleteOldRecordsConfirm: 'Are you sure you want to delete all student collection history (parcels) older than',
+    tenDays: '10 days',
+    thisActionCannotBeUndone: 'This action cannot be undone.',
+    deleteRecords: 'Delete Records',
 
     // Announcements Page
     manageAnnouncements: 'Manage announcements and notifications for students',
@@ -516,6 +523,7 @@ export const en = {
     collect: 'Collect',
     confirmDeletion: 'Confirm Deletion',
     paymentQRScanner: 'Payment QR Scanner',
+    scanPaymentQRDescription: 'Scan payment QR code and upload payment proof',
     scanPaymentQRAndUpload: 'Scan payment QR code and upload payment proof',
     collectionQRCode: 'Collection QR Code',
     showThisQRCode: 'Show this QR code to collect your parcel',

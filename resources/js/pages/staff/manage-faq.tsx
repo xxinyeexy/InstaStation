@@ -55,7 +55,7 @@ export default function ManageFaq({
     const [adding, setAdding] = useState(false);
     const [addQuestion, setAddQuestion] = useState('');
     const [addAnswer, setAddAnswer] = useState('');
-    const [addCategory, setAddCategory] = useState('');
+    const [addCategory, setAddCategory] = useState(categories.length > 0 ? categories[0] : 'General');
     const [addStatus, setAddStatus] = useState<'Active' | 'Inactive'>('Active');
     const [successMessage, setSuccessMessage] = useState<string>('');
 
@@ -210,7 +210,11 @@ export default function ManageFaq({
                                 ))}
                         </select>
                         <button
-                            onClick={() => setAdding(true)}
+                            onClick={() => {
+                                setAdding(true);
+                                // Set default category when opening modal
+                                setAddCategory(categories.length > 0 ? categories[0] : 'General');
+                            }}
                             className="flex-1 sm:flex-none inline-flex justify-center items-center gap-2 rounded-md bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600 dark:bg-pink-600 dark:hover:bg-pink-700"
                         >
                             <Plus size={16} /> {t('addFAQ')}
@@ -283,7 +287,7 @@ export default function ManageFaq({
 
             {editing && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-                    <div className="absolute inset-0 bg-black/30" onClick={() => setEditing(null)} />
+                    <div className="absolute inset-0 bg-black/30" />
                     <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
@@ -415,7 +419,7 @@ export default function ManageFaq({
 
             {showDeleteModal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/30" onClick={handleDeleteCancel} />
+                    <div className="absolute inset-0 bg-black/30" />
                     <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 text-center shadow-xl dark:bg-gray-800">
                         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/40">
                             <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
@@ -461,7 +465,7 @@ export default function ManageFaq({
 
             {adding && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-                    <div className="absolute inset-0 bg-black/30" onClick={() => setAdding(false)} />
+                    <div className="absolute inset-0 bg-black/30" />
                     <div className="relative z-10 w-full max-w-xl rounded-xl bg-white p-4 sm:p-6 shadow-xl dark:bg-gray-800">
                         <div className="mb-4 flex items-start justify-between">
                             <div>
