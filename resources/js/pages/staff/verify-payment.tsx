@@ -30,6 +30,8 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
     const flashSuccessFromServer = (props as any).flash?.success ?? null;
     const [detail, setDetail] = useState<Row | null>(null);
     const [list, setList] = useState<Row[]>(rows);
+    const [searchTerm, setSearchTerm] = useState(filters?.q || '');
+    const [statusFilter, setStatusFilter] = useState(filters?.status || '');
     const [processingPayments, setProcessingPayments] = useState<Set<number>>(new Set());
     const [rejectModalPaymentId, setRejectModalPaymentId] = useState<number | null>(null);
     const [rejectionReason, setRejectionReason] = useState<string>('');
@@ -67,13 +69,27 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
         }
     }, [flashSuccessFromServer]);
 
-    const searchInputRef = useRef<HTMLInputElement | null>(null);
-    const typingTimerRef = useRef<number | null>(null);
-
     // When navigating with filters, ensure local list syncs with server data
     useEffect(() => {
         setList(rows);
     }, [rows]);
+
+    // Client-side filtering similar to parcel page
+    const filteredList = list.filter((payment) => {
+        // Status filter
+        const matchesStatus = statusFilter === '' || payment.status === statusFilter;
+
+        // Search filter - check multiple fields
+        const matchesSearch =
+            searchTerm === '' ||
+            payment.tracking_no?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            payment.student?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            payment.student_matric?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            payment.amount.toString().includes(searchTerm) ||
+            payment.method?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        return matchesStatus && matchesSearch;
+    });
 
     // Handle approve payment with error handling
     const handleApprovePayment = async (paymentId: number) => {
@@ -192,15 +208,6 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
         }
     };
 
-    // Trigger search using current input value
-    const performSearch = () => {
-        const value = searchInputRef.current?.value ?? '';
-        const params = new URLSearchParams(window.location.search);
-        params.set('q', value);
-        params.set('status', filters?.status || '');
-        router.get(`/staff/payments?${params.toString()}`);
-    };
-
     // Download proof image
     const handleDownloadImage = () => {
         if (!detail) return;
@@ -266,43 +273,19 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                         <div className="relative w-full max-w-xl">
                             {/* Search input */}
                             <input
-                                ref={searchInputRef}
                                 className="w-full rounded-md border border-border bg-background py-2 pr-3 pl-9 text-sm text-foreground placeholder:text-muted-foreground"
                                 placeholder={t('searchParcels')}
-                                defaultValue={filters?.q || ''}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        performSearch();
-                                    }
-                                }}
-                                onChange={() => {
-                                    // Debounce live search while typing
-                                    if (typingTimerRef.current) {
-                                        window.clearTimeout(typingTimerRef.current);
-                                    }
-                                    typingTimerRef.current = window.setTimeout(() => {
-                                        performSearch();
-                                    }, 300);
-                                }}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
                             />
-                            <button
-                                type="button"
-                                onClick={performSearch}
-                                className="absolute top-1/2 left-2 -translate-y-1/2 text-gray-400 hover:text-gray-500"
-                                aria-label="Search"
-                            >
+                            <div className="absolute top-1/2 left-2 -translate-y-1/2 text-gray-400">
                                 <Search className="h-4 w-4" />
-                            </button>
+                            </div>
                         </div>
                         <select
                             className="ml-4 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground"
-                            defaultValue={filters?.status || ''}
-                            onChange={(e) => {
-                                const params = new URLSearchParams(window.location.search);
-                                params.set('q', (document.querySelector('input[placeholder^=Search]') as HTMLInputElement)?.value || '');
-                                params.set('status', e.target.value);
-                                router.get(`/staff/payments?${params.toString()}`);
-                            }}
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
                         >
                             <option value="">{t('allStatus')}</option>
                             <option value="pending">{t('pending')}</option>
@@ -320,7 +303,7 @@ export default function VerifyPayment({ summary, rows, filters }: { summary: Sum
                                 <div className="col-span-1 text-right">{t('actions')}</div>
                             </div>
 
-                            {list.map((r) => (
+                            {filteredList.map((r) => (
                                 <div key={r.payment_id} className="grid grid-cols-12 items-center gap-2 border-b border-border px-4 py-3">
                                     <div className="col-span-3 font-medium text-foreground">{r.tracking_no ?? '—'}</div>
                                     <div className="col-span-4">
