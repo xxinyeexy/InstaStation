@@ -84,12 +84,46 @@ export default function ManageFaq({
         window.location.href = `/staff/manage-faq?` + new URLSearchParams({ q, category }).toString();
     };
 
-    const csrf = (typeof document !== 'undefined' ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') : '') || '';
+    const fetchWithCSRF = async (url: string, options: RequestInit = {}) => {
+        let token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': token,
+            ...(options.headers || {}),
+        } as any;
+
+        // Default content type to json if body is present and not FormData
+        if (options.body && typeof options.body === 'string' && !headers['Content-Type']) {
+            headers['Content-Type'] = 'application/json';
+        }
+
+        let res = await fetch(url, { ...options, headers });
+
+        if (res.status === 419) {
+            console.warn('CSRF token expired. Refreshing...');
+            try {
+                const refreshRes = await fetch(window.location.href);
+                const html = await refreshRes.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newToken = doc.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                if (newToken) {
+                    document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', newToken);
+                    headers['X-CSRF-TOKEN'] = newToken;
+                    res = await fetch(url, { ...options, headers });
+                }
+            } catch (e) {
+                console.error('Failed to refresh CSRF token', e);
+            }
+        }
+        return res;
+    };
 
     const publish = async (faq_id: number, to: 'publish' | 'unpublish') => {
-        await fetch(`/staff/faq/${faq_id}/${to}`, {
+        await fetchWithCSRF(`/staff/faq/${faq_id}/${to}`, {
             method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
         });
         setList((prev) =>
             prev.map((r) =>
@@ -98,7 +132,7 @@ export default function ManageFaq({
         );
     };
     const remove = async (faq_id: number) => {
-        await fetch(`/staff/faq/${faq_id}`, { method: 'DELETE', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf } });
+        await fetchWithCSRF(`/staff/faq/${faq_id}`, { method: 'DELETE' });
         setList((prev) => prev.filter((r) => r.faq_id !== faq_id));
     };
 
@@ -226,21 +260,21 @@ export default function ManageFaq({
                 <div className="space-y-4">
                     {filtered.map((f) => (
                         <div key={f.faq_id} className="rounded-xl border border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700">
-                            <div className="flex items-start justify-between p-4">
-                                <div className="pr-4">
+                            <div className="flex flex-col p-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div className="min-w-0 flex-1 w-full sm:pr-4">
                                     <div className="mb-2 flex items-center gap-2 text-xs">
                                         <span className={`rounded-full px-2 py-0.5 ${categoryClasses(f.category)}`}>{t((f.category || 'General').toLowerCase() as any)}</span>
                                         {f.faq_status === 'Inactive' && (
                                             <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-600 dark:bg-gray-700 dark:text-gray-300">{t('draft')}</span>
                                         )}
                                     </div>
-                                    <div className="text-lg font-semibold text-gray-900 dark:text-white">{f.faq_question}</div>
-                                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">{f.faq_answer}</div>
+                                    <div className="break-words text-lg font-semibold text-gray-900 dark:text-white" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{f.faq_question}</div>
+                                    <div className="mt-2 break-words text-sm text-gray-600 dark:text-gray-400" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{f.faq_answer}</div>
                                     <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
                                         Created: {f.created_at ? new Date(f.created_at).toLocaleDateString() : 'N/A'}
                                     </div>
                                 </div>
-                                <div className="flex shrink-0 items-center gap-3">
+                                <div className="mt-4 flex shrink-0 items-center gap-3 sm:mt-0">
                                     {f.faq_status === 'Active' ? (
                                         <button
                                             onClick={() => publish(f.faq_id, 'unpublish')}
@@ -378,13 +412,8 @@ export default function ManageFaq({
                                             return;
                                         }
 
-                                        await fetch(`/staff/faq/${editing.faq_id}`, {
+                                        const res = await fetchWithCSRF(`/staff/faq/${editing.faq_id}`, {
                                             method: 'PUT',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-Requested-With': 'XMLHttpRequest',
-                                                'X-CSRF-TOKEN': csrf,
-                                            },
                                             body: JSON.stringify({
                                                 faq_question: editQuestion,
                                                 faq_answer: editAnswer,
@@ -392,6 +421,12 @@ export default function ManageFaq({
                                                 faq_status: editStatus,
                                             }),
                                         });
+
+                                        if (!res.ok) {
+                                            const errorData = await res.json();
+                                            showValidationError(errorData.message || 'Failed to update FAQ');
+                                            return;
+                                        }
                                         setList((prev) =>
                                             prev.map((r) =>
                                                 r.faq_id === editing.faq_id
@@ -556,13 +591,8 @@ export default function ManageFaq({
                                         }
 
                                         try {
-                                            const res = await fetch('/staff/faq', {
+                                            const res = await fetchWithCSRF('/staff/faq', {
                                                 method: 'POST',
-                                                headers: {
-                                                    'Content-Type': 'application/json',
-                                                    'X-Requested-With': 'XMLHttpRequest',
-                                                    'X-CSRF-TOKEN': csrf,
-                                                },
                                                 body: JSON.stringify({
                                                     faq_question: addQuestion,
                                                     faq_answer: addAnswer,
@@ -574,7 +604,17 @@ export default function ManageFaq({
                                             if (!res.ok) {
                                                 const errorData = await res.json();
                                                 console.error('Server error:', errorData);
-                                                showValidationError('Failed to add FAQ. Please ensure all fields are valid.');
+                                                let errorMessage = 'Failed to add FAQ. Please ensure all fields are valid.';
+                                                // Extract validation errors
+                                                if (errorData.errors) {
+                                                    const messages = Object.values(errorData.errors).flat();
+                                                    if (messages.length > 0) {
+                                                        errorMessage = String(messages[0]);
+                                                    }
+                                                } else if (errorData.message) {
+                                                    errorMessage = errorData.message;
+                                                }
+                                                showValidationError(errorMessage);
                                                 return;
                                             }
 

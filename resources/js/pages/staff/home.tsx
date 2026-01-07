@@ -649,8 +649,8 @@ export default function StaffHome() {
                             title={t('unclaimedParcels')}
                             value={data.overview.unclaimed}
                             icon={AlertCircle}
-                            bgColor="bg-red-100 dark:bg-red-500/20"
-                            iconColor="text-red-600 dark:text-red-400"
+                            bgColor="bg-gray-100 dark:bg-gray-500/20"
+                            iconColor="text-gray-600 dark:text-gray-400"
                         />
                     </AnimatedChart>
                 </div>

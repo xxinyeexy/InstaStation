@@ -269,7 +269,7 @@ export default function Unclaimed({
                                             <div className="mb-1 font-mono text-lg font-bold text-gray-900">{p.tracking_no}</div>
                                             <div className="text-sm font-medium text-gray-600">From: {p.sender}</div>
                                         </div>
-                                        <span className="rounded-full bg-gradient-to-r from-rose-500 to-pink-500 px-3 py-1 text-xs font-bold text-white shadow-md">unclaimed</span>
+                                        <span className="rounded-full bg-gray-500 px-3 py-1 text-xs font-bold text-white shadow-md">unclaimed</span>
                                     </div>
 
                                     <div className="mb-4 grid grid-cols-2 gap-4 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 p-4">
@@ -362,7 +362,7 @@ export default function Unclaimed({
                                             </td>
                                             <td className="px-6 py-4 text-gray-600">{p.location ?? '—'}</td>
                                             <td className="px-6 py-4">
-                                                <span className="rounded-md bg-rose-100 px-2 py-1 text-xs font-medium text-rose-700">unclaimed</span>
+                                                <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">unclaimed</span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex gap-2">

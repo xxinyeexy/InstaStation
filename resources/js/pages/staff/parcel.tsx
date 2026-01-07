@@ -101,6 +101,45 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
     const { auth } = usePage<SharedData>().props;
     const currentUser = auth.user;
 
+    // Helper function to handle CSRF token refresh on 419 errors
+    const fetchWithCSRF = async (url: string, options: RequestInit = {}) => {
+        let token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': token,
+            ...(options.headers || {}),
+        } as any;
+
+        // Default content type to json if body is present and not FormData
+        if (options.body && typeof options.body === 'string' && !headers['Content-Type']) {
+            headers['Content-Type'] = 'application/json';
+        }
+
+        let res = await fetch(url, { ...options, headers, credentials: 'same-origin' });
+
+        if (res.status === 419) {
+            console.warn('CSRF token expired. Refreshing...');
+            try {
+                const refreshRes = await fetch(window.location.href);
+                const html = await refreshRes.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newToken = doc.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+                if (newToken) {
+                    document.querySelector('meta[name="csrf-token"]')?.setAttribute('content', newToken);
+                    headers['X-CSRF-TOKEN'] = newToken;
+                    res = await fetch(url, { ...options, headers, credentials: 'same-origin' });
+                }
+            } catch (e) {
+                console.error('Failed to refresh CSRF token', e);
+            }
+        }
+        return res;
+    };
+
+
     const [activeTab, setActiveTab] = useState<TabType>('All Parcels');
     const [searchTerm, setSearchTerm] = useState('');
     // Use state for parcel list and initialize it with the parcels prop
@@ -454,13 +493,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
         setIsUpdating(true);
         try {
-            const response = await fetch(`/staff/parcel/${editingParcel.parcel_id}`, {
+            const response = await fetchWithCSRF(`/staff/parcel/${editingParcel.parcel_id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                credentials: 'same-origin',
                 body: JSON.stringify({
                     tracking_no: editForm.tracking_no,
                     parcel_status: editForm.parcel_status,
