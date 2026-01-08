@@ -110,7 +110,11 @@ export default function Register() {
             router.post('/register', payload, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    setSuccess('You may proceed to login after verifying your email.');
+                    setSuccess('Account created successfully! Please check your email to verify your account.');
+                    // Navigate to login page after 3 seconds
+                    setTimeout(() => {
+                        router.visit('/login');
+                    }, 3000);
                 },
                 onError: (errors) => {
                     setErrors(errors);
@@ -146,7 +150,7 @@ export default function Register() {
                 ))}
 
             {/* Floating toast for success */}
-            {success && <Alert type="success" message={success} />}
+            {success && <Alert type="success" message={success} duration={3000} />}
 
             <div className="flex min-h-screen items-center justify-center bg-[#FFE0F2] px-4 py-8 dark:bg-gray-900">
                 <Link

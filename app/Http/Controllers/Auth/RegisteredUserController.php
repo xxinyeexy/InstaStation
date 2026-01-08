@@ -166,6 +166,8 @@ class RegisteredUserController extends Controller
             'claim_redirect_type' => $claimRedirectType,
             'session_id' => $request->session()->getId(),
         ]);
-        return redirect()->route('login')->with('status', 'You may proceed to login after verifying your email address.');
+        // Don't redirect here - let the frontend handle the success message and redirect
+        // This allows the Inertia.js onSuccess callback to show the notification
+        return back();
     }
 }
