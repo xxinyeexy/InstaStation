@@ -153,6 +153,40 @@ class StudentController extends Controller
                             return null;
                         }
                     })(),
+                    // Calculate payment state using same logic as PaymentController
+                    'payment_state' => (function () use ($parcel, $user) {
+                        try {
+                            $arrival = $parcel->created_at ?? now();
+                            $daysSince = $arrival->diffInDays(now());
+                            $status = strtolower($parcel->parcel_status);
+
+                            // Get latest payment
+                            $latestPayment = \App\Models\Payment::where('parcel_id', $parcel->parcel_id)
+                                ->orderBy('created_at', 'desc')
+                                ->first();
+
+                            // Check for rejection notification
+                            $isRejected = \App\Models\Notification::where('notifiable_id', $user->id)
+                                ->where('type', 'payment_rejected')
+                                ->whereJsonContains('data->parcel_id', $parcel->parcel_id)
+                                ->exists();
+
+                            // Payment state rules (same as PaymentController)
+                            if (($latestPayment && !empty($latestPayment->verified_by)) || in_array($status, ['approved', 'collected'])) {
+                                return 'Verified';
+                            } elseif ($isRejected) {
+                                return 'Rejected';
+                            } elseif ($latestPayment && empty($latestPayment->verified_by)) {
+                                return 'Processing';
+                            } elseif ($status === 'pending payment') {
+                                return $daysSince >= 3 ? 'Overdue' : 'Pending';
+                            } else {
+                                return 'Pending';
+                            }
+                        } catch (\Exception $e) {
+                            return 'Pending';
+                        }
+                    })(),
                     'student_user' => $parcel->studentUser
                         ? [
                             'id' => $parcel->studentUser->id,
@@ -375,13 +409,23 @@ class StudentController extends Controller
                     return 'Rejected';
                 }
 
-                // Check for existing payment that is not verified
-                $hasPayment = \App\Models\Payment::where('parcel_id', (int)$parcelId)
-                    ->whereNull('verified_by')
-                    ->exists();
+                // Check for existing payment that is not verified (Processing state)
+                $latestPayment = \App\Models\Payment::where('parcel_id', (int)$parcelId)
+                    ->orderBy('created_at', 'desc')
+                    ->first();
                 
-                if ($hasPayment) {
-                    return 'Pending';
+                if ($latestPayment && empty($latestPayment->verified_by)) {
+                    return 'Processing';
+                }
+
+                // Check if payment is overdue (>= 3 days since arrival)
+                $parcel = \App\Models\Parcel::find($parcelId);
+                if ($parcel) {
+                    $arrival = $parcel->created_at ?? now();
+                    $daysSince = $arrival->diffInDays(now());
+                    if ($daysSince >= 3) {
+                        return 'Overdue';
+                    }
                 }
             }
             return 'Pending';

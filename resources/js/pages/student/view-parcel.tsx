@@ -12,6 +12,7 @@ interface ParcelData {
     status: string;
     arrivalDate: string;
     paymentStatus: string;
+    payment_state?: 'Pending' | 'Overdue' | 'Verified' | 'Rejected' | 'Processing';
     size: string;
     sender: string;
     location: string;
@@ -182,6 +183,10 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                 return 'bg-green-100 text-green-800';
             case 'pending':
                 return 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200';
+            case 'overdue':
+                return 'bg-red-100 text-red-800 ring-1 ring-red-300';
+            case 'processing':
+                return 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200';
             case 'rejected':
                 return 'bg-gray-100 text-gray-800';
             default:
@@ -223,9 +228,14 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                                 <div>
                                     <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('status')}</label>
                                     <span
-                                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeColor(parcel.status)}`}
+                                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${parcel.status.toLowerCase() === 'pending payment' && parcel.paymentStatus.toLowerCase() === 'processing'
+                                                ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
+                                                : getStatusBadgeColor(parcel.status)
+                                            }`}
                                     >
-                                        {getTranslatedStatus(parcel.status)}
+                                        {parcel.status.toLowerCase() === 'pending payment' && parcel.paymentStatus.toLowerCase() === 'processing'
+                                            ? 'Awaiting Payment Verification'
+                                            : getTranslatedStatus(parcel.status)}
                                     </span>
                                 </div>
                             </div>

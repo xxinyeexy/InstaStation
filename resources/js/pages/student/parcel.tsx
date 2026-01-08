@@ -48,6 +48,7 @@ interface Parcel {
     payment_proof_url?: string | null;
     payment_verified?: boolean;
     payment_rejected?: boolean;
+    payment_state?: 'Pending' | 'Overdue' | 'Verified' | 'Rejected' | 'Processing';
     rejection_details?: {
         reason: string | null;
         date: string;
@@ -1369,9 +1370,14 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                             </div>
                                         </div>
                                         <span
-                                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${getStatusStyles(parcel.parcel_status)}`}
+                                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${parcel.parcel_status?.toLowerCase() === 'pending payment' && parcel.payment_state === 'Processing'
+                                                    ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
+                                                    : getStatusStyles(parcel.parcel_status)
+                                                }`}
                                         >
-                                            {getTranslatedStatus(parcel.parcel_status)}
+                                            {parcel.parcel_status?.toLowerCase() === 'pending payment' && parcel.payment_state === 'Processing'
+                                                ? 'Awaiting Payment Verification'
+                                                : getTranslatedStatus(parcel.parcel_status)}
                                         </span>
                                     </div>
 
@@ -1385,17 +1391,21 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                     <div className="mb-4 flex items-center gap-2 text-sm">
                                         <WalletCards className="h-4 w-4 text-gray-400 dark:text-muted-foreground" />
                                         <span className="text-gray-600 dark:text-muted-foreground">{t('payment')}:</span>
-                                        {parcel.payment_verified || isApproved || isReady ? (
+                                        {parcel.payment_verified || isApproved || isReady || parcel.payment_state === 'Verified' ? (
                                             <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">
                                                 {t('verified')}
                                             </span>
-                                        ) : parcel.payment_rejected ? (
+                                        ) : parcel.payment_rejected || parcel.payment_state === 'Rejected' ? (
                                             <span className="inline-flex rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-700 ring-1 ring-gray-200">
                                                 {t('rejected')}
                                             </span>
-                                        ) : parcel.days >= 3 ? (
+                                        ) : parcel.payment_state === 'Overdue' ? (
                                             <span className="inline-flex rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 ring-1 ring-red-200">
                                                 {t('overdue')}
+                                            </span>
+                                        ) : parcel.payment_state === 'Processing' ? (
+                                            <span className="inline-flex rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-indigo-200">
+                                                {t('processing')}
                                             </span>
                                         ) : (
                                             <span className="inline-flex rounded-full bg-yellow-50 px-2 py-0.5 text-xs font-medium text-yellow-700 ring-1 ring-yellow-200">

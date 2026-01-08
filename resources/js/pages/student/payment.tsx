@@ -30,7 +30,7 @@ type PaymentRow = {
     payment_id: number;
     parcel_code: string | null;
     amount: number;
-    status: 'Verified' | 'Pending' | 'Rejected';
+    status: 'Verified' | 'Pending' | 'Processing' | 'Rejected';
     submitted_at: string | null;
     verified_at: string | null;
     proof_url: string | null;
@@ -91,7 +91,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
     const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(new Set());
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
-    const [paymentFilter, setPaymentFilter] = useState<'all' | 'verified' | 'pending' | 'rejected'>('all');
+    const [paymentFilter, setPaymentFilter] = useState<'all' | 'verified' | 'pending' | 'processing' | 'rejected'>('all');
     const [paymentSort, setPaymentSort] = useState<'newest' | 'oldest'>('newest');
 
     const handlePayNow = (parcelId: number) => {
@@ -107,6 +107,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
             if (paymentFilter === 'all') return true;
             if (paymentFilter === 'verified') return p.status === 'Verified';
             if (paymentFilter === 'pending') return p.status === 'Pending';
+            if (paymentFilter === 'processing') return p.status === 'Processing';
             if (paymentFilter === 'rejected') return p.status === 'Rejected';
             return true;
         })
@@ -550,12 +551,12 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                             {/* Filter Dropdown */}
                             <select
                                 value={paymentFilter}
-                                onChange={(e) => setPaymentFilter(e.target.value as 'all' | 'verified' | 'pending' | 'rejected')}
+                                onChange={(e) => setPaymentFilter(e.target.value as 'all' | 'verified' | 'pending' | 'processing' | 'rejected')}
                                 className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             >
                                 <option value="all">{t('allStatus')}</option>
                                 <option value="verified">{t('verified')}</option>
-                                <option value="pending">{t('pending')}</option>
+                                <option value="processing">{t('processing')}</option>
                                 <option value="rejected">{t('rejected')}</option>
                             </select>
                             {/* Sort Dropdown */}
@@ -579,38 +580,29 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                                 <li key={p.payment_id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4">
                                     {/* Left: code + status */}
                                     <div className="flex items-center gap-2">
-                                        <span
-                                            className={`rounded-full p-1 ${p.status === 'Verified'
-                                                ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-                                                : p.status === 'Rejected'
-                                                    ? 'bg-gray-500/10 text-gray-600 dark:text-gray-400'
-                                                    : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'
-                                                }`}
-                                        >
-                                            {p.status === 'Verified' && <WalletCards className="h-4 w-4" />}
-                                            {p.status === 'Rejected' && <X className="h-4 w-4" />}
-                                            {p.status === 'Pending' && (
-                                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth="2"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                    />
-                                                </svg>
-                                            )}
-                                        </span>
                                         <span className="font-medium text-card-foreground">{p.parcel_code ?? '—'}</span>
                                         <span
                                             className={`ml-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs ${p.status === 'Verified'
                                                 ? 'border-green-200 bg-green-50 text-green-700 dark:border-green-500/20 dark:bg-green-500/10 dark:text-green-400'
                                                 : p.status === 'Rejected'
                                                     ? 'border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-500/20 dark:bg-gray-500/10 dark:text-gray-400'
-                                                    : 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400'
+                                                    : p.status === 'Processing'
+                                                        ? 'border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-400'
+                                                        : 'border-yellow-200 bg-yellow-50 text-yellow-700 dark:border-yellow-500/20 dark:bg-yellow-500/10 dark:text-yellow-400'
                                                 }`}
                                         >
                                             {p.status === 'Verified' && <WalletCards className="h-3 w-3" />}
                                             {p.status === 'Rejected' && <X className="h-3 w-3" />}
+                                            {p.status === 'Processing' && (
+                                                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth="2"
+                                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                    />
+                                                </svg>
+                                            )}
                                             {p.status === 'Pending' && (
                                                 <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                                                     <path

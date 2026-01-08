@@ -110,7 +110,7 @@ class PaymentController extends Controller
                     'payment_id' => $p->payment_id,
                     'parcel_code' => optional($p->parcel)->parcel_code,
                     'amount' => 1.00,
-                    'status' => $p->verified_by ? 'Verified' : 'Pending',
+                    'status' => $p->verified_by ? 'Verified' : 'Processing',
                     'submitted_at' => optional($p->created_at)->format('Y-m-d H:i:s'),
                     'submitted_at_formatted' => optional($p->created_at)->format('d/m/Y, g:i:s A'),
                     'verified_at' => $p->verified_by ? optional($p->updated_at)->format('d/m/Y, g:i:s A') : null,
