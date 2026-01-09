@@ -564,6 +564,19 @@ class ParcelController extends Controller
     public function destroy($id)
     {
         $parcel = Parcel::findOrFail($id);
+        
+        // Delete associated records first to avoid foreign key constraint errors
+        // Delete associated payment if exists
+        if ($parcel->payment) {
+            $parcel->payment->delete();
+        }
+        
+        // Delete associated reports if any
+        if ($parcel->reports()->exists()) {
+            $parcel->reports()->delete();
+        }
+        
+        // Now delete the parcel
         $parcel->delete();
 
         return response()->json(['message' => 'Parcel deleted']);
