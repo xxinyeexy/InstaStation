@@ -94,24 +94,51 @@ class ParcelController extends Controller
 
             Log::info('Validation passed', ['validated_data' => $validatedData]);
 
-            // Try resolve student ONLY if both name and matric are provided
-            // If only matric is provided (no name), keep parcel unclaimed even if student exists
+            // Try resolve student by matric/student_id if provided
+            // Changed: Now looks up student even if name is not provided
             $student_user = null;
             $hasRecipientName = !empty(trim((string)($validatedData['recipient_name'] ?? '')));
             $hasRecipientMatric = !empty(trim((string)($validatedData['recipient_matric'] ?? ''))) 
                 || !empty(trim((string)($request->student_id ?? '')));
             
-            // Only link to student if BOTH name and matric/student_id are provided
-            if ($request->filled('student_id') && $hasRecipientName) {
+            // Look up student if matric/student_id is provided (name is optional)
+            // Check both student_id and recipient_matric fields
+            $matricToSearch = trim($request->student_id ?? $request->recipient_matric ?? '');
+            
+            if (!empty($matricToSearch)) {
+                // DEBUG: Log all students to verify database content
+                $allStudents = User::where('type', 'student')->select('id', 'name', 'matric', 'email')->get();
+                Log::info('DEBUG: All students in database', ['students' => $allStudents->toArray()]);
+                
+                Log::info('DEBUG: Searching for student', [
+                    'matricToSearch' => $matricToSearch,
+                    'matricToSearch_lower' => strtolower($matricToSearch),
+                    'student_id_field' => $request->student_id,
+                    'recipient_matric_field' => $request->recipient_matric
+                ]);
+                
                 $student_user = User::where('type', 'student')
-                    ->where(function ($q) use ($request) {
-                        $q->where('matric', $request->student_id)
-                            ->orWhere('id', $request->student_id);
+                    ->where(function ($q) use ($matricToSearch) {
+                        // Case-insensitive matric search with TRIM to handle whitespace/newlines
+                        $q->whereRaw('LOWER(TRIM(matric)) = ?', [strtolower($matricToSearch)])
+                            ->orWhere('id', $matricToSearch);
                     })
                     ->first();
 
                 if (!$student_user) {
-                    Log::warning('Student not found, proceeding as Unclaimed', ['student_id' => $request->student_id]);
+                    Log::warning('Student not found, proceeding as Unclaimed', [
+                        'student_id' => $request->student_id,
+                        'recipient_matric' => $request->recipient_matric,
+                        'searched_value' => $matricToSearch,
+                        'searched_lower' => strtolower($matricToSearch)
+                    ]);
+                } else {
+                    Log::info('Student found by matric/ID', [
+                        'student_id' => $student_user->id,
+                        'matric' => $student_user->matric,
+                        'name' => $student_user->name,
+                        'email' => $student_user->email
+                    ]);
                 }
             }
 

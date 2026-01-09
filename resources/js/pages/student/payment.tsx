@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X, Upload, Info, Calendar, Sparkles, HandCoins } from 'lucide-react';
+import { AlertCircle, Bell, CheckCircle, CircleAlert, CircleCheck, CreditCard, WalletCards, X, XCircle, Upload, Info, Calendar, Sparkles, HandCoins } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -88,7 +88,15 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
 
     const [viewerUrl, setViewerUrl] = useState<string | null>(null);
     const [notificationList, setNotificationList] = useState<any[]>(serverNotifications);
-    const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(new Set());
+    // Load dismissed IDs from localStorage on mount
+    const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(() => {
+        try {
+            const stored = localStorage.getItem('dismissedNotificationIds');
+            return stored ? new Set(JSON.parse(stored)) : new Set();
+        } catch {
+            return new Set();
+        }
+    });
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
     const [showSuccessToast, setShowSuccessToast] = useState(false);
     const [paymentFilter, setPaymentFilter] = useState<'all' | 'verified' | 'pending' | 'processing' | 'rejected'>('all');
@@ -149,16 +157,24 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
         console.log('Dismissed IDs:', Array.from(dismissedNotificationIds));
 
         // Filter out any notifications that were manually dismissed
-        const filteredNotifications = serverNotifications.filter((n) => !dismissedNotificationIds.has(n.id));
+        const filteredNotifications = (serverNotifications || []).filter((n) => !dismissedNotificationIds.has(n.id));
         console.log('Filtered notifications:', filteredNotifications.length);
         setNotificationList(filteredNotifications);
     }, [serverNotifications, dismissedNotificationIds]);
+
+    // Save dismissed IDs to localStorage whenever they change
+    useEffect(() => {
+        try {
+            localStorage.setItem('dismissedNotificationIds', JSON.stringify(Array.from(dismissedNotificationIds)));
+        } catch (error) {
+            console.error('Failed to save dismissed notifications:', error);
+        }
+    }, [dismissedNotificationIds]);
 
     // Refresh data when component mounts (e.g., returning from payment submission)
     useEffect(() => {
         // Check if there's a flash message
         if (flash.success) {
-            setShowSuccessToast(true);
             setTimeout(() => setShowSuccessToast(false), 5000);
         }
 
@@ -300,45 +316,78 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
 
             {/* Notification Dropdown */}
             {showNotificationDropdown && (
-                <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
-                    <div className="border-b border-border p-4">
-                        <h3 className="text-lg font-semibold text-popover-foreground">{t('notifications')}</h3>
+                <div className="notification-dropdown absolute top-12 right-0 z-50 w-[420px] rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-slate-200 p-5">
+                        <h3 className="text-lg font-bold text-slate-800">{t('notifications')}</h3>
+                        <p className="text-xs text-slate-600 mt-0.5">Stay updated with your parcels</p>
                     </div>
-                    <div className="max-h-96 overflow-y-auto">
+                    <div className="max-h-[480px] overflow-y-auto">
                         {notificationList.length === 0 ? (
-                            <div className="p-8 text-center text-sm text-muted-foreground">{t('noNotifications')}</div>
+                            <div className="p-12 text-center">
+                                <div className="mx-auto w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                                    <Bell className="h-8 w-8 text-slate-400" />
+                                </div>
+                                <p className="text-sm font-medium text-slate-600">{t('noNotifications')}</p>
+                                <p className="text-xs text-slate-400 mt-1">You're all caught up!</p>
+                            </div>
                         ) : (
-                            notificationList.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
-                                    onClick={() => handleNotificationClick(notification)}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-1 flex-shrink-0">
-                                            <AlertCircle className="h-5 w-5 text-destructive" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
-                                            <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
-                                            {notification.reason && (
-                                                <div className="mt-3 group overflow-hidden rounded-xl border border-red-100 bg-red-50/30 p-3 dark:border-red-900/30 dark:bg-red-900/10 transition-all hover:bg-red-50 dark:hover:bg-red-900/20">
-                                                    <div className="flex items-center gap-2 mb-1.5">
-                                                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                                                        <span className="text-[10px] font-black uppercase tracking-wider text-red-800 dark:text-red-300">{t('staffFeedback')}</span>
+                            notificationList.map((notification) => {
+                                const title = notification.title?.toLowerCase() || '';
+                                const isCollected = title.includes('parcel collected') || title.includes('collected');
+                                const isRejected = title.includes('rejected');
+                                const isVerified = title.includes('verified');
+
+                                return (
+                                    <div
+                                        key={notification.id}
+                                        className="cursor-pointer border-b border-slate-100 p-4 hover:bg-slate-50 transition-all duration-200"
+                                        onClick={() => handleNotificationClick(notification)}
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            {/* Icon based on notification type */}
+                                            <div className={`mt-0.5 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${isCollected
+                                                ? 'bg-green-100'
+                                                : isRejected
+                                                    ? 'bg-red-100'
+                                                    : isVerified
+                                                        ? 'bg-blue-100'
+                                                        : 'bg-orange-100'
+                                                }`}>
+                                                {isCollected ? (
+                                                    <CheckCircle className="h-5 w-5 text-green-600" strokeWidth={2.5} />
+                                                ) : isRejected ? (
+                                                    <XCircle className="h-5 w-5 text-red-600" strokeWidth={2.5} />
+                                                ) : isVerified ? (
+                                                    <CheckCircle className="h-5 w-5 text-blue-600" strokeWidth={2.5} />
+                                                ) : (
+                                                    <AlertCircle className="h-5 w-5 text-orange-600" strokeWidth={2.5} />
+                                                )}
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="text-sm font-bold text-slate-800">{notification.title}</h4>
+                                                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">{notification.message}</p>
+
+                                                {notification.reason && (
+                                                    <div className="mt-3 rounded-xl border border-red-200 bg-gradient-to-br from-red-50 to-red-100/50 p-3.5 transition-all hover:shadow-sm">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                            <span className="text-[10px] font-black uppercase tracking-wider text-red-700">{t('staffFeedback')}</span>
+                                                        </div>
+                                                        <p className="pl-3.5 text-xs italic leading-relaxed text-red-700">
+                                                            "{notification.reason}"
+                                                        </p>
                                                     </div>
-                                                    <p className="pl-3.5 text-xs italic leading-relaxed text-red-700 dark:text-red-400">
-                                                        "{notification.reason}"
-                                                    </p>
-                                                </div>
-                                            )}
-                                            <p className="mt-1 text-xs text-muted-foreground">
-                                                {formatDate(notification.created_at)}
-                                            </p>
+                                                )}
+
+                                                <p className="mt-2 text-xs font-medium text-slate-400">
+                                                    {formatDate(notification.created_at)}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 </div>

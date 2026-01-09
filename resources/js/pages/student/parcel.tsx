@@ -309,7 +309,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // In-app server notifications (bell dropdown)
     const [notificationList, setNotificationList] = useState<any[]>(serverNotifications);
-    const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(new Set());
+    // Load dismissed IDs from localStorage on mount
+    const [dismissedNotificationIds, setDismissedNotificationIds] = useState<Set<string>>(() => {
+        try {
+            const stored = localStorage.getItem('dismissedNotificationIds');
+            return stored ? new Set(JSON.parse(stored)) : new Set();
+        } catch {
+            return new Set();
+        }
+    });
     const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
 
     // Update parcel list when prop changes
@@ -327,6 +335,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         console.log('Filtered notifications:', filteredNotifications.length);
         setNotificationList(filteredNotifications);
     }, [serverNotifications, dismissedNotificationIds]);
+
+    // Save dismissed IDs to localStorage whenever they change
+    useEffect(() => {
+        try {
+            localStorage.setItem('dismissedNotificationIds', JSON.stringify(Array.from(dismissedNotificationIds)));
+        } catch (error) {
+            console.error('Failed to save dismissed notifications:', error);
+        }
+    }, [dismissedNotificationIds]);
 
 
 
@@ -1022,52 +1039,85 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
             {/* Notification Dropdown */}
             {showNotificationDropdown && (
-                <div className="notification-dropdown absolute top-12 right-0 z-50 w-96 rounded-lg border bg-popover shadow-lg">
-                    <div className="border-b border-border p-4">
-                        <h3 className="text-lg font-semibold text-popover-foreground">{t('notifications')}</h3>
+                <div className="notification-dropdown absolute top-12 right-0 z-50 w-[420px] rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-slate-200 p-5">
+                        <h3 className="text-lg font-bold text-slate-800">{t('notifications')}</h3>
+                        <p className="text-xs text-slate-600 mt-0.5">Stay updated with your parcels</p>
                     </div>
-                    <div className="max-h-96 overflow-y-auto">
+                    <div className="max-h-[480px] overflow-y-auto">
                         {visibleNotifications.length === 0 ? (
-                            <div className="p-8 text-center text-sm text-muted-foreground">{t('noNotifications')}</div>
+                            <div className="p-12 text-center">
+                                <div className="mx-auto w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                                    <Bell className="h-8 w-8 text-slate-400" />
+                                </div>
+                                <p className="text-sm font-medium text-slate-600">{t('noNotifications')}</p>
+                                <p className="text-xs text-slate-400 mt-1">You're all caught up!</p>
+                            </div>
                         ) : (
-                            visibleNotifications.map((notification) => (
-                                <div
-                                    key={notification.id}
-                                    className="cursor-pointer border-b border-border bg-popover p-4 hover:bg-accent"
-                                    onClick={() => handleNotificationClick(notification)}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-1 flex-shrink-0">
-                                            <AlertCircle className="h-5 w-5 text-destructive" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="text-sm font-semibold text-popover-foreground">{notification.title}</h4>
-                                            <p className="mt-1 text-sm text-muted-foreground">{notification.message}</p>
-                                            {notification.reason && (
-                                                <div className="mt-3 group overflow-hidden rounded-xl border border-red-100 bg-red-50/30 p-3 dark:border-red-900/30 dark:bg-red-900/10 transition-all hover:bg-red-50 dark:hover:bg-red-900/20">
-                                                    <div className="flex items-center gap-2 mb-1.5">
-                                                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
-                                                        <span className="text-[10px] font-black uppercase tracking-wider text-red-800 dark:text-red-300">{t('staffFeedback')}</span>
+                            visibleNotifications.map((notification) => {
+                                const title = notification.title?.toLowerCase() || '';
+                                const isCollected = title.includes('parcel collected') || title.includes('collected');
+                                const isRejected = title.includes('rejected');
+                                const isVerified = title.includes('verified');
+
+                                return (
+                                    <div
+                                        key={notification.id}
+                                        className="cursor-pointer border-b border-slate-100 p-4 hover:bg-slate-50 transition-all duration-200"
+                                        onClick={() => handleNotificationClick(notification)}
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            {/* Icon based on notification type */}
+                                            <div className={`mt-0.5 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${isCollected
+                                                ? 'bg-green-100'
+                                                : isRejected
+                                                    ? 'bg-red-100'
+                                                    : isVerified
+                                                        ? 'bg-blue-100'
+                                                        : 'bg-orange-100'
+                                                }`}>
+                                                {isCollected ? (
+                                                    <CheckCircle className="h-5 w-5 text-green-600" strokeWidth={2.5} />
+                                                ) : isRejected ? (
+                                                    <XCircle className="h-5 w-5 text-red-600" strokeWidth={2.5} />
+                                                ) : isVerified ? (
+                                                    <CheckCircle className="h-5 w-5 text-blue-600" strokeWidth={2.5} />
+                                                ) : (
+                                                    <AlertCircle className="h-5 w-5 text-orange-600" strokeWidth={2.5} />
+                                                )}
+                                            </div>
+
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="text-sm font-bold text-slate-800">{notification.title}</h4>
+                                                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">{notification.message}</p>
+
+                                                {notification.reason && (
+                                                    <div className="mt-3 rounded-xl border border-red-200 bg-gradient-to-br from-red-50 to-red-100/50 p-3.5 transition-all hover:shadow-sm">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                                            <span className="text-[10px] font-black uppercase tracking-wider text-red-700">{t('staffFeedback')}</span>
+                                                        </div>
+                                                        <p className="pl-3.5 text-xs italic leading-relaxed text-red-700">
+                                                            "{notification.reason}"
+                                                        </p>
                                                     </div>
-                                                    <p className="pl-3.5 text-xs italic leading-relaxed text-red-700 dark:text-red-400">
-                                                        "{notification.reason}"
-                                                    </p>
-                                                </div>
-                                            )}
-                                            <p className="mt-1 text-xs text-muted-foreground">
-                                                {new Date(notification.created_at).toLocaleString('en-GB', {
-                                                    day: '2-digit',
-                                                    month: '2-digit',
-                                                    year: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit',
-                                                    hour12: true
-                                                })}
-                                            </p>
+                                                )}
+
+                                                <p className="mt-2 text-xs font-medium text-slate-400">
+                                                    {new Date(notification.created_at).toLocaleString('en-GB', {
+                                                        day: '2-digit',
+                                                        month: '2-digit',
+                                                        year: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                        hour12: true
+                                                    })}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 </div>
@@ -1140,56 +1190,56 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                         {/* Top Group (8 cols) */}
                         <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 gap-6">
                             {/* My Parcels Card */}
-                            <div className="h-32 rounded-2xl bg-[#f5f3ff] border border-[#ddd6fe] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#f0ebff] border border-[#d4c5f9] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-sm font-semibold text-slate-600">{t('myParcels')}</span>
+                                    <span className="text-sm font-semibold text-slate-700">{t('myParcels')}</span>
                                     <span className="text-4xl font-bold text-[#7c3aed]">{tileCounts.myParcels}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#ede9fe]/80 flex items-center justify-center text-[#7c3aed]">
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#e0d4fc]/90 flex items-center justify-center text-[#7c3aed]">
                                     <Package className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
                             {/* Pending Payment Card */}
-                            <div className="h-32 rounded-2xl bg-[#fffdfa] border border-[#fef3c7] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#fef4c7] border border-[#fde68a] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-sm font-semibold text-slate-600">{t('pendingPayment')}</span>
+                                    <span className="text-sm font-semibold text-slate-700">{t('pendingPayment')}</span>
                                     <span className="text-4xl font-bold text-[#b45309]">{tileCounts.pendingPayment}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#fef3c7]/80 flex items-center justify-center text-[#b45309]">
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#fde68a]/90 flex items-center justify-center text-[#b45309]">
                                     <Clock className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
                             {/* Approved Card */}
-                            <div className="h-32 rounded-2xl bg-[#fffaf5] border border-[#fed7aa] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#ffe4cc] border border-[#fdba74] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-sm font-semibold text-slate-600">{t('approved')}</span>
+                                    <span className="text-sm font-semibold text-slate-700">{t('approved')}</span>
                                     <span className="text-4xl font-bold text-[#ea580c]">{tileCounts.approved}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#ffedd5]/80 flex items-center justify-center text-[#ea580c]">
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#fdba74]/90 flex items-center justify-center text-[#ea580c]">
                                     <WalletCards className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
                             {/* Ready for Collection Card */}
-                            <div className="h-32 rounded-2xl bg-[#f0fdf4] border border-[#bbf7d0] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#d1fae5] border border-[#a7f3d0] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-sm font-semibold text-slate-600">{t('readyForCollection')}</span>
+                                    <span className="text-sm font-semibold text-slate-700">{t('readyForCollection')}</span>
                                     <span className="text-4xl font-bold text-[#16a34a]">{tileCounts.readyForCollection}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#dcfce7]/80 flex items-center justify-center text-[#16a34a]">
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#a7f3d0]/90 flex items-center justify-center text-[#16a34a]">
                                     <PackageOpen className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
 
                             {/* Collected Card */}
-                            <div className="h-32 rounded-2xl bg-[#f0f9ff] border border-[#e0f2fe] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
+                            <div className="h-32 rounded-2xl bg-[#dbeafe] border border-[#bfdbfe] p-6 relative overflow-hidden group hover:shadow-lg transition-all">
                                 <div className="flex flex-col justify-between h-full relative z-10">
-                                    <span className="text-sm font-semibold text-slate-600">{t('collected')}</span>
+                                    <span className="text-sm font-semibold text-slate-700">{t('collected')}</span>
                                     <span className="text-4xl font-bold text-[#2563eb]">{tileCounts.collected}</span>
                                 </div>
-                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#dbeafe]/80 flex items-center justify-center text-[#2563eb]">
+                                <div className="absolute right-6 top-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#bfdbfe]/90 flex items-center justify-center text-[#2563eb]">
                                     <CircleCheck className="w-8 h-8" strokeWidth={2.4} />
                                 </div>
                             </div>
@@ -1371,8 +1421,8 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                         </div>
                                         <span
                                             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${parcel.parcel_status?.toLowerCase() === 'pending payment' && parcel.payment_state === 'Processing'
-                                                    ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
-                                                    : getStatusStyles(parcel.parcel_status)
+                                                ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
+                                                : getStatusStyles(parcel.parcel_status)
                                                 }`}
                                         >
                                             {parcel.parcel_status?.toLowerCase() === 'pending payment' && parcel.payment_state === 'Processing'

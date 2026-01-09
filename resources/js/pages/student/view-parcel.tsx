@@ -165,6 +165,8 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
         switch (normalizedStatus) {
             case 'pending payment':
                 return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+            case 'approved':
+                return 'bg-orange-100 text-orange-800 border border-orange-200';
             case 'ready for collection':
                 return 'bg-green-100 text-green-800';
             case 'collected':
@@ -229,8 +231,8 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                                     <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{t('status')}</label>
                                     <span
                                         className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${parcel.status.toLowerCase() === 'pending payment' && parcel.paymentStatus.toLowerCase() === 'processing'
-                                                ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
-                                                : getStatusBadgeColor(parcel.status)
+                                            ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
+                                            : getStatusBadgeColor(parcel.status)
                                             }`}
                                     >
                                         {parcel.status.toLowerCase() === 'pending payment' && parcel.paymentStatus.toLowerCase() === 'processing'
