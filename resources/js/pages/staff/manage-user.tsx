@@ -237,7 +237,7 @@ export default function ManageUser({ summary, rows, filters }: { summary: Summar
                                     <div className="col-span-1 font-medium text-foreground">RM{r.spent.toFixed(2)}</div>
                                     <div className="col-span-1">
                                         <span
-                                            className={`rounded-full px-2 py-0.5 text-xs ring-1 ${r.status === 'active' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:ring-emerald-500/50' : 'bg-gray-50 text-gray-700 ring-gray-200 dark:bg-muted dark:text-foreground dark:ring-border'}`}
+                                            className={`rounded-full px-2 py-0.5 text-xs ring-1 ${r.status?.toLowerCase() === 'active' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:ring-emerald-500/50' : 'bg-gray-50 text-gray-700 ring-gray-200 dark:bg-muted dark:text-foreground dark:ring-border'}`}
                                         >
                                             {r.status || '-'}
                                         </span>

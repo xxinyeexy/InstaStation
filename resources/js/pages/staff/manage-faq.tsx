@@ -271,7 +271,7 @@ export default function ManageFaq({
                                     <div className="break-words text-lg font-semibold text-gray-900 dark:text-white" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{f.faq_question}</div>
                                     <div className="mt-2 break-words text-sm text-gray-600 dark:text-gray-400" style={{ wordBreak: 'break-all', overflowWrap: 'anywhere' }}>{f.faq_answer}</div>
                                     <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
-                                        Created: {f.created_at ? new Date(f.created_at).toLocaleDateString() : 'N/A'}
+                                        Created: {f.created_at ? new Date(f.created_at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) : 'N/A'}
                                     </div>
                                 </div>
                                 <div className="mt-4 flex shrink-0 items-center gap-3 sm:mt-0">
@@ -311,7 +311,7 @@ export default function ManageFaq({
                                 </div>
                             </div>
                             <div className="flex items-center justify-end pr-4 pb-3 text-xs text-gray-400 dark:text-gray-500">
-                                Updated: {f.updated_at ? new Date(f.updated_at).toLocaleDateString() : 'N/A'}
+                                Updated: {f.updated_at ? new Date(f.updated_at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) : 'N/A'}
                             </div>
                         </div>
                     ))}

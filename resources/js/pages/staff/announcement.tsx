@@ -135,7 +135,15 @@ export default function StaffAnnouncements(props: {
         if (!value) return '—';
         const d = new Date(value);
         if (Number.isNaN(d.getTime())) return '—';
-        return d.toLocaleString();
+        return d.toLocaleString('en-GB', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+        });
     };
 
     const toIsoStringFromLocal = (value?: string) => {
@@ -419,7 +427,7 @@ export default function StaffAnnouncements(props: {
                                 </div>
                             </div>
                             <div className="flex items-center justify-end pr-4 pb-3 text-xs text-gray-400 dark:text-gray-500">
-                                Updated: {f.updated_at ? new Date(f.updated_at).toLocaleString() : 'N/A'}
+                                Updated: {f.updated_at ? new Date(f.updated_at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) : 'N/A'}
                             </div>
                         </div>
                     ))}
@@ -742,7 +750,7 @@ export default function StaffAnnouncements(props: {
                             <div className="grid grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
                                 <div>
                                     <div className="font-medium">{t('created')}</div>
-                                    <div>{(viewing as any).created_at ? new Date((viewing as any).created_at).toLocaleString() : 'N/A'}</div>
+                                    <div>{(viewing as any).created_at ? new Date((viewing as any).created_at).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) : 'N/A'}</div>
                                 </div>
                                 <div>
                                     <div className="font-medium">{t('publishDate')}</div>

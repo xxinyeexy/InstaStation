@@ -328,7 +328,7 @@ export const en = {
     studentDetails: 'STUDENT',
     financial: 'FINANCIAL',
     preview: 'Preview',
-    exportCSV: 'Export CSV',
+    exportCSV: 'Export',
     verified: 'Verified',
     unverified: 'Unverified',
 

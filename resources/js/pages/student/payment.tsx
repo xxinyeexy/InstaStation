@@ -701,14 +701,14 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                 {/* Proof Viewer Modal */}
                 {viewerUrl && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm animate-in fade-in duration-300">
-                        <div className="relative max-w-4xl w-full animate-in zoom-in-95 duration-300">
+                        <div className="relative max-w-2xl w-full animate-in zoom-in-95 duration-300">
                             <button
                                 onClick={() => setViewerUrl(null)}
                                 className="absolute -top-12 right-0 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
                             >
                                 <X className="h-6 w-6" />
                             </button>
-                            <img src={viewerUrl} alt="Payment Proof" className="h-full w-full rounded-2xl object-contain shadow-2xl" />
+                            <img src={viewerUrl} alt="Payment Proof" className="max-h-[80vh] w-full rounded-2xl object-contain shadow-2xl" />
                         </div>
                     </div>
                 )}
