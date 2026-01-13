@@ -104,8 +104,8 @@ const ParcelRegistrationForm = () => {
                 const uniqueStudents = Array.from(new Map(combined.map(s => [s.student_id, s])).values());
                 const localMatches = uniqueStudents
                     .filter(s =>
-                        s.student_name.toLowerCase().includes(lowerValue) ||
-                        (s.matric_id && s.matric_id.toLowerCase().includes(lowerValue))
+                        s.student_name.toLowerCase().startsWith(lowerValue) ||
+                        (s.matric_id && s.matric_id.toLowerCase().startsWith(lowerValue))
                     )
                     .slice(0, 10);
 

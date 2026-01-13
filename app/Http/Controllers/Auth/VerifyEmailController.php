@@ -92,9 +92,15 @@ class VerifyEmailController extends Controller
             ? route('staff.dashboard')
             : route('student.parcel');
 
-        // If already verified, redirect to intended URL or role-based target
+        // If already verified, redirect based on user role
         if ($user->hasVerifiedEmail()) {
-            // If there's an intended URL (e.g., parcel claim), use it; otherwise use role target
+            // Staff should always go to staff dashboard
+            if ($user->type === 'staff') {
+                $request->session()->forget(['url.intended', 'claim_intended_url', 'claim_redirect_type', 'pending_parcel_claim', 'pending_claim_redirect_type']);
+                return redirect()->route('staff.dashboard')->with('status', 'Email already verified!');
+            }
+            
+            // Students: use intended URL (e.g., parcel claim) or default to parcel page
             if ($intendedUrl) {
                 return redirect($intendedUrl)->with('status', 'Email already verified!');
             }
@@ -106,7 +112,14 @@ class VerifyEmailController extends Controller
             event(new Verified($user));
         }
 
-        // After verification, redirect to intended URL (e.g., parcel claim consume) or role-based target
+        // After verification, redirect based on user role
+        // Staff should always go to staff dashboard
+        if ($user->type === 'staff') {
+            $request->session()->forget(['url.intended', 'claim_intended_url', 'claim_redirect_type', 'pending_parcel_claim', 'pending_claim_redirect_type']);
+            return redirect()->route('staff.dashboard')->with('status', 'Email verified successfully!');
+        }
+        
+        // Students: redirect to intended URL (e.g., parcel claim consume) or default parcel page
         if ($intendedUrl) {
             // Debug logging to file
             $debugData = [

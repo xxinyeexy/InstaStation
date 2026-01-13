@@ -153,8 +153,13 @@ export default function History({ total_collections, collections_this_year, tota
 
     const filteredParcels = parcels
         .filter(
-            (p) =>
-                (p.parcel_code && p.parcel_code.toLowerCase().includes(search.toLowerCase())) || (p.collected_at && p.collected_at.includes(search)),
+            (p) => {
+                const formattedDate = p.collected_at ? new Date(p.collected_at).toLocaleDateString('en-CA') : '';
+                return (
+                    (p.parcel_code && p.parcel_code.toLowerCase().includes(search.toLowerCase())) ||
+                    (formattedDate && formattedDate.includes(search))
+                );
+            }
         )
         .sort((a, b) => {
             if (sortOrder === 'recent') {
@@ -398,7 +403,9 @@ export default function History({ total_collections, collections_this_year, tota
                                                     {parcel.parcel_code}
                                                 </span>
                                             </div>
-                                            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('collectedOn')} {parcel.collected_at}</div>
+                                            <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                                {t('collectedOn')} {parcel.collected_at ? new Date(parcel.collected_at).toLocaleDateString('en-CA') : '-'}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 self-end sm:self-auto">

@@ -173,8 +173,9 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
 
     // Refresh data when component mounts (e.g., returning from payment submission)
     useEffect(() => {
-        // Check if there's a flash message
+        // Check if there's a flash message (Global toast is suppressed for this page, so we handle it locally)
         if (flash.success) {
+            setShowSuccessToast(true);
             setTimeout(() => setShowSuccessToast(false), 5000);
         }
 
@@ -410,6 +411,7 @@ export default function Payment({ summary, rows, payments }: { summary: Summary;
                     </div>
                 </div>
             )}
+
 
             <div className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                 <div>

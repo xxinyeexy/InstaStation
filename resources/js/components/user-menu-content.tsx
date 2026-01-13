@@ -3,7 +3,7 @@ import { UserInfo } from '@/components/user-info';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { type User } from '@/types';
-import { Link, router } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
 
 interface UserMenuContentProps {
@@ -15,8 +15,8 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
     const cleanup = useMobileNavigation();
 
     const handleLogout = () => {
+        // Cleanup DOM modifications before logout
         cleanup();
-        router.flushAll();
     };
 
     return (

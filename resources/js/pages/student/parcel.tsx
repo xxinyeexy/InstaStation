@@ -818,11 +818,44 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
         setIsUploadingProof(true);
         const formData = new FormData();
         formData.append('proof', file);
+        formData.append('redirect_url', '/student/parcel');
 
         router.post(`/student/payment/submit/${payParcelId}`, formData, {
             onSuccess: () => {
                 setShowPayModal(false);
-                addToastNotification('success', t('success'), t('paymentProofUploaded') || 'Payment proof uploaded successfully!');
+
+                // Dismiss 'payment_rejected' notifications for this parcel immediately
+                // This ensures the user doesn't see the feedback prompt after they've already acted on it
+                const rejectionNotifications = notificationList.filter(
+                    (n) => n.parcel_id === payParcelId && n.type === 'payment_rejected'
+                );
+
+                if (rejectionNotifications.length > 0) {
+                    const idsToDismiss = new Set(rejectionNotifications.map((n) => n.id));
+
+                    // 1. Mark as read on server (fire-and-forget)
+                    rejectionNotifications.forEach((n) => {
+                        if (!n.id) return;
+                        fetch(`/student/notifications/${n.id}/mark-read`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                            },
+                        }).catch((err) => console.error('Failed to mark notification read:', err));
+                    });
+
+                    // 2. Hide locally immediately (updates state and localStorage via useEffect)
+                    setDismissedNotificationIds((prev) => {
+                        const next = new Set(prev);
+                        idsToDismiss.forEach((id) => next.add(id));
+                        return next;
+                    });
+
+                    // 3. Update list view to reflect removal instantly
+                    setNotificationList((prev) => prev.filter((n) => !idsToDismiss.has(n.id)));
+                }
+
                 // Reset file input
                 if (proofInputRef.current) {
                     proofInputRef.current.value = '';

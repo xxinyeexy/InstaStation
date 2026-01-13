@@ -125,9 +125,12 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('verification.notice'));
         }
 
-        // If user is verified, redirect to intended URL or default based on role
+        // If user is verified, redirect based on role
         if ($user->type === 'staff') {
-            return redirect()->intended(route('staff.dashboard'));
+            // Staff should always go to staff dashboard, ignore any intended URLs
+            // Clear intended URLs as they might be student-specific (e.g., parcel claims)
+            $request->session()->forget(['url.intended', 'claim_intended_url', 'claim_redirect_type', 'pending_parcel_claim', 'pending_claim_redirect_type']);
+            return redirect()->route('staff.dashboard');
         }
 
         // Redirect students to intended URL (e.g., parcel claim consume) or default parcel page

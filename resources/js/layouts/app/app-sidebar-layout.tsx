@@ -28,7 +28,7 @@ export default function AppSidebarLayout({ children, breadcrumbs = [], headerAct
                     {headerAction}
                 </AppSidebarHeader>
                 {children}
-                {flash.success && !window.location.pathname.includes('/staff/payments') && (
+                {flash.success && !window.location.pathname.includes('/staff/payments') && !window.location.pathname.includes('/student/payment') && (
                     <div className="fixed right-6 bottom-6 z-50">
                         <Alert type="success" message={flash.success} duration={3000} />
                     </div>

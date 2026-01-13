@@ -445,10 +445,10 @@ const SchedulePickup = ({ parcel }: Props) => {
                                 {timeSlots.map((slot) => {
                                     const state = slotAvailability[slot.label];
                                     const currentCount = typeof state?.count === 'number' ? state.count : 0;
-                                    const maxCapacity = 10;
+                                    const maxCapacity = 5;
                                     const isFull = state?.full === true || currentCount >= maxCapacity;
-                                    // Show recommended for slots with less than 5 students (50% capacity)
-                                    const isRecommended = !isFull && currentCount < 5;
+                                    // Show recommended for slots with less than 3 students (60% capacity)
+                                    const isRecommended = !isFull && currentCount < 3;
                                     const hasPassed = isTimeSlotPassed(slot.id, selectedDate);
                                     const isAvailable = !isFull && !hasPassed;
                                     const isSelectedSlot = selectedTimeSlot === slot.id;
@@ -469,7 +469,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                                                 <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                                                 <span className={isAvailable ? 'text-gray-900 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}>{slot.label}</span>
                                                 <span
-                                                    className={`ml-2 text-xs font-medium ${isFull ? 'text-red-600' : currentCount >= 8 ? 'text-orange-600' : 'text-gray-500 dark:text-gray-400'
+                                                    className={`ml-2 text-xs font-medium ${isFull ? 'text-red-600' : currentCount >= 4 ? 'text-orange-600' : 'text-gray-500 dark:text-gray-400'
                                                         }`}
                                                     title={`${currentCount} students scheduled out of ${maxCapacity} maximum capacity`}
                                                 >

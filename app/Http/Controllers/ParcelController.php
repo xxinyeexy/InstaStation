@@ -598,9 +598,8 @@ class ParcelController extends Controller
         $students = User::select('id as student_id', 'name as student_name', 'email', 'matric as matric_id')
             ->where('type', 'student')
             ->where(function ($q) use ($query) {
-                $q->where('name', 'LIKE', "%{$query}%")
-                    ->orWhere('matric', 'LIKE', "%{$query}%")
-                    ->orWhere('email', 'LIKE', "%{$query}%");
+                $q->where('name', 'LIKE', "{$query}%")
+                    ->orWhere('matric', 'LIKE', "{$query}%");
             })
             ->limit(10)
             ->get()
@@ -630,7 +629,7 @@ class ParcelController extends Controller
                     // Frontend expects `id` to be the primary key used by routes (parcel_id)
                     'id' => $p->parcel_id,
                     'parcel_code' => $p->parcel_code,
-                    'collected_at' => optional($p->schedule)->toDateString(),
+                    'collected_at' => optional($p->updated_at)->toIso8601String(),
                     // Fee is RM1.00 per collected parcel
                     'fee' => 1.00,
                     'status' => 'Completed',

@@ -73,9 +73,9 @@ export default function PaymentSubmit({ parcel, existing_payment }: { parcel: Pa
         }
         post(`/student/payment/submit/${parcel.parcel_id}`, {
             forceFormData: true,
-            onSuccess: () => {
-                router.visit('/student/payment');
-            },
+            onError: (errors) => {
+                console.error('Payment submission failed:', errors);
+            }
         });
     };
 

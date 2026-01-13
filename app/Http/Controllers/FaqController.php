@@ -35,8 +35,8 @@ class FaqController extends Controller
                 'category' => $f->category,
                 'faq_status' => $f->faq_status,
                 'views' => rand(50, 300), // demo metric; replace with real analytics if available
-                'created_at' => optional($f->created_at)->toDateString(),
-                'updated_at' => optional($f->updated_at)->toDateString(),
+                'created_at' => $f->created_at,
+                'updated_at' => $f->updated_at,
             ];
         });
 
@@ -129,7 +129,7 @@ class FaqController extends Controller
             'faq_status' => 'sometimes|in:Active,Inactive',
         ]);
         $faq->update($data);
-        return response()->json(['success' => true, 'faq' => $faq]);
+        return response()->json(['success' => true, 'faq' => $faq->fresh()]);
     }
 
     /**
@@ -144,13 +144,13 @@ class FaqController extends Controller
     public function publish(Faq $faq)
     {
         $faq->update(['faq_status' => 'Active']);
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'faq' => $faq->fresh()]);
     }
 
     public function unpublish(Faq $faq)
     {
         $faq->update(['faq_status' => 'Inactive']);
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'faq' => $faq->fresh()]);
     }
 
     /**

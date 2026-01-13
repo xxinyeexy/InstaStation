@@ -366,9 +366,9 @@ export default function StudentFaq({
                                                     {faq.category ? getCategoryTranslation(faq.category) : t('general')}
                                                 </span>
                                             </div>
-                                            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-card-foreground">{faq.faq_question}</h3>
+                                            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-card-foreground break-all">{faq.faq_question}</h3>
                                             {expandedFaq === faq.faq_id && (
-                                                <div className="mt-4 leading-relaxed text-gray-700 dark:text-muted-foreground">{faq.faq_answer}</div>
+                                                <div className="mt-4 leading-relaxed text-gray-700 dark:text-muted-foreground break-all">{faq.faq_answer}</div>
                                             )}
                                         </div>
                                         <ChevronRight

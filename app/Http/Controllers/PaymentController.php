@@ -314,8 +314,13 @@ class PaymentController extends Controller
             })
             ->each->delete();
 
-        // Return success and redirect back
-        return back()->with('success', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
+        // Return success and redirect
+        $redirectUrl = $request->input('redirect_url');
+        if ($redirectUrl) {
+            return redirect($redirectUrl)->with('success', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
+        }
+
+        return redirect()->route('student.payment')->with('success', 'Payment proof uploaded successfully! Staff will verify within 24 hours.');
     }
 
     public function staffIndex(Request $request): Response

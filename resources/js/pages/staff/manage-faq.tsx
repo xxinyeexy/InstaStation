@@ -122,14 +122,24 @@ export default function ManageFaq({
     };
 
     const publish = async (faq_id: number, to: 'publish' | 'unpublish') => {
-        await fetchWithCSRF(`/staff/faq/${faq_id}/${to}`, {
+        const response = await fetchWithCSRF(`/staff/faq/${faq_id}/${to}`, {
             method: 'POST',
         });
-        setList((prev) =>
-            prev.map((r) =>
-                r.faq_id === faq_id ? { ...r, faq_status: to === 'publish' ? 'Active' : 'Inactive', updated_at: new Date().toISOString() } : r,
-            ),
-        );
+        const result = await response.json();
+        if (result.success && result.faq) {
+            setList((prev) =>
+                prev.map((r) =>
+                    r.faq_id === faq_id ? result.faq : r,
+                ),
+            );
+        } else {
+            // Fallback
+            setList((prev) =>
+                prev.map((r) =>
+                    r.faq_id === faq_id ? { ...r, faq_status: to === 'publish' ? 'Active' : 'Inactive', updated_at: new Date().toISOString() } : r,
+                ),
+            );
+        }
     };
     const remove = async (faq_id: number) => {
         await fetchWithCSRF(`/staff/faq/${faq_id}`, { method: 'DELETE' });
@@ -427,19 +437,30 @@ export default function ManageFaq({
                                             showValidationError(errorData.message || 'Failed to update FAQ');
                                             return;
                                         }
-                                        setList((prev) =>
-                                            prev.map((r) =>
-                                                r.faq_id === editing.faq_id
-                                                    ? {
-                                                        ...r,
-                                                        faq_question: editQuestion,
-                                                        faq_answer: editAnswer,
-                                                        category: editCategory,
-                                                        faq_status: editStatus,
-                                                    }
-                                                    : r,
-                                            ),
-                                        );
+
+                                        const result = await res.json();
+                                        if (result.success && result.faq) {
+                                            setList((prev) =>
+                                                prev.map((r) =>
+                                                    r.faq_id === editing.faq_id ? result.faq : r,
+                                                ),
+                                            );
+                                        } else {
+                                            // Fallback
+                                            setList((prev) =>
+                                                prev.map((r) =>
+                                                    r.faq_id === editing.faq_id
+                                                        ? {
+                                                            ...r,
+                                                            faq_question: editQuestion,
+                                                            faq_answer: editAnswer,
+                                                            category: editCategory,
+                                                            faq_status: editStatus,
+                                                        }
+                                                        : r,
+                                                ),
+                                            );
+                                        }
                                         setEditing(null);
                                         showSuccessMessage('FAQ updated successfully!');
                                     }}
@@ -465,7 +486,7 @@ export default function ManageFaq({
                             {selectedDeleteLabel ? (
                                 <>
                                     {' '}
-                                    <span className="font-medium text-red-600">{selectedDeleteLabel}</span>
+                                    <span className="font-medium text-red-600 break-all">{selectedDeleteLabel}</span>
                                 </>
                             ) : (
                                 ` ${t('thisFAQ')}`

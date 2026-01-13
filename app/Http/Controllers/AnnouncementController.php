@@ -177,16 +177,12 @@ class AnnouncementController extends Controller
 
     public function publish(Request $request, Announcement $announcement)
     {
-        $data = $request->validate([
-            'publish_date' => 'sometimes|nullable|date',
-        ]);
-
-        $publishDate = $data['publish_date'] ?? ($announcement->publish_date ?: now()->toISOString());
+        $now = now();
         
         $updates = [
             'announcement_status' => 'Published',
-            'publish_date' => $publishDate,
-            'updated_at' => now(),
+            'publish_date' => $now,
+            'updated_at' => $now,
         ];
 
         // If expiry date is in the past, clear it to prevent immediate auto-expiry to Draft

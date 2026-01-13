@@ -189,26 +189,41 @@ export default function StaffAnnouncements(props: {
             body.append('publish_date', currentTimestamp);
         }
 
-        await fetch(`/staff/announcements/${announcement_id}/${to}`, {
+        const response = await fetch(`/staff/announcements/${announcement_id}/${to}`, {
             method: 'POST',
             headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrf },
             body: to === 'publish' ? body : undefined,
             credentials: 'include',
         });
 
-        setList((prev) =>
-            prev.map((r) =>
-                ((r as any).announcement_id || r.faq_id) === announcement_id
-                    ? {
-                        ...r,
-                        announcement_status: to === 'publish' ? 'Published' : 'Draft',
-                        publish_date: to === 'publish' ? currentTimestamp : (r as any).publish_date,
-                        faq_status: to === 'publish' ? 'Active' : 'Inactive',
-                        updated_at: currentTimestamp,
-                    }
-                    : r,
-            ),
-        );
+        // Get the updated announcement from server response
+        const result = await response.json();
+
+        if (result.success && result.announcement) {
+            // Use server data to avoid timezone issues
+            setList((prev) =>
+                prev.map((r) =>
+                    ((r as any).announcement_id || r.faq_id) === announcement_id
+                        ? result.announcement
+                        : r,
+                ),
+            );
+        } else {
+            // Fallback to client-side update if server doesn't return data
+            setList((prev) =>
+                prev.map((r) =>
+                    ((r as any).announcement_id || r.faq_id) === announcement_id
+                        ? {
+                            ...r,
+                            announcement_status: to === 'publish' ? 'Published' : 'Draft',
+                            publish_date: to === 'publish' ? currentTimestamp : (r as any).publish_date,
+                            faq_status: to === 'publish' ? 'Active' : 'Inactive',
+                            updated_at: currentTimestamp,
+                        }
+                        : r,
+                ),
+            );
+        }
     };
     const remove = async (announcement_id: number) => {
         await fetch(`/staff/announcements/${announcement_id}`, {
@@ -362,7 +377,7 @@ export default function StaffAnnouncements(props: {
                                                 </span>
                                             )}
                                     </div>
-                                    <div className="text-lg font-semibold text-gray-900 dark:text-white break-words line-clamp-1">
+                                    <div className="text-lg font-semibold text-gray-900 dark:text-white break-all line-clamp-1">
                                         {(f as any).announcement_title || (f as any).faq_question}
                                     </div>
                                     <div className="mt-2 text-sm text-gray-600 dark:text-gray-400 break-all line-clamp-3">
@@ -448,7 +463,7 @@ export default function StaffAnnouncements(props: {
                             {selectedDeleteLabel ? (
                                 <>
                                     {' '}
-                                    <span className="font-medium text-red-600">{selectedDeleteLabel}</span>
+                                    <span className="font-medium text-red-600 break-all">{selectedDeleteLabel}</span>
                                 </>
                             ) : (
                                 ` ${t('thisAnnouncement')}`
@@ -733,7 +748,7 @@ export default function StaffAnnouncements(props: {
                             </button>
                         </div>
                         <div className="space-y-4">
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white break-words">{(viewing as any).announcement_title || (viewing as any).faq_question}</div>
+                            <div className="text-2xl font-bold text-gray-900 dark:text-white break-all">{(viewing as any).announcement_title || (viewing as any).faq_question}</div>
                             {(viewing as any).announcement_image && (
                                 <div className="relative aspect-video w-full overflow-hidden rounded-md border border-gray-100 dark:border-gray-700">
                                     <img

@@ -27,6 +27,7 @@ type Parcel = {
     sender?: string | null;
     size?: string | null;
     fee?: number | null;
+    updated_at?: string;
 };
 
 export default function Report({ parcel, student, payment }: { parcel: Parcel; student?: Student; payment?: Payment }) {
@@ -96,7 +97,7 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
                                     <CalendarDays size={16} className="text-gray-600" />
                                     <span className="text-gray-600">{t('arrivalDate')}:</span>
                                     <span className="ml-1 font-medium">
-                                        {parcel.created_at ? new Date(parcel.created_at).toISOString().slice(0, 10) : '-'}
+                                        {parcel.created_at ? new Date(parcel.created_at).toLocaleDateString('en-CA') : '-'}
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -140,7 +141,15 @@ export default function Report({ parcel, student, payment }: { parcel: Parcel; s
                             <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
                                 <div>
                                     <div className="text-gray-600">{t('collectionDate')}:</div>
-                                    <div className="font-medium">{parcel.schedule ? new Date(parcel.schedule).toISOString().slice(0, 10) : '-'}</div>
+                                    <div className="font-medium">
+                                        {(parcel.parcel_status === 'Collected' && parcel.updated_at) || parcel.schedule
+                                            ? new Date(
+                                                parcel.parcel_status === 'Collected' && parcel.updated_at
+                                                    ? parcel.updated_at
+                                                    : parcel.schedule!,
+                                            ).toLocaleDateString('en-CA')
+                                            : '-'}
+                                    </div>
                                 </div>
                                 <div>
                                     <div className="text-gray-600">{t('collectionStatus')}:</div>

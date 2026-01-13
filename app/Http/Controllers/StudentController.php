@@ -24,7 +24,7 @@ class StudentController extends Controller
     /**
      * Maximum allowed participants per time slot session
      */
-    private const TIME_SLOT_CAPACITY = 20;
+    private const TIME_SLOT_CAPACITY = 5;
 
     /**
      * Time slot definitions: human label mapped to [start, end) 24h range.
