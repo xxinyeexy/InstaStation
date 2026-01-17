@@ -4,42 +4,62 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use App\Models\User;
 
 class VerifyEmailController extends Controller
 {
     /**
      * Mark the authenticated user's email address as verified.
      */
-    public function __invoke(EmailVerificationRequest $request): RedirectResponse
+    public function __invoke(Request $request): RedirectResponse
     {
-        // Ensure user is authenticated
-        if (!$request->user()) {
-            return redirect()->route('login')->with('error', 'Please log in to verify your email.');
+        $id = $request->route('id');
+        $hash = (string) $request->route('hash');
+        
+        // Find the user by ID from the route
+        $user = User::findOrFail($id);
+
+        // Verify the hash manually as we are no longer using EmailVerificationRequest's authorize method
+        if (!hash_equals($hash, sha1($user->getEmailForVerification()))) {
+            \Illuminate\Support\Facades\Log::warning('VerifyEmailController: Hash mismatch', [
+                'user_id' => $id,
+                'provided_hash' => $hash,
+                'expected_hash' => sha1($user->getEmailForVerification()),
+            ]);
+            abort(403, 'This action is unauthorized.');
         }
 
-        // Get the authenticated user
-        $user = $request->user();
+        // Optimization: If already verified, move on to session processing
+        if ($user->hasVerifiedEmail()) {
+            return $this->handlePostVerificationRedirect($request, $user, 'Email already verified!');
+        }
 
-        // Preserve the intended URL if it exists (e.g., from parcel claim flow)
-        // This ensures parcel linking happens after verification
+        // Mark email as verified
+        if ($user->markEmailAsVerified()) {
+            event(new Verified($user));
+        }
+
+        return $this->handlePostVerificationRedirect($request, $user, 'Email verified successfully!');
+    }
+
+    /**
+     * Handle redirections after successful verification.
+     */
+    protected function handlePostVerificationRedirect(Request $request, User $user, string $status): \Illuminate\Http\RedirectResponse
+    {
+        // Get various session variables for parcel linking flow
         $intendedUrl = $request->session()->get('url.intended') ?: $request->session()->get('claim_intended_url');
         $pendingParcelClaim = $request->session()->get('pending_parcel_claim');
         $pendingClaimRedirectType = $request->session()->get('pending_claim_redirect_type');
         
-        // Comprehensive logging
-        \Illuminate\Support\Facades\Log::info('VerifyEmailController: Starting verification', [
+        \Illuminate\Support\Facades\Log::info('VerifyEmailController: Processing post-verification', [
             'user_id' => $user->id,
-            'user_email' => $user->email,
-            'user_matric' => $user->matric,
             'session_id' => $request->session()->getId(),
             'intended_url' => $intendedUrl,
-            'pending_parcel_claim' => $pendingParcelClaim,
-            'pending_claim_redirect_type' => $pendingClaimRedirectType,
-            'all_session_data' => $request->session()->all(),
         ]);
-        
+
         // If we have a pending parcel claim but no intended URL, reconstruct it
         if (!$intendedUrl && $pendingParcelClaim) {
             $redirectType = $pendingClaimRedirectType ?? 'register';
@@ -52,120 +72,67 @@ class VerifyEmailController extends Controller
                     'redirect_type' => $redirectType,
                 ]
             );
-            
-            \Illuminate\Support\Facades\Log::info('VerifyEmailController: Reconstructed claim URL from pending parcel', [
-                'user_id' => $user->id,
-                'parcel_id' => $pendingParcelClaim,
-                'claim_url' => $intendedUrl,
-            ]);
         }
-        
-        // FALLBACK: If no session data at all, check for unclaimed parcels matching this user's matric
-        if (!$intendedUrl && !$pendingParcelClaim && $user->type === 'student' && $user->matric) {
-            $unclaimedParcel = \App\Models\Parcel::where('recipient_matric', $user->matric)
+
+        // Student logic: check for ALL unclaimed parcels matching matric
+        // This ensures that any parcels waiting for this specific student are linked
+        if ($user->type === 'student' && $user->matric) {
+            // Priority 1: Link the specific parcel from the "I'm new here" flow if it exists
+            if ($pendingParcelClaim) {
+                $specificParcel = \App\Models\Parcel::find($pendingParcelClaim);
+                if ($specificParcel && $specificParcel->student_id === null) {
+                    $specificParcel->student_id = $user->id;
+                    $specificParcel->recipient_name = $user->name;
+                    $specificParcel->recipient_matric = $user->matric;
+                    if (strtolower((string) $specificParcel->parcel_status) === 'unclaimed') {
+                        $specificParcel->parcel_status = 'Pending Payment';
+                    }
+                    $specificParcel->save();
+                    
+                    \Illuminate\Support\Facades\Log::info('VerifyEmailController: Linked specific pending claim', [
+                        'user_id' => $user->id,
+                        'parcel_id' => $specificParcel->parcel_id,
+                    ]);
+                }
+            }
+
+            // Priority 2: Sweep for any OTHER parcels matching the matric ID
+            $unclaimedParcels = \App\Models\Parcel::where(function($q) use ($user) {
+                    $q->where('recipient_matric', $user->matric)
+                      ->orWhereRaw('LOWER(recipient_matric) = ?', [strtolower($user->matric)]);
+                })
                 ->whereRaw('lower(parcel_status) = ?', ['unclaimed'])
                 ->whereNull('student_id')
-                ->first();
+                ->get();
             
-            if ($unclaimedParcel) {
-                \Illuminate\Support\Facades\Log::info('VerifyEmailController: Found unclaimed parcel matching matric, auto-linking', [
-                    'user_id' => $user->id,
-                    'user_matric' => $user->matric,
-                    'parcel_id' => $unclaimedParcel->parcel_id,
-                ]);
-                
+            foreach ($unclaimedParcels as $unclaimedParcel) {
                 // Auto-link the parcel
                 $unclaimedParcel->student_id = $user->id;
                 $unclaimedParcel->recipient_name = $user->name;
+                $unclaimedParcel->recipient_matric = $user->matric; // Ensure it's the correct one
                 $unclaimedParcel->parcel_status = 'Pending Payment';
                 $unclaimedParcel->save();
                 
-                \Illuminate\Support\Facades\Log::info('VerifyEmailController: Parcel auto-linked successfully', [
+                \Illuminate\Support\Facades\Log::info('VerifyEmailController: Auto-linked additional parcel during verification', [
                     'user_id' => $user->id,
                     'parcel_id' => $unclaimedParcel->parcel_id,
                 ]);
             }
         }
 
-        // Determine post-verification destination based on user role (fallback)
-        $roleTarget = ($user->type === 'staff')
-            ? route('staff.dashboard')
-            : route('student.parcel');
-
-        // If already verified, redirect based on user role
-        if ($user->hasVerifiedEmail()) {
-            // Staff should always go to staff dashboard
-            if ($user->type === 'staff') {
-                $request->session()->forget(['url.intended', 'claim_intended_url', 'claim_redirect_type', 'pending_parcel_claim', 'pending_claim_redirect_type']);
-                return redirect()->route('staff.dashboard')->with('status', 'Email already verified!');
-            }
-            
-            // Students: use intended URL (e.g., parcel claim) or default to parcel page
-            if ($intendedUrl) {
-                return redirect($intendedUrl)->with('status', 'Email already verified!');
-            }
-            return redirect($roleTarget)->with('status', 'Email already verified!');
-        }
-
-        // Mark email as verified
-        if ($request->fulfill()) {
-            event(new Verified($user));
-        }
-
-        // After verification, redirect based on user role
-        // Staff should always go to staff dashboard
-        if ($user->type === 'staff') {
-            $request->session()->forget(['url.intended', 'claim_intended_url', 'claim_redirect_type', 'pending_parcel_claim', 'pending_claim_redirect_type']);
-            return redirect()->route('staff.dashboard')->with('status', 'Email verified successfully!');
-        }
-        
-        // Students: redirect to intended URL (e.g., parcel claim consume) or default parcel page
+        // Store intended URL back into the session just in case logout/invalidation clears it
+        // and we want it to be available after the user manually logs in.
         if ($intendedUrl) {
-            // Debug logging to file
-            $debugData = [
-                'timestamp' => now()->toDateTimeString(),
-                'action' => 'verify.email',
-                'user_id' => $user->id,
-                'user_email' => $user->email,
-                'session_id' => $request->session()->getId(),
-                'intended_url' => $intendedUrl,
-                'redirecting_to' => $intendedUrl,
-            ];
-            file_put_contents(storage_path('logs/claim_debug.log'), json_encode($debugData, JSON_PRETTY_PRINT) . "\n\n", FILE_APPEND);
-            
-            \Illuminate\Support\Facades\Log::info('VerifyEmailController: Redirecting to intended URL after verification', [
-                'user_id' => $user->id,
-                'intended_url' => $intendedUrl,
-                'session_id' => $request->session()->getId(),
-            ]);
-            
-            // Clear both session keys after using the intended URL
-            $request->session()->forget(['url.intended', 'claim_intended_url']);
-            return redirect($intendedUrl)->with('status', 'Email verified successfully!');
+            $request->session()->put('url.intended', $intendedUrl);
         }
-        
-        // Debug logging when no intended URL found
-        $debugData = [
-            'timestamp' => now()->toDateTimeString(),
-            'action' => 'verify.email.no_intended',
-            'user_id' => $user->id,
-            'user_email' => $user->email,
-            'session_id' => $request->session()->getId(),
-            'session_data' => [
-                'url.intended' => $request->session()->get('url.intended'),
-                'claim_intended_url' => $request->session()->get('claim_intended_url'),
-                'claim_redirect_type' => $request->session()->get('claim_redirect_type'),
-            ],
-            'redirecting_to' => $roleTarget,
-        ];
-        file_put_contents(storage_path('logs/claim_debug.log'), json_encode($debugData, JSON_PRETTY_PRINT) . "\n\n", FILE_APPEND);
-        
-        \Illuminate\Support\Facades\Log::warning('VerifyEmailController: No intended URL found, redirecting to role target', [
-            'user_id' => $user->id,
-            'role_target' => $roleTarget,
-            'session_id' => $request->session()->getId(),
-        ]);
 
-        return redirect($roleTarget)->with('status', 'Email verified successfully!');
+        // As requested: user MUST return to login page even if they were logged in.
+        // We log them out to ensure they "finish fill up all the login details".
+        if (\Illuminate\Support\Facades\Auth::check()) {
+            \Illuminate\Support\Facades\Auth::logout();
+            // We don't invalidate the session here so we keep the status message and intended URL
+        }
+
+        return redirect()->route('login')->with('status', $status . ' Please log in to continue.');
     }
 }

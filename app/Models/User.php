@@ -71,4 +71,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->notify(new CustomVerifyEmail);
     }
+
+    /**
+     * Accessor: Always return matric in uppercase.
+     */
+    public function getMatricAttribute($value)
+    {
+        return strtoupper((string) $value);
+    }
+
+    /**
+     * Mutator: Always save matric in uppercase.
+     */
+    public function setMatricAttribute($value)
+    {
+        $this->attributes['matric'] = strtoupper((string) $value);
+    }
 }

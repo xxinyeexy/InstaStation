@@ -76,12 +76,12 @@ class StaffController extends Controller
         // If no senders data, provide fallback
         if ($senders->isEmpty()) {
             $senders = collect([
-                ['name' => 'Shopee', 'value' => 0],
-                ['name' => 'Lazada', 'value' => 0],
-                ['name' => 'Amazon', 'value' => 0],
-                ['name' => 'Grab', 'value' => 0],
-                ['name' => 'Taobao', 'value' => 0],
-                ['name' => 'Zalora', 'value' => 0],
+                ['name' => 'SHOPEE', 'value' => 0],
+                ['name' => 'LAZADA', 'value' => 0],
+                ['name' => 'AMAZON', 'value' => 0],
+                ['name' => 'GRAB', 'value' => 0],
+                ['name' => 'TAOBAO', 'value' => 0],
+                ['name' => 'ZALORA', 'value' => 0],
             ]);
         }
 

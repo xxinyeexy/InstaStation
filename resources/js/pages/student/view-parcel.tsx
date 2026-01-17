@@ -68,19 +68,21 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
         const getIconClass = (color: string) => {
             switch (color) {
                 case 'blue':
-                    return 'h-5 w-5 text-blue-500';
+                    return 'h-5 w-5 text-blue-500 dark:text-blue-400';
                 case 'orange':
-                    return 'h-5 w-5 text-orange-500';
+                    return 'h-5 w-5 text-orange-500 dark:text-orange-400';
                 case 'green':
-                    return 'h-5 w-5 text-green-500';
+                    return 'h-5 w-5 text-green-500 dark:text-green-400';
                 case 'pink':
-                    return 'h-5 w-5 text-pink-500';
+                    return 'h-5 w-5 text-pink-500 dark:text-pink-400';
                 case 'yellow':
-                    return 'h-5 w-5 text-yellow-500';
+                    return 'h-5 w-5 text-yellow-500 dark:text-yellow-400';
                 case 'purple':
-                    return 'h-5 w-5 text-purple-500';
+                    return 'h-5 w-5 text-purple-500 dark:text-purple-400';
+                case 'red':
+                    return 'h-5 w-5 text-red-500 dark:text-red-400';
                 default:
-                    return 'h-5 w-5 text-gray-500';
+                    return 'h-5 w-5 text-gray-500 dark:text-gray-400';
             }
         };
 
@@ -164,17 +166,17 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
         const normalizedStatus = status.toLowerCase();
         switch (normalizedStatus) {
             case 'pending payment':
-                return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+                return 'bg-yellow-100 text-yellow-800 border border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700/50';
             case 'approved':
-                return 'bg-orange-100 text-orange-800 border border-orange-200';
+                return 'bg-orange-100 text-orange-800 border border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-700/50';
             case 'ready for collection':
-                return 'bg-green-100 text-green-800';
+                return 'bg-green-100 text-green-800 border border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700/50';
             case 'collected':
-                return 'bg-blue-100 text-blue-800';
+                return 'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700/50';
             case 'unclaimed':
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-100 text-gray-800 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-100 text-gray-800 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
         }
     };
 
@@ -182,17 +184,17 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
     const getPaymentStatusBadgeColor = (paymentStatus: string) => {
         switch (paymentStatus.toLowerCase()) {
             case 'verified':
-                return 'bg-green-100 text-green-800';
+                return 'bg-green-100 text-green-800 border border-green-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-700/50';
             case 'pending':
-                return 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200';
+                return 'bg-yellow-50 text-yellow-700 ring-1 ring-yellow-200 dark:bg-amber-900/30 dark:text-amber-400 dark:ring-amber-700/50';
             case 'overdue':
-                return 'bg-red-100 text-red-800 ring-1 ring-red-300';
+                return 'bg-red-100 text-red-800 ring-1 ring-red-300 dark:bg-rose-900/30 dark:text-rose-400 dark:ring-rose-700/50';
             case 'processing':
-                return 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200';
+                return 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:ring-indigo-700/50';
             case 'rejected':
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-100 text-gray-800 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-100 text-gray-800 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
         }
     };
 
@@ -335,47 +337,51 @@ const ParcelDetails = ({ parcel, trackingHistory, payment_proof_url }: Props) =>
                         </div>
 
                         <div className="relative">
-                            {/* Timeline line */}
-                            <div className="absolute top-0 bottom-0 left-6 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
+                            {/* Continuous Timeline Line */}
+                            <div className="absolute bottom-7 left-7 top-7 w-0.5 -translate-x-1/2 bg-gray-100 dark:bg-gray-800" />
 
-                            <div className="space-y-6">
+                            <div className="relative">
                                 {trackingHistory.map((event) => (
-                                    <div key={event.id} className="relative flex items-start gap-4">
+                                    <div key={event.id} className="relative flex items-start gap-5 pb-10 last:pb-0">
                                         {/* Timeline dot */}
                                         <div
-                                            className={`relative z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-gray-200 dark:border-gray-700 ${event.iconColor === 'blue'
-                                                ? 'bg-blue-50 dark:bg-blue-900/20'
+                                            className={`relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 shadow-sm transition-all duration-500 ${event.iconColor === 'blue'
+                                                ? 'border-blue-100 bg-blue-50 dark:border-blue-500/30 dark:bg-gray-900'
                                                 : event.iconColor === 'orange'
-                                                    ? 'bg-orange-50 dark:bg-orange-900/20'
+                                                    ? 'border-orange-100 bg-orange-50 dark:border-orange-500/30 dark:bg-gray-900'
                                                     : event.iconColor === 'green'
-                                                        ? 'bg-green-50 dark:bg-green-900/20'
+                                                        ? 'border-green-100 bg-green-50 dark:border-green-500/30 dark:bg-gray-900'
                                                         : event.iconColor === 'pink'
-                                                            ? 'bg-pink-50 dark:bg-pink-900/20'
+                                                            ? 'border-pink-100 bg-pink-50 dark:border-pink-500/30 dark:bg-gray-900'
                                                             : event.iconColor === 'yellow'
-                                                                ? 'bg-yellow-50 dark:bg-yellow-900/20'
+                                                                ? 'border-yellow-100 bg-yellow-50 dark:border-yellow-500/30 dark:bg-gray-900'
                                                                 : event.iconColor === 'purple'
-                                                                    ? 'bg-purple-50 dark:bg-purple-900/20'
+                                                                    ? 'border-purple-100 bg-purple-50 dark:border-purple-500/30 dark:bg-gray-900'
                                                                     : event.iconColor === 'red'
-                                                                        ? 'bg-gray-100 dark:bg-gray-800'
-                                                                        : 'bg-white dark:bg-gray-800'
+                                                                        ? 'border-red-100 bg-red-50 dark:border-red-500/30 dark:bg-gray-900'
+                                                                        : 'border-gray-200 bg-white dark:border-white/10 dark:bg-gray-900'
                                                 }`}
                                         >
                                             {renderIcon(event.title === 'Ready for Collection' ? 'package-open' : event.title === 'Payment Verified' ? 'wallet-cards' : event.icon, event.iconColor)}
                                         </div>
 
                                         {/* Event content */}
-                                        <div className="flex-1 space-y-1">
-                                            <h3 className="text-sm font-medium text-gray-900 dark:text-white">{getTranslatedEventTitle(event.title)}</h3>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">{getTranslatedEventDescription(event.description)}</p>
+                                        <div className="flex-1 space-y-1.5 pt-2.5">
+                                            <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">{getTranslatedEventTitle(event.title)}</h3>
+                                            <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">{getTranslatedEventDescription(event.description)}</p>
 
-                                            {event.hasAttribution && event.attribution && (
-                                                <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                                                    <User className="h-3 w-3" />
-                                                    <span>{event.attribution}</span>
+                                            <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                                                {event.hasAttribution && event.attribution && (
+                                                    <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-500">
+                                                        <User className="h-3.5 w-3.5" />
+                                                        <span>{event.attribution}</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+                                                    <AlarmClock className="h-3.5 w-3.5" />
+                                                    <span>{event.timestamp}</span>
                                                 </div>
-                                            )}
-
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">{event.timestamp}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

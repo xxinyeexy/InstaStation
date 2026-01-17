@@ -214,29 +214,29 @@ export default function Unclaimed({
                 </div> */}
 
                 {/* Search */}
-                <form onSubmit={onSearch} className="mb-8 overflow-hidden rounded-3xl border-2 border-pink-200 bg-white/80 p-6 shadow-lg backdrop-blur-sm">
+                <form onSubmit={onSearch} className="mb-8 overflow-hidden rounded-3xl border-2 border-pink-200 bg-white/80 p-6 shadow-lg backdrop-blur-sm dark:border-pink-200/50 dark:bg-white/90">
                     <div className="mb-4 flex items-center gap-3">
-                        <div className="rounded-full bg-pink-100 p-2">
-                            <PackageSearch className="h-5 w-5 text-pink-600" />
+                        <div className="rounded-full bg-pink-100 p-2 dark:bg-pink-100">
+                            <PackageSearch className="h-5 w-5 text-pink-600 dark:text-pink-600" />
                         </div>
-                        <h2 className="text-lg font-bold text-gray-900">Search Unclaimed Parcels</h2>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-900">Search Unclaimed Parcels</h2>
                     </div>
                     <div className="flex flex-col gap-3 sm:flex-row">
                         <input
                             value={q}
                             onChange={(e) => setQ(e.target.value)}
                             placeholder="Enter your name, tracking number, or matric ID..."
-                            className="flex-1 rounded-xl border-2 border-gray-200 px-4 py-3 text-sm font-medium transition-all focus:border-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-100"
+                            className="flex-1 rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-900 transition-all placeholder:text-gray-400 focus:border-pink-400 focus:outline-none focus:ring-4 focus:ring-pink-100 dark:border-gray-200 dark:bg-white dark:text-gray-900 dark:placeholder:text-gray-400 dark:focus:border-pink-400 dark:focus:ring-pink-100"
                         />
                         <button
                             type="submit"
-                            className="rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                            className="rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl dark:from-purple-600 dark:to-pink-600"
                         >
                             Search
                         </button>
                     </div>
-                    <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
-                        <div className="h-1 w-1 rounded-full bg-purple-400"></div>
+                    <div className="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
+                        <div className="h-1 w-1 rounded-full bg-purple-400 dark:bg-purple-400"></div>
                         <span>Tip: Search by your name, tracking number, or matric ID</span>
                     </div>
                 </form>
@@ -275,20 +275,20 @@ export default function Unclaimed({
                                     <div className="mb-4 grid grid-cols-2 gap-4 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 p-4">
                                         <div>
                                             <span className="block text-xs font-semibold text-gray-500">Student</span>
-                                            <span className="font-bold text-gray-900">{p.recipient_name ?? '—'}</span>
+                                            <span className="font-bold text-gray-900">{p.recipient_name || '—'}</span>
                                         </div>
                                         <div>
                                             <span className="block text-xs font-semibold text-gray-500">Matric ID</span>
-                                            <span className="font-bold text-gray-900">{p.recipient_matric ?? '—'}</span>
+                                            <span className="font-bold text-gray-900">{p.recipient_matric || '—'}</span>
                                         </div>
                                         <div>
                                             <span className="block text-xs font-semibold text-gray-500">Location</span>
-                                            <span className="font-bold text-gray-900">{p.location ?? '—'}</span>
+                                            <span className="font-bold text-gray-900">{p.location || '—'}</span>
                                         </div>
                                         <div>
                                             <span className="block text-xs font-semibold text-gray-500">Size</span>
                                             <span className="inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
-                                                {p.size ?? '—'}
+                                                {p.size || '—'}
                                             </span>
                                         </div>
                                         <div className="col-span-2">
@@ -345,9 +345,9 @@ export default function Unclaimed({
                                     {filtered.map((p) => (
                                         <tr key={p.parcel_id} className="transition-colors hover:bg-purple-50/50">
                                             <td className="px-6 py-4 font-mono font-bold text-gray-900">{p.tracking_no}</td>
-                                            <td className="px-6 py-4 font-semibold text-gray-700">{p.recipient_name ?? '—'}</td>
-                                            <td className="px-6 py-4 font-semibold text-gray-700">{p.recipient_matric ?? '—'}</td>
-                                            <td className="px-6 py-4 text-gray-600">{p.sender}</td>
+                                            <td className="px-6 py-4 font-semibold text-gray-700">{p.recipient_name || '—'}</td>
+                                            <td className="px-6 py-4 font-semibold text-gray-700">{p.recipient_matric || '—'}</td>
+                                            <td className="px-6 py-4 text-gray-600">{p.sender || '—'}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2 text-gray-600">
                                                     <CalendarDays className="h-4 w-4" />
@@ -358,9 +358,9 @@ export default function Unclaimed({
                                                 <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700">{p.days ?? '—'}d</span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">{p.size ?? '—'}</span>
+                                                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">{p.size || '—'}</span>
                                             </td>
-                                            <td className="px-6 py-4 text-gray-600">{p.location ?? '—'}</td>
+                                            <td className="px-6 py-4 text-gray-600">{p.location || '—'}</td>
                                             <td className="px-6 py-4">
                                                 <span className="rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">unclaimed</span>
                                             </td>

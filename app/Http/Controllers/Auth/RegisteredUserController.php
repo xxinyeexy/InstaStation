@@ -96,10 +96,29 @@ class RegisteredUserController extends Controller
                 $request->session()->put('pending_parcel_claim', $parcelId);
                 $request->session()->put('pending_claim_redirect_type', $claimRedirectType);
                 
+                // CRITICAL: Link the parcel to the new user IMMEDIATELY in the database.
+                // This ensures the link is preserved even if they switch devices for verification.
+                $pendingParcel = \App\Models\Parcel::find($parcelId);
+                if ($pendingParcel && $pendingParcel->student_id === null) {
+                    $pendingParcel->student_id = $user->id;
+                    $pendingParcel->recipient_name = $user->name;
+                    $pendingParcel->recipient_matric = $user->matric;
+                    // Only change status to Pending Payment if it was Unclaimed
+                    if (strtolower((string) $pendingParcel->parcel_status) === 'unclaimed') {
+                        $pendingParcel->parcel_status = 'Pending Payment';
+                    }
+                    $pendingParcel->save();
+                    
+                    \Illuminate\Support\Facades\Log::info('RegisteredUserController: Immediately linked parcel to new student', [
+                        'user_id' => $user->id,
+                        'parcel_id' => $parcelId,
+                    ]);
+                }
+                
                 // Also store in user's session data (Laravel's session table)
                 $request->session()->save();
                 
-                \Illuminate\Support\Facades\Log::info('Stored pending parcel claim for new user', [
+                \Illuminate\Support\Facades\Log::info('Stored pending parcel claim info for new user', [
                     'user_id' => $user->id,
                     'parcel_id' => $parcelId,
                     'redirect_type' => $claimRedirectType,

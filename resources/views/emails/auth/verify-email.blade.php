@@ -44,7 +44,12 @@
                                 </tr>
                             </table>
 
-                            <p style="font-size: 14px; color: #6b7280; margin: 30px 0 0 0; text-align: center;">
+                            <p style="margin: 30px 0 0 0; color: #4b5563; font-size: 16px;">
+                                Regards,<br>
+                                UMPSA Parcel Centre
+                            </p>
+
+                            <p style="font-size: 14px; color: #6b7280; margin: 30px 0 0 0;">
                                 If you did not create an account, no further action is required.
                             </p>
                         </td>
@@ -53,10 +58,6 @@
                     <!-- Footer -->
                     <tr>
                         <td style="padding: 30px; background-color: #f9fafb; border-radius: 0 0 8px 8px;">
-                            <p style="margin: 0; color: #6b7280; font-size: 14px; text-align: center;">
-                                Thank you,<br>
-                                <strong style="color: #1f2937;">InstaStation Team</strong>
-                            </p>
                             <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
                             <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">
                                 If you're having trouble clicking the "Verify Email Address" button, copy and paste the

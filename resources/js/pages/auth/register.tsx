@@ -131,9 +131,12 @@ export default function Register() {
     };
 
     const handleInputChange = (field: string, value: string) => {
+        // Auto-capitalize matric ID
+        const finalValue = field === 'matric' ? value.toUpperCase() : value;
+
         setFormData((prev) => ({
             ...prev,
-            [field]: value,
+            [field]: finalValue,
         }));
     };
 
@@ -258,7 +261,7 @@ export default function Register() {
                                             onChange={(e) => handleInputChange('matric', e.target.value)}
                                             disabled={processing}
                                             placeholder="CB12345"
-                                            className="w-full rounded-lg border border-gray-200 bg-white py-3 pr-4 pl-10 text-gray-900 placeholder-gray-500 focus:border-[#f0bfd7] focus:ring-2 focus:ring-[#fdceef] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground dark:placeholder-muted-foreground"
+                                            className="w-full uppercase rounded-lg border border-gray-200 bg-white py-3 pr-4 pl-10 text-gray-900 placeholder-gray-500 focus:border-[#f0bfd7] focus:ring-2 focus:ring-[#fdceef] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-border dark:bg-background dark:text-foreground dark:placeholder-muted-foreground"
                                         />
                                     </div>
                                 </div>

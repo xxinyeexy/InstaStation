@@ -309,8 +309,15 @@ class StudentController extends Controller
             'iconColor' => 'purple',
         ];
 
-        // 2) Student Matched — use the student's account creation time when available
-        $matchedAt = optional($parcel->studentUser)->created_at ?: $createdTime;
+        // 2) Student Matched — use the parcel's updated_at if different from created_at
+        // (indicating student was matched after parcel creation), otherwise use created_at
+        // (for parcels created with student already assigned)
+        $matchedAt = $parcel->student_id 
+            ? ($parcel->updated_at && $parcel->updated_at->ne($parcel->created_at) 
+                ? $parcel->updated_at 
+                : $parcel->created_at)
+            : $createdTime;
+        
         $history[] = [
             'id' => 2,
             'title' => 'Student Matched',

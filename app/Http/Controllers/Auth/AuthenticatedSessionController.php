@@ -134,7 +134,36 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Redirect students to intended URL (e.g., parcel claim consume) or default parcel page
-        return redirect()->intended(route('student.parcel'));
+        if ($user->type === 'student') {
+            // Auto-link any unclaimed parcels matching this student's matric ID
+            // This is a safety net for cases where the linking flow was interrupted
+            if ($user->matric && $user->hasVerifiedEmail()) {
+                $unclaimedParcels = \App\Models\Parcel::where(function($q) use ($user) {
+                        $q->where('recipient_matric', $user->matric)
+                          ->orWhereRaw('LOWER(recipient_matric) = ?', [strtolower($user->matric)]);
+                    })
+                    ->whereRaw('lower(parcel_status) = ?', ['unclaimed'])
+                    ->whereNull('student_id')
+                    ->get();
+
+                foreach ($unclaimedParcels as $unclaimedParcel) {
+                    $unclaimedParcel->student_id = $user->id;
+                    $unclaimedParcel->recipient_name = $user->name;
+                    $unclaimedParcel->recipient_matric = $user->matric;
+                    $unclaimedParcel->parcel_status = 'Pending Payment';
+                    $unclaimedParcel->save();
+                    
+                    \Illuminate\Support\Facades\Log::info('AuthenticatedSessionController: Auto-linked parcel during login', [
+                        'user_id' => $user->id,
+                        'parcel_id' => $unclaimedParcel->parcel_id,
+                    ]);
+                }
+            }
+
+            return redirect()->intended(route('student.parcel'));
+        }
+
+        return redirect()->intended(route('home'));
     }
 
     /**

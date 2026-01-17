@@ -435,9 +435,15 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
 
     // Handle form input changes
     const handleEditFormChange = (field: keyof EditParcelForm, value: string | number) => {
+        // Auto-capitalize sender name and student (matric) ID
+        let finalValue = value;
+        if (typeof value === 'string' && (field === 'sender_name' || field === 'student_id')) {
+            finalValue = value.toUpperCase();
+        }
+
         setEditForm((prev) => ({
             ...prev,
-            [field]: value,
+            [field]: finalValue,
         }));
 
         // If updating student_id or recipient_name, trigger lookup
@@ -1541,7 +1547,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                         type="text"
                                                         value={editForm.student_id}
                                                         onChange={(e) => handleEditFormChange('student_id', e.target.value)}
-                                                        className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
+                                                        className="mt-1 w-full uppercase rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                     />
                                                 </div>
                                                 <div>
@@ -1576,7 +1582,7 @@ export default function Dashboard({ parcels = [] }: DashboardProps) {
                                                     type="text"
                                                     value={editForm.sender_name}
                                                     onChange={(e) => handleEditFormChange('sender_name', e.target.value)}
-                                                    className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
+                                                    className="mt-1 w-full uppercase rounded-lg border border-gray-200 px-3 py-2 text-gray-900 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 focus:outline-none dark:bg-gray-900 dark:border-gray-700 dark:text-white"
                                                 />
                                             </div>
                                         </div>

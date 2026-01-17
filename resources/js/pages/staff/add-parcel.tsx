@@ -86,7 +86,13 @@ const ParcelRegistrationForm = () => {
             return; // 🔒 prevent overwrite after user selects a result
         }
 
-        setFormData((prev) => ({ ...prev, [field]: value }));
+        // Auto-capitalize sender and matric ID
+        let finalValue = value;
+        if (field === 'sender' || field === 'matricId') {
+            finalValue = value.toUpperCase();
+        }
+
+        setFormData((prev) => ({ ...prev, [field]: finalValue }));
 
         if (field === 'studentName') {
             // Cancel previous timeout
@@ -582,7 +588,7 @@ const ParcelRegistrationForm = () => {
                                     placeholder={t('senderName')}
                                     value={formData.sender}
                                     onChange={(e) => handleInputChange('sender', e.target.value)}
-                                    className="w-full rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
+                                    className="w-full uppercase rounded-md border border-gray-300 bg-background px-3 py-2 text-foreground focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none dark:border-border"
                                     required
                                 />
                             </div>
@@ -669,7 +675,7 @@ const ParcelRegistrationForm = () => {
                                 placeholder={t('idNumber')}
                                 value={formData.matricId}
                                 onChange={(e) => handleInputChange('matricId', e.target.value)}
-                                className={`w-full rounded-md border border-border bg-background px-3 py-2 text-foreground transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightMatric ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300 dark:border-border'}`}
+                                className={`w-full uppercase rounded-md border border-border bg-background px-3 py-2 text-foreground transition-colors focus:border-pink-200 focus:ring-2 focus:ring-pink-200 focus:outline-none ${highlightMatric ? 'border-green-500 ring-2 ring-green-300' : 'border-gray-300 dark:border-border'}`}
                             />
                         </div>
                     </div>

@@ -49,9 +49,7 @@ class ParcelCollectedNotification extends Notification
             ->greeting('Hi! ' . strtoupper($notifiable->name ?? '') . ',')
             ->line('Your parcel **' . $parcelCode . '** has been successfully collected from **' . $staffName . '** on **' . $collectedDate . '**.')
             ->line('Attached to this email is a receipt for the Parcel Service Fee. Thank you.')
-            ->line('')
-            ->line('Best regards,  ')
-            ->line('**' . $staffName . '** from UMPSA Parcel Centre')
+            ->salutation("Regards,  \nUMPSA Parcel Centre")
             ->attachData($pdfContent, $pdfFileName, [
                 'mime' => 'application/pdf',
             ]);

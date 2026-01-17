@@ -39,6 +39,11 @@
                             @endif
                             <p style="margin:0 0 20px 0;">Please collect it as soon as possible to avoid delays.</p>
 
+                            <p style="margin:24px 0 0 0;">
+                                Regards,<br>
+                                UMPSA Parcel Centre
+                            </p>
+
                             <p style="margin:24px 0 0 0;font-size:13px;color:#666;">If you have already collected the
                                 parcel, you can ignore this email.</p>
                         </td>

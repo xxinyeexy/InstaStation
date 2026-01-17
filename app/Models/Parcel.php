@@ -39,6 +39,18 @@ class Parcel extends Model
         'schedule' => 'date',
     ];
 
+    /**
+     * Get the number of days since the parcel arrived (created_at).
+     * This overrides the static database column to ensure it's always up to date.
+     */
+    public function getDaysAttribute($value)
+    {
+        if (!$this->created_at) {
+            return 0;
+        }
+        return (int) $this->created_at->diffInDays(now());
+    }
+
     // Auto-generate parcel_code
     protected static function boot()
 {
@@ -91,5 +103,37 @@ class Parcel extends Model
     public function reports()
     {
         return $this->hasMany(Report::class, 'parcel_id');
+    }
+
+    /**
+     * Accessor: Always return sender in uppercase.
+     */
+    public function getSenderAttribute($value)
+    {
+        return strtoupper((string) $value);
+    }
+
+    /**
+     * Mutator: Always save sender in uppercase.
+     */
+    public function setSenderAttribute($value)
+    {
+        $this->attributes['sender'] = strtoupper((string) $value);
+    }
+
+    /**
+     * Accessor: Always return recipient_matric in uppercase.
+     */
+    public function getRecipientMatricAttribute($value)
+    {
+        return strtoupper((string) $value);
+    }
+
+    /**
+     * Mutator: Always save recipient_matric in uppercase.
+     */
+    public function setRecipientMatricAttribute($value)
+    {
+        $this->attributes['recipient_matric'] = strtoupper((string) $value);
     }
 }

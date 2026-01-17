@@ -318,10 +318,10 @@ export default function Welcome() {
                         >
                             <p className="mx-auto max-w-3xl px-2 text-base leading-relaxed font-medium text-gray-600 sm:text-lg md:text-xl">
                                 Streamline parcel management for your{' '}
-                                <span className="rounded-lg bg-pink-100 px-2 py-1 font-bold text-pink-700">university</span> with{' '}
-                                <span className="rounded-lg bg-purple-100 px-2 py-1 font-bold text-purple-700">smart matching</span>,{' '}
-                                <span className="rounded-lg bg-green-100 px-2 py-1 font-bold text-green-700">secure payments</span>, and
-                                <span className="rounded-lg bg-yellow-100 px-2 py-1 font-bold text-yellow-700">real-time tracking.</span>
+                                <span className="inline-block rounded-lg bg-pink-100 px-2 py-1 font-bold text-pink-700">university</span> with{' '}
+                                <span className="inline-block rounded-lg bg-purple-100 px-2 py-1 font-bold text-purple-700">smart matching</span>,{' '}
+                                <span className="inline-block rounded-lg bg-green-100 px-2 py-1 font-bold text-green-700">secure payments</span>, and
+                                <span className="inline-block rounded-lg bg-yellow-100 px-2 py-1 font-bold text-yellow-700">real-time tracking.</span>
                             </p>
                         </div>
 
