@@ -40,6 +40,43 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Boot method to handle user deletion
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Before a user is deleted, check and preserve information
+        static::deleting(function ($user) {
+            // For staff/admin: PREVENT deletion if they have created or edited parcels
+            // This ensures staff names remain in the system
+            if (in_array($user->type, ['staff', 'admin'])) {
+                $createdCount = \App\Models\Parcel::where('created_by', $user->id)->count();
+                $editedCount = \App\Models\Parcel::where('last_edited_by', $user->id)->count();
+                
+                if ($createdCount > 0 || $editedCount > 0) {
+                    throw new \Exception(
+                        "Cannot delete this staff member. They have created {$createdCount} parcel(s) " .
+                        "and edited {$editedCount} parcel(s). Please reassign these parcels first or " .
+                        "deactivate the account instead of deleting it."
+                    );
+                }
+            }
+            
+            // For students: preserve their name and matric in parcel records
+            if ($user->type === 'student') {
+                // ALWAYS update recipient info for all parcels belonging to this student
+                // This ensures the name is preserved even if it was set before
+                \App\Models\Parcel::where('student_id', $user->id)
+                    ->update([
+                        'recipient_name' => $user->name,
+                        'recipient_matric' => $user->matric
+                    ]);
+            }
+        });
+    }
+
+    /**
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>

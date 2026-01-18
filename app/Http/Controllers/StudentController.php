@@ -309,14 +309,18 @@ class StudentController extends Controller
             'iconColor' => 'purple',
         ];
 
-        // 2) Student Matched — use the parcel's updated_at if different from created_at
-        // (indicating student was matched after parcel creation), otherwise use created_at
-        // (for parcels created with student already assigned)
-        $matchedAt = $parcel->student_id 
-            ? ($parcel->updated_at && $parcel->updated_at->ne($parcel->created_at) 
-                ? $parcel->updated_at 
-                : $parcel->created_at)
-            : $createdTime;
+        // 2) Student Matched — use report_at if available and not the sentinel date
+        // Unclaimed parcels have report_at set to '2000-01-01' as a sentinel value
+        $matchedAt = $parcel->created_at; // Default to created_at
+
+        if ($parcel->student_id && $parcel->report_at) {
+            // Check if report_at is not the sentinel date (2000-01-01)
+            $sentinelDate = \Carbon\Carbon::parse('2000-01-01');
+            if ($parcel->report_at->greaterThan($sentinelDate)) {
+                // Use report_at as the match timestamp
+                $matchedAt = $parcel->report_at;
+            }
+        }
         
         $history[] = [
             'id' => 2,

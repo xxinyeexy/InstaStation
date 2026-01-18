@@ -188,6 +188,7 @@ class ParcelController extends Controller
                 'time_slot' => null, // Time slot should be null initially
                 'created_by' => $user->id, // Reference to users table (staff)
                 'last_edited_by' => $user->id, // Reference to users table (staff)
+                'report_at' => $student_user ? now() : null, // Set to null for unclaimed, now() for matched
             ]);
 
             Log::info('Parcel created successfully', [
@@ -792,10 +793,10 @@ class ParcelController extends Controller
             foreach ($fields as $f) {
                 switch ($f) {
                     case 'student_name':
-                        $row[$f] = optional($p->studentUser)->name;
+                        $row[$f] = optional($p->studentUser)->name ?? $p->recipient_name ?? 'N/A';
                         break;
                     case 'student_matric':
-                        $row[$f] = optional($p->studentUser)->matric;
+                        $row[$f] = optional($p->studentUser)->matric ?? $p->recipient_matric ?? 'No Matric ID';
                         break;
                     case 'payment_status':
                         $row[$f] = ($p->payment && !empty($p->payment->verified_by)) ? 'Verified' : 'Pending/Unverified';
@@ -886,10 +887,10 @@ class ParcelController extends Controller
                     foreach ($fields as $f) {
                         switch ($f) {
                             case 'student_name':
-                                $row[] = optional($p->studentUser)->name;
+                                $row[] = optional($p->studentUser)->name ?? $p->recipient_name ?? 'N/A';
                                 break;
                             case 'student_matric':
-                                $row[] = optional($p->studentUser)->matric;
+                                $row[] = optional($p->studentUser)->matric ?? $p->recipient_matric ?? 'No Matric ID';
                                 break;
                             case 'payment_status':
                                 $row[] = ($p->payment && !empty($p->payment->verified_by)) ? 'Verified' : 'Pending/Unverified';

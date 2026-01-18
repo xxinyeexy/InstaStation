@@ -30,6 +30,7 @@ class Parcel extends Model
         'time_slot',
         'created_by',
         'last_edited_by',
+        'report_at',
     ];
 
     protected $casts = [
@@ -51,7 +52,7 @@ class Parcel extends Model
         return (int) $this->created_at->diffInDays(now());
     }
 
-    // Auto-generate parcel_code
+    // Auto-generate parcel_code and auto-populate recipient fields
     protected static function boot()
 {
     parent::boot();
@@ -72,6 +73,37 @@ class Parcel extends Model
 
             $model->parcel_code = $prefix . $yearMonth . $newNumber;
         });
+        
+        // Ensure report_at is set correctly - use sentinel date for unclaimed
+        // Database has useCurrent() default, so we can't use null
+        if (!$model->student_id) {
+            // Use a sentinel date (2000-01-01) for unclaimed parcels
+            $model->report_at = \Carbon\Carbon::parse('2000-01-01 00:00:00');
+        } elseif ($model->student_id && !$model->report_at) {
+            $model->report_at = now();
+        }
+    });
+    
+    // Auto-populate recipient fields when student_id is set
+    static::saving(function ($model) {
+        // Only populate if student_id is set and recipient_name is not explicitly set
+        // or if student_id has changed
+        if ($model->student_id && ($model->isDirty('student_id') || !$model->recipient_name)) {
+            $student = \App\Models\User::find($model->student_id);
+            if ($student) {
+                $model->recipient_name = $student->name;
+                $model->recipient_matric = $student->matric;
+                
+                // If student_id is being set for the first time (was null before)
+                // and report_at is null or sentinel date, set it to now (this is a claim event)
+                $sentinelDate = \Carbon\Carbon::parse('2000-01-01');
+                $isSentinel = $model->report_at && $model->report_at->equalTo($sentinelDate);
+                
+                if ($model->isDirty('student_id') && $model->getOriginal('student_id') === null && (!$model->report_at || $isSentinel)) {
+                    $model->report_at = now();
+                }
+            }
+        }
     });
 }
     // Relationships

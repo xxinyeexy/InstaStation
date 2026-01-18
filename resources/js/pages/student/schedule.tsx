@@ -354,7 +354,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                             Collection Location
                         </h2>
                         <div className="space-y-2">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">University Parcel Center</h3>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">UMPSA Parcel Centre</h3>
                             <p className="text-gray-600 dark:text-gray-400">Ground Floor, Student Services Building</p>
                             <div className="text-gray-600 dark:text-gray-400">
                                 <p className="font-medium">Operating Hours:</p>
@@ -522,7 +522,7 @@ const SchedulePickup = ({ parcel }: Props) => {
                                 </div>
                                 <div>
                                     <span className="text-sm text-blue-700 dark:text-blue-300">Location:</span>
-                                    <span className="ml-2 font-medium text-blue-900 dark:text-blue-100">University Parcel Center</span>
+                                    <span className="ml-2 font-medium text-blue-900 dark:text-blue-100">UMPSA Parcel Centre</span>
                                 </div>
                             </div>
                         </div>

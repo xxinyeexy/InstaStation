@@ -207,11 +207,14 @@ class ClaimController extends Controller
             }
             
             // Link the parcel to the student
+            $wasUnclaimed = strtolower((string) $parcel->parcel_status) === 'unclaimed';
             $parcel->student_id = $user->id;
             $parcel->recipient_name = $user->name;
             $parcel->recipient_matric = $user->matric;
-            if (strtolower((string) $parcel->parcel_status) === 'unclaimed') {
+            if ($wasUnclaimed) {
                 $parcel->parcel_status = 'Pending Payment';
+                // Store the match timestamp in report_at when claiming an unclaimed parcel
+                $parcel->report_at = now();
             }
             $parcel->save();
             
@@ -239,11 +242,14 @@ class ClaimController extends Controller
         }
 
         // Default linking for 'Yes, it's mine' (matric match)
+        $wasUnclaimed = strtolower((string) $parcel->parcel_status) === 'unclaimed';
         $parcel->student_id = $user->id;
         $parcel->recipient_name = $user->name;
         $parcel->recipient_matric = $user->matric;
-        if (strtolower((string) $parcel->parcel_status) === 'unclaimed') {
+        if ($wasUnclaimed) {
             $parcel->parcel_status = 'Pending Payment';
+            // Store the match timestamp in report_at when claiming an unclaimed parcel
+            $parcel->report_at = now();
         }
         $parcel->save();
 
